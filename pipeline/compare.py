@@ -40,6 +40,7 @@ from multiprocessing import Process
 
 from astropy.io import fits
 from astropy.table import Table
+from pandas import DataFrame
 
 from cats_management import cut_catalog
 from misc import extract_settings, get_fits, check_distance
@@ -178,7 +179,9 @@ class Compare:
         stats_d['repeated'].append(idx_repeated)
         stats_d['lost'].append(idx_lost)
 
-        stats_d.to_csv('{}.csv'.format(fits_n[-12:-4]))
+        # Creates a DataFrame from dictionary
+        stats_df = DataFrame(stats_d)
+        stats_df.to_csv('{}.csv'.format(fits_n[-12:-4]))
 
     def populate_dict(self, stats_d, sources_d):
         """ populates dictionaries with selected keys
