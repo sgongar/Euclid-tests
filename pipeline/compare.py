@@ -194,6 +194,9 @@ class Compare:
         stats_df = DataFrame(stats_d)
         stats_df.to_csv('{}/{}.csv'.format(prfs_d['tmp_out'], fits_n[-12:-4]))
 
+        for key_ in sources_d.keys():
+            print key_, len(sources_d[key_])
+
         # Creates a DataFrame from sources dictionary
         sources_df = DataFrame(sources_d)
         sources_df.to_csv('{}/sources_{}.csv'.format(prfs_d['tmp_out'],
