@@ -146,15 +146,20 @@ class Compare:
         # All variables starting by 'cat' are referred to scamp output catalogs
         # All variables starting by 'fits' are referred to sextractor catalogs
         for cat_source in cat_table['SOURCE_NUMBER'].tolist():
-            idx_source = 0
+            # Reset variables associated to each input source
+            distances_cache = []
+
+            # Gets input data associated to selectes source
             cat_t = cat_table[cat_table['SOURCE_NUMBER'].isin([cat_source])]
             cat_ra = float(cat_t['ALPHA_J2000'])
             cat_dec = float(cat_t['DELTA_J2000'])
 
+            # In order to improve comparation speed output catalog is reduced
             margins = [[cat_ra, 'ALPHA_J2000'], [cat_dec, 'DELTA_J2000']]
             margin = 2 * prfs_d['tolerance']
             fits_table_cut = cut_catalog(fits_table, margins, margin)
 
+            # Takes a look over output sources
             for fits_source in fits_table_cut['NUMBER'].tolist():
                 mask = fits_table_cut['NUMBER'].isin([fits_source])
                 fits_t = fits_table_cut[mask]
@@ -166,13 +171,17 @@ class Compare:
                                                  prfs_d['tolerance'])
                 if close:
                     close_flag = True
-                    idx_source += 1
+                    distances_cache.append(distance)
 
-            if idx_source > 1 and close_flag == True:
+            if len(distances_cache) > 1 and close_flag == True:
+                for distance_ in distances_cache:
+                    sources_d['CCD'].append(fits_n[-12:-4])
+                    sources_d['dither'].append(fits_n[-5:-4])
+                    sources_d['distance'].append(distance_)
                 idx_repeated += 1
-            elif idx_source == 1 and close_flag == True:
+            elif len(distances_cache) == 1 and close_flag == True:
                 idx_detected += 1
-            elif idx_source == 0:
+            elif len(distances_cache) == 0:
                 idx_lost += 1
             else:
                 raise Exception
@@ -181,9 +190,14 @@ class Compare:
         stats_d['repeated'].append(idx_repeated)
         stats_d['lost'].append(idx_lost)
 
-        # Creates a DataFrame from dictionary
+        # Creates a DataFrame from stats dictionary
         stats_df = DataFrame(stats_d)
-        stats_df.to_csv('{}/{}.csv'.format(prfs_d, fits_n[-12:-4]))
+        stats_df.to_csv('{}/{}.csv'.format(prfs_d['tmp_out'], fits_n[-12:-4]))
+
+        # Creates a DataFrame from sources dictionary
+        sources_df = DataFrame(sources_d)
+        sources_df.to_csv('{}/sources_{}.csv'.format(prfs_d['tmp_out'],
+                                                     fits_n[-12:-4]))
 
     def populate_dict(self, stats_d, sources_d):
         """ populates dictionaries with selected keys
@@ -196,8 +210,9 @@ class Compare:
         stats_d = {'CCD': [], 'dither': [], 'total': [], 'detected': [],
                    'repeated': [], 'lost': []}
 
-        sources_d = {'CCD': [], 'i_ALPHA_J2000': [], "i_DELTA_J2000": [],
-                     'o_ALPHA_J2000': [], 'o_DELTA_J2000': [], 'distance': []}
+        sources_d = {'CCD': [], 'dither': [], 'distance': [],
+                     'i_ALPHA_J2000': [], "i_DELTA_J2000": [],
+                     'o_ALPHA_J2000': [], 'o_DELTA_J2000': []}
 
         return stats_d, sources_d
 
