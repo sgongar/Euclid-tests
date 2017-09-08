@@ -180,7 +180,7 @@ class Compare:
                     i_alpha_cache.append(cat_ra)
                     i_delta_cache.append(cat_dec)
                     o_alpha_cache.append(fits_ra)
-                    i_alpha_cache.append(fits_dec)
+                    o_delta_cache.append(fits_dec)
 
             if len(distances_cache) > 1 and close_flag == True:
                 for idx_cache, distance_ in enumerate(distances_cache):
@@ -235,7 +235,7 @@ class Compare:
                    'repeated': [], 'lost': []}
 
         sources_d = {'CCD': [], 'dither': [], 'distance': [],
-                     'i_ALPHA_J2000': [], "i_DELTA_J2000": [],
+                     'i_ALPHA_J2000': [], 'i_DELTA_J2000': [],
                      'o_ALPHA_J2000': [], 'o_DELTA_J2000': []}
 
         return stats_d, sources_d
