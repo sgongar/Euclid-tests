@@ -148,6 +148,10 @@ class Compare:
         for cat_source in cat_table['SOURCE_NUMBER'].tolist():
             # Reset variables associated to each input source
             distances_cache = []
+            i_alpha_cache = []
+            i_delta_cache = []
+            o_alpha_cache = []
+            i_alpha_cache = []
 
             # Gets input data associated to selectes source
             cat_t = cat_table[cat_table['SOURCE_NUMBER'].isin([cat_source])]
@@ -160,6 +164,7 @@ class Compare:
             fits_table_cut = cut_catalog(fits_table, margins, margin)
 
             # Takes a look over output sources
+            # Each source has only one reference
             for fits_source in fits_table_cut['NUMBER'].tolist():
                 mask = fits_table_cut['NUMBER'].isin([fits_source])
                 fits_t = fits_table_cut[mask]
@@ -172,14 +177,30 @@ class Compare:
                 if close:
                     close_flag = True
                     distances_cache.append(distance)
+                    i_alpha_cache.append(cat_ra)
+                    i_delta_cache.append(cat_dec)
+                    o_alpha_cache.append(fits_ra)
+                    i_alpha_cache.append(fits_dec)
 
             if len(distances_cache) > 1 and close_flag == True:
-                for distance_ in distances_cache:
+                for idx_cache, distance_ in enumerate(distances_cache):
                     sources_d['CCD'].append(fits_n[-12:-4])
                     sources_d['dither'].append(fits_n[-5:-4])
                     sources_d['distance'].append(distance_)
+                    sources_d['i_ALPHA_J2000'].append(i_alpha_cache[idx_cache])
+                    sources_d['i_DELTA_J2000'].append(i_delta_cache[idx_cache])
+                    sources_d['o_ALPHA_J2000'].append(o_alpha_cache[idx_cache])
+                    sources_d['o_DELTA_J2000'].append(o_delta_cache[idx_cache])
                 idx_repeated += 1
             elif len(distances_cache) == 1 and close_flag == True:
+                for idx_cache, distance_ in enumerate(distances_cache):
+                    sources_d['CCD'].append(fits_n[-12:-4])
+                    sources_d['dither'].append(fits_n[-5:-4])
+                    sources_d['distance'].append(distance_)
+                    sources_d['i_ALPHA_J2000'].append(i_alpha_cache[idx_cache])
+                    sources_d['i_DELTA_J2000'].append(i_delta_cache[idx_cache])
+                    sources_d['o_ALPHA_J2000'].append(o_alpha_cache[idx_cache])
+                    sources_d['o_DELTA_J2000'].append(o_delta_cache[idx_cache])
                 idx_detected += 1
             elif len(distances_cache) == 0:
                 idx_lost += 1
