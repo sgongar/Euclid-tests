@@ -151,7 +151,7 @@ class Compare:
             i_alpha_cache = []
             i_delta_cache = []
             o_alpha_cache = []
-            i_alpha_cache = []
+            o_delta_cache = []
 
             # Gets input data associated to selectes source
             cat_t = cat_table[cat_table['SOURCE_NUMBER'].isin([cat_source])]
