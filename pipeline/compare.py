@@ -148,6 +148,7 @@ class Compare:
         for cat_source in cat_table['SOURCE_NUMBER'].tolist():
             # Reset variables associated to each input source
             distances_cache = []
+            duplicated_cache = []
             i_alpha_cache = []
             i_delta_cache = []
             o_alpha_cache = []
@@ -176,6 +177,7 @@ class Compare:
                                                  prfs_d['tolerance'])
                 if close:
                     close_flag = True
+                    distance = distance * 3600  # From degrees to seconds
                     distances_cache.append(distance)
                     i_alpha_cache.append(cat_ra)
                     i_delta_cache.append(cat_dec)
@@ -187,6 +189,7 @@ class Compare:
                     sources_d['CCD'].append(fits_n[-12:-4])
                     sources_d['dither'].append(fits_n[-5:-4])
                     sources_d['distance'].append(distance_)
+                    sources_d['duplicated'].append(True)
                     sources_d['i_ALPHA_J2000'].append(i_alpha_cache[idx_cache])
                     sources_d['i_DELTA_J2000'].append(i_delta_cache[idx_cache])
                     sources_d['o_ALPHA_J2000'].append(o_alpha_cache[idx_cache])
@@ -197,6 +200,7 @@ class Compare:
                     sources_d['CCD'].append(fits_n[-12:-4])
                     sources_d['dither'].append(fits_n[-5:-4])
                     sources_d['distance'].append(distance_)
+                    sources_d['duplicated'].append(False)
                     sources_d['i_ALPHA_J2000'].append(i_alpha_cache[idx_cache])
                     sources_d['i_DELTA_J2000'].append(i_delta_cache[idx_cache])
                     sources_d['o_ALPHA_J2000'].append(o_alpha_cache[idx_cache])
@@ -213,15 +217,17 @@ class Compare:
 
         # Creates a DataFrame from stats dictionary
         stats_df = DataFrame(stats_d)
-        stats_df.to_csv('{}/{}.csv'.format(prfs_d['tmp_out'], fits_n[-12:-4]))
-
-        for key_ in sources_d.keys():
-            print key_, len(sources_d[key_])
+        stats_df.to_csv('{}/{}.csv'.format(prfs_d['tmp_out'], fits_n[-12:-4]),
+                        columns=['CCD', 'dither', 'total', 'detected',
+                                 'repeated', 'lost'])
 
         # Creates a DataFrame from sources dictionary
         sources_df = DataFrame(sources_d)
         sources_df.to_csv('{}/sources_{}.csv'.format(prfs_d['tmp_out'],
-                                                     fits_n[-12:-4]))
+                                                     fits_n[-12:-4]),
+                          columns=['CCD', 'dither', 'distance', 'duplicated',
+                                   'i_ALPHA_J2000', 'i_DELTA_J2000',
+                                   'o_ALPHA_J2000', 'o_DELTA_J2000'])
 
     def populate_dict(self, stats_d, sources_d):
         """ populates dictionaries with selected keys
@@ -234,7 +240,7 @@ class Compare:
         stats_d = {'CCD': [], 'dither': [], 'total': [], 'detected': [],
                    'repeated': [], 'lost': []}
 
-        sources_d = {'CCD': [], 'dither': [], 'distance': [],
+        sources_d = {'CCD': [], 'dither': [], 'distance': [], 'duplicated': [],
                      'i_ALPHA_J2000': [], 'i_DELTA_J2000': [],
                      'o_ALPHA_J2000': [], 'o_DELTA_J2000': []}
 
