@@ -427,6 +427,8 @@ def extract_settings():
     prfs_d['dithers_out'] = prfs_d['home'] + prfs_d['dithers_out']
     prfs_d['catalogs_dir'] = ConfMap(Cf, "OutputDirs")['catalogs_dir']
     prfs_d['catalogs_dir'] = prfs_d['home'] + prfs_d['catalogs_dir']
+    prfs_d['tmp_out'] = ConfMap(Cf, "OutputDirs")['tmp_out']
+    prfs_d['tmp_out'] = prfs_d['home'] + prfs_d['tmp_out']
 
     prfs_d['detections'] = int(ConfMap(Cf, "Misc")['detections'])
     prfs_d['pm_low'] = float(ConfMap(Cf, "Misc")['pm_low'])
