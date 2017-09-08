@@ -107,8 +107,7 @@ class Compare:
                 active_compare = list([job.is_alive() for job in compare_j])
                 pass
 
-        # print stats_d
-        # print sources_d
+        self.merge_stats(fits_files)
 
     def perform_analysis_thread(self, full_c, fits_n, idx, prfs_d):
         """
@@ -117,8 +116,11 @@ class Compare:
         @param fits_n:
         @param idx:
         """
-
-        # Set-up dictionary for this particular case
+        # Set-up indexes for this particular case
+        idx_detected = 0
+        idx_repeated = 0
+        idx_lost = 0
+        # Set-up dictionaries for this particular case
         stats_d = {}
         sources_d = {}
         stats_d, sources_d = self.populate_dict(stats_d, sources_d)
@@ -141,17 +143,18 @@ class Compare:
         # All variables starting by 'cat' are referred to scamp output catalogs
         # All variables starting by 'fits' are referred to sextractor catalogs
         for cat_source in cat_table['SOURCE_NUMBER'].tolist():
-            i = 0
+            idx_source = 0
             cat_t = cat_table[cat_table['SOURCE_NUMBER'].isin([cat_source])]
             cat_ra = float(cat_t['ALPHA_J2000'])
             cat_dec = float(cat_t['DELTA_J2000'])
 
             margins = [[cat_ra, 'ALPHA_J2000'], [cat_dec, 'DELTA_J2000']]
             margin = 2 * prfs_d['tolerance']
-            fits_table_cutted = cut_catalog(fits_table, margins, margin)
+            fits_table_cut = cut_catalog(fits_table, margins, margin)
 
-            for fits_source in fits_table['NUMBER'].tolist():
-                fits_t = fits_table[fits_table['NUMBER'].isin([fits_source])]
+            for fits_source in fits_table_cut['NUMBER'].tolist():
+                mask = fits_table_cut['NUMBER'].isin([fits_source])
+                fits_t = fits_table_cut[mask]
                 fits_ra = float(fits_t['ALPHA_J2000'])
                 fits_dec = float(fits_t['DELTA_J2000'])
                 # Compare cat_ra, cat_dec against fits_ra, fits_dec
@@ -159,13 +162,23 @@ class Compare:
                                                  cat_dec, fits_dec,
                                                  prfs_d['tolerance'])
                 if close:
-                    i += 1
-            if i > 1:
-                print "nope"
-        
-        stats_d['detected'].append(i)
+                    close_flag = True
+                    idx_source += 1
 
-        print stats_d
+            if idx_source > 1 and close_flag == True:
+                idx_repeated += 1
+            elif idx_source == 1 and close_flag == True:
+                idx_detected += 1
+            elif idx_source == 0:
+                idx_lost += 1
+            else:
+                raise Exception
+        
+        stats_d['detected'].append(idx_detected)
+        stats_d['repeated'].append(idx_repeated)
+        stats_d['lost'].append(idx_lost)
+
+        stats_d.to_csv('{}.csv'.format(fits_n[-12:-4]))
 
     def populate_dict(self, stats_d, sources_d):
         """ populates dictionaries with selected keys
@@ -175,12 +188,23 @@ class Compare:
 
         @retun stats_d, sources_d
         """
-        stats_d = {'CCD': [], 'total': [], 'detected': []}
+        stats_d = {'CCD': [], 'total': [], 'detected': [],
+                   'repeated': [], 'lost': []}
 
         sources_d = {'CCD': [], 'i_ALPHA_J2000': [], "i_DELTA_J2000": [],
                      'o_ALPHA_J2000': [], 'o_DELTA_J2000': [], 'distance': []}
 
         return stats_d, sources_d
+
+    def merge_stats(self, fits_files):
+        """
+
+        @fits_files
+        """
+
+        for fits_ in fits_files:
+            print fits_
+
 
 if __name__ == '__main__':
     test = Compare()
