@@ -46,7 +46,7 @@ from misc import create_configurations, pipeline_help
 from misc import create_sextractor_dict, create_scamp_dict
 from performance import SextractorPerformance
 from sextractor_aux import Sextractor, catalogue_creation
-from scamp_aux import Scamp, scamp_filter
+from scamp_aux import Scamp, ScampFilter
 from stats_management import ExtractStats
 
 __author__ = "Samuel Gongora-Garcia"
@@ -266,9 +266,9 @@ class Check:
                                                       conf[2], conf[3])
                         f_name = 'results/filt_{}_20-21__6.csv'.format(f_conf)
                         if not path.isfile(f_name):
-                            filt_p = Process(target=scamp_filter,
-                                             args=(logger, prfs_d,
-                                                   mag, scmp_d,))
+                            filt_p = Process(target=ScampFilter,
+                                             args=(logger, mag,
+                                                   scmp_d, f_conf, ))
                             filt_j.append(filt_p)
                             filt_p.start()
                         idx_proc += 1

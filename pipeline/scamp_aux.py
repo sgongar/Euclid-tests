@@ -131,9 +131,6 @@ class Scamp:
             cats_dir = '{}/{}/{}'.format(prfs_d['catalogs_dir'], folder_sex,
                                          f_conf)
 
-            print "sex", folder_sex
-            print "scmp", f_conf
-
             fits_files = get_fits(unique=False)
             for idx, fits_ in enumerate(fits_files):
                 merged_cat = '{}/m_{}.cat'.format(cats_dir, fits_[2:-5])
@@ -166,69 +163,75 @@ class Scamp:
 
         return True
 
+# TODO Split scamp_filter method into single methods
+class ScampFilter:
 
-# TODO Create an object from this function!
-def scamp_filter(logger, prfs_d, mag, scmp_d):
-    """
+    def __init__(self, mag, scmp_d, f_conf):
+        """
 
-    @param logger:
-    @param prfs_d:
-    @param mag:
-    @param scmp_d:
-    """
-    logger.info("Filtering scamp's output")
+        @param mag:
+        @param scmp_d:
+        @param f_conf:
+        """
+        prfs_d = self.extract_settings()
+        
+        self.save = True  # save flag - set as True for catalogs saving
+        self.scamp_filter(logger, prfs_d, mag, scmp_d, f_conf)
 
-    # Full catalog name
-    full_n = '{}/full_{}_{}_{}_{}_{}_1.cat'.format(prfs_d['results_dir'],
-                                                   scmp_d['crossid_radius'],
-                                                   scmp_d['pixscale_maxerr'],
-                                                   scmp_d['posangle_maxerr'],
-                                                   scmp_d['position_maxerr'],
-                                                   mag)
-    # Filtered catalog name
-    filt_n = 'filt_{}_{}_{}_{}_{}_'.format(scmp_d['crossid_radius'],
-                                           scmp_d['pixscale_maxerr'],
-                                           scmp_d['posangle_maxerr'],
-                                           scmp_d['position_maxerr'], mag)
+    def scamp_filter(self, logger, prfs_d, mag, scmp_d, f_conf):
+        """
 
-    logger.debug('opening full catalog {}'.format(full_n))
-    full_cat = fits.open(full_n)
-    full_db = Table(full_cat[2].data)
-    logger.debug('converting full catalog to Pandas format')
-    full_db = full_db.to_pandas()
+        @param logger:
+        @param prfs_d:
+        @param mag:
+        @param scmp_d:
+        """
+        logger.info("Filtering scamp's output")
 
-    # Getting merge catalogue
-    mrgd_n = '{}/merged_{}_{}_{}_{}_{}_1.cat'.format(prfs_d['results_dir'],
-                                                     scmp_d['crossid_radius'],
-                                                     scmp_d['pixscale_maxerr'],
-                                                     scmp_d['posangle_maxerr'],
-                                                     scmp_d['position_maxerr'],
-                                                     mag)
-    logger.debug('opening merged catalog {}'.format(mrgd_n))
-    merged_cat = fits.open(mrgd_n)
-    logger.debug('converting merged catalog to Pandas format')
-    merged_db = Table(merged_cat[2].data)
-    # print "step 1", data
+        # Full catalog name
+        full_n = '{}/full_{}_{}_1.cat'.format(prfs_d['results_dir'],
+                                              f_conf, mag)
+        # Filtered catalog name
+        filt_n = 'filt_{}_{}_'.format(f_conf, mag)
 
-    # Removing 0 catalogue detections
-    logger.debug('removing 0 catalog detections')
-    full_db = full_db.loc[~full_db['CATALOG_NUMBER'].isin([0])]
-    full_db.to_csv('{}/{}_1.csv'.format(prfs_d['results_dir'], filt_n))
+        logger.debug('opening full catalog {}'.format(full_n))
+        full_cat = fits.open(full_n)
+        full_db = Table(full_cat[2].data)
+        logger.debug('converting full catalog to Pandas format')
+        full_db = full_db.to_pandas()
 
-    # Computing pm
-    logger.debug('computing proper motion')
-    full_db = pm_compute(logger, merged_db, full_db)
-    full_db.to_csv('{}/{}_3.csv'.format(prfs_d['results_dir'], filt_n))
+        # Getting merge catalogue
+        mrgd_n = '{}/merged_{}_{}_1.cat'.format(prfs_d['results_dir'],
+                                                f_conf, mag)
+        logger.debug('opening merged catalog {}'.format(mrgd_n))
+        merged_cat = fits.open(mrgd_n)
+        logger.debug('converting merged catalog to Pandas format')
+        merged_db = Table(merged_cat[2].data)
 
-    logger.debug('after filtering detections')
-    full_db = pm_filter(full_db, prfs_d['pm_low'],
-                        prfs_d['pm_up'], prfs_d['pm_sn'])
-    full_db.to_csv('{}/{}_4.csv'.format(prfs_d['results_dir'], filt_n))
+        # Removing 0 catalogue detections
+        logger.debug('removing 0 catalog detections')
+        full_db = full_db.loc[~full_db['CATALOG_NUMBER'].isin([0])]
+        if self.save:
+            full_db.to_csv('{}/{}_1.csv'.format(prfs_d['results_dir'], filt_n))
 
-    logger.debug('after proper motion')
-    full_db = motion_filter(logger, full_db, prfs_d['r_fit'])
-    full_db.to_csv('{}/{}_5.csv'.format(prfs_d['results_dir'], filt_n))
+        # Computing pm
+        logger.debug('computing proper motion')
+        full_db = pm_compute(logger, merged_db, full_db)
+        if self.save:
+            full_db.to_csv('{}/{}_3.csv'.format(prfs_d['results_dir'], filt_n))
 
-    logger.debug('after first filter')
-    full_db = confidence_filter(logger, full_db, prfs_d['r_fit'])
-    full_db.to_csv('{}/{}_6.csv'.format(prfs_d['results_dir'], filt_n))
+        logger.debug('after filtering detections')
+        full_db = pm_filter(full_db, prfs_d['pm_low'],
+                            prfs_d['pm_up'], prfs_d['pm_sn'])
+        if self.save:
+            full_db.to_csv('{}/{}_4.csv'.format(prfs_d['results_dir'], filt_n))
+
+        logger.debug('after proper motion')
+        full_db = motion_filter(logger, full_db, prfs_d['r_fit'])
+        if self.save:
+            full_db.to_csv('{}/{}_5.csv'.format(prfs_d['results_dir'], filt_n))
+
+        logger.debug('after first filter')
+        full_db = confidence_filter(logger, full_db, prfs_d['r_fit'])
+        if self.save:
+            full_db.to_csv('{}/{}_6.csv'.format(prfs_d['results_dir'], filt_n))
