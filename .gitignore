@@ -1,0 +1,50 @@
+### Emacs ###
+# -*- mode: gitignore; -*-
+*~
+\#*\#
+
+### Byte-compiled / optimized / DLL files ###
+__pycache__/
+*.py[cod]
+*$py.class
+
+### Fits files ###
+*.fits
+fits/*.fits
+pipeline/fits_output/*/*.fits
+
+### Images files ###
+pipeline/images_output/*/*.jpeg
+
+### Swarp files ###
+pipeline/swarp.xml
+
+### Test reports ###
+pipeline/report*.pdf
+pipeline/reports/*
+
+### Test catalogues ###
+test*.reg
+
+### Catalogs ###
+fits/*.cat
+*.head
+pipeline/*.csv
+
+### Output ###
+pipeline/results/merged_*.cat
+pipeline/results/full_*.cat
+pipeline/results/filt_*.csv
+pipeline/results/catalogs/2*
+
+### Logs ###
+pipeline/logs/*
+
+### Plots ###
+pipeline/plots/*
+
+### Tests ###
+old_tests/
+
+### Local backup ###
+old/
