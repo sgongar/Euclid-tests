@@ -36,7 +36,7 @@ from multiprocessing import Process
 from astropy.io import fits
 from astropy.table import Table
 
-from misc import extract_settings, get_fits
+from misc import extract_settings, get_fits, check_distance
 
 __author__ = "Samuel Gongora-Garcia"
 __copyright__ = "Copyright 2017"
@@ -89,7 +89,8 @@ class Compare:
                 idx_proc = proc + idx
 
                 compare_p = Process(target=self.perform_analysis_thread,
-                                    args=(full_cat, fits_name, idx_proc, ))
+                                    args=(full_cat, fits_name, idx_proc,
+                                          prfs_d,))
                 compare_j.append(compare_p)
                 compare_p.start()
 
@@ -98,28 +99,43 @@ class Compare:
                 active_compare = list([job.is_alive() for job in compare_j])
                 pass
 
-    def perform_analysis_thread(self, full_cat, fits_name, idx):
+    def perform_analysis_thread(self, full_cat, fits_name, idx, prfs_d):
         """
 
+        @param full_cat:
+        @param fits_name:
+        @param idx:
         """
-        # open catalog
-        # print "idx", idx
+        # open full catalog
         cat_file = fits.open(full_cat)
         cat_data = Table(cat_file[2].data)
         cat_table = cat_data.to_pandas()
+        # Removing zero catalog references
+        cat_table = cat_table.loc[~cat_table['CATALOG_NUMBER'].isin([0])]
 
         fits_file = fits.open(fits_name)
         fits_data = Table(fits_file[2].data)
         fits_table = fits_data.to_pandas()
 
-        print cat_table.columns
-
-        for source_ in cat_table['SOURCE_NUMBER'].tolist():
-                t = sex_table[sex_table['NUMBER'].isin([sex_source])].iloc[0]
-                ra = t['X_WORLD']
-                dec = t['Y_WORLD']
-
-        # open image
+        # All variables starting by 'cat' are referred to scamp output catalogs
+        # All variables starting by 'fits' are referred to sextractor catalogs
+        for cat_source in cat_table['SOURCE_NUMBER'].tolist():
+            i = 0
+            cat_t = cat_table[cat_table['SOURCE_NUMBER'].isin([cat_source])]
+            cat_ra = float(cat_t['ALPHA_J2000'])
+            cat_dec = float(cat_t['DELTA_J2000'])
+            for fits_source in fits_table['NUMBER'].tolist():
+                fits_t = fits_table[fits_table['NUMBER'].isin([fits_source])]
+                fits_ra = float(fits_t['ALPHA_J2000'])
+                fits_dec = float(fits_t['DELTA_J2000'])
+                # Compare cat_ra, cat_dec against fits_ra, fits_dec
+                close, distance = check_distance(cat_ra, fits_ra,
+                                                 cat_dec, fits_dec,
+                                                 prfs_d['tolerance'])
+                if close:
+                    i += 1
+            if i > 1:
+                print "nope"
 
         # compare
 
