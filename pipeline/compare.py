@@ -87,7 +87,6 @@ class Compare:
 
         fits_files = get_fits(unique=False)
         
-        """
         for idx in range(0, len(fits_files), 5):
             compare_j = []
             for proc in range(0, 5, 1):
@@ -109,7 +108,7 @@ class Compare:
             while True in active_compare:
                 active_compare = list([job.is_alive() for job in compare_j])
                 pass
-        """
+
         self.merge_stats(fits_files, prfs_d)
 
     def perform_analysis_thread(self, full_c, fits_n, idx, prfs_d):
