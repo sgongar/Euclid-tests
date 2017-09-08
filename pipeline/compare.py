@@ -37,10 +37,11 @@ Todo:
 """
 
 from multiprocessing import Process
+from os import remove
 
 from astropy.io import fits
 from astropy.table import Table
-from pandas import DataFrame
+from pandas import concat, DataFrame, read_csv
 
 from cats_management import cut_catalog
 from misc import extract_settings, get_fits, check_distance
@@ -86,6 +87,7 @@ class Compare:
 
         fits_files = get_fits(unique=False)
         
+        """
         for idx in range(0, len(fits_files), 5):
             compare_j = []
             for proc in range(0, 5, 1):
@@ -107,8 +109,8 @@ class Compare:
             while True in active_compare:
                 active_compare = list([job.is_alive() for job in compare_j])
                 pass
-
-        self.merge_stats(fits_files)
+        """
+        self.merge_stats(fits_files, prfs_d)
 
     def perform_analysis_thread(self, full_c, fits_n, idx, prfs_d):
         """
@@ -127,6 +129,7 @@ class Compare:
         stats_d, sources_d = self.populate_dict(stats_d, sources_d)
 
         stats_d['CCD'].append(fits_n[-12:-4])
+        stats_d['dither'].append(fits_n[-5:-4])
 
         # Opens catalog file
         cat_file = fits.open(full_c)
@@ -181,7 +184,7 @@ class Compare:
 
         # Creates a DataFrame from dictionary
         stats_df = DataFrame(stats_d)
-        stats_df.to_csv('{}.csv'.format(fits_n[-12:-4]))
+        stats_df.to_csv('{}/{}.csv'.format(prfs_d, fits_n[-12:-4]))
 
     def populate_dict(self, stats_d, sources_d):
         """ populates dictionaries with selected keys
@@ -191,7 +194,7 @@ class Compare:
 
         @retun stats_d, sources_d
         """
-        stats_d = {'CCD': [], 'total': [], 'detected': [],
+        stats_d = {'CCD': [], 'dither': [], 'total': [], 'detected': [],
                    'repeated': [], 'lost': []}
 
         sources_d = {'CCD': [], 'i_ALPHA_J2000': [], "i_DELTA_J2000": [],
@@ -199,15 +202,25 @@ class Compare:
 
         return stats_d, sources_d
 
-    def merge_stats(self, fits_files):
+    def merge_stats(self, fits_files, prfs_d):
         """
 
-        @fits_files
+        @param fits_files:
+        @param prfs_d:
         """
+        cat_list = []
 
         for fits_ in fits_files:
-            print fits_
+            fits_file = '{}/{}.csv'.format(prfs_d['tmp_out'], fits_[-13:-5])
+            cat_ = read_csv(fits_file, index_col=0)
+            cat_list.append(cat_)
 
+        for fits_ in fits_files:
+            fits_file = '{}/{}.csv'.format(prfs_d['tmp_out'], fits_[-13:-5])
+            remove(fits_file)
+
+        stats_cat = concat(cat_list, axis=0)
+        stats_cat.to_csv('stats.csv')
 
 if __name__ == '__main__':
     test = Compare()
