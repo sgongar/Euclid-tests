@@ -1,20 +1,7 @@
-### Emacs ###
-# -*- mode: gitignore; -*-
-*~
-\#*\#
-
 ### Byte-compiled / optimized / DLL files ###
 __pycache__/
 *.py[cod]
 *$py.class
-
-### Fits files ###
-*.fits
-fits/*.fits
-pipeline/fits_output/*/*.fits
-
-### Images files ###
-pipeline/images_output/*/*.jpeg
 
 ### Swarp files ###
 pipeline/swarp.xml
@@ -23,12 +10,7 @@ pipeline/swarp.xml
 pipeline/report*.pdf
 pipeline/reports/*
 
-### Test catalogues ###
-test*.reg
-
 ### Catalogs ###
-fits/*.cat
-*.head
 pipeline/*.csv
 
 ### Output ###
@@ -37,14 +19,14 @@ pipeline/results/full_*.cat
 pipeline/results/filt_*.csv
 pipeline/results/catalogs/2*
 
+### Temporal ###
+pipeline/tmp/*.csv
+
 ### Logs ###
 pipeline/logs/*
 
 ### Plots ###
 pipeline/plots/*
-
-### Tests ###
-old_tests/
 
 ### Local backup ###
 old/
