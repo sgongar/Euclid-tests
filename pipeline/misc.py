@@ -390,16 +390,11 @@ def extract_settings():
     prfs_d['time_3'] = ConfMap(Cf, "ImagesTime")['time_3']
     prfs_d['time_4'] = ConfMap(Cf, "ImagesTime")['time_4']
 
-    prfs_d['conf_scamp'] = ConfMap(Cf, "ConfigDirs")['conf_scamp']
-    prfs_d['conf_scamp'] = prfs_d['home'] + prfs_d['conf_scamp']
-    prfs_d['conf_sex'] = ConfMap(Cf, "ConfigDirs")['conf_sex']
-    prfs_d['conf_sex'] = prfs_d['home'] + prfs_d['conf_sex']
-    prfs_d['params_sex'] = ConfMap(Cf, "ConfigDirs")['params_sex']
-    prfs_d['params_sex'] = prfs_d['home'] + prfs_d['params_sex']
-    prfs_d['params_cat'] = ConfMap(Cf, "ConfigDirs")['params_cat']
-    prfs_d['params_cat'] = prfs_d['home'] + prfs_d['params_cat']
-    prfs_d['logger_config'] = ConfMap(Cf, "ConfigDirs")['logger_config']
-    prfs_d['logger_config'] = prfs_d['home'] + prfs_d['logger_config']
+    OutputDirs_list = ['conf_scamp', 'conf_sex', 'params_sex', 'params_cat',
+                       'logger_config']
+    for conf_ in OutputDirs_list:
+        prfs_d[conf_] = ConfMap(Cf, "ConfigDirs")[conf_]
+        prfs_d[conf_] = prfs_d['home'] + prfs_d[conf_]
 
     prfs_d['output_cats'] = ConfMap(Cf, "CatsDirs")['output_cats']
     prfs_d['output_cats'] = prfs_d['version'] + prfs_d['output_cats']
@@ -413,22 +408,11 @@ def extract_settings():
     prfs_d['first_sso'] = ConfMap(Cf, "CatsOrganization")['first_sso']
     prfs_d['first_sso'] = int(prfs_d['first_sso']) - 1
 
-    prfs_d['plots_dir'] = ConfMap(Cf, "OutputDirs")['plots_dir']
-    prfs_d['plots_dir'] = prfs_d['home'] + prfs_d['plots_dir']
-    prfs_d['results_dir'] = ConfMap(Cf, "OutputDirs")['results_dir']
-    prfs_d['results_dir'] = prfs_d['home'] + prfs_d['results_dir']
-    prfs_d['images_out'] = ConfMap(Cf, "OutputDirs")['images_out']
-    prfs_d['images_out'] = prfs_d['home'] + prfs_d['images_out']
-    prfs_d['fits_out'] = ConfMap(Cf, "OutputDirs")['fits_out']
-    prfs_d['fits_out'] = prfs_d['home'] + prfs_d['fits_out']
-    prfs_d['report_out'] = ConfMap(Cf, "OutputDirs")['report_out']
-    prfs_d['report_out'] = prfs_d['home'] + prfs_d['report_out']
-    prfs_d['dithers_out'] = ConfMap(Cf, "OutputDirs")['dithers_out']
-    prfs_d['dithers_out'] = prfs_d['home'] + prfs_d['dithers_out']
-    prfs_d['catalogs_dir'] = ConfMap(Cf, "OutputDirs")['catalogs_dir']
-    prfs_d['catalogs_dir'] = prfs_d['home'] + prfs_d['catalogs_dir']
-    prfs_d['tmp_out'] = ConfMap(Cf, "OutputDirs")['tmp_out']
-    prfs_d['tmp_out'] = prfs_d['home'] + prfs_d['tmp_out']
+    OutputDirs_list = ['plots_dir', 'results_dir', 'images_out', 'fits_out',
+                       'report_out', 'dithers_out', 'catalogs_dir', 'tmp_out']
+    for conf_ in OutputDirs_list:
+        prfs_d[conf_] = ConfMap(Cf, "OutputDirs")[conf_]
+        prfs_d[conf_] = prfs_d['home'] + prfs_d[conf_]
 
     prfs_d['detections'] = int(ConfMap(Cf, "Misc")['detections'])
     prfs_d['pm_low'] = float(ConfMap(Cf, "Misc")['pm_low'])

@@ -69,7 +69,7 @@ def rebase_catalogue(logger, mag, prfs_d, remove_ssos, cat_location):
     """
     # salida del catalogo por sextractor
     logger.debug('opening sextracted catalog from {}'.format(cat_location))
-    sex_table = get_output_catalogue(prfs_d, cat_location)
+    sex_table = get_output_catalog(prfs_d, cat_location)
 
     # entrada del catalogo por luca
     cat_number = 10
@@ -920,7 +920,7 @@ def get_input_cat(log_check, prfs_d, cat_number,
             return sources_df
 
 
-def get_output_catalogue(logger, cat_location):
+def get_output_catalog(logger, cat_location):
     """ gets a Pandas dataframe with all data
 
     @param logger: a logger object

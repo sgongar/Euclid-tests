@@ -221,7 +221,6 @@ class Check:
                                               scmp_d['position_maxerr'])
                 print "scamp"
                 for idx_sex, conf_sex in enumerate(confs_sex):
-                    print "sextractor"
                     (analysis_d,
                      len_dicts) = create_sextractor_dict(logger, prfs_d,
                                                          idx_sex,
