@@ -757,7 +757,7 @@ if __name__ == '__main__':
         elif argv[1] == '-regions':
             for d in range(1, 5, 1):
                 print "d es", d
-                input_catalogue = prfs_d['output_cats'] + '/m_20-21_x2_y2_d{}.cat'.format(d)
+                input_catalogue = prfs_d['output_cats'] + '/2_1.35_1.35_0.1_4/m_20-21_x1_y2_d{}.cat'.format(d)
                 # input_catalogue = prfs_d['input_cats'] + '/Cat_20-21_d{}.dat'.format(d)
                 # input_catalogue = '/mnt/g/dev/Euclid-tests/pipeline/results/full_150_1.2_0.05_0.16_20-21_1.cat'
                 # input_catalogue = '/pcdisk/holly/sgongora/Documents/Euclid/luca_data/v14/CCDs/catalog_20-21.cat'
