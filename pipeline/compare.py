@@ -40,7 +40,7 @@ from misc import extract_settings, get_fits, check_distance
 __author__ = "Samuel Gongora-Garcia"
 __copyright__ = "Copyright 2017"
 __credits__ = ["Samuel Gongora-Garcia"]
-__version__ = "0.2"
+__version__ = "0.3"
 __maintainer__ = "Samuel Gongora-Garcia"
 __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
@@ -77,6 +77,8 @@ class Compare:
         cats = self.load_catalogs(prfs_d, cats_dir)
 
         fits_files = get_fits(unique=False)
+
+        print fits_files
 
         for idx in range(0, len(fits_files), 17):
             compare_j = []
@@ -175,38 +177,54 @@ class Compare:
                         o_delta_cache.append(fits_dec)
 
                 if len(distances_cache) > 1 and close_flag is True:
-                    for idx_cache, distance_ in enumerate(distances_cache):
-                        sources_d['CCD'].append(fits_n[-12:-4])
-                        sources_d['cat'].append(ccd_)
-                        sources_d['dither'].append(fits_n[-5:-4])
-                        sources_d['distance'].append(distance_)
-                        sources_d['duplicated'].append(True)
-                        i_alpha = i_alpha_cache[idx_cache]
-                        sources_d['i_ALPHA_J2000'].append(i_alpha)
-                        i_delta = i_delta_cache[idx_cache]
-                        sources_d['i_DELTA_J2000'].append(i_delta)
-                        o_alpha = o_alpha_cache[idx_cache]
-                        sources_d['o_ALPHA_J2000'].append(o_alpha)
-                        o_delta = o_delta_cache[idx_cache]
-                        sources_d['o_DELTA_J2000'].append(o_delta)
+                    idx_cache = distances_cache.index(min(distances_cache))
+                    sources_d['CCD'].append(fits_n[-12:-4])
+                    sources_d['cat'].append(ccd_)
+                    sources_d['dither'].append(fits_n[-5:-4])
+                    distance_ = distances_cache[idx_cache]
+                    sources_d['distance'].append(distance_)
+                    sources_d['duplicated'].append(True)
+                    i_alpha = i_alpha_cache[idx_cache]
+                    sources_d['i_ALPHA_J2000'].append(i_alpha)
+                    i_delta = i_delta_cache[idx_cache]
+                    sources_d['i_DELTA_J2000'].append(i_delta)
+                    o_alpha = o_alpha_cache[idx_cache]
+                    sources_d['o_ALPHA_J2000'].append(o_alpha)
+                    o_delta = o_delta_cache[idx_cache]
+                    sources_d['o_DELTA_J2000'].append(o_delta)
                     idx_repeated += 1
                 elif len(distances_cache) == 1 and close_flag is True:
-                    for idx_cache, distance_ in enumerate(distances_cache):
-                        sources_d['CCD'].append(fits_n[-12:-4])
-                        sources_d['cat'].append(ccd_)
-                        sources_d['dither'].append(fits_n[-5:-4])
-                        sources_d['distance'].append(distance_)
-                        sources_d['duplicated'].append(False)
-                        i_alpha = i_alpha_cache[idx_cache]
-                        sources_d['i_ALPHA_J2000'].append(i_alpha)
-                        i_delta = i_delta_cache[idx_cache]
-                        sources_d['i_DELTA_J2000'].append(i_delta)
-                        o_alpha = o_alpha_cache[idx_cache]
-                        sources_d['o_ALPHA_J2000'].append(o_alpha)
-                        o_delta = o_delta_cache[idx_cache]
-                        sources_d['o_DELTA_J2000'].append(o_delta)
+                    idx_cache = distances_cache.index(min(distances_cache))
+                    sources_d['CCD'].append(fits_n[-12:-4])
+                    sources_d['cat'].append(ccd_)
+                    sources_d['dither'].append(fits_n[-5:-4])
+                    distance_ = distances_cache[idx_cache]
+                    sources_d['distance'].append(distance_)
+                    sources_d['duplicated'].append(False)
+                    i_alpha = i_alpha_cache[idx_cache]
+                    sources_d['i_ALPHA_J2000'].append(i_alpha)
+                    i_delta = i_delta_cache[idx_cache]
+                    sources_d['i_DELTA_J2000'].append(i_delta)
+                    o_alpha = o_alpha_cache[idx_cache]
+                    sources_d['o_ALPHA_J2000'].append(o_alpha)
+                    o_delta = o_delta_cache[idx_cache]
+                    sources_d['o_DELTA_J2000'].append(o_delta)
                     idx_detected += 1
                 elif len(distances_cache) == 0:
+                    sources_d['CCD'].append(fits_n[-12:-4])
+                    sources_d['cat'].append(ccd_)
+                    sources_d['dither'].append(fits_n[-5:-4])
+                    distance_ = ''
+                    sources_d['distance'].append(distance_)
+                    sources_d['duplicated'].append('')
+                    i_alpha = i_alpha_cache[idx_cache]
+                    sources_d['i_ALPHA_J2000'].append(i_alpha)
+                    i_delta = i_delta_cache[idx_cache]
+                    sources_d['i_DELTA_J2000'].append(i_delta)
+                    o_alpha = ''
+                    sources_d['o_ALPHA_J2000'].append(o_alpha)
+                    o_delta = ''
+                    sources_d['o_DELTA_J2000'].append(o_delta)
                     idx_lost += 1
                 else:
                     raise Exception
