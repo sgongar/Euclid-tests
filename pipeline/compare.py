@@ -1,25 +1,28 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-"""Python script for time measurements
-
-This module demonstrates documentation as specified by the `Google Python
-Style Guide`_. Docstrings may extend over multiple lines. Sections are created
-with a section header and a colon followed by a block of indented text.
+""" Python script to compare catalogs created with scamp against catalogs 
+    created with sextractor.
 
 Versions:
-*
+* 0.1 - First version. Compare the catalog of each CCD with the same CCD in
+        the single-star versions.
+* 0.2 - Second version. Compare the catalog of each CCD with a catalog made
+        with all the CCDs.
+        This version is not correct as we don't have the correct header data.
+* 0.3 - Third version.
 
 In order to improve legibilidad algunas abreviaturas han sido creadas
-c = catalog
-n = name
-d = dictionary
-loc = location
+* c = catalog
+* n = name
+* d = dictionary
+* loc = location
 
 Todo:
     * Improve log messages
     * Improve docstring
     * Create versions history
+    * License??
 """
 
 from multiprocessing import Process
@@ -35,9 +38,6 @@ from misc import extract_settings, get_fits, check_distance
 __author__ = "Samuel Gongora-Garcia"
 __copyright__ = "Copyright 2017"
 __credits__ = ["Samuel Gongora-Garcia"]
-"""
-__license__ = "GPL"
-"""
 __version__ = "0.2"
 __maintainer__ = "Samuel Gongora-Garcia"
 __email__ = "sgongora@cab.inta-csic.es"
@@ -82,7 +82,7 @@ class Compare:
             compare_j = []
             for proc in range(0, 5, 1):
                 idx_p = proc + idx
-                if idx_proc < len(fits_files):
+                if idx_p < len(fits_files):
                     if single:
                         full_c = '{}/f_{}_1.cat'.format(cats_dir,
                                                         fits_files[idx_p][2:-5])
@@ -91,11 +91,10 @@ class Compare:
 
                     fits_n = '{}/{}/{}.cat'.format(prfs_d['fits_dir'],
                                                    folder_sex,
-                                                   fits_files[idx_proc][:-5]) 
+                                                   fits_files[idx_p][:-5])
 
                     compare_p = Process(target=self.perform_analysis_thread,
-                                        args=(full_c, fits_n, idx_proc,
-                                              prfs_d,))
+                                        args=(full_c, fits_n, idx_p, prfs_d,))
                     compare_j.append(compare_p)
                     compare_p.start()
 
@@ -179,7 +178,7 @@ class Compare:
                     o_alpha_cache.append(fits_ra)
                     o_delta_cache.append(fits_dec)
 
-            if len(distances_cache) > 1 and close_flag == True:
+            if len(distances_cache) > 1 and close_flag is True:
                 for idx_cache, distance_ in enumerate(distances_cache):
                     sources_d['CCD'].append(fits_n[-12:-4])
                     sources_d['dither'].append(fits_n[-5:-4])
@@ -190,7 +189,7 @@ class Compare:
                     sources_d['o_ALPHA_J2000'].append(o_alpha_cache[idx_cache])
                     sources_d['o_DELTA_J2000'].append(o_delta_cache[idx_cache])
                 idx_repeated += 1
-            elif len(distances_cache) == 1 and close_flag == True:
+            elif len(distances_cache) == 1 and close_flag is True:
                 for idx_cache, distance_ in enumerate(distances_cache):
                     sources_d['CCD'].append(fits_n[-12:-4])
                     sources_d['dither'].append(fits_n[-5:-4])
@@ -205,7 +204,7 @@ class Compare:
                 idx_lost += 1
             else:
                 raise Exception
-        
+
         stats_d['detected'].append(idx_detected)
         stats_d['repeated'].append(idx_repeated)
         stats_d['lost'].append(idx_lost)
@@ -253,7 +252,7 @@ class Compare:
         cats_dir = '{}/{}/{}'.format(prfs_d['catalogs_dir'], folder_sex,
                                      folder_scmp)
         fits_files = get_fits(unique=False)
-        
+
         # Using a mutable dictionary instead a fixed lists will allow us
         # to change catalog columns without a problem
         cat_dict = {}
@@ -276,7 +275,7 @@ class Compare:
                     except KeyError:
                         cat_final[param_key] = []
                         cat_final[param_key].append(value_)
-        
+
         cat_df = DataFrame(cat_final)
         self.rewrite_catalog(cat_df)
         # cat_df.to_csv('test.csv')
@@ -350,7 +349,7 @@ class Compare:
         c29 = fits.Column(name='FLUX_RADIUS', format='1E', unit='pixel',
                           disp='F10.3', array=cat_df['FLUX_RADIUS'])
         c30 = fits.Column(name='ELONGATION', format='1E', disp='F8.3',
-                          array=cat_dfe['ELONGATION'])
+                          array=cat_df['ELONGATION'])
         c31 = fits.Column(name='ELLIPTICITY', format='1E', disp='F8.3',
                           array=cat_df['ELLIPTICITY'])
         c32 = fits.Column(name='CXX_IMAGE', format='1E', unit='pixel**(-2)',
