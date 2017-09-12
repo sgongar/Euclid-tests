@@ -34,7 +34,7 @@ from astropy.table import Table
 from pandas import concat, DataFrame, read_csv
 
 from images_management import get_fits_limits
-from cats_management import cut_catalog
+from cats_management import cut_catalog, shrink_catalog
 from misc import extract_settings, get_fits, check_distance
 
 __author__ = "Samuel Gongora-Garcia"
@@ -56,32 +56,41 @@ class Compare:
         prfs_d = extract_settings()
 
         # Perfoms an analysis
-        self.perform_analysis(prfs_d)
+        if not self.perform_analysis(prfs_d):
+            raise Exception
 
     def perform_analysis(self, prfs_d):
         """
 
-        @param prfs_d:
-        @param folder_sex:
-        @param folder_scmp:
+        For now location is hard-coded. In posterior versions of this script
+        this should be fixed in order to allow a more complete analysis along
+        different sextractor and scamp configurations.
 
-        @return True: if everything is alright
+        @param prfs_d: a regular preferences dictionary.
+
+        @return True: if everything is alright.
         """
-        # Hardcoded
+        # Hardcoded references.
         folder_sex = '2_1.35_1.35_0.1_4'
         folder_scmp = '150_1.2_5_0.033'
 
-        # Creates a dict
-        cats_dir = '{}/{}/{}'.format(prfs_d['catalogs_dir'], folder_sex,
-                                     folder_scmp)
-        cats = self.load_catalogs(prfs_d, cats_dir)
+        # Load scamp's catalogs.
+        scamp_cats_dir = '{}/{}/{}'.format(prfs_d['catalogs_dir'], folder_sex,
+                                           folder_scmp)
+        scamp_cats = self.load_scamp_catalogs(prfs_d, scamp_cats_dir)
 
+        # Load sextractor's catalogs. Option to filter
+        sex_cats_dir = '{}/{}'.format(prfs_d['fits_dir'], folder_sex)
+        sex_cats = self.load_sex_catalogs(prfs_d, sex_cats_dir, unique=True)
+
+        # Unique flag allow us to get a list of references populated only by
+        # images of first dither.
         fits_files = get_fits(unique=False)
 
-        print fits_files
-
+        # TODO '17' value is harcoded to this (24 cores/48 threads) CPU.
+        # Should be change to a relative value related to microprocessor used.
         for idx in range(0, len(fits_files), 17):
-            compare_j = []
+            compare_j = []  # A list for active jobs.
             for proc in range(0, 17, 1):
                 idx_p = proc + idx
                 if idx_p < len(fits_files):
@@ -91,7 +100,8 @@ class Compare:
                                                    fits_files[idx_p][:-5])
 
                     compare_p = Process(target=self.perform_analysis_thread,
-                                        args=(fits_n, idx_p, prfs_d, cats,))
+                                        args=(fits_n, idx_p, prfs_d,
+                                              scamp_cats, sex_cats,))
                     compare_j.append(compare_p)
                     compare_p.start()
 
@@ -102,12 +112,16 @@ class Compare:
 
         self.merge_stats(fits_files, prfs_d)
 
-    def perform_analysis_thread(self, fits_n, idx, prfs_d, cats):
+        return True
+
+    def perform_analysis_thread(self, fits_n, idx, prfs_d,
+                                scamp_cats, sex_cats):
         """
 
-        @param full_c:
         @param fits_n:
         @param idx:
+        @param prfs_d:
+        @param cats:
         """
         # Set-up indexes for this particular case
         idx_detected = 0
@@ -122,9 +136,7 @@ class Compare:
         stats_d['CCD'].append(fits_n[-12:-4])
         stats_d['dither'].append(fits_n[-5:-4])
 
-        fits_file = fits.open(fits_n)
-        fits_data = Table(fits_file[2].data)
-        fits_table = fits_data.to_pandas()
+        fits_table = sex_cats[fits_n[-12:-4]]
         # Removing zero catalog references
         # fits_table = fits_table.loc[~fits_table['CATALOG_NUMBER'].isin([0])]
         stats_d['total'].append(len(fits_table['NUMBER'].tolist()))
@@ -148,7 +160,7 @@ class Compare:
             ccd_ = self.look_for_ccd(prfs_d, fits_ra, fits_dec, ccd_borders_d)
 
             if ccd_ is not None:
-                cat_table = cats[ccd_]
+                cat_table = scamp_cats[ccd_]
 
                 # To improve comparation speed output catalog is reduced
                 margins = [[fits_ra, 'ALPHA_J2000'],
@@ -177,10 +189,12 @@ class Compare:
                         o_delta_cache.append(fits_dec)
 
                 if len(distances_cache) > 1 and close_flag is True:
-                    idx_cache = distances_cache.index(min(distances_cache))
+                    # These values will be the same whatever the output is.
                     sources_d['CCD'].append(fits_n[-12:-4])
                     sources_d['cat'].append(ccd_)
                     sources_d['dither'].append(fits_n[-5:-4])
+
+                    idx_cache = distances_cache.index(min(distances_cache))
                     distance_ = distances_cache[idx_cache]
                     sources_d['distance'].append(distance_)
                     sources_d['duplicated'].append(True)
@@ -194,10 +208,12 @@ class Compare:
                     sources_d['o_DELTA_J2000'].append(o_delta)
                     idx_repeated += 1
                 elif len(distances_cache) == 1 and close_flag is True:
-                    idx_cache = distances_cache.index(min(distances_cache))
+                    # These values will be the same whatever the output is.
                     sources_d['CCD'].append(fits_n[-12:-4])
                     sources_d['cat'].append(ccd_)
                     sources_d['dither'].append(fits_n[-5:-4])
+
+                    idx_cache = distances_cache.index(min(distances_cache))
                     distance_ = distances_cache[idx_cache]
                     sources_d['distance'].append(distance_)
                     sources_d['duplicated'].append(False)
@@ -211,9 +227,7 @@ class Compare:
                     sources_d['o_DELTA_J2000'].append(o_delta)
                     idx_detected += 1
                 elif len(distances_cache) == 0:
-                    sources_d['CCD'].append(fits_n[-12:-4])
-                    sources_d['cat'].append(ccd_)
-                    sources_d['dither'].append(fits_n[-5:-4])
+                    """
                     distance_ = ''
                     sources_d['distance'].append(distance_)
                     sources_d['duplicated'].append('')
@@ -225,9 +239,9 @@ class Compare:
                     sources_d['o_ALPHA_J2000'].append(o_alpha)
                     o_delta = ''
                     sources_d['o_DELTA_J2000'].append(o_delta)
+                    """
                     idx_lost += 1
-                else:
-                    raise Exception
+
             else:
                 idx_lost += 1
 
@@ -282,7 +296,7 @@ class Compare:
             if ra_cmp and dec_cmp:
                 return key_
 
-    def load_catalogs(self, prfs_d, cats_dir):
+    def load_scamp_catalogs(self, prfs_d, cats_dir):
         """
 
         @param prfs_d:
@@ -290,9 +304,11 @@ class Compare:
 
         @retun cat_d;
         """
-        cat_d = {}
+        cat_d = {}  # A dictionary for catalogs.
 
+        # Get keys for catalogs.
         ccd_borders_d = self.define_ccd_borders(prfs_d)
+        # A for loop for open and filter catalogs.
         for ccd_ in ccd_borders_d.keys():
             full_c = '{}/f_20-21_{}_1.cat'.format(cats_dir, ccd_)
 
@@ -304,6 +320,55 @@ class Compare:
             mask_zero = ~cat_table['CATALOG_NUMBER'].isin([0])
             cat_table = cat_table.loc[mask_zero]
             cat_d[ccd_] = cat_table
+
+        return cat_d
+
+    def load_sex_catalogs(self, prfs_d, sex_cats_dir, unique):
+        """
+
+        @param prfs_d:
+        @param unique: a flag for
+
+        @return cat_d:
+        """
+        cat_d = {}  # A dictionary for catalogs.
+        limits_d = {}  # A dictionay for limits.
+
+        # Populates dictionary with lists
+        limits_d['above_ra'] = []
+        limits_d['below_ra'] = []
+        limits_d['above_dec'] = []
+        limits_d['below_dec'] = []
+
+        # Gets fits files references
+        fits_files = get_fits(unique=True)
+
+        # Get limits for dither one.
+        for fits_ in fits_files:
+            fits_loc = '{}/{}'.format(prfs_d['fits_dir'], fits_)
+            limits = get_fits_limits(fits_loc)
+            limits_d['above_ra'].append(limits['above_ra'])
+            limits_d['below_ra'].append(limits['below_ra'])
+            limits_d['above_dec'].append(limits['above_dec'])
+            limits_d['below_dec'].append(limits['below_dec'])
+
+        above_ra = max(limits_d['above_ra'])
+        below_ra = min(limits_d['below_ra'])
+        above_dec = max(limits_d['above_dec'])
+        below_dec = min(limits_d['below_dec'])
+
+        margins_d = {'above_ra': above_ra, 'below_ra': below_ra,
+                     'above_dec': above_dec, 'below_dec': below_dec}
+
+        fits_files = get_fits(unique=False)
+        for fits_ in fits_files:
+            sex_c = '{}/{}.cat'.format(sex_cats_dir, fits_[:-5])
+
+            cat_file = fits.open(sex_c)
+            cat_data = Table(cat_file[2].data)
+            cat_table = cat_data.to_pandas()
+
+            cat_d[fits_[-13:-5]] = shrink_catalog(cat_table, margins_d)
 
         return cat_d
 

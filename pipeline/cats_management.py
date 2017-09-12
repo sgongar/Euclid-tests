@@ -1117,6 +1117,23 @@ def cut_catalog(catalog, keys, margin):
     return catalog
 
 
+def shrink_catalog(catalog, margins_d):
+    """
+
+    @param catalog:
+    @param margins_d:
+
+    @return catalog:
+    """
+
+    catalog = catalog[catalog['ALPHA_J2000'] < margins_d['above_ra']]
+    catalog = catalog[catalog['ALPHA_J2000'] > margins_d['below_ra']]
+    catalog = catalog[catalog['DELTA_J2000'] < margins_d['above_dec']]
+    catalog = catalog[catalog['DELTA_J2000'] > margins_d['below_dec']]
+
+    return catalog
+
+
 def look_for_ssos(logger, prfs_d, mag, scmp_d, f_conf):
     """
 

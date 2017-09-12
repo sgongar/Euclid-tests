@@ -24,14 +24,11 @@ def merge_results(logger, prfs_d, stats_dict):
     @return stats_dict:
     """
 
-    print "stats dict es", stats_dict
-
     full_stats = []
     for key in stats_dict.keys():
         full_stats.append(stats_dict['{}'.format(key)])
 
     full_stats = concat(full_stats)
-    print "full_stats es", full_stats
 
     list_mag = []
     list_dither = []
