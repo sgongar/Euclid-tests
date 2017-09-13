@@ -182,8 +182,8 @@ class Check:
 
                     # Sextractor extraction parameters - Uncomment if necessary
                     analysis_d = {'deblend_mincount': 0.1,
-                                  'analysis_thresh': 1.35,
-                                  'detect_thresh': 1.35,
+                                  'analysis_thresh': 10,
+                                  'detect_thresh': 10,
                                   'deblend_nthresh': 2, 'detect_minarea': 4,
                                   'filter': 'models/gauss_2.0_5x5.conv'}
 

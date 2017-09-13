@@ -71,7 +71,7 @@ class Compare:
         @return True: if everything is alright.
         """
         # Hardcoded references.
-        folder_sex = '2_1.35_1.35_0.1_4'
+        folder_sex = '2_10_10_0.1_4'
         folder_scmp = '150_1.2_5_0.033'
 
         # Load scamp's catalogs.
