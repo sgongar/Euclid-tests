@@ -755,16 +755,18 @@ if __name__ == '__main__':
         elif argv[1] == '-PM':
             check_pm = Check_PM(logger)
         elif argv[1] == '-regions':
-            for d in range(1, 5, 1):
-                print "d es", d
-                input_catalogue = prfs_d['output_cats'] + '/2_1.35_1.35_0.1_4/m_20-21_x1_y2_d{}.cat'.format(d)
-                # input_catalogue = prfs_d['input_cats'] + '/Cat_20-21_d{}.dat'.format(d)
-                # input_catalogue = '/mnt/g/dev/Euclid-tests/pipeline/results/full_150_1.2_0.05_0.16_20-21_1.cat'
-                # input_catalogue = '/pcdisk/holly/sgongora/Documents/Euclid/luca_data/v14/CCDs/catalog_20-21.cat'
+            permutations = [[0, 0], [0, 1], [0, 2], [1, 0], [1, 1], [1, 2],
+                            [2, 0], [2, 1], [2, 2]]
+            for permutation_ in permutations:
+                mag = '20-21'
+                sex_folder = '2_100_100_0.1_4'
+                i_c = '{}/{}/m_{}_x{}_y{}_d1.cat'.format(prfs_d['output_cats'],
+                                                         sex_folder, mag,
+                                                         permutation_[0],
+                                                         permutation_[1])
+                Create_regions(i_c, prfs_d).fits()
+                logger.debug('opening catalog file {}'.format(i_c))
 
-                logger.debug('opening catalog file {}'.format(input_catalogue))
-
-                Create_regions(input_catalogue, prfs_d).fits()
         elif argv[1] == '-modify':
             list_1, list_2 = modify_table(logger, prfs_d)
         elif argv[1] == '-input':
