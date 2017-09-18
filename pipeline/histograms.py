@@ -44,91 +44,60 @@ class DrawHistograms:
 
         """
         prfs_d = extract_settings()
-        self.read_stats(prfs_d)
+        distance_d = self.read_stats(prfs_d)
+        self.draw_histograms(distance_d)
 
     def read_stats(self, prfs_d):
         """ Reads stats.
 
+        @param prfs_d:
+
+        @return distance_d:
         """
         # Creates dict.
-        stats_d = {}
+        distance_d = {}
         # Gets fits files from directory.
-        fits_files = get_fits(unique=False)
+        fits_files = get_fits(unique=True)
 
         for fits_n in fits_files:
             csv_n = '{}/sources_{}.csv'.format(prfs_d['tmp_out'],
                                                fits_n[-13:-5])
-            test = read_csv(csv_n, index_col=0)
-            print test
+            cat = read_csv(csv_n, index_col=0)
+            distance_d[fits_n[-13:-5]] = cat['distance'].tolist()
 
-    def draw_histograms(self):
+        return distance_d
+
+    def draw_histograms(self, distance_d):
         """
 
         """
-        fig, ((ax0, ax1),
-              (ax2, ax3),
-              (ax4, ax5)) = plt.subplots(ncols=2, nrows=3,
-                                         figsize=(8.27, 11.69), dpi=100)
+        fig, ax_l = plt.subplots(ncols=3, nrows=3,
+                                 figsize=(16.53, 11.69), dpi=100)
 
+        ((ax0, ax1, ax2), (ax3, ax4, ax5), (ax6, ax7, ax8)) = ax_l
 
-#     # input analysis values
-#     ax0.hist(pm_in_values, bins=20,
-#              facecolor='gray', label='test')
-#     ax0.set_title("Proper motion distribution")
-#     ax0.set_xlim(x0_limits)
-#     x0_ticks.insert(0, 20)  # TODO workaround about automatic range
-#     ax0.set_xticks(x0_ticks)
-#     ax0.grid(True)
+        keys = ['x0_y0_d1', 'x0_y1_d1', 'x0_y2_d1',
+                'x1_y0_d1', 'x1_y1_d1', 'x1_y2_d1',
+                'x2_y0_d1', 'x2_y1_d1', 'x2_y2_d1']
 
-#     ax1.hist(mag_in_values, bins=20,
-#              facecolor='gray')
-#     ax1.set_title("Magnitude distribution")
-#     ax1.set_xlim(x1_limits)
-#     ax1.set_xticks(x1_ticks)
+        idx_l = 0
+        for idx_g in range(0, 7, 3):
+            for idx_ax in range(0, 3, 1):
+                key_ = keys[idx_g + idx_ax]
+                ticks = [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35]
 
-#     ax1.grid(True)
+                ax_l[idx_l][idx_ax].hist(distance_d[key_], bins=ticks)
+                ax_l[idx_l][idx_ax].set_title(key_)
+                ax_l[idx_l][idx_ax].grid(True)
+                ax_l[idx_l][idx_ax].set_xticks(ticks)
+            idx_l += 1
 
-#     # output analysis values
-#     print "proper motion out values", len(pm_out_values)
-#     ax2.hist(pm_out_values, bins=20,
-#              facecolor='gray', label='test')
-#     ax2.set_title("Proper motion distribution")
-#     ax2.set_xlim(x0_limits)
-#     ax2.set_xticks(x0_ticks)
-#     ax2.grid(True)
+        fig.tight_layout()
 
-#     print "magnitude out values", len(mag_out_values)
-#     ax3.hist(mag_out_values, bins=20,
-#              facecolor='gray')
-#     ax3.set_title("Magnitude distribution")
-#     ax3.set_xlim(x1_limits)
-#     ax3.set_xticks(x1_ticks)
-
-#     ax3.grid(True)
-
-#     print "flags distribution", len(flags_values)
-#     ax4.hist(flags_values, bins=20,
-#              facecolor='gray')
-#     ax4.set_title("Flags distribution")
-#     # ax4.set_xlim(x1_limits)
-#     # ax4.set_xticks(x1_ticks)
-
-#     ax4.grid(True)
-
-#     print "flags distribution", len(flags_dict.keys())
-#     labels = flags_dict.keys()
-#     sizes = [len(flags_dict[flags_dict.keys()[x]]) for x in range(len(flags_dict.keys()))]
-#     ax5.pie(sizes, labels=labels, autopct='%1.1f%%',
-#             shadow=True, startangle=90)
-#     ax5.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
-
-#     ax5.grid(True)
-
-#     fig.tight_layout()
-
-#     with PdfPages('test.pdf') as pdf:
-#         pdf.savefig()
+        with PdfPages('test.pdf') as pdf:
+            pdf.savefig()
 
 
 if __name__ == '__main__':
+
     DrawHistograms()
