@@ -19,8 +19,12 @@ pipeline/results/full_*.cat
 pipeline/results/filt_*.csv
 pipeline/results/catalogs/2*
 
+### Stats ###
+pipeline/stats_tests/deblend*
+
 ### Temporal ###
 pipeline/tmp/*.csv
+pipeline/tmp/*.reg
 
 ### Logs ###
 pipeline/logs/*
