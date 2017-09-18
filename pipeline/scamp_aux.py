@@ -3,32 +3,6 @@
 
 """Python script for time measurements
 
-This module demonstrates documentation as specified by the `Google Python
-Style Guide`_. Docstrings may extend over multiple lines. Sections are created
-with a section header and a colon followed by a block of indented text.
-
-Example:
-    Examples can be given using either the ``Example`` or ``Examples``
-    sections. Sections support any reStructuredText formatting, including
-    literal blocks::
-
-        $ python example_google.py
-
-Section breaks are created by resuming unindented text. Section breaks
-are also implicitly created anytime a new section starts.
-
-Attributes:
-    module_level_variable1 (int): Module level variables may be documented in
-        either the ``Attributes`` section of the module docstring, or in an
-        inline docstring immediately following the variable.
-
-        Either form is acceptable, but the two should not be mixed. Choose
-        one convention to document module level variables and be consistent
-        with it.
-
-Todo:
-    * Improve log messages
-
 """
 
 from os import path, makedirs
@@ -153,6 +127,7 @@ class Scamp:
 
                 output_dir = '{}/catalogs/{}/{}'.format(prfs_d['results_dir'],
                                                         folder_sex, f_conf)
+
                 if not path.exists(output_dir):
                     makedirs(output_dir)
 
@@ -163,10 +138,10 @@ class Scamp:
 
         return True
 
-# TODO Split scamp_filter method into single methods
-class ScampFilter:
 
-    def __init__(self, mag, scmp_d, f_conf):
+class ScampFilter:  # TODO Split scamp_filter method into single methodss
+
+    def __init__(self, logger, mag, scmp_d, f_conf):
         """
 
         @param mag:
@@ -174,7 +149,7 @@ class ScampFilter:
         @param f_conf:
         """
         prfs_d = self.extract_settings()
-        
+
         self.save = True  # save flag - set as True for catalogs saving
         self.scamp_filter(logger, prfs_d, mag, scmp_d, f_conf)
 
