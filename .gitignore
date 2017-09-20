@@ -1,7 +1,11 @@
 ### Byte-compiled / optimized / DLL files ###
 __pycache__/
+pipeline/__pycache__/
 *.py[cod]
 *$py.class
+
+### virtualenv ###
+.venv/*
 
 ### Swarp files ###
 pipeline/swarp.xml
