@@ -98,9 +98,10 @@ class Sextractor:
 
         # Creates folder for each configuration
         folder_loc = '{}/{}'.format(analysis_dir, folder_n)
-        if not path.isfile(folder_loc):
-            mkdir(folder_loc)
-        else:
+        try:
+            if not path.isfile(folder_loc):
+                mkdir(folder_loc)
+        except OSError:
             logger.debug('folder {} already created'.format(folder_n))
 
         for image_idx in range(0, len(fits_files), prfs_d['cores_number']):
@@ -157,6 +158,8 @@ class Sextractor:
         s_9 = " -FILTER_NAME %s" % (analysis_d['filter'])
 
         cmd_3 = s_1 + s_2 + s_3 + s_4 + s_5 + s_6 + s_7 + s_8 + s_9
+
+        print cmd_3
 
         sextractor_p = Popen(cmd_3, shell=True)
         sextractor_p.wait()

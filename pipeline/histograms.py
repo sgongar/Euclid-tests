@@ -20,12 +20,10 @@ Todo:
     * License??
 """
 
-import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from pandas import read_csv
 
-# from misc import get_ticks, pm_compute, pm_filter, get_limits
 from misc import extract_settings, get_fits
 
 __author__ = "Samuel Gongora-Garcia"
@@ -45,7 +43,9 @@ class DrawHistograms:
         """
         prfs_d = extract_settings()
         distance_d = self.read_stats(prfs_d)
-        self.draw_histograms(distance_d)
+
+        if not self.draw_histograms(distance_d):
+            raise Exception
 
     def read_stats(self, prfs_d):
         """ Reads stats.
@@ -69,6 +69,8 @@ class DrawHistograms:
 
     def draw_histograms(self, distance_d):
         """
+
+        @param distance_d:
 
         """
         fig, ax_l = plt.subplots(ncols=3, nrows=3,

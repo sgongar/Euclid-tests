@@ -182,9 +182,9 @@ class Check:
 
                     # Sextractor extraction parameters - Uncomment if necessary
                     analysis_d = {'deblend_mincount': 0.1,
-                                  'analysis_thresh': 10,
-                                  'detect_thresh': 10,
-                                  'deblend_nthresh': 2, 'detect_minarea': 4,
+                                  'analysis_thresh': 100,
+                                  'detect_thresh': 100,
+                                  'deblend_nthresh': 64, 'detect_minarea': 4,
                                   'filter': 'models/gauss_2.0_5x5.conv'}
 
                     Sextractor(logger, prfs_d, analysis_d, analysis_dir,
@@ -226,8 +226,8 @@ class Check:
                                                          idx_sex,
                                                          cat_conf=False)
                     analysis_d = {'deblend_mincount': 0.1,
-                                  'analysis_thresh': 1.35,
-                                  'detect_thresh': 1.35,
+                                  'analysis_thresh': 1000,
+                                  'detect_thresh': 1000,
                                   'deblend_nthresh': 2, 'detect_minarea': 4,
                                   'filter': 'models/gauss_2.0_5x5.conv'}
                     if not Scamp(logger, mag, scmp_d, f_conf, analysis_d):

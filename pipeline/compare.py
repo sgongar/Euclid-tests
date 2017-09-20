@@ -42,7 +42,7 @@ from misc import extract_settings, get_fits, check_distance
 __author__ = "Samuel Gongora-Garcia"
 __copyright__ = "Copyright 2017"
 __credits__ = ["Samuel Gongora-Garcia"]
-__version__ = "0.4"
+__version__ = "0.5"
 __maintainer__ = "Samuel Gongora-Garcia"
 __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
@@ -73,7 +73,7 @@ class Compare:
         @return True: if everything is alright.
         """
         # Hardcoded references.
-        folder_sex = '20_10_10_0.1_4'
+        folder_sex = '64_100_100_0.1_4'
         # folder_scmp = '150_1.2_5_0.033'
 
         # Load scamp's catalogs.
@@ -157,6 +157,8 @@ class Compare:
 
         ccd_borders_d = self.define_ccd_borders(prfs_d)
 
+        distorsion = 0.05  # Set-up variable for distorsion allowed.
+
         stats_d['CCD'].append(fits_n[-12:-4])
         stats_d['dither'].append(fits_n[-5:-4])
 
@@ -176,13 +178,21 @@ class Compare:
             o_alpha_cache = []
             o_delta_cache = []
 
+            i_flux_iso_cache = []
+            i_flux_auto_cache = []
+            o_flux_iso_cache = []
+            o_flux_auto_cache = []
+
             # Gets input data associated to selectes source
             input_t = input_table[input_table['NUMBER'].isin([input_source])]
             input_ra = float(input_t['ALPHA_J2000'])
             input_dec = float(input_t['DELTA_J2000'])
+            input_flux_iso = float(input_t['FLUX_ISO'])
+            input_flux_auto = float(input_t['FLUX_AUTO'])
 
             ccd_ = self.look_for_ccd(prfs_d, input_ra, input_dec,
                                      ccd_borders_d)
+
             if ccd_ is not None:
                 output_table = output_cats[0][ccd_]
 
@@ -199,6 +209,8 @@ class Compare:
                     output_t = output_table_cut[mask]
                     output_ra = float(output_t['ALPHA_J2000'])
                     output_dec = float(output_t['DELTA_J2000'])
+                    output_flux_iso = float(output_t['FLUX_ISO'])
+                    output_flux_auto = float(output_t['FLUX_AUTO'])
                     # Compare output_ra, output_dec against input_ra, input_dec
                     close, distance = check_distance(input_ra, output_ra,
                                                      input_dec, output_dec,
@@ -211,6 +223,10 @@ class Compare:
                         i_delta_cache.append(input_dec)
                         o_alpha_cache.append(output_ra)
                         o_delta_cache.append(output_dec)
+                        i_flux_iso_cache.append(input_flux_iso)
+                        i_flux_auto_cache.append(input_flux_auto)
+                        o_flux_iso_cache.append(output_flux_iso)
+                        o_flux_auto_cache.append(output_flux_auto)
 
                 if len(distances_cache) > 1 and close_flag is True:
                     # These values will be the same whatever the output is.
@@ -230,6 +246,16 @@ class Compare:
                     sources_d['o_ALPHA_J2000'].append(o_alpha)
                     o_delta = o_delta_cache[idx_cache]
                     sources_d['o_DELTA_J2000'].append(o_delta)
+
+                    i_flux_iso = i_flux_iso_cache[idx_cache]
+                    sources_d['i_FLUX_ISO'].append(i_flux_iso)
+                    i_flux_auto = i_flux_auto_cache[idx_cache]
+                    sources_d['i_FLUX_AUTO'].append(i_flux_auto)
+                    o_flux_iso = o_flux_iso_cache[idx_cache]
+                    sources_d['o_FLUX_ISO'].append(o_flux_iso)
+                    o_flux_auto = o_flux_auto_cache[idx_cache]
+                    sources_d['o_FLUX_AUTO'].append(o_flux_auto)
+
                     idx_repeated += 1
                 elif len(distances_cache) == 1 and close_flag is True:
                     # These values will be the same whatever the output is.
@@ -249,11 +275,21 @@ class Compare:
                     sources_d['o_ALPHA_J2000'].append(o_alpha)
                     o_delta = o_delta_cache[idx_cache]
                     sources_d['o_DELTA_J2000'].append(o_delta)
+
+                    i_flux_iso = i_flux_iso_cache[idx_cache]
+                    sources_d['i_FLUX_ISO'].append(i_flux_iso)
+                    i_flux_auto = i_flux_auto_cache[idx_cache]
+                    sources_d['i_FLUX_AUTO'].append(i_flux_auto)
+                    o_flux_iso = o_flux_iso_cache[idx_cache]
+                    sources_d['o_FLUX_ISO'].append(o_flux_iso)
+                    o_flux_auto = o_flux_auto_cache[idx_cache]
+                    sources_d['o_FLUX_AUTO'].append(o_flux_auto)
+
                     idx_detected += 1
                 elif len(distances_cache) == 0:
                     idx_lost += 1
 
-                if distance_ > 0.1:
+                if distance_ > distorsion and len(distances_cache) >= 1:
                     idx_cache = distances_cache.index(min(distances_cache))
                     i_alpha = i_alpha_cache[idx_cache]
                     i_comp_d['i_ALPHA_J2000'].append(i_alpha)
@@ -284,7 +320,9 @@ class Compare:
                           columns=['CCD', 'cat', 'dither', 'distance',
                                    'duplicated',
                                    'i_ALPHA_J2000', 'i_DELTA_J2000',
-                                   'o_ALPHA_J2000', 'o_DELTA_J2000'])
+                                   'o_ALPHA_J2000', 'o_DELTA_J2000',
+                                   'i_FLUX_ISO', 'i_FLUX_AUTO',
+                                   'o_FLUX_ISO', 'o_FLUX_AUTO'])
 
         i_comp_df = DataFrame(i_comp_d)
         i_comp_df.to_csv('{}/i_regions_{}.reg'.format(prfs_d['tmp_out'],
@@ -447,7 +485,9 @@ class Compare:
         sources_d = {'CCD': [], 'dither': [], 'cat': [],
                      'distance': [], 'duplicated': [],
                      'i_ALPHA_J2000': [], 'i_DELTA_J2000': [],
-                     'o_ALPHA_J2000': [], 'o_DELTA_J2000': []}
+                     'o_ALPHA_J2000': [], 'o_DELTA_J2000': [],
+                     'i_FLUX_ISO': [], 'i_FLUX_AUTO': [],
+                     'o_FLUX_ISO': [], 'o_FLUX_AUTO': []}
 
         i_comp_d = {'i_ALPHA_J2000': [], 'i_DELTA_J2000': []}
         o_comp_d = {'o_ALPHA_J2000': [], 'o_DELTA_J2000': []}
