@@ -73,7 +73,7 @@ class Compare:
         @return True: if everything is alright.
         """
         # Hardcoded references.
-        folder_sex = '64_100_100_0.1_4'
+        folder_sex = '20_100_100_0.1_4'
         # folder_scmp = '150_1.2_5_0.033'
 
         # Load scamp's catalogs.
@@ -91,7 +91,7 @@ class Compare:
                                             unique=True, filter=False)
 
         # Load sextractor's full populated catalogs.
-        fits_dir = '/pcdisk/kool5/sgongora/Documents/luca_data/v14/CCDs'
+        fits_dir = '/media/sf_Shared_Folder/luca_data/v14/CCDs'
         sex_cats_dir = '{}/{}'.format(fits_dir, folder_sex)
         sex_cats_o = self.load_sex_catalogs(prfs_d, sex_cats_dir,
                                             unique=True, filter=False)
@@ -421,7 +421,9 @@ class Compare:
 
         fits_files = get_fits(unique=True)
         for fits_ in fits_files:
+            print "fits_", fits_[:-5]
             sex_c = '{}/{}.cat'.format(sex_cats_dir, fits_[:-5])
+            print "sex_c", sex_c
 
             cat_file = fits.open(sex_c)
             cat_data = Table(cat_file[2].data)

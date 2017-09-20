@@ -86,12 +86,12 @@ class DrawHistograms:
         for idx_g in range(0, 7, 3):
             for idx_ax in range(0, 3, 1):
                 key_ = keys[idx_g + idx_ax]
-                ticks = [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35]
+                ticks = [0.001, 0.002, 0.003, 0.004, 0.005]
 
-                ax_l[idx_l][idx_ax].hist(distance_d[key_], bins=ticks)
+                ax_l[idx_l][idx_ax].hist(distance_d[key_])
                 ax_l[idx_l][idx_ax].set_title(key_)
                 ax_l[idx_l][idx_ax].grid(True)
-                ax_l[idx_l][idx_ax].set_xticks(ticks)
+                # ax_l[idx_l][idx_ax].set_xticks(ticks)
             idx_l += 1
 
         fig.tight_layout()

@@ -184,7 +184,7 @@ class Check:
                     analysis_d = {'deblend_mincount': 0.1,
                                   'analysis_thresh': 100,
                                   'detect_thresh': 100,
-                                  'deblend_nthresh': 64, 'detect_minarea': 4,
+                                  'deblend_nthresh': 20, 'detect_minarea': 4,
                                   'filter': 'models/gauss_2.0_5x5.conv'}
 
                     Sextractor(logger, prfs_d, analysis_d, analysis_dir,
@@ -219,7 +219,7 @@ class Check:
                                               scmp_d['pixscale_maxerr'],
                                               scmp_d['posangle_maxerr'],
                                               scmp_d['position_maxerr'])
-                print "scamp"
+
                 for idx_sex, conf_sex in enumerate(confs_sex):
                     (analysis_d,
                      len_dicts) = create_sextractor_dict(logger, prfs_d,
@@ -277,7 +277,7 @@ class Check:
                         pass
                     filt_j = []
                 except IndexError:
-                    print "finished"
+                    print("finished")
 
         return True
 
@@ -328,7 +328,7 @@ class Check:
                         pass
                     check_j = []
                 except IndexError:
-                    print "finished"
+                    print("finished")
 
         # Merge catalog files into a single one and cleans old ones
         for mag in prfs_d['mags']:
@@ -385,7 +385,7 @@ class Check:
                         pass
                     stats_j = []
                 except Exception as e:
-                    print e
+                    print(e)
 
         if not merge_stats(logger, prfs_d):
             raise Exception
@@ -420,11 +420,11 @@ class Check:
         return True
 
     def plot_a_thread_(self):
-        print "dentro de plot_thread_1"
+        print("dentro de plot_thread_1")
         pdf_plot = Detections_vs_Tolerance()
 
     def plot_b_thread_(self):
-        print "dentro de plot_thread_2"
+        print("dentro de plot_thread_2")
         pdf_plot = Detections_vs_Created()
 
     def plot_c_thread_(self, logger):

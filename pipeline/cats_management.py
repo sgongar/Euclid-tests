@@ -730,7 +730,6 @@ def get_input_cat(log_check, prfs_d, cat_number,
         return sources_df
 
     elif version is '8':
-        print "cat_file is", cat_file
         catalogue = genfromtxt(cat_file)
 
         list_x = catalogue[:, 0]
@@ -934,7 +933,7 @@ def get_output_catalog(logger, cat_location):
         catalogue_data = catalogue[2].data
         catalogue_table = Table(catalogue_data).to_pandas()
     except Exception as e:
-        print e
+        print(e)
         # logger.error('exception {} in file {}'.format(e, cat_location))
 
     return catalogue_table
@@ -1247,7 +1246,6 @@ def look_for_ssos_thread(logger, prfs_d, image, out_dict, sex_keys,
 
     # Merge all catalog dither into a single one
     ssos = concat(cat_list, ignore_index=True)
-    # print "full cat era...", full_cat
     ssos_n = '{}_{}_{}'.format(image[:13], f_conf, mag)
     ssos.to_csv('{}/{}_ssos.csv'.format(prfs_d['catalogs_dir'], ssos_n))
 
@@ -1318,7 +1316,6 @@ def look_for_ssos_thread(logger, prfs_d, image, out_dict, sex_keys,
 
                 close, distance = check_distance(alpha, ra, delta, dec,
                                                  prfs_d['tolerance'])
-                # print alpha_mask, delta_mask
                 if close:
                     df = sex_table[sex_table['NUMBER'].isin([sex_source])]
                     sex_flag = True
@@ -1530,7 +1527,7 @@ def merge_ssos(logger, prfs_d, conf, mag):
     """
     file_name = '_{}_{}_{}_{}_{}_'.format(conf[0], conf[1], conf[2],
                                           conf[3], mag)
-    print file_name
+    print(file_name)
     idx = 0
     csv_files = []
     dataframes_dict = {}
@@ -1538,9 +1535,7 @@ def merge_ssos(logger, prfs_d, conf, mag):
 
     files = listdir(prfs_d['home'] + '/pipeline')
     for csv_ in files:
-        # print csv_
         if csv_[-9:] == '_ssos.csv' and file_name in csv_:
-            # print "dentro"
             idx += 1
             csv_files.append(csv_)
             dataframes_dict[idx] = read_csv(csv_, index_col=0)
