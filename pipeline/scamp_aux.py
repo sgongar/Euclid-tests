@@ -225,7 +225,7 @@ class CatalogCreation:
 
         """
         prfs_d = extract_settings()
-        folder_sex = '20_100_100_0.1_4'
+        folder_sex = '2_1.35_1.35_0.1_4'
 
         if not self.catalog_creation(prfs_d, folder_sex):
             raise Exception

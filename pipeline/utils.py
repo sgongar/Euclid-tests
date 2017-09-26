@@ -759,11 +759,11 @@ if __name__ == '__main__':
                             [2, 0], [2, 1], [2, 2]]
             for permutation_ in permutations:
                 mag = '20-21'
-                sex_folder = '2_100_100_0.1_4'
-                i_c = '{}/{}/m_{}_x{}_y{}_d1.cat'.format(prfs_d['output_cats'],
-                                                         sex_folder, mag,
-                                                         permutation_[0],
-                                                         permutation_[1])
+                sex_folder = '20_100_100_0.1_4'
+                i_c = '{}/{}/mag_{}_CCD_x{}_y{}_d1.cat'.format(prfs_d['output_cats'],
+                                                               sex_folder, mag,
+                                                               permutation_[0],
+                                                               permutation_[1])
                 Create_regions(i_c, prfs_d).fits()
                 logger.debug('opening catalog file {}'.format(i_c))
 
