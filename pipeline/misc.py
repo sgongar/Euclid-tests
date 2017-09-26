@@ -122,8 +122,6 @@ def get_os():
     else:
         raise Exception
 
-    os_sytem = 'test'
-
     return os_system
     """ a function that returns True if all numbers in a list are equal
 
