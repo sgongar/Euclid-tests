@@ -36,7 +36,7 @@ from astropy.table import Table
 from pandas import concat, DataFrame, read_csv
 
 from images_management import get_fits_limits
-from cats_management import cut_catalog, shrink_catalog
+from cats_management import cut_catalog, shrink_catalog, merge_catalog
 from misc import extract_settings, get_fits, check_distance
 
 __author__ = "Samuel Gongora-Garcia"
@@ -58,7 +58,9 @@ class Compare:
         prfs_d = extract_settings()
 
         # Perfoms an analysis TODO Create a custom Exception!
-        self.perform_analysis(prfs_d)
+        # self.perform_analysis(prfs_d)
+        folder_sex = '20_100_100_0.1_4'
+        merge_catalog(prfs_d, folder_sex)
 
     def perform_analysis(self, prfs_d):
         """ This method obtains the catalogues under study and launches

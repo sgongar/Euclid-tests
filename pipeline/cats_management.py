@@ -1556,21 +1556,22 @@ def merge_ssos(logger, prfs_d, conf, mag):
 
     logger.debug('output catalog {} created'.format(output_file_name))
 
-def merge_catalog(logger, prfs_d, folder_sex, folder_scmp):
+def merge_catalog(prfs_d, folder_sex):
     """
-    Tienes que sacar una extracción unitaria de cada uno y luego quedarte con el
-    header central!!
+
     @param prfs_d:
     @param folder_sex:
-    @param folder_scmp:
     @return cat_n: a reference in string format.
+    """
     """
     cats_dir = '{}/{}/{}'.format(prfs_d['catalogs_dir'], folder_sex,
                                  folder_scmp)
-    fits_files = get_fits(unique=False)
+    """
+    fits_files = get_fits(unique=True)
 
     # Using a mutable dictionary instead a fixed lists will allow us
     # to change catalog columns without a problem
+    # Needs 
     cat_dict = {}
     for idx in range(0, len(fits_files), 1):
         cat_loc = '{}/{}/{}.cat'.format(prfs_d['fits_dir'], folder_sex,
@@ -1593,11 +1594,13 @@ def merge_catalog(logger, prfs_d, folder_sex, folder_scmp):
                     cat_final[param_key].append(value_)
 
     cat_df = DataFrame(cat_final)
-    rewrite_catalog(cat_df)
+    rewrite_catalog(cat_df, prfs_d, folder_sex)
         # cat_df.to_csv('test.csv')
 
-def rewrite_catalog(cat_df):
-    """ writes a new catalogue only fulfilled with stars
+
+def rewrite_catalog(cat_df, prfs_d, folder_sex):
+    """
+    writes a new catalogue only fulfilled with stars
     @param logger: a logger object
     @param prfs_d:
     @param catalogue_table:
@@ -1738,5 +1741,12 @@ def rewrite_catalog(cat_df):
                             c57, c58, c59, c60, c61])
     tbhdu = fits.BinTableHDU.from_columns(coldefs)
 
-    cat_loc = '{}/{}/{}/catalog.cat'.format(prfs_d['catalogs_dir'],
-                                            folder_sex, folder_scmp)
+    cat_ref = '{}/{}/mag_20-21_CCD_x1_y1_d1.cat'.format(prfs_d['fits_dir'],
+                                                        folder_sex)
+
+    catalog = fits.open(cat_ref)
+    catalog[2] = tbhdu
+    catalog[2].header['EXTNAME'] = 'LDAC_OBJECTS'
+    cat_loc = '{}/{}/catalog.cat'.format(prfs_d['fits_dir'], folder_sex)
+    catalog.writeto(cat_loc, overwrite=True)
+

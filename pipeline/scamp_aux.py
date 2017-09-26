@@ -11,6 +11,7 @@ from subprocess import Popen
 from astropy.io import fits
 from astropy.table import Table
 
+from cats_management import merge_catalog
 from misc import pm_compute, pm_filter, extract_settings
 from misc import motion_filter, confidence_filter, get_fits
 
@@ -29,7 +30,11 @@ __status__ = "Development"
 class Scamp:
 
     def __init__(self, logger, mag, scmp_d, f_conf, sex_d):
-        mode = {'type': 'custom'}
+        """
+        for now scamp's mode is hardcoded
+
+        """
+        mode = {'type': 'scamp'}
         prfs_d = extract_settings()
 
         self.scamp_process(logger, prfs_d, mode, mag,
@@ -59,16 +64,15 @@ class Scamp:
                                       scmp_d['posangle_maxerr'],
                                       scmp_d['position_maxerr'])
 
-        print f_conf
-
         logger.info('scamp process for magnitude {}'.format(mag))
 
         if mode['type'] == 'scamp':
             scmp_p_1 = "scamp -c %s" % (prfs_d['conf_scamp'])
-            scmp_p_2 = ' {}/{}/m_{}_x?_y?_d?.cat'.format(prfs_d['fits_dir'],
-                                                         folder_sex, mag)
+            scmp_p_2 = ' {}/{}/mag_{}_CCD_x?_y?_d?.cat'.format(prfs_d['fits_dir'],
+                                                               folder_sex, mag)
             scmp_p_3 = ' -ASTREFCAT_NAME'
-            scmp_p_4 = ' {}/catalog_{}.cat'.format(prfs_d['output_cats'], mag)
+            scmp_p_4 = ' {}/{}/catalog_{}.cat'.format(prfs_d['output_cats'],
+                                                      folder_sex, mag)
             scmp_p_5 = ' -PIXSCALE_MAXERR {}'.format(scmp_d['pixscale_maxerr'])
             scmp_p_6 = ' -POSANGLE_MAXERR {}'.format(scmp_d['posangle_maxerr'])
             scmp_p_7 = ' -POSITION_MAXERR {}'.format(scmp_d['position_maxerr'])
@@ -88,6 +92,8 @@ class Scamp:
                                                     folder_sex, f_conf)
             if not path.exists(output_dir):
                 makedirs(output_dir)
+
+            print "scmp_p", scmp_p
 
             process_scamp = Popen(scmp_p, shell=True)
             process_scamp.wait()
@@ -150,7 +156,7 @@ class ScampFilter:  # TODO Split scamp_filter method into single methodss
         """
         prfs_d = self.extract_settings()
 
-        self.save = True  # save flag - set as True for catalogs saving
+        self.save = True  #"scmp_p",  save flag - set as True for catalogs saving
         self.scamp_filter(logger, prfs_d, mag, scmp_d, f_conf)
 
     def scamp_filter(self, logger, prfs_d, mag, scmp_d, f_conf):
@@ -210,3 +216,28 @@ class ScampFilter:  # TODO Split scamp_filter method into single methodss
         full_db = confidence_filter(logger, full_db, prfs_d['r_fit'])
         if self.save:
             full_db.to_csv('{}/{}_6.csv'.format(prfs_d['results_dir'], filt_n))
+
+
+class CatalogCreation:
+
+    def __init__(self):
+        """
+
+        """
+        prfs_d = extract_settings()
+        folder_sex = '20_100_100_0.1_4'
+
+        if not self.catalog_creation(prfs_d, folder_sex):
+            raise Exception
+
+    def catalog_creation(self, prfs_d, folder_sex):
+        """
+
+        """
+        merge_catalog(prfs_d, folder_sex)
+
+        return True
+
+
+if __name__ == '__main__':
+    test = CatalogCreation()

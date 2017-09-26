@@ -4,29 +4,8 @@
 
 """Script principal del paquete.
 
-Con este script podremos lanzar las acciones de analsis necesarias.
-
-Example:
-    Examples can be given using either the ``Example`` or ``Examples``
-    sections. Sections support any reStructuredText formatting, including
-    literal blocks::
-
-        $ python example_google.py
-
-Section breaks are created by resuming unindented text. Section breaks
-are also implicitly created anytime a new section starts.
-
-Attributes:
-    module_level_variable1 (int): Module level variables may be documented in
-        either the ``Attributes`` section of the module docstring, or in an
-        inline docstring immediately following the variable.
-
-        Either form is acceptable, but the two should not be mixed. Choose
-        one convention to document module level variables and be consistent
-        with it.
-
 Todo:
-    * Improve log messages
+    *
 
 """
 
@@ -226,9 +205,9 @@ class Check:
                                                          idx_sex,
                                                          cat_conf=False)
                     analysis_d = {'deblend_mincount': 0.1,
-                                  'analysis_thresh': 1000,
-                                  'detect_thresh': 1000,
-                                  'deblend_nthresh': 2, 'detect_minarea': 4,
+                                  'analysis_thresh': 100,
+                                  'detect_thresh': 100,
+                                  'deblend_nthresh': 20, 'detect_minarea': 4,
                                   'filter': 'models/gauss_2.0_5x5.conv'}
                     if not Scamp(logger, mag, scmp_d, f_conf, analysis_d):
                         raise Exception
