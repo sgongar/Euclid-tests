@@ -111,14 +111,18 @@ def get_os():
     @return os_system: a string which contains the operative system name
     """
 
-    if 'fedora' in platform():
+    if 'fedora-23' in platform():
         os_system = 'fedora'
     elif 'Debian' in platform():
         os_system = 'debian'
     elif 'Ubuntu' in platform():
         os_system = 'ubuntu'
+    elif 'fedora-26' in platform():
+        os_system = 'test'
     else:
         raise Exception
+
+    os_sytem = 'test'
 
     return os_system
     """ a function that returns True if all numbers in a list are equal
@@ -345,6 +349,8 @@ def extract_settings():
         prfs_d['home'] = ConfMap(Cf, "HomeDirs")['fed_home']
     elif os_version == 'ubuntu':
         prfs_d['home'] = ConfMap(Cf, "HomeDirs")['ub_home']
+    elif os_version == 'test':
+        prfs_d['home'] = ConfMap(Cf, "HomeDirs")['test_home']
     else:
         raise BadSettings('Operative system not chosen')
 
@@ -353,6 +359,9 @@ def extract_settings():
         prfs_d['version'] = prfs_d['version'] + prfs_d['cat']
     elif os_version == 'ubuntu':
         prfs_d['version'] = ConfMap(Cf, "Version")['ub_version']
+        prfs_d['version'] = prfs_d['version'] + prfs_d['cat']
+    elif os_version == 'test':
+        prfs_d['version'] = ConfMap(Cf, "Version")['test_version']
         prfs_d['version'] = prfs_d['version'] + prfs_d['cat']
     else:
         raise BadSettings('Operative system not chosen')

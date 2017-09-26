@@ -91,7 +91,7 @@ class Compare:
                                             unique=True, filter=False)
 
         # Load sextractor's full populated catalogs.
-        fits_dir = '/media/sf_Shared_Folder/luca_data/v14/CCDs'
+        fits_dir = '/media/sf_CarpetaCompartida/luca_data/v14/CCDs'
         sex_cats_dir = '{}/{}'.format(fits_dir, folder_sex)
         sex_cats_o = self.load_sex_catalogs(prfs_d, sex_cats_dir,
                                             unique=True, filter=False)
@@ -128,6 +128,7 @@ class Compare:
                 active_compare = list([job.is_alive() for job in compare_j])
                 pass
 
+        # TODO Create a directory if this doesn't exist  
         # Creates a file with all the statistics obtained.
         if not self.merge_stats(fits_files, prfs_d):
             raise Exception  # TODO Creates a custom Exception.
