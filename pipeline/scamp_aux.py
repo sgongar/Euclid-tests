@@ -154,7 +154,7 @@ class ScampFilter:  # TODO Split scamp_filter method into single methodss
         @param scmp_d:
         @param f_conf:
         """
-        prfs_d = self.extract_settings()
+        prfs_d = extract_settings()
 
         self.save = True  #"scmp_p",  save flag - set as True for catalogs saving
         self.scamp_filter(logger, prfs_d, mag, scmp_d, f_conf)
