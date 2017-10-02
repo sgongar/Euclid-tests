@@ -10,7 +10,7 @@ function upgrade_system {
 
 
 function install_virtualenv {
-  Install virtualenv for deploy a new enviroment
+  # Install virtualenv for deploy a new enviroment
   virtualenv --python=/usr/bin/python2.7  /home/user/Work/Projects/pipeline/.venv
   source /home/user/Work/Projects/pipeline/.venv/bin/activate
 }
@@ -127,48 +127,59 @@ function install_scamp {
 }
 
 
+function update_enviroment {
+  cp /media/sf_Euclid-tests/pipeline/.bash_profile ~/.bash_profile
+  source ~/.bash_profile
+}
+
+
 function copy_files {
-  cp -r /media/sf_Euclid-tests/pipeline/* /home/user/Work/Projects/pipeline/* 
+  cp -r /media/sf_Euclid-tests/pipeline/* /home/user/Work/Projects/pipeline/ 
+  cp -r /media/sf_Euclid-tests/pipeline/.settings.ini ~/Work/Projects/pipeline/.settings.ini
 }
 
 
 function main {
-  TMP_DIR="/home/user/Work/Projects/pipeline/tmp"
-  LOCAL_DIR="/home/user/Work/Projects/pipeline/.local/"
+  # TMP_DIR="/home/user/Work/Projects/pipeline/tmp/"
+  # LOCAL_DIR="/home/user/Work/Projects/pipeline/.local/"
+  # installation_dir="/media/sf_Euclid-tests/pipeline/"
 
-  # Checking directories
-  if [ ! -d "$TMP_DIR" ]; then
-    mkdir $TMP_DIR
-  fi
+  # cd $installation_dir
 
-  if [ ! -d "$LOCAL_DIR" ]; then
-    mkdir $LOCAL_DIR
-  fi
-
-  # Install scamp from scratch
-  # Compile ATLAS/Lapack library
-  cd $TMP_DIR 
-
-  upgrade_system
-
+  # upgrade_system
   install_virtualenv
-
   update_pip
 
-  install_atlas
+  # # Checking directories
+  # if [ ! -d "$TMP_DIR" ]; then
+  #   mkdir $TMP_DIR
+  # fi
 
-  cd ../../
-  rm -rf *
+  # if [ ! -d "$LOCAL_DIR" ]; then
+  #   mkdir $LOCAL_DIR
+  # fi
 
-  install_cdsclient
-  cd ../
+  # # Install scamp from scratch
+  # # Compile ATLAS/Lapack library
+  # cd $TMP_DIR 
 
-  install_sextractor
-  cd ../
+  # install_atlas
 
-  install_scamp
-  cd ../
-  rm -rf scamp*
+  # cd ../../
+  # rm -rf *
+
+  # install_cdsclient
+  # cd ../
+
+  # install_sextractor
+  # cd ../
+
+  # install_scamp
+  # cd ../
+  # rm -rf scamp*
+
+  # update_enviroment
+  # copy_files
 }
 
 
