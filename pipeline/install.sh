@@ -1,84 +1,177 @@
 #!/bin/bash
+# An small script for libraries intallation
+# 
+# Google's Shell Style Guide
 
-# Install package dependecies
-sudo yum -y install $(cat packages.txt)
 
-# Install virtualenv for deploy a new enviroment
-virtualenv --python=/usr/bin/python2.7  /home/user/Work/Projects/pipeline/.venv
-source /home/user/Work/Projects/pipeline/.venv/bin/activate
+function upgrade_system {
+  sudo yum -y install $(cat packages.txt)
+}
 
-pip install --upgrade pip
-pip install -r modules.txt
 
-# Install sextractor
-echo "saving sextractor package"
-wget -O /home/user/Work/Projects/pipeline/tmp/sextractor.rpm https://www.astromatic.net/download/sextractor/sextractor-2.19.5-1.x86_64.rpm
-sudo rpm -ivh /home/user/Work/Projects/pipeline/tmp/sextractor.rpm
-echo "removing temporal file sextractor.rpm"
-rm /home/user/Work/Projects/pipeline/tmp/sextractor.rpm
+function install_virtualenv {
+  Install virtualenv for deploy a new enviroment
+  virtualenv --python=/usr/bin/python2.7  /home/user/Work/Projects/pipeline/.venv
+  source /home/user/Work/Projects/pipeline/.venv/bin/activate
+}
 
-# Create local directory to deploy libraries and binaries
-mkdir /home/user/Work/Projects/pipeline/.local/
 
-# Install scamp from scratch
-# Compile ATLAS/Lapack library
-cd /home/user/Work/Projects/pipeline/tmp
+function update_pip {
+  pip install --upgrade pip
+  pip install -r modules.txt
+}
 
-ATLAS_URL="https://downloads.sourceforge.net/project/math-atlas/Stable/3.10.3/atlas3.10.3.tar.bz2?r=&ts=1506698217&use_mirror=10gbps-io"
-LAPACK_URL="http://www.netlib.org/lapack/lapack-3.7.1.tgz"
 
-wget -O atlas.tar.bz2 $ATLAS_URL
-wget -O lapack.tgz $LAPACK_URL
+function install_atlas {
+  ATLAS_URL="https://downloads.sourceforge.net/project/math-atlas/Stable/3.10.3/atlas3.10.3.tar.bz2?r=&ts=1506698217&use_mirror=10gbps-io"
+  LAPACK_URL="http://www.netlib.org/lapack/lapack-3.7.1.tgz"
 
-tar -xf atlas.tar.bz2
-rm atlas.tar.bz2
+  wget -O atlas.tar.bz2 $ATLAS_URL
+  wget -O lapack.tgz $LAPACK_URL
 
-cd ATLAS
-mkdir DONE
-cd DONE
+  tar -xf atlas.tar.bz2
+  rm atlas.tar.bz2
 
-../configure -Fa alg -fPIC --with-netlib-lapack-tarfile=../../lapack.tgz
-make
+  cd ATLAS
+  if [ ! -d DONE/ ]; then
+    mkdir DONE
+  fi
+  cd DONE/
 
-# Get into lib folder and make shared libraries
-cd lib
-make shared
-cd ../
+  mkdir /home/user/Work/Projects/pipeline/.local/ATLAS
+  ../configure -Fa alg -fPIC --with-netlib-lapack-tarfile=../../lapack.tgz --prefix=/home/user/Work/Projects/pipeline/.local/ATLAS
+  make
 
-awk '{ if (NR == 3) print "DESTDIR=/home/user/Work/Projects/pipeline/.local/ATLAS"; else print $0}' Makefile > output_file.txt
-mv output_file.txt Makefile
+  # Get into lib folder and make shared libraries
+  cd lib
+  make shared
+  cd ../
 
-make install
+  make install
+}
 
-cd ../../
-rm -rf *
 
-wget -O cdsclient.tar.gz http://cdsarc.u-strasbg.fr/ftp/pub/sw/cdsclient.tar.gz
-tar -xzf cdsclient.tar.gz
-cd cdsclient-*
+function install_cdsclient {
+  cdsclient_url="http://cdsarc.u-strasbg.fr/ftp/pub/sw/cdsclient.tar.gz"
+  wget -O cdsclient.tar.gz $cdsclient_url
 
-mkdir /home/user/Work/Projects/pipeline/.local/cdsclient
+  if [ ! -d cdsclient/ ]; then
+    mkdir cdsclient/
+  fi
 
-./configure -prefix=/home/user/Work/Projects/pipeline/.local/cdsclient
-make
-make install
+  tar -xzf cdsclient.tar.gz -C cdsclient --strip-components=1
+  cd cdsclient
 
-cd ../
-rm -rf cdsclient*
+  # Create a dir for cdsclient installation
+  cdsclient_dir="/home/user/Work/Projects/pipeline/.local/cdsclient"
 
-wget -O scamp.tar.gz https://www.astromatic.net/download/scamp/scamp-2.0.4.tar.gz
-tar -xzf scamp.tar.gz
+  if [ ! -d $cdsclient_dir ]; then
+    mkdir $cdsclient_dir
+  fi
 
-cd scamp*
+  # Configure
+  ./configure -prefix=/home/user/Work/Projects/pipeline/.local/cdsclient
 
-ATLAS_INCLUDE_DIR="/home/user/Work/Projects/pipeline/.local/ATLAS/include"
-ATLAS_LIB_DIR="/home/user/Work/Projects/pipeline/.local/ATLAS/lib"
-CDSCLIENT_BIN_DIR="/home/user/Work/Projects/pipeline/.local/cdsclient/bin"
-SCAMP_BIN_DIR="/home/user/Work/Projects/pipeline/.local"
-./configure --with-atlas-incdir=$ATLAS_INCLUDE_DIR --with-atlas-libdir=$ATLAS_LIB_DIR --with-cdsclient-dir=$CDSCLIENT_BIN_DIR --prefix=$SCAMP_BIN_DIR
+  # Compile them
+  make
 
-make
-make install
+  # Perfom an installation to local folder
+  make install
+}
 
-cd ../
-rm -rf scamp*
+
+function install_sextractor {
+  SEXTRACTOR_URL="https://www.astromatic.net/download/sextractor/sextractor-2.19.5.tar.gz"
+  wget -O sextractor.tar.gz $SEXTRACTOR_URL
+
+  if [ ! -d sextractor/ ]; then
+    mkdir sextractor/
+  fi
+
+  tar -xzf sextractor.tar.gz -C sextractor/ --strip-components=1
+  cd sextractor
+
+  ATLAS_INCLUDE_DIR="/home/user/Work/Projects/pipeline/.local/ATLAS/include"
+  ATLAS_LIB_DIR="/home/user/Work/Projects/pipeline/.local/ATLAS/lib"
+  SEXTRACTOR_BIN_DIR="/home/user/Work/Projects/pipeline/.local"
+  ./configure --with-atlas-incdir=$ATLAS_INCLUDE_DIR \
+  --with-atlas-libdir=$ATLAS_LIB_DIR --prefix=$SEXTRACTOR_BIN_DIR
+
+  make
+  make install
+}
+
+
+function install_scamp {
+  SCAMP_URL="https://www.astromatic.net/download/scamp/scamp-2.0.4.tar.gz"
+  wget -O scamp.tar.gz $SCAMP_URL
+
+  if [ ! -d scamp/ ]; then
+    mkdir scamp/
+  fi
+
+  tar -xzf scamp.tar.gz -C scamp/ --strip-components=1
+  cd scamp
+
+  ATLAS_INCLUDE_DIR="/home/user/Work/Projects/pipeline/.local/ATLAS/include"
+  ATLAS_LIB_DIR="/home/user/Work/Projects/pipeline/.local/ATLAS/lib"
+  CDSCLIENT_BIN_DIR="/home/user/Work/Projects/pipeline/.local/cdsclient/bin"
+  SCAMP_BIN_DIR="/home/user/Work/Projects/pipeline/.local"
+
+  ./configure --with-atlas-incdir=$ATLAS_INCLUDE_DIR \
+  --with-atlas-libdir=$ATLAS_LIB_DIR --with-cdsclient-dir=$CDSCLIENT_BIN_DIR \
+  --prefix=$SCAMP_BIN_DIR
+
+  make
+  make install
+}
+
+
+function copy_files {
+  cp -r /media/sf_Euclid-tests/pipeline/* /home/user/Work/Projects/pipeline/* 
+}
+
+
+function main {
+  TMP_DIR="/home/user/Work/Projects/pipeline/tmp"
+  LOCAL_DIR="/home/user/Work/Projects/pipeline/.local/"
+
+  # Checking directories
+  if [ ! -d "$TMP_DIR" ]; then
+    mkdir $TMP_DIR
+  fi
+
+  if [ ! -d "$LOCAL_DIR" ]; then
+    mkdir $LOCAL_DIR
+  fi
+
+  # Install scamp from scratch
+  # Compile ATLAS/Lapack library
+  cd $TMP_DIR 
+
+  upgrade_system
+
+  install_virtualenv
+
+  update_pip
+
+  install_atlas
+
+  cd ../../
+  rm -rf *
+
+  install_cdsclient
+  cd ../
+
+  install_sextractor
+  cd ../
+
+  install_scamp
+  cd ../
+  rm -rf scamp*
+}
+
+
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  main "$@"
+fi
