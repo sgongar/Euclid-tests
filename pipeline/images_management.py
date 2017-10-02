@@ -7,7 +7,6 @@ from os import listdir
 from astropy.io import fits
 from astropy.wcs import WCS
 from pandas import concat, Series, read_csv
-from astroscrappy import detect_cosmics
 from multiprocessing import Process, Manager
 from numpy import isclose, logical_and
 
@@ -91,65 +90,6 @@ def merge_results(logger, prfs_d, stats_dict):
     stats.to_csv('finals.csv')
 
     return stats_dict
-
-
-def clean_images(logger, prfs_d):
-    """
-
-    @param logger:
-    @param prfs_d:
-
-    @return True:
-    """
-    im_list = listdir(prfs_d['fits_dir'])
-
-    for im in im_list:
-        im_list[im_list.index(im)] = prfs_d['fits_dir'] + '/' + im
-
-    clean_j = []
-    for element in range(0, len(im_list), int(prfs_d['cores_number'])):
-        try:
-            for proc in range(0, int(prfs_d['cores_number']), 1):
-                clean_p = Process(target=clean_images_thread,
-                                  args=(logger, prfs_d,
-                                        im_list[element + proc], ))
-                clean_j.append(clean_p)
-                clean_p.start()
-
-            active_clean = list([job.is_alive() for job in clean_j])
-            while True in active_clean:
-                active_clean = list([job.is_alive() for job in clean_j])
-                pass
-
-        except IndexError:
-            logger.debug('extraction finished')
-
-    logger.info('Cleaning process of images finished')
-
-    return True
-
-
-def clean_images_thread(logger, prfs_d, im):
-    """ single thread process associated to glitches filter process
-
-    @param logger:
-    @param prfs_d:
-    @param im:
-
-    @param True:
-    """
-    logger.debug('starting image {}'.format(im))
-    hdu_list = fits.open(im)
-    hdu = hdu_list[0]
-    data_1, data_2 = detect_cosmics(indat=hdu.data, gain=3.1, readnoise=4.5,
-                                    satlevel=64535.0, verbose=True)
-
-    hdu.data = data_2
-    hdu_list[0] = hdu
-
-    hdu_list.writeto(im[:-5] + '_copy.fits', clobber=True)
-
-    return True
 
 
 def check(logger, prfs_d, analysis_d):

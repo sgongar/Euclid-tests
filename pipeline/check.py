@@ -16,8 +16,6 @@ from sys import argv
 from cats_management import look_for_ssos
 from cats_management import merge_sso_cat, merge_ssos
 from stats_management import merge_stats
-from curves import Detections_vs_Tolerance, Detections_vs_Created
-from curves import PMs_vs_Detections
 from errors import BadSettings
 from errors import CatalogueError
 from misc import setting_logger, extract_settings
@@ -65,8 +63,6 @@ class Check:
             self.check(logger, prfs_d, confs, total_confs)
         elif argv[1] == '-stats':
             self.stats(logger, prfs_d, confs, total_confs)
-        elif argv[1] == '-plot':
-            self.plot(logger)
         elif argv[1] == '-help':
             pipeline_help(logger)
         elif argv[1] == '-sextractor_performance':
@@ -370,45 +366,6 @@ class Check:
             raise Exception
 
         return True
-
-    def plot(self, logger):
-        """
-
-        @param logger:
-        """
-
-        plot_j = []
-        """
-        plot_p = Process(target=self.plot_a_thread_)
-        plot_j.append(plot_p)
-        plot_p.start()
-
-        plot_p = Process(target=self.plot_b_thread_)
-        plot_j.append(plot_p)
-        plot_p.start()
-        """
-        plot_p = Process(target=self.plot_c_thread_, args=(logger,))
-        plot_j.append(plot_p)
-        plot_p.start()
-
-        active_plot = list([j.is_alive() for j in plot_j])
-        while True in active_plot:
-            active_plot = list([j.is_alive() for j in plot_j])
-            pass
-
-        return True
-
-    def plot_a_thread_(self):
-        print("dentro de plot_thread_1")
-        pdf_plot = Detections_vs_Tolerance()
-
-    def plot_b_thread_(self):
-        print("dentro de plot_thread_2")
-        pdf_plot = Detections_vs_Created()
-
-    def plot_c_thread_(self, logger):
-        logger.debug('plotting plot c')
-        pdf_plot = PMs_vs_Detections()
 
     def sextractor_performance(self, logger, prfs_d):
         sextractor_performance = SextractorPerformance(logger, prfs_d)
