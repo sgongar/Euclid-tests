@@ -119,6 +119,8 @@ def get_os():
         os_system = 'ubuntu'
     elif 'fedora-26' in platform():
         os_system = 'test'
+    elif 'centos' in platform():
+        os_system = 'centos'
     else:
         raise Exception
 
@@ -339,6 +341,9 @@ def extract_settings():
     Cf = ConfigParser()
     Cf.read(".settings.ini")
 
+    from os import getcwd
+    print getcwd()
+
     os_version = get_os()
     prfs_d = {}
     prfs_d['cat'] = ConfMap(Cf, "Version")['cat_version']
@@ -349,6 +354,8 @@ def extract_settings():
         prfs_d['home'] = ConfMap(Cf, "HomeDirs")['ub_home']
     elif os_version == 'test':
         prfs_d['home'] = ConfMap(Cf, "HomeDirs")['test_home']
+    elif os_version == 'centos':
+        prfs_d['home'] = ConfMap(Cf, "HomeDirs")['centos_home']
     else:
         raise BadSettings('Operative system not chosen')
 
@@ -359,6 +366,9 @@ def extract_settings():
         prfs_d['version'] = ConfMap(Cf, "Version")['ub_version']
         prfs_d['version'] = prfs_d['version'] + prfs_d['cat']
     elif os_version == 'test':
+        prfs_d['version'] = ConfMap(Cf, "Version")['test_version']
+        prfs_d['version'] = prfs_d['version'] + prfs_d['cat']
+    elif os_version == 'centos':
         prfs_d['version'] = ConfMap(Cf, "Version")['test_version']
         prfs_d['version'] = prfs_d['version'] + prfs_d['cat']
     else:
