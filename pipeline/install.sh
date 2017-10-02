@@ -23,11 +23,11 @@ function update_pip {
 
 
 function install_atlas {
-  ATLAS_URL="https://downloads.sourceforge.net/project/math-atlas/Stable/3.10.3/atlas3.10.3.tar.bz2?r=&ts=1506698217&use_mirror=10gbps-io"
-  LAPACK_URL="http://www.netlib.org/lapack/lapack-3.7.1.tgz"
+  atlas_url="https://downloads.sourceforge.net/project/math-atlas/Stable/3.10.3/atlas3.10.3.tar.bz2?r=&ts=1506698217&use_mirror=10gbps-io"
+  lapack_url="http://www.netlib.org/lapack/lapack-3.7.1.tgz"
 
-  wget -O atlas.tar.bz2 $ATLAS_URL
-  wget -O lapack.tgz $LAPACK_URL
+  wget -O atlas.tar.bz2 $atlas_url
+  wget -O lapack.tgz $lapack_url
 
   tar -xf atlas.tar.bz2
   rm atlas.tar.bz2
@@ -39,7 +39,8 @@ function install_atlas {
   cd DONE/
 
   mkdir /home/user/Work/Projects/pipeline/.local/ATLAS
-  ../configure -Fa alg -fPIC --with-netlib-lapack-tarfile=../../lapack.tgz --prefix=/home/user/Work/Projects/pipeline/.local/ATLAS
+  ../configure -Fa alg -fPIC --with-netlib-lapack-tarfile=../../lapack.tgz\
+  --prefix=/home/user/Work/Projects/pipeline/.local/ATLAS
   make
 
   # Get into lib folder and make shared libraries
@@ -81,8 +82,8 @@ function install_cdsclient {
 
 
 function install_sextractor {
-  SEXTRACTOR_URL="https://www.astromatic.net/download/sextractor/sextractor-2.19.5.tar.gz"
-  wget -O sextractor.tar.gz $SEXTRACTOR_URL
+  sextractor_url="https://www.astromatic.net/download/sextractor/sextractor-2.19.5.tar.gz"
+  wget -O sextractor.tar.gz $sextractor_url
 
   if [ ! -d sextractor/ ]; then
     mkdir sextractor/
@@ -91,20 +92,22 @@ function install_sextractor {
   tar -xzf sextractor.tar.gz -C sextractor/ --strip-components=1
   cd sextractor
 
-  ATLAS_INCLUDE_DIR="/home/user/Work/Projects/pipeline/.local/ATLAS/include"
-  ATLAS_LIB_DIR="/home/user/Work/Projects/pipeline/.local/ATLAS/lib"
-  SEXTRACTOR_BIN_DIR="/home/user/Work/Projects/pipeline/.local"
-  ./configure --with-atlas-incdir=$ATLAS_INCLUDE_DIR \
-  --with-atlas-libdir=$ATLAS_LIB_DIR --prefix=$SEXTRACTOR_BIN_DIR
+  atlas_include_dir="/home/user/Work/Projects/pipeline/.local/ATLAS/include"
+  atlas_lib_dir="/home/user/Work/Projects/pipeline/.local/ATLAS/lib"
+  sextractor_bin_dir="/home/user/Work/Projects/pipeline/.local"
+  ./configure --with-atlas-incdir=$atlas_include_dir \
+  --with-atlas-libdir=$atlas_lib_dir --prefix=$sextractor_bin_dir
 
+  # Compile Sextractor
   make
+  # Install Sextractor in local directories
   make install
 }
 
 
 function install_scamp {
-  SCAMP_URL="https://www.astromatic.net/download/scamp/scamp-2.0.4.tar.gz"
-  wget -O scamp.tar.gz $SCAMP_URL
+  scamp_url="https://www.astromatic.net/download/scamp/scamp-2.0.4.tar.gz"
+  wget -O scamp.tar.gz $scamp_url
 
   if [ ! -d scamp/ ]; then
     mkdir scamp/
@@ -140,46 +143,46 @@ function copy_files {
 
 
 function main {
-  # TMP_DIR="/home/user/Work/Projects/pipeline/tmp/"
-  # LOCAL_DIR="/home/user/Work/Projects/pipeline/.local/"
-  # installation_dir="/media/sf_Euclid-tests/pipeline/"
+  TMP_DIR="/home/user/Work/Projects/pipeline/tmp/"
+  LOCAL_DIR="/home/user/Work/Projects/pipeline/.local/"
+  installation_dir="/media/sf_Euclid-tests/pipeline/"
 
-  # cd $installation_dir
+  cd $installation_dir
 
   # upgrade_system
   install_virtualenv
   update_pip
 
-  # # Checking directories
-  # if [ ! -d "$TMP_DIR" ]; then
-  #   mkdir $TMP_DIR
-  # fi
+  # Checking directories
+  if [ ! -d "$TMP_DIR" ]; then
+    mkdir $TMP_DIR
+  fi
 
-  # if [ ! -d "$LOCAL_DIR" ]; then
-  #   mkdir $LOCAL_DIR
-  # fi
+  if [ ! -d "$LOCAL_DIR" ]; then
+    mkdir $LOCAL_DIR
+  fi
 
-  # # Install scamp from scratch
-  # # Compile ATLAS/Lapack library
-  # cd $TMP_DIR 
+  # Install scamp from scratch
+  # Compile ATLAS/Lapack library
+  cd $TMP_DIR 
 
-  # install_atlas
+  install_atlas
 
-  # cd ../../
-  # rm -rf *
+  cd ../../
+  rm -rf a*
 
-  # install_cdsclient
-  # cd ../
+  install_cdsclient
+  cd ../
 
-  # install_sextractor
-  # cd ../
+  install_sextractor
+  cd ../
 
-  # install_scamp
-  # cd ../
-  # rm -rf scamp*
+  install_scamp
+  cd ../
+  rm -rf scamp*
 
-  # update_enviroment
-  # copy_files
+  update_enviroment
+  copy_files
 }
 
 

@@ -22,9 +22,6 @@ All sextractor's plot outputs will be located here.
 
 ### regions
 
-### reports
-Reports in .pdf or .csv format.
-
 ### results
 All scamp's output catalogues will be located here.
 
@@ -33,3 +30,4 @@ Any script or program not yet finished which cannot be related to previous folde
 
 ### to-do
 unit_testing
+move scripts to executables! just to improve usability
