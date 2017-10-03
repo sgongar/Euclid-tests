@@ -1,5 +1,0 @@
-astropy==2.0.2
-astroscrappy==1.0.5
-matplotlib==2.0.2
-pandas==0.20.3
-statsmodels==0.8.0
