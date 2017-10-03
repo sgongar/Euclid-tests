@@ -4,6 +4,10 @@
 
 """Script principal del paquete.
 
+Versions:
+- 0.1: Initial release.
+- 0.2: Plot functions were removed.
+
 Todo:
     *
 
@@ -32,7 +36,7 @@ __credits__ = ["Samuel Gongora-Garcia"]
 """
 __license__ = "GPL"
 """
-__version__ = "0.1"
+__version__ = "0.2"
 __maintainer__ = "Samuel Gongora-Garcia"
 __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"

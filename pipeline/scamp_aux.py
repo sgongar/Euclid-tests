@@ -93,8 +93,6 @@ class Scamp:
             if not path.exists(output_dir):
                 makedirs(output_dir)
 
-            print "scmp_p", scmp_p
-
             process_scamp = Popen(scmp_p, shell=True)
             process_scamp.wait()
 

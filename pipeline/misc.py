@@ -341,9 +341,6 @@ def extract_settings():
     Cf = ConfigParser()
     Cf.read(".settings.ini")
 
-    from os import getcwd
-    print getcwd()
-
     os_version = get_os()
     prfs_d = {}
     prfs_d['cat'] = ConfMap(Cf, "Version")['cat_version']
@@ -369,7 +366,7 @@ def extract_settings():
         prfs_d['version'] = ConfMap(Cf, "Version")['test_version']
         prfs_d['version'] = prfs_d['version'] + prfs_d['cat']
     elif os_version == 'centos':
-        prfs_d['version'] = ConfMap(Cf, "Version")['test_version']
+        prfs_d['version'] = ConfMap(Cf, "Version")['centos_version']
         prfs_d['version'] = prfs_d['version'] + prfs_d['cat']
     else:
         raise BadSettings('Operative system not chosen')
