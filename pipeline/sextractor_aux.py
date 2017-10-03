@@ -24,8 +24,7 @@ from multiprocessing import Process
 
 from cats_management import rebase_catalogue
 from cats_management import rewriting_catalogue
-from errors import FolderNotCreated
-from misc import get_fits
+from misc import extract_settings, get_fits
 
 
 __author__ = "Samuel Gongora-Garcia"
@@ -42,13 +41,13 @@ __status__ = "Development"
 
 class Sextractor:
 
-    def __init__(self, logger, prfs_d, analysis_d,
-                 analysis_dir, regular):
+    def __init__(self, logger, analysis_d, analysis_dir, regular):
         """
 
         """
-        self.sextractor_process(logger, prfs_d, analysis_d,
-                                analysis_dir, regular)
+        prfs_d = extract_settings()
+        self.sextractor_process(logger, prfs_d,
+                                analysis_d, analysis_dir, regular)
 
     def sextractor_process(self, logger, prfs_d, analysis_d,
                            analysis_dir, regular):
@@ -142,94 +141,87 @@ class Sextractor:
         return True
 
 
-def catalogue_creation(logger, prfs_d, analysis_d):
-    """ creates a single catalogue for all images available
+class CatalogCreation:
 
-    @param logger: a logger object
-    @param prfs_d: a dictionary with all configuration information
+    def __init__(self, logger, analysis_d):
+        """ creates a single catalogue for all images available
 
-    @return True: if everything goes right
-    """
+        @param logger: a logger object
+        @param prfs_d: a dictionary with all configuration information
 
-    mags = prfs_d['mags']
+        @return True: if everything goes right
+        """
 
-    cat_j = []
-    for proc in range(0, len(mags), 1):
-        mag = mags[proc]
-        cat_p = Process(target=catalogue_thread,
-                        args=(logger, prfs_d, analysis_d, mag,))
-        cat_j.append(cat_p)
-        cat_p.start()
+        prfs_d = extract_settings()
+        mags = prfs_d['mags']
 
-    active_cat = list([job.is_alive() for job in cat_j])
-    while True in active_cat:
+        cat_j = []
+        for proc in range(0, len(mags), 1):
+            mag = mags[proc]
+            cat_p = Process(target=self.catalogue_thread,
+                            args=(logger, prfs_d, analysis_d, mag,))
+            cat_j.append(cat_p)
+            cat_p.start()
+
         active_cat = list([job.is_alive() for job in cat_j])
-        pass
+        while True in active_cat:
+            active_cat = list([job.is_alive() for job in cat_j])
+            pass
 
-    return True
+    def catalogue_thread(self, logger, prfs_d, analysis_d, mag):
+        """
 
+        @param logger: a logger object
+        @param prfs_d: a dictionary with all configuration information
+        @param analysis_d:
+        @param mag:
 
-def catalogue_thread(logger, prfs_d, analysis_d, mag):
-    """
+        @return True:
+        """
 
-    @param logger: a logger object
-    @param prfs_d: a dictionary with all configuration information
-    @param analysis_d:
-    @param mag:
+        # Harcoded for single CCD catalog!
+        logger.info('swarp process launched for mag {}'.format(mag))
+        logger.info('files {}/m_{}_*.fits'.format(prfs_d['fits_ref'], mag))
 
-    @return True:
-    """
+        c_11 = 'swarp {}/mag_{}_CCD_x?_y?_d?.fits'.format(prfs_d['fits_ref'],
+                                                          mag)
+        c_12 = ' -IMAGEOUT_NAME coadd_{}.fits'.format(mag)
+        c_13 = ' -WEIGHTOUT_NAME coadd_{}.weight.fits'.format(mag)
+        c_14 = ' -WEIGHT_TYPE NONE -VERBOSE_TYPE QUIET'
+        c_15 = ' -GAIN_KEYWORD GAIN'
+        c_1 = c_11 + c_12 + c_13 + c_14 + c_15
 
-    # Harcoded for single CCD catalog!
-    logger.info('swarp process launched for mag {}'.format(mag))
-    logger.info('files {}/m_{}_*d1.fits'.format(prfs_d['fits_dir'], mag))
+        process_1 = Popen(c_1, shell=True)
+        process_1.wait()
+        logger.info('Swarp process finished')
 
-    c_11 = 'swarp {}/m_{}_x?_y?_d1.fits'.format(prfs_d['fits_dir'], mag)
-    c_12 = ' -IMAGEOUT_NAME coadd_{}.fits'.format(mag)
-    c_13 = ' -WEIGHTOUT_NAME coadd_{}.weight.fits'.format(mag)
-    c_14 = ' -WEIGHT_TYPE NONE -VERBOSE_TYPE QUIET'
-    c_15 = ' -GAIN_KEYWORD GAIN'
-    c_1 = c_11 + c_12 + c_13 + c_14 + c_15
+        folder_sex = '{}_{}_{}_{}_{}'.format(analysis_d['deblend_nthresh'],
+                                             analysis_d['analysis_thresh'],
+                                             analysis_d['detect_thresh'],
+                                             analysis_d['deblend_mincount'],
+                                             analysis_d['detect_minarea'])
 
-    process_1 = Popen(c_1, shell=True)
-    process_1.wait()
-    logger.info('Swarp process finished')
+        cat_loc = '{}/{}/catalog_{}.cat'.format(prfs_d['fits_ref'],
+                                                folder_sex, mag)
 
-    logger.info('Swarped image sextraction process')
-    c_21 = 'sex -c {} coadd_{}.fits'.format(prfs_d['conf_sex'], mag)
-    """
-    c_21 = 'sex -c {} {}/m_{}_x0_y?_d1.fits'.format(prfs_d['conf_sex'],
-                                                    prfs_d['fits_dir'], mag)
-    """
-    c_22 = ' -CATALOG_NAME {}/catalog_{}.cat'.format(prfs_d['output_cats'],
-                                                     mag)
-    c_23 = ' -PARAMETERS_NAME {}'.format(prfs_d['params_cat'])
-    c_24 = ' -DETECT_MINAREA {}'.format(analysis_d['detect_minarea'])
-    c_25 = ' -DETECT_THRESH {}'.format(analysis_d['detect_thresh'])
-    c_26 = ' -ANALYSIS_THRESH {}'.format(analysis_d['analysis_thresh'])
-    c_27 = ' -DEBLEND_NTHRESH {}'.format(analysis_d['deblend_nthresh'])
-    c_28 = ' -DEBLEND_MINCONT {}'.format(analysis_d['deblend_mincount'])
-    c_2 = c_21 + c_22 + c_23 + c_24 + c_25 + c_26 + c_27 + c_28
+        logger.info('Swarped image sextraction process')
+        c_21 = 'sex -c {} coadd_{}.fits'.format(prfs_d['conf_sex'], mag)
+        c_22 = ' -CATALOG_NAME {}'.format(cat_loc)
+        c_23 = ' -PARAMETERS_NAME {}'.format(prfs_d['params_cat'])
+        c_24 = ' -DETECT_MINAREA {}'.format(analysis_d['detect_minarea'])
+        c_25 = ' -DETECT_THRESH {}'.format(analysis_d['detect_thresh'])
+        c_26 = ' -ANALYSIS_THRESH {}'.format(analysis_d['analysis_thresh'])
+        c_27 = ' -DEBLEND_NTHRESH {}'.format(analysis_d['deblend_nthresh'])
+        c_28 = ' -DEBLEND_MINCONT {}'.format(analysis_d['deblend_mincount'])
+        c_2 = c_21 + c_22 + c_23 + c_24 + c_25 + c_26 + c_27 + c_28
 
-    process_2 = Popen(c_2, shell=True)
-    process_2.wait()
-    logger.info('Sextractor process for catalogue finished')
+        process_2 = Popen(c_2, shell=True)
+        process_2.wait()
+        logger.info('Sextractor process for catalogue finished')
 
-    remove(prfs_d['home'] + '/pipeline/coadd_{}.fits'.format(mag))
-    logger.debug('coadd_{}.fits removed'.format(mag))
-    remove(prfs_d['home'] + '/pipeline/coadd_{}.weight.fits'.format(mag))
-    logger.debug('coadd_{}.weight.fits removed'.format(mag))
+        remove(prfs_d['home'] + '/pipeline/coadd_{}.fits'.format(mag))
+        logger.debug('coadd_{}.fits removed'.format(mag))
+        remove(prfs_d['home'] + '/pipeline/coadd_{}.weight.fits'.format(mag))
+        logger.debug('coadd_{}.weight.fits removed'.format(mag))
 
-    input_catalogue = prfs_d['output_cats'] + '/catalogue_{}.cat'.format(mag)
-    logger.debug('input_catalogue is {}'.format(input_catalogue))
-    remove_ssos = True  # todo - add argv option to remove ssos or not
-
-    logger.debug('creating new catalog from {}'.format(input_catalogue))
-    final_catalogue = rebase_catalogue(logger, mag, prfs_d, remove_ssos,
-                                       input_catalogue)
-
-    # logger.debug('rewriting new catalog to {}'.format(final_catalogue))
-    if not rewriting_catalogue(logger, prfs_d, final_catalogue, mag):
-        raise Exception
-
-    return True
+        return True

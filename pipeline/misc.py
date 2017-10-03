@@ -59,8 +59,6 @@ def get_fits(unique):
             fits_unique.append(file_[:21])
         fits_unique = list(set(fits_unique))
 
-        print fits_unique
-
         for file_ in fits_unique:
             fits_unique[fits_unique.index(file_)] = file_ + '1.fits'
 
@@ -182,7 +180,7 @@ def create_sextractor_dict(logger, prfs_d, conf_num, cat_conf):
     """
 
     if cat_conf:
-        configurations = [2, 0.01, 2, 4, 'models/gauss_2.0_5x5.conv']
+        configurations = [2, 0.1, 1.35, 4, 'models/gauss_2.0_5x5.conv']
         len_conf = 1
     else:
         mode = {'type': 'sextractor'}  # harcoded
@@ -377,7 +375,6 @@ def extract_settings():
     prfs_d['fpas_dir'] = prfs_d['version'] + prfs_d['fpas_dir']
     # TODO This hardcoded lines should be improve
     prfs_d['fits_ref'] = ConfMap(Cf, "ImagesDirs")['fits_ref']
-    # prfs_d['fits_ref'] = prfs_d['version'] + prfs_d['fits_ref']
 
     prfs_d['time_1'] = ConfMap(Cf, "ImagesTime")['time_1']
     prfs_d['time_2'] = ConfMap(Cf, "ImagesTime")['time_2']
@@ -611,13 +608,10 @@ def motion_filter(logger, db, r):
         epoch = db.loc[db['SOURCE_NUMBER'] == source, 'EPOCH'].tolist()
         cats = cats_coherence(db.loc[db['SOURCE_NUMBER'] == source,
                               'CATALOG_NUMBER'].tolist())
-        # print ra, dec, epoch
         # Calculate WLS fit and confidence interval
         for dimension in [ra, dec]:
             x = np.array(epoch)
             y = np.array(dimension)
-            # print "x", x
-            # print "y", y
             if dimension == ra:
                 sigma = db.loc[db['SOURCE_NUMBER'] == source,
                                'ERRA_WORLD'].tolist()
@@ -625,16 +619,11 @@ def motion_filter(logger, db, r):
                 sigma = db.loc[db['SOURCE_NUMBER'] == source,
                                'ERRB_WORLD'].tolist()
 
-            # print "sigma", sigma
             edim = np.array([1 / var for var in sigma])
-            # print edim
             x = sm.add_constant(x)
-            # print x
             # Model: y~x+c
             model = sm.WLS(y, x, weigths=edim)
             fitted = model.fit()
-
-            # print "output", fitted.rsquared
             if fitted.rsquared >= float(r) and cats:
                 passed.append(source)
 
@@ -691,8 +680,6 @@ def setting_logger():
     @return logger:
     """
     prfs_d = extract_settings()
-
-    print(prfs_d['logger_config'])
 
     config.fileConfig(prfs_d['logger_config'])
 

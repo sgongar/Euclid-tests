@@ -26,7 +26,7 @@ from misc import setting_logger, extract_settings
 from misc import create_configurations, pipeline_help
 from misc import create_sextractor_dict, create_scamp_dict
 from performance import SextractorPerformance
-from sextractor_aux import Sextractor, catalogue_creation
+from sextractor_aux import Sextractor, CatalogCreation
 from scamp_aux import Scamp, ScampFilter
 from stats_management import ExtractStats
 
@@ -55,7 +55,7 @@ class Check:
                                       confs, total_confs):
                 raise Exception
         elif argv[1] == '-catalog':
-            if not self.catalog(prfs_d):
+            if not self.catalog(logger, prfs_d):
                 raise CatalogueError("Catalog couldn't be created")
         elif argv[1] == '-sextractor':
             self.sextractor(logger, prfs_d)
@@ -113,12 +113,11 @@ class Check:
 
         @return True: if everything goes alright.
         """
-        analysis_dict, len_dicts = create_sextractor_dict(logger, prfs_d,
-                                                          0, True)
+        # Gets an dictionary with analysis's preferences
+        analysis_d, len_dicts = create_sextractor_dict(logger, prfs_d, 0, True)
         # Catalogue creation. Only created one time.
-        if not catalogue_creation(logger, prfs_d, analysis_dict):
-            raise CatalogueError("Catalog couldn't be created")
-
+        catalog_creation = CatalogCreation(logger, analysis_d)
+        
         return True
 
     def sextractor(self, logger, prfs_d):
@@ -166,8 +165,7 @@ class Check:
                                   'deblend_nthresh': 2, 'detect_minarea': 4,
                                   'filter': 'models/gauss_2.0_5x5.conv'}
 
-                    Sextractor(logger, prfs_d, analysis_d, analysis_dir,
-                               regular=True)
+                    Sextractor(logger, analysis_d, analysis_dir, regular=True)
 
             logger.debug('perfoming analysis over a bunch of files')
 

@@ -90,6 +90,9 @@ class Scamp:
             # Creates output dir for desired configuration
             output_dir = '{}/catalogs/{}/{}'.format(prfs_d['results_dir'],
                                                     folder_sex, f_conf)
+
+            print "output_dir", output_dir
+
             if not path.exists(output_dir):
                 makedirs(output_dir)
 
