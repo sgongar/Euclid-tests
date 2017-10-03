@@ -61,6 +61,7 @@ function install_cdsclient {
   fi
 
   tar -xzf cdsclient.tar.gz -C cdsclient --strip-components=1
+  rm cdsclient.tar.gz  # remove old file
   cd cdsclient
 
   # Create a dir for cdsclient installation
@@ -72,12 +73,13 @@ function install_cdsclient {
 
   # Configure
   ./configure -prefix=/home/user/Work/Projects/pipeline/.local/cdsclient
-
+  
   # Compile them
   make
-
   # Perfom an installation to local folder
   make install
+  # Remove old directory
+  rm -r cdsclient
 }
 
 
@@ -90,18 +92,18 @@ function install_sextractor {
   fi
 
   tar -xzf sextractor.tar.gz -C sextractor/ --strip-components=1
+  rm sextractor.tar.gz  # Remove old file
   cd sextractor
 
-  atlas_include_dir="/home/user/Work/Projects/pipeline/.local/ATLAS/include"
-  atlas_lib_dir="/home/user/Work/Projects/pipeline/.local/ATLAS/lib"
-  sextractor_bin_dir="/home/user/Work/Projects/pipeline/.local"
-  ./configure --with-atlas-incdir=$atlas_include_dir \
-  --with-atlas-libdir=$atlas_lib_dir --prefix=$sextractor_bin_dir
+  # Configure
+  ./configure --with-atlas-incdir=$1 --with-atlas-libdir=$2 --prefix=$3
 
   # Compile Sextractor
   make
   # Install Sextractor in local directories
   make install
+  # Remove old directory
+  rm -r sextractor
 }
 
 
@@ -114,19 +116,20 @@ function install_scamp {
   fi
 
   tar -xzf scamp.tar.gz -C scamp/ --strip-components=1
+  rm scamp.tar.gz  # Remove old file
   cd scamp
 
-  ATLAS_INCLUDE_DIR="/home/user/Work/Projects/pipeline/.local/ATLAS/include"
-  ATLAS_LIB_DIR="/home/user/Work/Projects/pipeline/.local/ATLAS/lib"
-  CDSCLIENT_BIN_DIR="/home/user/Work/Projects/pipeline/.local/cdsclient/bin"
-  SCAMP_BIN_DIR="/home/user/Work/Projects/pipeline/.local"
+  # Configure
+  cdsclient_bin_dir="/home/user/Work/Projects/pipeline/.local/cdsclient/bin"
+  ./configure --with-atlas-incdir=$1 --with-atlas-libdir=$2\
+  --with-cdsclient-dir=$cdsclient_bin_dir --prefix=$3
 
-  ./configure --with-atlas-incdir=$ATLAS_INCLUDE_DIR \
-  --with-atlas-libdir=$ATLAS_LIB_DIR --with-cdsclient-dir=$CDSCLIENT_BIN_DIR \
-  --prefix=$SCAMP_BIN_DIR
-
+  # Compile Scamp
   make
+  # Install Scamp in local directories
   make install
+  # Remove old directory
+  rm -r scamp
 }
 
 
@@ -136,6 +139,7 @@ function update_enviroment {
 }
 
 
+# TODO improve format!
 function copy_files {
   cp -r /media/sf_Euclid-tests/pipeline/* /home/user/Work/Projects/pipeline/ 
   cp -r /media/sf_Euclid-tests/pipeline/.settings.ini ~/Work/Projects/pipeline/.settings.ini
@@ -143,9 +147,11 @@ function copy_files {
 
 
 function main {
-  TMP_DIR="/home/user/Work/Projects/pipeline/tmp/"
-  LOCAL_DIR="/home/user/Work/Projects/pipeline/.local/"
+  tmp_dir="/home/user/Work/Projects/pipeline/tmp/"
+  local_dir="/home/user/Work/Projects/pipeline/.local/"
   installation_dir="/media/sf_Euclid-tests/pipeline/"
+  atlas_include_dir="/home/user/Work/Projects/pipeline/.local/ATLAS/include"
+  atlas_lib_dir="/home/user/Work/Projects/pipeline/.local/ATLAS/lib"
 
   cd $installation_dir
 
@@ -154,17 +160,17 @@ function main {
   update_pip
 
   # Checking directories
-  if [ ! -d "$TMP_DIR" ]; then
-    mkdir $TMP_DIR
+  if [ ! -d "$tmp_dir" ]; then
+    mkdir $tmp_dir
   fi
 
-  if [ ! -d "$LOCAL_DIR" ]; then
-    mkdir $LOCAL_DIR
+  if [ ! -d "$local_dir" ]; then
+    mkdir $local_dir
   fi
 
   # Install scamp from scratch
   # Compile ATLAS/Lapack library
-  cd $TMP_DIR 
+  cd $tmp_dir
 
   install_atlas
 
@@ -174,12 +180,11 @@ function main {
   install_cdsclient
   cd ../
 
-  install_sextractor
+  install_sextractor $atlas_include_dir $atlas_lib_dir $local_dir
   cd ../
 
-  install_scamp
+  install_scamp $atlas_include_dir $atlas_lib_dir $local_dir
   cd ../
-  rm -rf scamp*
 
   update_enviroment
   copy_files
