@@ -238,13 +238,20 @@ class Check:
                                 scmp_d['pixscale_maxerr'],
                                 scmp_d['posangle_maxerr'],
                                 scmp_d['position_maxerr']]
-                        f_conf = '{}_{}_{}_{}'.format(conf[0], conf[1],
-                                                      conf[2], conf[3])
-                        f_name = 'results/filt_{}_20-21__6.csv'.format(f_conf)
+                        scmp_cf = '{}_{}_{}_{}'.format(conf[0], conf[1],
+                                                       conf[2], conf[3])
+                        f_name = 'results/filt_{}_20-21__6.csv'.format(scmp_cf)
+
+                        sex_d = {'deblend_mincount': 0.1,
+                                 'analysis_thresh': 1.35, 
+                                 'detect_thresh': 1.35,
+                                 'deblend_nthresh': 2, 'detect_minarea': 4,
+                                 'filter': 'models/gauss_2.0_5x5.conv'}
+
                         if not path.isfile(f_name):
                             filt_p = Process(target=ScampFilter,
                                              args=(logger, mag,
-                                                   scmp_d, f_conf, ))
+                                                   scmp_d, scmp_cf, sex_d,))
                             filt_j.append(filt_p)
                             filt_p.start()
                         idx_proc += 1

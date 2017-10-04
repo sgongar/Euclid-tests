@@ -79,7 +79,7 @@ class Scamp:
             scmp_p_8 = ' -CROSSID_RADIUS {}'.format(scmp_d['crossid_radius'])
             cats_dir = '{}/{}/{}'.format(prfs_d['catalogs_dir'], folder_sex,
                                          f_conf)
-            merged_cat = '{}/merged_{}_{}_.cat'.format(cats_dir, f_conf, mag)
+            merged_cat = '{}/merged_{}_{}.cat'.format(cats_dir, f_conf, mag)
             scmp_p_9 = ' -MERGEDOUTCAT_NAME {}'.format(merged_cat)
             full_cat = '{}/full_{}_{}.cat'.format(cats_dir, f_conf, mag)
             scmp_p_10 = ' -FULLOUTCAT_NAME {}'.format(full_cat)
@@ -95,6 +95,8 @@ class Scamp:
 
             if not path.exists(output_dir):
                 makedirs(output_dir)
+
+            print scmp_p
 
             process_scamp = Popen(scmp_p, shell=True)
             process_scamp.wait()
@@ -148,7 +150,7 @@ class Scamp:
 
 class ScampFilter:  # TODO Split scamp_filter method into single methodss
 
-    def __init__(self, logger, mag, scmp_d, f_conf):
+    def __init__(self, logger, mag, scmp_d, scmp_cf, sex_d):
         """
 
         @param mag:
@@ -158,9 +160,9 @@ class ScampFilter:  # TODO Split scamp_filter method into single methodss
         prfs_d = extract_settings()
 
         self.save = True  #"scmp_p",  save flag - set as True for catalogs saving
-        self.scamp_filter(logger, prfs_d, mag, scmp_d, f_conf)
+        self.scamp_filter(logger, prfs_d, mag, scmp_d, scmp_cf, sex_d)
 
-    def scamp_filter(self, logger, prfs_d, mag, scmp_d, f_conf):
+    def scamp_filter(self, logger, prfs_d, mag, scmp_d, scmp_cf, sex_d):
         """
 
         @param logger:
@@ -170,11 +172,20 @@ class ScampFilter:  # TODO Split scamp_filter method into single methodss
         """
         logger.info("Filtering scamp's output")
 
+        sex_cf = '{}_{}_{}_{}_{}'.format(sex_d['deblend_nthresh'],
+                                         sex_d['analysis_thresh'],
+                                         sex_d['detect_thresh'],
+                                         sex_d['deblend_mincount'],
+                                         sex_d['detect_minarea'])
+
         # Full catalog name
-        full_n = '{}/full_{}_{}_1.cat'.format(prfs_d['results_dir'],
-                                              f_conf, mag)
+        full_n = '{}/catalogs/{}/{}/full_{}_{}_1.cat'.format(prfs_d['results_dir'],
+                                                             sex_cf, scmp_cf,
+                                                             scmp_cf, mag)
         # Filtered catalog name
-        filt_n = 'filt_{}_{}_'.format(f_conf, mag)
+        filt_n = 'filt_{}_{}_'.format(scmp_cf, mag)
+
+        print "full_n", full_n
 
         logger.debug('opening full catalog {}'.format(full_n))
         full_cat = fits.open(full_n)
@@ -182,15 +193,17 @@ class ScampFilter:  # TODO Split scamp_filter method into single methodss
         logger.debug('converting full catalog to Pandas format')
         full_db = full_db.to_pandas()
 
-        # Getting merge catalogue
-        mrgd_n = '{}/merged_{}_{}_1.cat'.format(prfs_d['results_dir'],
-                                                f_conf, mag)
+        # Getting merge catalog
+        mrgd_n = '{}/catalogs/{}/{}/merged_{}_{}_1.cat'.format(prfs_d['results_dir'],
+                                                               sex_cf, scmp_cf,
+                                                               scmp_cf, mag)
+
         logger.debug('opening merged catalog {}'.format(mrgd_n))
         merged_cat = fits.open(mrgd_n)
         logger.debug('converting merged catalog to Pandas format')
         merged_db = Table(merged_cat[2].data)
 
-        # Removing 0 catalogue detections
+        # Removing 0 catalog detections
         logger.debug('removing 0 catalog detections')
         full_db = full_db.loc[~full_db['CATALOG_NUMBER'].isin([0])]
         if self.save:
