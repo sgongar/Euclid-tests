@@ -39,15 +39,26 @@ function install_atlas {
   cd DONE/
 
   mkdir /home/user/Work/Projects/pipeline/.local/ATLAS
-  ../configure -Fa alg -fPIC --with-netlib-lapack-tarfile=../../lapack.tgz\
+  ../configure --shared -Fa alg -fPIC\
+  --with-netlib-lapack-tarfile=../../lapack.tgz\
   --prefix=/home/user/Work/Projects/pipeline/.local/ATLAS
-  make
+
+  mkdir /home/user/Work/Projects/pipeline/.local/ATLAS/lib
+
+  sed -i -e 's/"-rpath-link $(LIBINSTdir)"/-rpath-link $(LIBINSTdir)/g' Makefile
 
   # Get into lib folder and make shared libraries
   cd lib
-  make shared
+  # Change reference to fortran lib
+  sed -i -e 's/4.8.5/4.8.2/g' Make.inc
+  # Change ""
+  sed -i -e 's/"-rpath-link $(LIBINSTdir)"/-rpath-link $(LIBINSTdir)/g' Makefile
+
+  # make shared 
   cd ../
 
+  # Compile
+  make
   make install
 }
 
@@ -155,7 +166,7 @@ function main {
 
   cd $installation_dir
 
-  # upgrade_system
+  upgrade_system
   install_virtualenv
   update_pip
 
