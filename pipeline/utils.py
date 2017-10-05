@@ -702,6 +702,8 @@ def change_times_thread(logger, prfs_d, fits_image):
     fits.writeto(prfs_d['fits_dir'] + '/' + fits_image + 'copy',
                  data, header, clobber=True)
 
+    print "saving to", prfs_d['fits_dir'], '/', fits_image, 'copy'
+
     return True
 
 
@@ -730,7 +732,9 @@ if __name__ == '__main__':
     prfs_d = extract_settings()
 
     try:
-        if argv[1] == '-change':
+        if argv[1] == '-input':
+            print "input"
+        elif argv[1] == '-change':
             change_times(logger, prfs_d)
         elif argv[1] == '-rebase':
             cores_number = prfs_d['cores_number']
@@ -760,12 +764,13 @@ if __name__ == '__main__':
             for permutation_ in permutations:
                 mag = '20-21'
                 sex_folder = '2_1.35_1.35_0.1_4'
-                i_c = '{}/{}/mag_{}_CCD_x{}_y{}_d2.cat'.format(prfs_d['output_cats'],
-                                                               sex_folder, mag,
-                                                               permutation_[0],
-                                                               permutation_[1])
-                Create_regions(i_c, prfs_d).fits()
-                logger.debug('opening catalog file {}'.format(i_c))
+                for d in range(1, 5, 1):
+                    i_c = '{}/{}/mag_{}_CCD_x{}_y{}_d{}.cat'.format(prfs_d['output_cats'],
+                                                                   sex_folder, mag,
+                                                                   permutation_[0],
+                                                                   permutation_[1], d)
+                    Create_regions(i_c, prfs_d).fits()
+                    logger.debug('opening catalog file {}'.format(i_c))
 
         elif argv[1] == '-modify':
             list_1, list_2 = modify_table(logger, prfs_d)
