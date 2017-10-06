@@ -178,6 +178,10 @@ class CatalogCreation:
 
         @return True:
         """
+        # Fits files location
+        coadd_loc = '{}/coadd_{}.fits'.format(prfs_d['fits_ref'], mag)
+        coadd_weight_loc = '{}/coadd_{}.weight.fits'.format(prfs_d['fits_ref'],
+                                                            mag)
 
         # Harcoded for single CCD catalog!
         logger.info('swarp process launched for mag {}'.format(mag))
@@ -185,11 +189,11 @@ class CatalogCreation:
 
         c_11 = 'swarp {}/mag_{}_CCD_x?_y?_d?.fits'.format(prfs_d['fits_ref'],
                                                           mag)
-        c_12 = ' -IMAGEOUT_NAME coadd_{}.fits'.format(mag)
-        c_13 = ' -WEIGHTOUT_NAME coadd_{}.weight.fits'.format(mag)
-        c_14 = ' -WEIGHT_TYPE NONE -VERBOSE_TYPE QUIET'
-        c_15 = ' -GAIN_KEYWORD GAIN'
-        c_1 = c_11 + c_12 + c_13 + c_14 + c_15
+        c_12 = ' -IMAGEOUT_NAME {} -WEIGHTOUT_NAME {}'.format(coadd_loc,
+                                                              coadd_weight_loc)
+        c_13 = ' -WEIGHT_TYPE NONE -VERBOSE_TYPE QUIET'
+        c_14 = ' -GAIN_KEYWORD GAIN'
+        c_1 = c_11 + c_12 + c_13 + c_14
 
         process_1 = Popen(c_1, shell=True)
         process_1.wait()
@@ -201,11 +205,19 @@ class CatalogCreation:
                                              analysis_d['deblend_mincount'],
                                              analysis_d['detect_minarea'])
 
-        cat_loc = '{}/{}/catalog_{}.cat'.format(prfs_d['fits_ref'],
-                                                folder_sex, mag)
+        # Check if folder exists
+        conf_folder = '{}/{}/'.format(prfs_d['fits_ref'], folder_sex)
+        try:
+            if not path.isfile(conf_folder):
+                mkdir(conf_folder)
+        except OSError:
+            logger.debug('folder {} created'.format(conf_folder))
+
+        cat_loc = '{}/catalog_{}.cat'.format(conf_folder, mag)
 
         logger.info('Swarped image sextraction process')
-        c_21 = 'sex -c {} coadd_{}.fits'.format(prfs_d['conf_sex'], mag)
+        c_21 = 'sex -c {} {}/coadd_{}.fits'.format(prfs_d['conf_sex'],
+                                                   prfs_d['fits_ref'], mag)
         c_22 = ' -CATALOG_NAME {}'.format(cat_loc)
         c_23 = ' -PARAMETERS_NAME {}'.format(prfs_d['params_cat'])
         c_24 = ' -DETECT_MINAREA {}'.format(analysis_d['detect_minarea'])
@@ -218,10 +230,11 @@ class CatalogCreation:
         process_2 = Popen(c_2, shell=True)
         process_2.wait()
         logger.info('Sextractor process for catalogue finished')
+        logger.info('Catalog {} created'.format(cat_loc))
 
-        remove(prfs_d['home'] + '/pipeline/coadd_{}.fits'.format(mag))
-        logger.debug('coadd_{}.fits removed'.format(mag))
-        remove(prfs_d['home'] + '/pipeline/coadd_{}.weight.fits'.format(mag))
-        logger.debug('coadd_{}.weight.fits removed'.format(mag))
+        remove(coadd_loc)
+        logger.debug('{} removed'.format(coadd_loc))
+        remove(coadd_weight_loc)
+        logger.debug('{} removed'.format(coadd_weight_loc))
 
         return True

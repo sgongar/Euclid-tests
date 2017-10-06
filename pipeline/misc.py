@@ -180,7 +180,7 @@ def create_sextractor_dict(logger, prfs_d, conf_num, cat_conf):
     """
 
     if cat_conf:
-        configurations = [2, 0.1, 1.35, 4, 'models/gauss_2.0_5x5.conv']
+        configurations = [2, 0.1, 5, 4, 'models/gauss_2.0_5x5.conv']
         len_conf = 1
     else:
         mode = {'type': 'sextractor'}  # harcoded
