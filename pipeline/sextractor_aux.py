@@ -206,7 +206,7 @@ class CatalogCreation:
                                              analysis_d['detect_minarea'])
 
         # Check if folder exists
-        conf_folder = '{}/{}/'.format(prfs_d['fits_ref'], folder_sex)
+        conf_folder = '{}/{}'.format(prfs_d['fits_ref'], folder_sex)
         try:
             if not path.isfile(conf_folder):
                 mkdir(conf_folder)
