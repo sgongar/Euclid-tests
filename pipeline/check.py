@@ -117,7 +117,7 @@ class Check:
         analysis_d, len_dicts = create_sextractor_dict(logger, prfs_d, 0, True)
         # Catalogue creation. Only created one time.
         catalog_creation = CatalogCreation(logger, analysis_d)
-        
+
         return True
 
     def sextractor(self, logger, prfs_d):
@@ -160,8 +160,8 @@ class Check:
 
                     # Sextractor extraction parameters - Uncomment if necessary
                     analysis_d = {'deblend_mincount': 0.1,
-                                  'analysis_thresh': 1.35,
-                                  'detect_thresh': 1.35,
+                                  'analysis_thresh': 5,
+                                  'detect_thresh': 5,
                                   'deblend_nthresh': 2, 'detect_minarea': 4,
                                   'filter': 'models/gauss_2.0_5x5.conv'}
 
@@ -203,8 +203,8 @@ class Check:
                                                          idx_sex,
                                                          cat_conf=False)
                     analysis_d = {'deblend_mincount': 0.1,
-                                  'analysis_thresh': 1.35,
-                                  'detect_thresh': 1.35,
+                                  'analysis_thresh': 5,
+                                  'detect_thresh': 5,
                                   'deblend_nthresh': 2, 'detect_minarea': 4,
                                   'filter': 'models/gauss_2.0_5x5.conv'}
                     if not Scamp(logger, mag, scmp_d, f_conf, analysis_d):
@@ -240,11 +240,12 @@ class Check:
                                 scmp_d['position_maxerr']]
                         scmp_cf = '{}_{}_{}_{}'.format(conf[0], conf[1],
                                                        conf[2], conf[3])
+                        print "scmp_cf", scmp_cf
                         f_name = 'results/filt_{}_20-21__6.csv'.format(scmp_cf)
 
                         sex_d = {'deblend_mincount': 0.1,
-                                 'analysis_thresh': 1.35, 
-                                 'detect_thresh': 1.35,
+                                 'analysis_thresh': 5,
+                                 'detect_thresh': 5,
                                  'deblend_nthresh': 2, 'detect_minarea': 4,
                                  'filter': 'models/gauss_2.0_5x5.conv'}
 
@@ -254,6 +255,8 @@ class Check:
                                                    scmp_d, scmp_cf, sex_d,))
                             filt_j.append(filt_p)
                             filt_p.start()
+                        else:
+                            print "ya creado"
                         idx_proc += 1
                     active_filt = list([j.is_alive() for j in filt_j])
                     while True in active_filt:

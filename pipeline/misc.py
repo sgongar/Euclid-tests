@@ -286,7 +286,7 @@ def create_configurations(logger, prfs_d, mode):
         l_position_maxerr = [0.012375, 0.0165, 0.033, 0.083, 0.16]
         """
 
-        l_crossid_radius = [150]  # seconds
+        l_crossid_radius = [10]  # seconds
         l_pixscale_maxerr = [1.2]  # scale-factor
         l_posangle_maxerr = [5]  # degrees
         l_position_maxerr = [0.033]  # 0.083, 0.16, 0.32, 0.64, 1.28 [1, 2] s
@@ -606,8 +606,8 @@ def motion_filter(logger, db, r):
         ra = db.loc[db['SOURCE_NUMBER'] == source, 'ALPHA_J2000'].tolist()
         dec = db.loc[db['SOURCE_NUMBER'] == source, 'DELTA_J2000'].tolist()
         epoch = db.loc[db['SOURCE_NUMBER'] == source, 'EPOCH'].tolist()
-        cats = cats_coherence(db.loc[db['SOURCE_NUMBER'] == source,
-                              'CATALOG_NUMBER'].tolist())
+        # cats = cats_coherence(db.loc[db['SOURCE_NUMBER'] == source,
+        #                       'CATALOG_NUMBER'].tolist())
         # Calculate WLS fit and confidence interval
         for dimension in [ra, dec]:
             x = np.array(epoch)
@@ -624,7 +624,7 @@ def motion_filter(logger, db, r):
             # Model: y~x+c
             model = sm.WLS(y, x, weigths=edim)
             fitted = model.fit()
-            if fitted.rsquared >= float(r) and cats:
+            if fitted.rsquared >= float(r):
                 passed.append(source)
 
     # Passed if both dimension have required rsquared

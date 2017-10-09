@@ -10,6 +10,7 @@ from subprocess import Popen
 
 from astropy.io import fits
 from astropy.table import Table
+from pandas import concat
 
 from cats_management import merge_catalog
 from misc import pm_compute, pm_filter, extract_settings
@@ -53,11 +54,11 @@ class Scamp:
         @return True: if everything goes alright
         """
 
-        folder_sex = '{}_{}_{}_{}_{}'.format(sex_d['deblend_nthresh'],
-                                             sex_d['analysis_thresh'],
-                                             sex_d['detect_thresh'],
-                                             sex_d['deblend_mincount'],
-                                             sex_d['detect_minarea'])
+        sex_cf = '{}_{}_{}_{}_{}'.format(sex_d['deblend_nthresh'],
+                                         sex_d['analysis_thresh'],
+                                         sex_d['detect_thresh'],
+                                         sex_d['deblend_mincount'],
+                                         sex_d['detect_minarea'])
 
         f_conf = '{}_{}_{}_{}'.format(scmp_d['crossid_radius'],
                                       scmp_d['pixscale_maxerr'],
@@ -69,15 +70,15 @@ class Scamp:
         if mode['type'] == 'scamp':
             scmp_p_1 = "scamp -c %s" % (prfs_d['conf_scamp'])
             scmp_p_2 = ' {}/{}/mag_{}_CCD_x?_y?_d?.cat'.format(prfs_d['fits_dir'],
-                                                               folder_sex, mag)
+                                                               sex_cf, mag)
             scmp_p_3 = ' -ASTREFCAT_NAME'
             scmp_p_4 = ' {}/{}/catalog_{}.cat'.format(prfs_d['output_cats'],
-                                                      folder_sex, mag)
+                                                      sex_cf, mag)
             scmp_p_5 = ' -PIXSCALE_MAXERR {}'.format(scmp_d['pixscale_maxerr'])
             scmp_p_6 = ' -POSANGLE_MAXERR {}'.format(scmp_d['posangle_maxerr'])
             scmp_p_7 = ' -POSITION_MAXERR {}'.format(scmp_d['position_maxerr'])
             scmp_p_8 = ' -CROSSID_RADIUS {}'.format(scmp_d['crossid_radius'])
-            cats_dir = '{}/{}/{}'.format(prfs_d['catalogs_dir'], folder_sex,
+            cats_dir = '{}/{}/{}'.format(prfs_d['catalogs_dir'], sex_cf,
                                          f_conf)
             merged_cat = '{}/merged_{}_{}.cat'.format(cats_dir, f_conf, mag)
             scmp_p_9 = ' -MERGEDOUTCAT_NAME {}'.format(merged_cat)
@@ -89,9 +90,7 @@ class Scamp:
 
             # Creates output dir for desired configuration
             output_dir = '{}/catalogs/{}/{}'.format(prfs_d['results_dir'],
-                                                    folder_sex, f_conf)
-
-            print "output_dir", output_dir
+                                                    sex_cf, f_conf)
 
             if not path.exists(output_dir):
                 makedirs(output_dir)
@@ -111,8 +110,8 @@ class Scamp:
 
             # cats_dir value is associated to configuration, not to the file
             # so it should be generated once
-            cats_dir = '{}/{}/{}'.format(prfs_d['catalogs_dir'], folder_sex,
-                                         f_conf)
+            cats_dir = '{}/{}/{}'.format(prfs_d['catalogs_dir'],
+                                         sex_cf, f_conf)
 
             fits_files = get_fits(unique=False)
             for idx, fits_ in enumerate(fits_files):
@@ -124,18 +123,18 @@ class Scamp:
 
                 # gets fits name
                 fits_name = ' {}/{}/{}.cat'.format(prfs_d['fits_dir'],
-                                                   folder_sex, fits_[:-5])
+                                                   sex_cf, fits_[:-5])
                 scmp_p_2 = ' {}'.format(fits_name)
                 # gets cat name
                 reference_cat = ' {}/{}/{}1.cat'.format(prfs_d['fits_ref'],
-                                                        folder_sex, fits_[:-6])
+                                                        sex_cf, fits_[:-6])
                 scmp_p_3 = ' -ASTREFCAT_NAME {}'.format(reference_cat)
 
                 scmp_p = scmp_p_1 + scmp_p_2 + scmp_p_3 + scmp_p_4 + scmp_p_5
                 scmp_p = scmp_p + scmp_p_6 + scmp_p_7 + scmp_p_8 + scmp_p_9
 
                 output_dir = '{}/catalogs/{}/{}'.format(prfs_d['results_dir'],
-                                                        folder_sex, f_conf)
+                                                        sex_cf, f_conf)
 
                 if not path.exists(output_dir):
                     makedirs(output_dir)
@@ -159,7 +158,9 @@ class ScampFilter:  # TODO Split scamp_filter method into single methodss
         """
         prfs_d = extract_settings()
 
-        self.save = True  #"scmp_p",  save flag - set as True for catalogs saving
+        print "dentro de __init__"
+
+        self.save = True  # "scmp_p",  save flag - set as True for catalogs saving
         self.scamp_filter(logger, prfs_d, mag, scmp_d, scmp_cf, sex_d)
 
     def scamp_filter(self, logger, prfs_d, mag, scmp_d, scmp_cf, sex_d):
@@ -206,30 +207,35 @@ class ScampFilter:  # TODO Split scamp_filter method into single methodss
         # Removing 0 catalog detections
         logger.debug('removing 0 catalog detections')
         full_db = full_db.loc[~full_db['CATALOG_NUMBER'].isin([0])]
+
+        full_db = concat(g for _, g in full_db.groupby("SOURCE_NUMBER")
+                         if len(g) >= int(prfs_d['detections']))
+
         if self.save:
-            full_db.to_csv('{}/{}_1.csv'.format(prfs_d['results_dir'], filt_n))
+            full_db.to_csv('{}/filtered/{}_1.csv'.format(prfs_d['results_dir'],
+                                                         filt_n))
 
         # Computing pm
         logger.debug('computing proper motion')
         full_db = pm_compute(logger, merged_db, full_db)
         if self.save:
-            full_db.to_csv('{}/{}_3.csv'.format(prfs_d['results_dir'], filt_n))
+            full_db.to_csv('{}/filtered/{}_3.csv'.format(prfs_d['results_dir'], filt_n))
 
         logger.debug('after filtering detections')
         full_db = pm_filter(full_db, prfs_d['pm_low'],
                             prfs_d['pm_up'], prfs_d['pm_sn'])
         if self.save:
-            full_db.to_csv('{}/{}_4.csv'.format(prfs_d['results_dir'], filt_n))
+            full_db.to_csv('{}/filtered/{}_4.csv'.format(prfs_d['results_dir'], filt_n))
 
         logger.debug('after proper motion')
         full_db = motion_filter(logger, full_db, prfs_d['r_fit'])
         if self.save:
-            full_db.to_csv('{}/{}_5.csv'.format(prfs_d['results_dir'], filt_n))
+            full_db.to_csv('{}/filtered/{}_5.csv'.format(prfs_d['results_dir'], filt_n))
 
         logger.debug('after first filter')
         full_db = confidence_filter(logger, full_db, prfs_d['r_fit'])
         if self.save:
-            full_db.to_csv('{}/{}_6.csv'.format(prfs_d['results_dir'], filt_n))
+            full_db.to_csv('{}/filtered/{}_6.csv'.format(prfs_d['results_dir'], filt_n))
 
 
 class CatalogCreation:
