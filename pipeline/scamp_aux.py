@@ -236,28 +236,3 @@ class ScampFilter:  # TODO Split scamp_filter method into single methodss
         full_db = confidence_filter(logger, full_db, prfs_d['r_fit'])
         if self.save:
             full_db.to_csv('{}/filtered/{}_6.csv'.format(prfs_d['results_dir'], filt_n))
-
-
-class CatalogCreation:
-
-    def __init__(self):
-        """
-
-        """
-        prfs_d = extract_settings()
-        folder_sex = '2_1.35_1.35_0.1_4'
-
-        if not self.catalog_creation(prfs_d, folder_sex):
-            raise Exception
-
-    def catalog_creation(self, prfs_d, folder_sex):
-        """
-
-        """
-        merge_catalog(prfs_d, folder_sex)
-
-        return True
-
-
-if __name__ == '__main__':
-    test = CatalogCreation()

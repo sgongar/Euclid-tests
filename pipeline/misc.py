@@ -37,7 +37,7 @@ __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
 
 
-def get_fits(unique):
+def get_fits(unique, dither):
     """ returns a list with all fits files availables
 
     @param unique: a flag
@@ -64,7 +64,12 @@ def get_fits(unique):
 
         return fits_unique
     else:
-        return fits_list
+        list_out = []
+        for file_ in fits_list:
+            if file_[-6:-5] == str(dither):
+                list_out.append(file_)
+
+        return list_out
 
 
 def get_cats(logger):
@@ -123,12 +128,6 @@ def get_os():
         raise Exception
 
     return os_system
-    """ a function that returns True if all numbers in a list are equal
-
-    @param items: a list
-
-    @return True: if all items are equal
-    """
 
 
 def all_same(items):
@@ -391,6 +390,7 @@ def extract_settings():
     prfs_d['output_cats'] = prfs_d['version'] + prfs_d['output_cats']
     prfs_d['input_cats'] = ConfMap(Cf, "CatsDirs")['input_cats']
     prfs_d['input_cats'] = prfs_d['version'] + prfs_d['input_cats']
+    prfs_d['input_ref'] = ConfMap(Cf, "CatsDirs")['input_ref']
 
     prfs_d['first_star'] = ConfMap(Cf, "CatsOrganization")['first_star']
     prfs_d['first_star'] = int(prfs_d['first_star']) - 1
@@ -400,7 +400,8 @@ def extract_settings():
     prfs_d['first_sso'] = int(prfs_d['first_sso']) - 1
 
     OutputDirs_list = ['plots_dir', 'results_dir', 'images_out', 'fits_out',
-                       'report_out', 'dithers_out', 'catalogs_dir', 'tmp_out']
+                       'report_out', 'dithers_out', 'catalogs_dir', 'tmp_out',
+                       'filter_dir']
     for conf_ in OutputDirs_list:
         prfs_d[conf_] = ConfMap(Cf, "OutputDirs")[conf_]
         prfs_d[conf_] = prfs_d['home'] + prfs_d[conf_]

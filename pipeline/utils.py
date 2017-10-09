@@ -759,19 +759,25 @@ if __name__ == '__main__':
         elif argv[1] == '-PM':
             check_pm = Check_PM(logger)
         elif argv[1] == '-regions':
-            permutations = [[0, 0], [0, 1], [0, 2], [1, 0], [1, 1], [1, 2],
-                            [2, 0], [2, 1], [2, 2]]
-            for permutation_ in permutations:
+            opts = [[0, 0], [0, 1], [0, 2], [1, 0], [1, 1],
+                    [1, 2], [2, 0], [2, 1], [2, 2]]
+            for opt_ in opts:
                 mag = '20-21'
                 sex_folder = '2_1.35_1.35_0.1_4'
                 for d in range(1, 5, 1):
                     i_c = '{}/{}/mag_{}_CCD_x{}_y{}_d{}.cat'.format(prfs_d['output_cats'],
-                                                                   sex_folder, mag,
-                                                                   permutation_[0],
-                                                                   permutation_[1], d)
+                                                                    sex_folder,
+                                                                    mag,
+                                                                    opt_[0],
+                                                                    opt_[1], d)
                     Create_regions(i_c, prfs_d).fits()
                     logger.debug('opening catalog file {}'.format(i_c))
-
+        elif argv[1] == '-luca_check':
+            input_d = {}
+            for d in range(1, 5, 1):
+                input_d[d] = '{}/Cat_20-21_d{}.dat'.format(prfs_d['input_ref'],
+                                                           d)
+            Create_regions(input_d, prfs_d).check_luca(True, True)
         elif argv[1] == '-modify':
             list_1, list_2 = modify_table(logger, prfs_d)
         elif argv[1] == '-input':
