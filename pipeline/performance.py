@@ -14,7 +14,7 @@ from os import listdir
 from pandas import concat, read_csv
 
 from misc import create_configurations, get_cats, extract_settings
-from misc import setting_logger
+from misc import setting_logger, check_distance
 from regions import Create_regions
 
 
@@ -67,28 +67,81 @@ class ScampPerformance:
         for key_ in input_d.keys():
             input_l.append(input_d[key_])
 
-        input_df = concat(input_l, axis=0)
+        i_df = concat(input_l, axis=0)
         # Look for < 3 coincidences
-        input_df = concat(g for _, g in input_df.groupby('source')
+        i_df = concat(g for _, g in i_df.groupby('source')
                           if len(g) >= 3)
-        input_df = input_df.reset_index(drop=True)
-        # input_df.to_csv('test.csv')  # Saves DataFrame to csv file
+        i_df = i_df.reset_index(drop=True)
+
+        i_df.to_csv('input.csv')
 
         # Cross with filtered data - Opens datafile
         filter_n = 'filt_10_1.2_5_0.033_20-21__5.csv'
-        filter_cat = read_csv('{}/{}'.format(prfs_d['filter_dir'], filter_n),
-                              index_col=0)
+        o_cat = read_csv('{}/{}'.format(prfs_d['filter_dir'], filter_n),
+                                        index_col=0)
 
-        for source_ in filter_cat['SOURCE_NUMBER'].tolist():
-            cat = filter_cat[filter_cat['SOURCE_NUMBER'].isin([source_])]
+        stats_d = self.create_dict()
 
-            print cat
-            """
-            for cat in range(0, 3, 1):
-                cat_number = 
-            """
+        tmp_sources_i = []
+        tmp_sources_l = []
+
+        unique_sources = list(set(i_df['source'].tolist()))
+
+        for idx_source, source_ in enumerate(unique_sources):
+            # Gets associated data in input catalog
+            cat = i_df[i_df['source'].isin([source_])]
+            boolean_l = []
+
+            for i, row in enumerate(cat.itertuples(), 1):
+                catalog_n = row.catalog
+                pm = row.pm_values
+
+                i_alpha = row.alpha_j2000
+                i_delta = row.delta_j2000
+
+                o_df = o_cat[o_cat['CATALOG_NUMBER'].isin([catalog_n])]
+                o_df = o_df[o_df['ALPHA_J2000'] + 0.001 > i_alpha]
+                o_df = o_df[i_alpha > o_df['ALPHA_J2000'] - 0.001]
+                o_df = o_df[o_df['DELTA_J2000'] + 0.001> i_delta]
+                o_df = o_df[i_delta > o_df['DELTA_J2000'] - 0.001]
+
+                if o_df.empty is not True:
+                    print catalog_n, "True"
+                    boolean_l.append(True)
+                else:
+                    boolean_l.append(False)
+            
+            print boolean_l
+            # Total number
+            idx = stats_d['PM'].index(pm)
+            stats_d['total'][idx] += 1
+
+            if len(list(set(boolean_l))) == 1 and list(set(boolean_l))[0] == True:
+                idx = stats_d['PM'].index(pm)
+                stats_d['right'][idx] += 1
+            else:
+                pass
+
+        print stats_d
 
         return True
+
+    def create_dict(self):
+        """
+
+        """
+        stats_keys = ['total', 'right', 'false']
+
+        stats_d = {}
+        stats_d['PM'] = [0.001, 0.003, 0.01, 0.03, 0.1, 0.3,
+                         1, 3, 10, 30, 100, 300]
+
+        for key_ in stats_keys:
+            stats_d[key_] = []
+            for value_ in range(len(stats_d['PM'])):
+                stats_d[key_].append(0)
+
+        return stats_d
 
 
 if __name__ == '__main__':

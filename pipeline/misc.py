@@ -38,6 +38,7 @@ __status__ = "Development"
 
 
 def get_fits(unique, dither):
+# def get_fits(unique):
     """ returns a list with all fits files availables
 
     @param unique: a flag
@@ -68,9 +69,8 @@ def get_fits(unique, dither):
         for file_ in fits_list:
             if file_[-6:-5] == str(dither):
                 list_out.append(file_)
-
         return list_out
-
+        # return fits_list
 
 def get_cats(logger):
     """ returns a list populated by all catalog files in output catalogs dir

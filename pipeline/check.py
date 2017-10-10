@@ -25,7 +25,6 @@ from errors import CatalogueError
 from misc import setting_logger, extract_settings
 from misc import create_configurations, pipeline_help
 from misc import create_sextractor_dict, create_scamp_dict
-from performance import SextractorPerformance
 from sextractor_aux import Sextractor, CatalogCreation
 from scamp_aux import Scamp, ScampFilter
 from stats_management import ExtractStats
@@ -69,10 +68,6 @@ class Check:
             self.stats(logger, prfs_d, confs, total_confs)
         elif argv[1] == '-help':
             pipeline_help(logger)
-        elif argv[1] == '-sextractor_performance':
-            self.sextractor_performance(logger, prfs_d)
-        elif argv[1] == '-scamp_performance':
-            self.scamp_performance(logger, prfs_d)
         else:
             raise BadSettings('not analysis option choosen')
 
@@ -378,12 +373,6 @@ class Check:
             raise Exception
 
         return True
-
-    def sextractor_performance(self, logger, prfs_d):
-        sextractor_performance = SextractorPerformance(logger, prfs_d)
-
-    def scamp_perfomance(self, logger, prfs_d):
-        pass
 
 if __name__ == '__main__':
     check_process = Check()
