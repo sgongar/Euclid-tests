@@ -19,7 +19,7 @@ from numpy import genfromtxt, float64
 from pandas import concat, read_csv, Series
 
 from images_management import get_fits_limits
-from misc import get_fits
+from misc import get_fits, get_fits_d
 
 
 __author__ = "Samuel Gongora-Garcia"
@@ -204,7 +204,7 @@ class Create_regions:
                 x_values.append(regions_list[idx][0])
                 y_values.append(regions_list[idx][1])
 
-            fits_files_all = get_fits(unique=False, dither=dither_)
+            fits_files_all = get_fits_d(dither=dither_)
 
             fits_dict = {}
             for fits_ in fits_files_all:

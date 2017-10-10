@@ -37,8 +37,7 @@ __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
 
 
-def get_fits(unique, dither):
-# def get_fits(unique):
+def get_fits(unique):
     """ returns a list with all fits files availables
 
     @param unique: a flag
@@ -65,12 +64,33 @@ def get_fits(unique, dither):
 
         return fits_unique
     else:
-        list_out = []
-        for file_ in fits_list:
-            if file_[-6:-5] == str(dither):
-                list_out.append(file_)
-        return list_out
-        # return fits_list
+        return fits_list
+
+
+def get_fits_d(dither):
+    """ returns a list with all fits files availables
+
+    @param unique: a flag
+    @param folder: sextraction configuration
+
+    @return fits_list: a list with all fits files
+    """
+    prfs_d = extract_settings()
+    fits_list = []
+
+    files = listdir('{}'.format(prfs_d['fits_dir']))
+    for file_ in files:
+        if file_[:1] == 'm' and file_[-5:] == '.fits':
+            fits_list.append(file_)
+
+    
+    list_out = []
+    for file_ in fits_list:
+        if file_[-6:-5] == str(dither):
+            list_out.append(file_)
+    
+    return list_out
+
 
 def get_cats(logger):
     """ returns a list populated by all catalog files in output catalogs dir
@@ -260,9 +280,9 @@ def create_configurations(logger, prfs_d, mode):
     """
 
     if mode['type'] == 'sextractor':
-        l_deblending = [2]
-        l_mincount = [0.1, 1]
-        l_threshold = [1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2]
+        l_deblending = [2, 10]
+        l_mincount = [0.1]
+        l_threshold = [1.35, 1.5, 3, 5]
 
         l_area = [4]
         l_filter_name = ['models/gauss_2.0_5x5.conv']

@@ -78,7 +78,7 @@ class Sextractor:
             if not path.isfile(folder_loc):
                 mkdir(folder_loc)
         except OSError:
-            logger.debug('folder {} already created'.format(folder_n))
+            logger.debug('Folder {} already created'.format(folder_n))
 
         for image_idx in range(0, len(fits_files), prfs_d['cores_number']):
             for mag_ in mags:  # TODO Implement mag selection
@@ -103,9 +103,9 @@ class Sextractor:
                         active_sex = list([job.is_alive() for job in sex_j])
                         pass
                 except IndexError:
-                    logger.debug('extraction finished')
+                    logger.debug('Extraction finished')
 
-        logger.info('Sextraction process of fits images finished')
+        logger.info('Extraction process of fits images finished')
 
         return True
 

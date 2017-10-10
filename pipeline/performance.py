@@ -10,8 +10,9 @@ Todo:
 
 from multiprocessing import Process
 from os import listdir
+from subprocess import Popen
 
-from pandas import concat, read_csv
+from pandas import concat, read_csv, DataFrame
 
 from misc import create_configurations, get_cats, extract_settings
 from misc import setting_logger, check_distance
@@ -50,8 +51,8 @@ class ScampPerformance:
         confs = [2, 0.1, 5, 4, 'models/gauss_2.0_5x5.conv']
 
         analysis_d = {'deblend_mincount': 0.1,
-                      'analysis_thresh': 5,
-                      'detect_thresh': 5,
+                      'analysis_thresh': 1.35,
+                      'detect_thresh': 1.35,
                       'deblend_nthresh': 2, 'detect_minarea': 4,
                       'filter': 'models/gauss_2.0_5x5.conv'}
 
@@ -73,17 +74,11 @@ class ScampPerformance:
                           if len(g) >= 3)
         i_df = i_df.reset_index(drop=True)
 
-        i_df.to_csv('input.csv')
-
         # Cross with filtered data - Opens datafile
         filter_n = 'filt_10_1.2_5_0.033_20-21__5.csv'
         o_cat = read_csv('{}/{}'.format(prfs_d['filter_dir'], filter_n),
                                         index_col=0)
-
-        stats_d = self.create_dict()
-
-        tmp_sources_i = []
-        tmp_sources_l = []
+        stats_d, out_d = self.create_dict()
 
         unique_sources = list(set(i_df['source'].tolist()))
 
@@ -91,7 +86,10 @@ class ScampPerformance:
             # Gets associated data in input catalog
             cat = i_df[i_df['source'].isin([source_])]
             boolean_l = []
+            tmp_alpha = []
+            tmp_delta = []
 
+            # Iterate over each source
             for i, row in enumerate(cat.itertuples(), 1):
                 catalog_n = row.catalog
                 pm = row.pm_values
@@ -99,19 +97,24 @@ class ScampPerformance:
                 i_alpha = row.alpha_j2000
                 i_delta = row.delta_j2000
 
-                o_df = o_cat[o_cat['CATALOG_NUMBER'].isin([catalog_n])]
-                o_df = o_df[o_df['ALPHA_J2000'] + 0.001 > i_alpha]
-                o_df = o_df[i_alpha > o_df['ALPHA_J2000'] - 0.001]
-                o_df = o_df[o_df['DELTA_J2000'] + 0.001> i_delta]
-                o_df = o_df[i_delta > o_df['DELTA_J2000'] - 0.001]
+                # Checks if there is a source closed to input one
+                o_df = self.check_source(catalog_n, o_cat, i_alpha, i_delta)
 
                 if o_df.empty is not True:
-                    print catalog_n, "True"
                     boolean_l.append(True)
+                    print "True"
                 else:
+                    # Appends alpha and delta to a temp list
+                    # Just to check what happens in that area
+                    tmp_alpha.append(i_alpha)
+                    tmp_delta.append(i_delta)
+                    # Create a big region file with all faults
+                    out_d['alpha_j2000'].append(i_alpha)
+                    out_d['delta_j2000'].append(i_delta)
+                    out_d['catalog'].append(catalog_n)
+                    out_d['PM'].append(pm)
                     boolean_l.append(False)
             
-            print boolean_l
             # Total number
             idx = stats_d['PM'].index(pm)
             stats_d['total'][idx] += 1
@@ -120,17 +123,70 @@ class ScampPerformance:
                 idx = stats_d['PM'].index(pm)
                 stats_d['right'][idx] += 1
             else:
+                # self.create_regions(tmp_alpha, tmp_delta, source_)
+                # self.show_regions()
                 pass
 
-        print stats_d
+        stats_df = DataFrame(stats_d)
+        stats_df.to_csv('stats.csv')
+
+        out_df = DataFrame(out_d)
+        # Saves output to easily readable files
+        out_df.to_csv('errors.csv')
+        out_df.to_csv('errors.reg', index=False, header=False, sep=" ")
 
         return True
+
+    def check_source(self, catalog_n, o_cat, i_alpha, i_delta):
+        """
+
+        @param catalog_n:
+        @param o_cat:
+        @param i
+        """
+        o_df = o_cat[o_cat['CATALOG_NUMBER'].isin([catalog_n])]
+        o_df = o_df[o_df['ALPHA_J2000'] + 0.001 > i_alpha]
+        o_df = o_df[i_alpha > o_df['ALPHA_J2000'] - 0.001]
+        o_df = o_df[o_df['DELTA_J2000'] + 0.001 > i_delta]
+        o_df = o_df[i_delta > o_df['DELTA_J2000'] - 0.001]
+
+        return o_df
+
+    def create_regions(self, i_alpha_l, i_delta_l, source_):
+        """ shows in red input sources
+        shows in blue extracted ones
+
+        @param i_alpha:
+        @param i_delta
+        """
+        i_dict = {'i_alpha': i_alpha_l, 'i_delta': i_delta_l}
+        i_df = DataFrame(i_dict)
+        i_df.to_csv('{}.csv'.format(source_), index=False,
+                    header=False, sep=" ")
+
+    """
+    def show_regions(self, input_fits, regions, num):
+
+
+        cmd_11 = 'ds9 {} -zoom to fit -histequ '.format(input_fits)
+        cmd_12 = '-regions -format xy '
+        # load inputs regions
+        cmd_13 = '{}pipeline/output_{}.reg '.format(prfs_d['fed_home'], num)
+        cmd_14 = '-saveimage jpeg {} -exit'.format(output_image)
+        cmd_1 = cmd_11 + cmd_12 + cmd_13 + cmd_14
+
+        ds9_process = Popen(cmd_1, shell=True)
+        ds9_process.wait()
+
+        return True
+    """
 
     def create_dict(self):
         """
 
         """
-        stats_keys = ['total', 'right', 'false']
+        stats_keys = ['total', 'right', 'false',
+                      'f_dr', 'f_pur', 'f_com']
 
         stats_d = {}
         stats_d['PM'] = [0.001, 0.003, 0.01, 0.03, 0.1, 0.3,
@@ -141,7 +197,14 @@ class ScampPerformance:
             for value_ in range(len(stats_d['PM'])):
                 stats_d[key_].append(0)
 
-        return stats_d
+        out_keys = ['alpha_j2000', 'delta_j2000',
+                    'catalog', 'PM']
+        out_d = {}
+
+        for key_ in out_keys:
+            out_d[key_] = []
+
+        return stats_d, out_d
 
 
 if __name__ == '__main__':
