@@ -184,7 +184,7 @@ class ScampFilter:  # TODO Split scamp_filter method into single methodss
                                                              sex_cf, scmp_cf,
                                                              scmp_cf, mag)
         # Filtered catalog name
-        filt_n = 'filt_{}_{}_'.format(scmp_cf, mag)
+        filt_n = 'filt_{}_{}_{}_'.format(scmp_cf, sex_cf, mag)
 
         print "full_n", full_n
 
