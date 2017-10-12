@@ -34,13 +34,9 @@ __status__ = "Development"
 class ScampPerformance:
 
     def __init__(self):
-        logger = setting_logger()
-        prfs_d = extract_settings()
+        pass
 
-        if not self.check(logger, prfs_d):
-            raise Exception
-
-    def check(self, logger, prfs_d):
+    def check(self, logger, prfs_d, mag, scmp_cf, sex_cf, idx_file):
         """
 
         @param logger:
@@ -48,14 +44,6 @@ class ScampPerformance:
 
         @return True: if everything goes alright.
         """
-        confs = [2, 0.1, 5, 4, 'models/gauss_2.0_5x5.conv']
-
-        analysis_d = {'deblend_mincount': 0.1,
-                      'analysis_thresh': 1.35,
-                      'detect_thresh': 1.35,
-                      'deblend_nthresh': 2, 'detect_minarea': 4,
-                      'filter': 'models/gauss_2.0_5x5.conv'}
-
         # Creates an input dictionary with all input sources
         input_d = {}
         for d in range(1, 5, 1):
@@ -74,10 +62,14 @@ class ScampPerformance:
                           if len(g) >= 3)
         i_df = i_df.reset_index(drop=True)
 
+        # Open particular file!
+
+        filt_n = 'filt_{}_{}_5.csv'.format(scmp_cf, mag)
+        filter_o_n = '{}/{}/{}/{}'.format(prfs_d['filter_dir'],
+                                          sex_cf, scmp_cf, filt_n)
+
         # Cross with filtered data - Opens datafile
-        filter_n = 'filt_10_1.2_5_0.033_20-21__5.csv'
-        o_cat = read_csv('{}/{}'.format(prfs_d['filter_dir'], filter_n),
-                                        index_col=0)
+        o_cat = read_csv('{}'.format(filter_o_n), index_col=0)
         stats_d, out_d = self.create_dict()
 
         unique_sources = list(set(i_df['source'].tolist()))
@@ -127,15 +119,18 @@ class ScampPerformance:
                 # self.show_regions()
                 pass
 
+        """
         stats_df = DataFrame(stats_d)
-        stats_df.to_csv('stats.csv')
+        stats_df.to_csv('stats_{}.csv'.format(idx_file))
 
         out_df = DataFrame(out_d)
         # Saves output to easily readable files
-        out_df.to_csv('errors.csv')
-        out_df.to_csv('errors.reg', index=False, header=False, sep=" ")
+        out_df.to_csv('errors_{}.csv'.format(idx_file))
+        out_df.to_csv('errors_{}.reg'.format(idx_file),
+                      index=False, header=False, sep=" ")
+        """
 
-        return True
+        return stats_d
 
     def check_source(self, catalog_n, o_cat, i_alpha, i_delta):
         """

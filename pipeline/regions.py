@@ -442,6 +442,10 @@ class Create_regions:
                                               dither_number)
 
         if save and not path.isfile(dither_output):
+            # Check if dithers folder exists
+            if not path.exists(prfs_d['dithers_out']):
+                makedirs(prfs_d['dithers_out'])
+
             sources_df.to_csv(dither_output, index=False,
                               header=False, sep=" ")
         return sources_df

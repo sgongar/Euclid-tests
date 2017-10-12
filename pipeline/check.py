@@ -25,6 +25,8 @@ from errors import CatalogueError
 from misc import setting_logger, extract_settings
 from misc import create_configurations, pipeline_help
 from misc import create_sextractor_dict, create_scamp_dict
+from pandas import DataFrame
+from performance import ScampPerformance
 from sextractor_aux import Sextractor, CatalogCreation
 from scamp_aux import Scamp, ScampFilter
 from stats_management import ExtractStats
@@ -66,6 +68,8 @@ class Check:
             self.check(logger, prfs_d, confs, total_confs)
         elif argv[1] == '-stats':
             self.stats(logger, prfs_d, confs, total_confs)
+        elif argv[1] == '-scamp_performance':
+            self.scamp_performance(logger, prfs_d, mode, confs)
         elif argv[1] == '-help':
             pipeline_help(logger)
         else:
@@ -86,18 +90,19 @@ class Check:
         """
         if not self.catalogue(logger):
             raise Exception
+        """
         if not self.sextractor(logger, prfs_d):
             raise Exception
-        """
         if not self.scamp(logger, prfs_d, mode, confs):
             raise Exception
+        """
         if not self.filt(logger, prfs_d, mode, confs, total_confs):
             raise Exception
         if not self.check(logger, prfs_d, confs, total_confs):
             raise Exception
         if not self.stats(logger, prfs_d, confs, total_confs):
             raise Exception
-
+        """
         return True
 
     def catalog(self, logger, prfs_d):
@@ -219,45 +224,51 @@ class Check:
         @return True if everything goes alright.
         """
         filt_j = []
+        
+        # Sextractor configurations.
+        mode = {'type': 'sextractor'}
+        sex_confs, sex_confs_n = create_configurations(logger, prfs_d, mode)
+
+        print "total_conf", total_confs
 
         for mag in prfs_d['mags']:
             for idx_filt in range(0, total_confs, prfs_d['cores_number']):
-                try:
-                    filt_j = []
-                    idx_proc = 0
-                    while len(filt_j) < prfs_d['cores_number']:
-                        idx = idx_filt + idx_proc
-                        (scmp_d, len_confs) = create_scamp_dict(logger,
-                                                                prfs_d, idx)
-                        conf = [scmp_d['crossid_radius'],
-                                scmp_d['pixscale_maxerr'],
-                                scmp_d['posangle_maxerr'],
-                                scmp_d['position_maxerr']]
-                        scmp_cf = '{}_{}_{}_{}'.format(conf[0], conf[1],
-                                                       conf[2], conf[3])
+                for sex_conf in sex_confs:
+                    try:
+                        filt_j = []
+                        idx_proc = 0
+                        while len(filt_j) < prfs_d['cores_number']:
+                            idx = idx_filt + idx_proc
+                            (scmp_d, len_confs) = create_scamp_dict(logger,
+                                                                    prfs_d, idx)
+                            conf = [scmp_d['crossid_radius'],
+                                    scmp_d['pixscale_maxerr'],
+                                    scmp_d['posangle_maxerr'],
+                                    scmp_d['position_maxerr']]
+                            scmp_cf = '{}_{}_{}_{}'.format(conf[0], conf[1],
+                                                           conf[2], conf[3])
 
-                        f_name = 'results/filt_{}_20-21__6.csv'.format(scmp_cf)
+                            sex_d = {'deblend_mincount': sex_conf[1],
+                                     'analysis_thresh': sex_conf[2],
+                                     'detect_thresh': sex_conf[2],
+                                     'deblend_nthresh': sex_conf[0],
+                                     'detect_minarea': sex_conf[3],
+                                     'filter': 'models/gauss_2.0_5x5.conv'}
 
-                        sex_d = {'deblend_mincount': 0.1,
-                                 'analysis_thresh': 1.35,
-                                 'detect_thresh': 1.35,
-                                 'deblend_nthresh': 2, 'detect_minarea': 4,
-                                 'filter': 'models/gauss_2.0_5x5.conv'}
-
-                        if not path.isfile(f_name):
                             filt_p = Process(target=ScampFilter,
                                              args=(logger, mag,
                                                    scmp_d, scmp_cf, sex_d,))
                             filt_j.append(filt_p)
                             filt_p.start()
-                        idx_proc += 1
-                    active_filt = list([j.is_alive() for j in filt_j])
-                    while True in active_filt:
+
+                            idx_proc += 1
                         active_filt = list([j.is_alive() for j in filt_j])
-                        pass
-                    filt_j = []
-                except IndexError:
-                    print("finished")
+                        while True in active_filt:
+                            active_filt = list([j.is_alive() for j in filt_j])
+                            pass
+                        filt_j = []
+                    except IndexError:
+                        print("finished")
 
         return True
 
@@ -369,6 +380,60 @@ class Check:
 
         if not merge_stats(logger, prfs_d):
             raise Exception
+
+        return True
+
+    def scamp_performance(self, logger, prfs_d, mode, scmp_confs):
+        """ Performs a complete pipeline to scamp output.
+
+        @param logger:
+        @param prfs_d:
+        @param mode:
+        @param scmp_confs:
+
+        @return True if everything goes alright.
+        """
+        filt_j = []
+        
+        # Sextractor configurations.
+        mode = {'type': 'sextractor'}
+        sex_confs, sex_confs_n = create_configurations(logger, prfs_d, mode)
+        idx_proc = 0
+
+        stats_d = {}
+        for mag in prfs_d['mags']:
+            for idx_scmp, scmp_conf in enumerate(scmp_confs):
+                for idx_sex, sex_conf in enumerate(sex_confs):
+                    idx = idx_scmp + idx_sex
+
+                    (scmp_d, len_confs) = create_scamp_dict(logger,
+                                                            prfs_d, idx_scmp)
+                    conf = [scmp_d['crossid_radius'],
+                            scmp_d['pixscale_maxerr'],
+                            scmp_d['posangle_maxerr'],
+                            scmp_d['position_maxerr']]
+                    scmp_cf = '{}_{}_{}_{}'.format(conf[0], conf[1],
+                                                   conf[2], conf[3])
+
+                    conf = [sex_conf[0], sex_conf[2], sex_conf[2],
+                            sex_conf[1], sex_conf[3]]
+                    sex_cf = '{}_{}_{}_{}_{}'.format(conf[0], conf[1],
+                                                     conf[2], conf[3],
+                                                     conf[4])
+
+                    stats_d[idx] = ScampPerformance().check(logger, prfs_d,
+                                                            mag, scmp_cf,
+                                                            sex_cf, idx)
+
+        tmp_d = {'PM': [], 'total': [], 'right': [], 'false': [],
+                 'f_dr': [], 'f_pur': [], 'f_com': []}
+        for conf_key in stats_d.keys():
+            for value_key in stats_d[conf_key].keys():
+                for value in stats_d[conf_key][value_key]:
+                    tmp_d[value_key].append(value)
+
+        stats_df = DataFrame(tmp_d)
+        stats_df.to_csv('stats.csv')
 
         return True
 

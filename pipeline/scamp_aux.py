@@ -3,6 +3,10 @@
 
 """Python script for time measurements
 
+Versions:
+- 0.1: Initial release.
+- 0.2: Functions reorganised to two different classes.
+
 """
 
 from os import path, makedirs
@@ -19,10 +23,7 @@ from misc import motion_filter, confidence_filter, get_fits
 __author__ = "Samuel Gongora-Garcia"
 __copyright__ = "Copyright 2017"
 __credits__ = ["Samuel Gongora-Garcia"]
-"""
-__license__ = "GPL"
-"""
-__version__ = "0.1"
+__version__ = "0.2"
 __maintainer__ = "Samuel Gongora-Garcia"
 __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
@@ -95,8 +96,6 @@ class Scamp:
             if not path.exists(output_dir):
                 makedirs(output_dir)
 
-            print scmp_p
-
             process_scamp = Popen(scmp_p, shell=True)
             process_scamp.wait()
 
@@ -158,10 +157,13 @@ class ScampFilter:  # TODO Split scamp_filter method into single methodss
         """
         prfs_d = extract_settings()
 
-        print "dentro de __init__"
-
         self.save = True  # "scmp_p",  save flag - set as True for catalogs saving
-        self.scamp_filter(logger, prfs_d, mag, scmp_d, scmp_cf, sex_d)
+        (merged_db, full_db,
+         filter_o_n) = self.scamp_filter(logger, prfs_d, mag,
+                                         scmp_d, scmp_cf, sex_d)
+        full_db = self.compute_pm(logger, prfs_d, merged_db,
+                                  full_db, filter_o_n)
+        self.filter_pm(logger, prfs_d, full_db, filter_o_n)
 
     def scamp_filter(self, logger, prfs_d, mag, scmp_d, scmp_cf, sex_d):
         """
@@ -179,14 +181,15 @@ class ScampFilter:  # TODO Split scamp_filter method into single methodss
                                          sex_d['deblend_mincount'],
                                          sex_d['detect_minarea'])
 
-        # Full catalog name
-        full_n = '{}/catalogs/{}/{}/full_{}_{}_1.cat'.format(prfs_d['results_dir'],
-                                                             sex_cf, scmp_cf,
-                                                             scmp_cf, mag)
-        # Filtered catalog name
-        filt_n = 'filt_{}_{}_{}_'.format(scmp_cf, sex_cf, mag)
+        if not self.check_dir(logger, prfs_d, sex_cf, scmp_cf):
+            raise Exception
 
-        print "full_n", full_n
+        # Full catalog name
+        full_n = '{}/{}/{}/full_{}_{}_1.cat'.format(prfs_d['catalogs_dir'],
+                                                    sex_cf, scmp_cf,
+                                                    scmp_cf, mag)
+        # Filtered catalog name
+        filt_n = 'filt_{}_{}'.format(scmp_cf, mag)
 
         logger.debug('opening full catalog {}'.format(full_n))
         full_cat = fits.open(full_n)
@@ -195,14 +198,17 @@ class ScampFilter:  # TODO Split scamp_filter method into single methodss
         full_db = full_db.to_pandas()
 
         # Getting merge catalog
-        mrgd_n = '{}/catalogs/{}/{}/merged_{}_{}_1.cat'.format(prfs_d['results_dir'],
-                                                               sex_cf, scmp_cf,
-                                                               scmp_cf, mag)
+        mrgd_n = '{}/{}/{}/merged_{}_{}_1.cat'.format(prfs_d['catalogs_dir'],
+                                                      sex_cf, scmp_cf,
+                                                      scmp_cf, mag)
 
         logger.debug('opening merged catalog {}'.format(mrgd_n))
         merged_cat = fits.open(mrgd_n)
         logger.debug('converting merged catalog to Pandas format')
         merged_db = Table(merged_cat[2].data)
+
+        filter_o_n = '{}/{}/{}/{}'.format(prfs_d['filter_dir'],
+                                          sex_cf, scmp_cf, filt_n)
 
         # Removing 0 catalog detections
         logger.debug('removing 0 catalog detections')
@@ -212,27 +218,70 @@ class ScampFilter:  # TODO Split scamp_filter method into single methodss
                          if len(g) >= int(prfs_d['detections']))
 
         if self.save:
-            full_db.to_csv('{}/filtered/{}_1.csv'.format(prfs_d['results_dir'],
-                                                         filt_n))
+            full_db.to_csv('{}_1.csv'.format(filter_o_n))
 
+        return merged_db, full_db, filter_o_n
+
+    def compute_pm(self, logger, prfs_d, merged_db, full_db, filter_o_n):
+        """
+        
+        @param logger:
+        @param prfs_d:
+        @param merged_db:
+        @param full_db:
+        @param filter_o_n:
+
+        @return full_db:
+        """
         # Computing pm
         logger.debug('computing proper motion')
         full_db = pm_compute(logger, merged_db, full_db)
         if self.save:
-            full_db.to_csv('{}/filtered/{}_3.csv'.format(prfs_d['results_dir'], filt_n))
+            logger.debug('saving output to {}_2.csv'.format(filter_o_n))
+            full_db.to_csv('{}_2.csv'.format(filter_o_n))
 
+        return full_db
+
+    def filter_pm(self, logger, prfs_d, full_db, filter_o_n):
+        """
+
+        @param logger:
+        @param prfs_d:
+        @param full_db:
+        """
         logger.debug('after filtering detections')
         full_db = pm_filter(full_db, prfs_d['pm_low'],
                             prfs_d['pm_up'], prfs_d['pm_sn'])
         if self.save:
-            full_db.to_csv('{}/filtered/{}_4.csv'.format(prfs_d['results_dir'], filt_n))
+            logger.debug('saving output to {}_3.csv'.format(filter_o_n))
+            full_db.to_csv('{}_3.csv'.format(filter_o_n))
 
         logger.debug('after proper motion')
         full_db = motion_filter(logger, full_db, prfs_d['r_fit'])
         if self.save:
-            full_db.to_csv('{}/filtered/{}_5.csv'.format(prfs_d['results_dir'], filt_n))
+            logger.debug('saving output to {}_4.csv'.format(filter_o_n))
+            full_db.to_csv('{}_4.csv'.format(filter_o_n))
 
         logger.debug('after first filter')
         full_db = confidence_filter(logger, full_db, prfs_d['r_fit'])
         if self.save:
-            full_db.to_csv('{}/filtered/{}_6.csv'.format(prfs_d['results_dir'], filt_n))
+            logger.debug('saving output to {}_5.csv'.format(filter_o_n))
+            full_db.to_csv('{}_5.csv'.format(filter_o_n))
+
+    def check_dir(self, logger, prfs_d, sex_cf, scmp_cf):
+        """
+        
+        @param logger:
+        @param sex_cf:
+        @param scmp_cf:
+
+        @return True: if everything goes alright.
+        """
+        filter_dir = '{}/{}/{}'.format(prfs_d['filter_dir'], sex_cf, scmp_cf)
+
+        if not path.exists(filter_dir):
+            makedirs(filter_dir)
+        else:
+            logger.debug('')
+
+        return True
