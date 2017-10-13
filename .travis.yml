@@ -7,4 +7,4 @@ before_install:
 install:
   - pip install -r pipeline/modules.txt
 script:
-  - python tests/tests.py
+  - python -m unittest discover -s tests
