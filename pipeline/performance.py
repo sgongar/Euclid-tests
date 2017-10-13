@@ -97,6 +97,7 @@ class ScampPerformance:
                 o_df = self.check_source(catalog_n, o_cat, i_alpha, i_delta)
 
                 if o_df.empty is not True:
+                    print "haha"
                     boolean_l.append(True)
                     tmp_catalog.append(catalog_n)
                     tmp_pm.append(pm)
@@ -123,11 +124,11 @@ class ScampPerformance:
             if len(list(set(boolean_l))) == 1 and list(set(boolean_l))[0] == True:
                 idx = stats_d['PM'].index(pm)
                 stats_d['right'][idx] += 1
-            else:
                 print "catalog", tmp_catalog
                 print "pm", tmp_pm
                 print "tmp_alpha", tmp_alpha
                 print "tmp_delta", tmp_delta
+            else:
                 # self.create_regions(tmp_alpha, tmp_delta, source_)
                 # self.show_regions()
                 pass

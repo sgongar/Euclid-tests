@@ -9,7 +9,12 @@ Todo:
 
 """
 
+from os import path
+
 from unittest import TestCase, main
+from mock import MagicMock, patch
+
+path.append("/pcdisk/holly/sgongora/Documents/Euclid/Euclid-tests/")
 
 
 __author__ = "Samuel Gongora-Garcia"
@@ -24,9 +29,26 @@ __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
 
 
-def main():
+class TestSimple(TestCase):
 
-    return True
+    """
+    """
+
+    def setUp(self):
+        """
+        define setUp parameters
+        """
+        pass
+
+    def test(self):
+
+        return True
+
+    def tearDown(self):
+        """
+        define tearDown parameters
+        """
+        pass
 
 
 if __name__ == '__main__':
