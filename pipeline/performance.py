@@ -45,6 +45,8 @@ class ScampPerformance:
         @return True: if everything goes alright.
         """
         # Creates an input dictionary with all input sources
+        logger.debug('checking performance for {} and {}'.format(scmp_cf,
+                                                                 sex_cf))
         input_d = {}
         for d in range(1, 5, 1):
             input_d[d] = '{}/Cat_20-21_d{}.dat'.format(prfs_d['input_ref'],
@@ -78,6 +80,8 @@ class ScampPerformance:
             # Gets associated data in input catalog
             cat = i_df[i_df['source'].isin([source_])]
             boolean_l = []
+            tmp_catalog = []
+            tmp_pm = []
             tmp_alpha = []
             tmp_delta = []
 
@@ -94,19 +98,24 @@ class ScampPerformance:
 
                 if o_df.empty is not True:
                     boolean_l.append(True)
+                    tmp_catalog.append(catalog_n)
+                    tmp_pm.append(pm)
+                    tmp_alpha.append(i_alpha)
+                    tmp_delta.append(i_delta)
+
                     print "True"
                 else:
                     # Appends alpha and delta to a temp list
                     # Just to check what happens in that area
-                    tmp_alpha.append(i_alpha)
-                    tmp_delta.append(i_delta)
+
                     # Create a big region file with all faults
-                    out_d['alpha_j2000'].append(i_alpha)
-                    out_d['delta_j2000'].append(i_delta)
                     out_d['catalog'].append(catalog_n)
                     out_d['PM'].append(pm)
+                    out_d['alpha_j2000'].append(i_alpha)
+                    out_d['delta_j2000'].append(i_delta)
+
                     boolean_l.append(False)
-            
+
             # Total number
             idx = stats_d['PM'].index(pm)
             stats_d['total'][idx] += 1
@@ -115,6 +124,10 @@ class ScampPerformance:
                 idx = stats_d['PM'].index(pm)
                 stats_d['right'][idx] += 1
             else:
+                print "catalog", tmp_catalog
+                print "pm", tmp_pm
+                print "tmp_alpha", tmp_alpha
+                print "tmp_delta", tmp_delta
                 # self.create_regions(tmp_alpha, tmp_delta, source_)
                 # self.show_regions()
                 pass

@@ -280,9 +280,9 @@ def create_configurations(logger, prfs_d, mode):
     """
 
     if mode['type'] == 'sextractor':
-        l_deblending = [32]
-        l_mincount = [0.005]
-        l_threshold = [1.35, 1.5]
+        l_deblending = [2]
+        l_mincount = [0.1]
+        l_threshold = [1.5]
 
         l_area = [4]
         l_filter_name = ['models/gauss_2.0_5x5.conv']

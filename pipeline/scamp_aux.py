@@ -31,7 +31,7 @@ __status__ = "Development"
 
 class Scamp:
 
-    def __init__(self, logger, mag, scmp_d, f_conf, sex_d):
+    def __init__(self, logger, mag, scmp_d, scmp_cf, sex_d):
         """
         for now scamp's mode is hardcoded
 
@@ -40,10 +40,10 @@ class Scamp:
         prfs_d = extract_settings()
 
         self.scamp_process(logger, prfs_d, mode, mag,
-                           scmp_d, f_conf, sex_d)
+                           scmp_d, scmp_cf, sex_d)
 
     def scamp_process(self, logger, prfs_d, mode, mag,
-                      scmp_d, f_conf, sex_d):
+                      scmp_d, scmp_cf, sex_d):
         """
 
         @param logger: a logger object
@@ -61,12 +61,14 @@ class Scamp:
                                          sex_d['deblend_mincount'],
                                          sex_d['detect_minarea'])
 
-        f_conf = '{}_{}_{}_{}'.format(scmp_d['crossid_radius'],
-                                      scmp_d['pixscale_maxerr'],
-                                      scmp_d['posangle_maxerr'],
-                                      scmp_d['position_maxerr'])
+        scmp_cf = '{}_{}_{}_{}'.format(scmp_d['crossid_radius'],
+                                       scmp_d['pixscale_maxerr'],
+                                       scmp_d['posangle_maxerr'],
+                                       scmp_d['position_maxerr'])
 
         logger.info('scamp process for magnitude {}'.format(mag))
+        logger.info('sextractor configuration {}'.format(sex_cf))
+        logger.info('scamp configuration {}'.format(scmp_cf))
 
         if mode['type'] == 'scamp':
             scmp_p_1 = "scamp -c %s" % (prfs_d['conf_scamp'])
@@ -80,10 +82,10 @@ class Scamp:
             scmp_p_7 = ' -POSITION_MAXERR {}'.format(scmp_d['position_maxerr'])
             scmp_p_8 = ' -CROSSID_RADIUS {}'.format(scmp_d['crossid_radius'])
             cats_dir = '{}/{}/{}'.format(prfs_d['catalogs_dir'], sex_cf,
-                                         f_conf)
-            merged_cat = '{}/merged_{}_{}.cat'.format(cats_dir, f_conf, mag)
+                                         scmp_cf)
+            merged_cat = '{}/merged_{}_{}.cat'.format(cats_dir, scmp_cf, mag)
             scmp_p_9 = ' -MERGEDOUTCAT_NAME {}'.format(merged_cat)
-            full_cat = '{}/full_{}_{}.cat'.format(cats_dir, f_conf, mag)
+            full_cat = '{}/full_{}_{}.cat'.format(cats_dir, scmp_cf, mag)
             scmp_p_10 = ' -FULLOUTCAT_NAME {}'.format(full_cat)
             scmp_p = scmp_p_1 + scmp_p_2 + scmp_p_3 + scmp_p_4 + scmp_p_5
             scmp_p = scmp_p + scmp_p_6 + scmp_p_7 + scmp_p_8 + scmp_p_9
@@ -91,10 +93,12 @@ class Scamp:
 
             # Creates output dir for desired configuration
             output_dir = '{}/catalogs/{}/{}'.format(prfs_d['results_dir'],
-                                                    sex_cf, f_conf)
+                                                    sex_cf, scmp_cf)
 
             if not path.exists(output_dir):
                 makedirs(output_dir)
+
+            print scmp_p
 
             process_scamp = Popen(scmp_p, shell=True)
             process_scamp.wait()
@@ -110,7 +114,7 @@ class Scamp:
             # cats_dir value is associated to configuration, not to the file
             # so it should be generated once
             cats_dir = '{}/{}/{}'.format(prfs_d['catalogs_dir'],
-                                         sex_cf, f_conf)
+                                         sex_cf, scmp_cf)
 
             fits_files = get_fits(unique=False)
             for idx, fits_ in enumerate(fits_files):
@@ -133,7 +137,7 @@ class Scamp:
                 scmp_p = scmp_p + scmp_p_6 + scmp_p_7 + scmp_p_8 + scmp_p_9
 
                 output_dir = '{}/catalogs/{}/{}'.format(prfs_d['results_dir'],
-                                                        sex_cf, f_conf)
+                                                        sex_cf, scmp_cf)
 
                 if not path.exists(output_dir):
                     makedirs(output_dir)
@@ -153,7 +157,7 @@ class ScampFilter:  # TODO Split scamp_filter method into single methodss
 
         @param mag:
         @param scmp_d:
-        @param f_conf:
+        @param scmp_cf:
         """
         prfs_d = extract_settings()
 
@@ -224,7 +228,7 @@ class ScampFilter:  # TODO Split scamp_filter method into single methodss
 
     def compute_pm(self, logger, prfs_d, merged_db, full_db, filter_o_n):
         """
-        
+
         @param logger:
         @param prfs_d:
         @param merged_db:
@@ -270,7 +274,7 @@ class ScampFilter:  # TODO Split scamp_filter method into single methodss
 
     def check_dir(self, logger, prfs_d, sex_cf, scmp_cf):
         """
-        
+
         @param logger:
         @param sex_cf:
         @param scmp_cf:
