@@ -63,6 +63,7 @@ class ScampPerformance:
         i_df = concat(g for _, g in i_df.groupby('source')
                           if len(g) >= 3)
         i_df = i_df.reset_index(drop=True)
+        i_df.to_csv('input_sources.csv')
 
         # Open particular file!
 

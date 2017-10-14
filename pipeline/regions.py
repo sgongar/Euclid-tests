@@ -51,11 +51,12 @@ class Create_regions:
         hdu_list = fits.open(self.input_catalogue)
         hdu = Table(hdu_list[2].data).to_pandas()
 
-        dithers = [range(1, 10, 1), range(10, 19, 1),
-                   range(19, 28, 1), range(28, 37, 1)]
+        dithers = [range(1, 34, 4), range(2, 35, 4),
+                   range(3, 36, 4), range(4, 37, 4)]
 
         # hdu_dict = {}
         for d in dithers:
+            print d
             hdu_d = hdu[hdu['CATALOG_NUMBER'].isin(d)]
 
             alpha_list = Series(hdu_d['ALPHA_J2000'].tolist(),
@@ -63,9 +64,12 @@ class Create_regions:
             delta_list = Series(hdu_d['DELTA_J2000'].tolist(),
                                 name='DELTA_J2000')
 
+            # TODO Fix name to something readable!
             positions_table = concat([alpha_list, delta_list], axis=1)
-            print 'writing to {}.reg'.format(self.input_catalogue)
-            positions_table.to_csv('{}_d{}.reg'.format(self.input_catalogue, dithers.index(d)),
+            print 'writing to {}_d{}.reg'.format(self.input_catalogue,
+                                                 dithers.index(d) + 1)
+            positions_table.to_csv('{}_d{}.reg'.format(self.input_catalogue,
+                                                       dithers.index(d) + 1),
                                    index=False, header=False, sep=" ")
 
         # alpha_list = Series(hdu['ALPHA_J2000'].tolist(), name='ALPHA_J2000')
