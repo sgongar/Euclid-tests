@@ -54,6 +54,47 @@ class Create_regions:
         dithers = [range(1, 34, 4), range(2, 35, 4),
                    range(3, 36, 4), range(4, 37, 4)]
 
+        dither = False
+
+        # hdu_dict = {}
+        if dither:
+            for d in dithers:
+                hdu_d = hdu[hdu['CATALOG_NUMBER'].isin(d)]
+
+                source_l = Series(hdu_d['SOURCE_NUMBER'].tolist(),
+                                  name='SOURCE_NUMBER')
+                alpha_l = Series(hdu_d['ALPHA_J2000'].tolist(),
+                                 name='ALPHA_J2000')
+                delta_l = Series(hdu_d['DELTA_J2000'].tolist(),
+                                 name='DELTA_J2000')
+
+                full_t = concat([source_l, alpha_l, delta_l], axis=1)
+                print 'out to {}_d{}.csv'.format(self.input_catalogue[:-6],
+                                                 dithers.index(d) + 1)
+                full_t.to_csv('{}_d{}.csv'.format(self.input_catalogue[:-6],
+                                                  dithers.index(d) + 1))
+        else:
+            source_l = Series(hdu['SOURCE_NUMBER'].tolist(),
+                              name='SOURCE_NUMBER')
+            alpha_l = Series(hdu['ALPHA_J2000'].tolist(),
+                             name='ALPHA_J2000')
+            delta_l = Series(hdu['DELTA_J2000'].tolist(),
+                             name='DELTA_J2000')
+
+            full_t = concat([source_l, alpha_l, delta_l], axis=1)
+            print 'writing to {}.csv'.format(self.input_catalogue[:-6])
+            full_t.to_csv('{}.csv'.format(self.input_catalogue[:-6]))
+
+    def full_regions(self):
+        """
+
+        """
+        hdu_list = fits.open(self.input_catalogue)
+        hdu = Table(hdu_list[2].data).to_pandas()
+
+        dithers = [range(1, 34, 4), range(2, 35, 4),
+                   range(3, 36, 4), range(4, 37, 4)]
+
         # hdu_dict = {}
         for d in dithers:
             print d

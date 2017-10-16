@@ -759,12 +759,19 @@ if __name__ == '__main__':
         elif argv[1] == '-PM':
             check_pm = Check_PM(logger)
         elif argv[1] == '-full_cats':
-            i_c1 = '/pcdisk/holly/sgongora/Documents/SharedFolder'
+            i_c1 = '/mnt/c/CCDs'
             i_c2 = '/full_10_1.2_5_1_20-21_1.cat'
             i_c = i_c1 + i_c2
 
-            Create_regions(i_c, prfs_d).full_cats()
             logger.debug('opening catalog file {}'.format(i_c))
+            Create_regions(i_c, prfs_d).full_cats()
+        elif argv[1] == '-full_regions':
+            i_c1 = '/mnt/c/CCDs'
+            i_c2 = '/full_10_1.2_5_1_20-21_1.cat'
+            i_c = i_c1 + i_c2
+
+            logger.debug('opening catalog file {}'.format(i_c))
+            Create_regions(i_c, prfs_d).full_regions()
         elif argv[1] == '-regions':
             opts = [[0, 0], [0, 1], [0, 2], [1, 0], [1, 1],
                     [1, 2], [2, 0], [2, 1], [2, 2]]
