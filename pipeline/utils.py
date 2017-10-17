@@ -777,15 +777,19 @@ if __name__ == '__main__':
                     [1, 2], [2, 0], [2, 1], [2, 2]]
             for opt_ in opts:
                 mag = '20-21'
-                sex_folder = '2_1.35_1.35_0.1_4'
-                for d in range(1, 5, 1):
-                    i_c = '{}/{}/mag_{}_CCD_x{}_y{}_d{}.cat'.format(prfs_d['output_cats'],
-                                                                    sex_folder,
-                                                                    mag,
-                                                                    opt_[0],
-                                                                    opt_[1], d)
-                    Create_regions(i_c, prfs_d).fits()
-                    logger.debug('opening catalog file {}'.format(i_c))
+                sex_folders = ['20_1.5_1.5_0.1_4', '20_1.5_1.5_0.01_4',
+                               '20_1.5_1.5_0.001_4', '40_1.5_1.5_0.1_4',
+                               '40_1.5_1.5_0.01_4', '40_1.5_1.5_0.001_4']
+                cat_dir = prfs_d['output_cats']
+                for folder_ in sex_folders:
+                    for d in range(1, 5, 1):
+                        i_c = '{}/{}/mag_{}_CCD_x{}_y{}_d{}.cat'.format(cat_dir,
+                                                                        folder_,
+                                                                        mag,
+                                                                        opt_[0],
+                                                                        opt_[1], d)
+                        Create_regions(i_c, prfs_d).fits()
+                        logger.debug('opening catalog file {}'.format(i_c))
         elif argv[1] == '-luca_check':
             input_d = {}
             for d in range(1, 5, 1):

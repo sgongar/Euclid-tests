@@ -83,12 +83,11 @@ def get_fits_d(dither):
         if file_[:1] == 'm' and file_[-5:] == '.fits':
             fits_list.append(file_)
 
-    
     list_out = []
     for file_ in fits_list:
         if file_[-6:-5] == str(dither):
             list_out.append(file_)
-    
+
     return list_out
 
 
@@ -280,8 +279,8 @@ def create_configurations(logger, prfs_d, mode):
     """
 
     if mode['type'] == 'sextractor':
-        l_deblending = [2]
-        l_mincount = [0.1]
+        l_deblending = [20, 30, 40]
+        l_mincount = [0.001, 0.01]
         l_threshold = [1.5]
 
         l_area = [4]
@@ -297,22 +296,10 @@ def create_configurations(logger, prfs_d, mode):
                                                    threshold, area, filt])
 
     elif mode['type'] == 'scamp':
-        """
-        l_crossid_radius = [30, 50, 100, 150]  # seconds
-        l_pixscale_maxerr = [1.05, 1.1]  # scale-factor
-        l_posangle_maxerr = [0.5, 1, 2]  # degrees
-        # minutes [0.75, 1, 2, 5, 10] seconds
-        l_position_maxerr = [0.012375, 0.0165, 0.033, 0.083, 0.16]
-        """
-
         l_crossid_radius = [10]  # seconds
         l_pixscale_maxerr = [1.2]  # scale-factor
-        l_posangle_maxerr = [5]  # degrees was 0.5, 5
-        l_position_maxerr = [1]  # 0.083, 0.16, 0.32, 0.64, 1.28 [1, 2] s
-
-        # l_crossid_radius = [50, 100, 150]  # seconds
-        # l_posangle_maxerr = [0.02, 0.05, 0.2, 0.5, 2, 5]  # degrees
-        # l_position_maxerr = [0.0165, 0.033]  # 0.083, 0.16, 0.32, 0.64, 1.28 [1, 2] s
+        l_posangle_maxerr = [0.5, 2.5, 5]  # degrees was 0.5, 5
+        l_position_maxerr = [0.083, 0.16, 0.64, 1.28]  # 0.083, 0.16, 0.32, 0.64, 1.28 [1, 2] s
 
         configurations = []
 

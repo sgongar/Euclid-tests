@@ -130,8 +130,8 @@ class Create_regions:
         delta_list = Series(hdu['Y_WORLD'].tolist(), name='Y_WORLD')
 
         positions_table = concat([alpha_list, delta_list], axis=1)
-        print 'writing to {}.reg'.format(self.input_catalogue)
-        positions_table.to_csv('{}.reg'.format(self.input_catalogue),
+        print 'writing to {}.reg'.format(self.input_catalogue[:-4])
+        positions_table.to_csv('{}.reg'.format(self.input_catalogue[:-4]),
                                index=False, header=False, sep=" ")
 
     def csv(self):

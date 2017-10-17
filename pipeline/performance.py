@@ -8,13 +8,8 @@ Todo:
 
 """
 
-from multiprocessing import Process
-from os import listdir
-from subprocess import Popen
-
 from pandas import concat, read_csv, DataFrame
 
-from misc import create_configurations, get_cats, extract_settings
 from misc import setting_logger, check_distance
 from regions import Create_regions
 
@@ -61,7 +56,7 @@ class ScampPerformance:
         i_df = concat(input_l, axis=0)
         # Look for < 3 coincidences
         i_df = concat(g for _, g in i_df.groupby('source')
-                          if len(g) >= 3)
+                      if len(g) >= 3)
         i_df = i_df.reset_index(drop=True)
         i_df.to_csv('input_sources.csv')
 
@@ -73,7 +68,7 @@ class ScampPerformance:
 
         # Cross with filtered data - Opens datafile
         o_cat = read_csv('{}'.format(filter_o_n), index_col=0)
-        stats_d, out_d = self.create_dict()
+        stats_d, out_d = self.create_dict(scmp_cf, sex_cf)
 
         unique_sources = list(set(i_df['source'].tolist()))
 
@@ -152,13 +147,18 @@ class ScampPerformance:
 
         @param catalog_n:
         @param o_cat:
-        @param i
+        @param i_alpha:
+        @param i_delta:
+
+        @return o_df:
         """
+        tolerance = 0.001
+
         o_df = o_cat[o_cat['CATALOG_NUMBER'].isin([catalog_n])]
-        o_df = o_df[o_df['ALPHA_J2000'] + 0.001 > i_alpha]
-        o_df = o_df[i_alpha > o_df['ALPHA_J2000'] - 0.001]
-        o_df = o_df[o_df['DELTA_J2000'] + 0.001 > i_delta]
-        o_df = o_df[i_delta > o_df['DELTA_J2000'] - 0.001]
+        o_df = o_df[o_df['ALPHA_J2000'] + tolerance > i_alpha]
+        o_df = o_df[i_alpha > o_df['ALPHA_J2000'] - tolerance]
+        o_df = o_df[o_df['DELTA_J2000'] + tolerance > i_delta]
+        o_df = o_df[i_delta > o_df['DELTA_J2000'] - tolerance]
 
         return o_df
 
@@ -191,9 +191,13 @@ class ScampPerformance:
         return True
     """
 
-    def create_dict(self):
+    def create_dict(self, scmp_cf, sex_cf):
         """
 
+        @param scmp_cf:
+        @param sex_cf:
+
+        @return stats_d, out_d
         """
         stats_keys = ['total', 'right', 'false',
                       'f_dr', 'f_pur', 'f_com']
@@ -201,6 +205,28 @@ class ScampPerformance:
         stats_d = {}
         stats_d['PM'] = [0.001, 0.003, 0.01, 0.03, 0.1, 0.3,
                          1, 3, 10, 30, 100, 300]
+
+        scamp_parameters = scmp_cf.split('_')
+        sex_parameters = sex_cf.split('_')
+
+        stats_d['crossid'] = []
+        stats_d['pixscale'] = []
+        stats_d['posangle'] = []
+        stats_d['position'] = []
+        stats_d['deblending'] = []
+        stats_d['threshold'] = []
+        stats_d['mincount'] = []
+        stats_d['area'] = []
+
+        for value_ in range(len(stats_d['PM'])):
+            stats_d['crossid'].append(scamp_parameters[0])
+            stats_d['pixscale'].append(scamp_parameters[1])
+            stats_d['posangle'].append(scamp_parameters[2])
+            stats_d['position'].append(scamp_parameters[3])
+            stats_d['deblending'].append(sex_parameters[0])
+            stats_d['threshold'].append(sex_parameters[1])
+            stats_d['mincount'].append(sex_parameters[3])
+            stats_d['area'].append(sex_parameters[4])
 
         for key_ in stats_keys:
             stats_d[key_] = []

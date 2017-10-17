@@ -188,6 +188,9 @@ class ScampFilter:  # TODO Split scamp_filter method into single methodss
         if not self.check_dir(logger, prfs_d, sex_cf, scmp_cf):
             raise Exception
 
+        logger.debug('running filter for scamp {} and {} sex'.format(scmp_cf,
+                                                                     sex_cf))
+
         # Full catalog name
         full_n = '{}/{}/{}/full_{}_{}_1.cat'.format(prfs_d['catalogs_dir'],
                                                     sex_cf, scmp_cf,
@@ -286,6 +289,6 @@ class ScampFilter:  # TODO Split scamp_filter method into single methodss
         if not path.exists(filter_dir):
             makedirs(filter_dir)
         else:
-            logger.debug('')
+            logger.debug('directory {} already exists'.format(filter_dir))
 
         return True

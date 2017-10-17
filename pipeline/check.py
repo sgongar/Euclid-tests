@@ -224,12 +224,10 @@ class Check:
         @return True if everything goes alright.
         """
         filt_j = []
-        
+
         # Sextractor configurations.
         mode = {'type': 'sextractor'}
         sex_confs, sex_confs_n = create_configurations(logger, prfs_d, mode)
-
-        print "total_conf", total_confs
 
         for mag in prfs_d['mags']:
             for idx_filt in range(0, total_confs, prfs_d['cores_number']):
@@ -240,7 +238,8 @@ class Check:
                         while len(filt_j) < prfs_d['cores_number']:
                             idx = idx_filt + idx_proc
                             (scmp_d, len_confs) = create_scamp_dict(logger,
-                                                                    prfs_d, idx)
+                                                                    prfs_d,
+                                                                    idx)
                             conf = [scmp_d['crossid_radius'],
                                     scmp_d['pixscale_maxerr'],
                                     scmp_d['posangle_maxerr'],
@@ -393,19 +392,20 @@ class Check:
 
         @return True if everything goes alright.
         """
-        filt_j = []
-        
+
         # Sextractor configurations.
         mode = {'type': 'sextractor'}
         sex_confs, sex_confs_n = create_configurations(logger, prfs_d, mode)
-        idx_proc = 0
 
         stats_d = {}
         for mag in prfs_d['mags']:
             for idx_scmp, scmp_conf in enumerate(scmp_confs):
                 for idx_sex, sex_conf in enumerate(sex_confs):
+                    # Set an index.
                     idx = idx_scmp + idx_sex
 
+                    # Scamp configuration.
+                    # Creates a dict from a particular configuration.
                     (scmp_d, len_confs) = create_scamp_dict(logger,
                                                             prfs_d, idx_scmp)
                     conf = [scmp_d['crossid_radius'],
@@ -415,18 +415,23 @@ class Check:
                     scmp_cf = '{}_{}_{}_{}'.format(conf[0], conf[1],
                                                    conf[2], conf[3])
 
+                    # Sextractor configuration.
                     conf = [sex_conf[0], sex_conf[2], sex_conf[2],
                             sex_conf[1], sex_conf[3]]
                     sex_cf = '{}_{}_{}_{}_{}'.format(conf[0], conf[1],
                                                      conf[2], conf[3],
                                                      conf[4])
 
+                    # Runs performance analysis.
                     stats_d[idx] = ScampPerformance().check(logger, prfs_d,
                                                             mag, scmp_cf,
                                                             sex_cf, idx)
 
         tmp_d = {'PM': [], 'total': [], 'right': [], 'false': [],
-                 'f_dr': [], 'f_pur': [], 'f_com': []}
+                 'f_dr': [], 'f_pur': [], 'f_com': [], 'crossid': [],
+                 'pixscale': [], 'posangle': [], 'position': [],
+                 'deblending': [], 'threshold': [], 'mincount': [],
+                 'area': []}
         for conf_key in stats_d.keys():
             for value_key in stats_d[conf_key].keys():
                 for value in stats_d[conf_key][value_key]:
@@ -436,6 +441,7 @@ class Check:
         stats_df.to_csv('stats.csv')
 
         return True
+
 
 if __name__ == '__main__':
     check_process = Check()
