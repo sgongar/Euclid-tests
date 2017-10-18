@@ -6,4 +6,4 @@ install:
   - pip install -r pipeline/test_modules.txt
 script:
   - cd tests
-  - python -m unittest -v test.py
+  - nosetests test.py
