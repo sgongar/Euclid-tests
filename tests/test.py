@@ -19,8 +19,8 @@ from unittest import TestCase, main
 from mock import MagicMock, patch
 
 home = getenv("HOME")
-# path.append('{}/build/sgongar/Euclid-tests/pipeline'.format(home))
-path.append('/mnt/g/dev/Euclid-tests/pipeline')
+path.append('{}/build/sgongar/Euclid-tests/pipeline'.format(home))
+# path.append('/mnt/g/dev/Euclid-tests/pipeline')
 
 from check import Check
 from errors import BadSettings
