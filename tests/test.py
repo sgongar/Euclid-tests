@@ -18,13 +18,7 @@ from types import ModuleType
 from unittest import TestCase, main
 from mock import MagicMock, patch
 
-home = getenv("HOME")
-path.append('{}/build/sgongar/Euclid-tests/pipeline'.format(home))
-# path.append('/mnt/g/dev/Euclid-tests/pipeline')
 
-from check import Check
-from errors import BadSettings
-import misc
 
 
 __author__ = "Samuel Gongora-Garcia"
@@ -50,6 +44,16 @@ class TestCheckOptions(TestCase):
     """
 
     """
+
+    def setUp(self):
+        home = getenv("HOME")
+        path.append('{}/build/sgongar/Euclid-tests/pipeline'.format(home))
+        # path.append('/mnt/g/dev/Euclid-tests/pipeline')
+
+        from check import Check
+        from errors import BadSettings
+        import misc
+
     @patch('misc.extract_settings', side_effect=extract_settings_mock)
     @patch('misc.setting_logger', side_effect=setting_logger_mock)
     @patch.object(Check, 'full_pipeline', return_value=True)
@@ -62,6 +66,7 @@ class TestCheckOptions(TestCase):
 
         return self.assertTrue(Check)
 
+"""
 class TestCheckNoOptions(TestCase):
     """
 
@@ -75,6 +80,7 @@ class TestCheckNoOptions(TestCase):
         argv[1] = '-wrong'
 
         return self.assertRaises(BadSettings, Check)
+"""
 
 if __name__ == '__main__':
     main()
