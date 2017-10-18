@@ -45,7 +45,7 @@ class TestCheckOptions(TestCase):
         """
         define setUp parameters
         """
-        path.append("/mnt/g/dev/Euclid-tests/pipeline")
+        path.append("/home/travis/build/sgongar/Euclid-tests/pipeline")
 
     # TODO Improve side_effect
     @patch('misc.extract_settings', side_effect=extract_settings_mock)
