@@ -20,6 +20,7 @@ from mock import MagicMock, patch
 
 home = getenv("HOME")
 path.append('{}/build/sgongar/Euclid-tests/pipeline'.format(home))
+# path.append('/mnt/g/dev/Euclid-tests/pipeline')
 
 from check import Check
 from errors import BadSettings
@@ -64,7 +65,7 @@ class TestCheckOptions(TestCase):
         # from errors import BadSettings
         # import misc
 
-        print "argv es", argv
+        argv[1] = '-wrong'
 
         self.assertRaises(BadSettings, Check)
 
