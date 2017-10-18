@@ -67,6 +67,9 @@ class TestCheckOptions(TestCase):
 
         return self.assertTrue(Check)
 
+    def tearDrown(self):
+        pass
+
 """
 class TestCheckNoOptions(TestCase):
 
