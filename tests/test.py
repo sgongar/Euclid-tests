@@ -18,6 +18,13 @@ from types import ModuleType
 from unittest import TestCase, main
 from mock import MagicMock, patch
 
+home = getenv("HOME")
+path.append('{}/build/sgongar/Euclid-tests/pipeline'.format(home))
+
+from check import Check
+from errors import BadSettings
+import misc
+
 
 __author__ = "Samuel Gongora-Garcia"
 __copyright__ = "Copyright 2017"
@@ -46,10 +53,7 @@ class TestCheckOptions(TestCase):
         """
         define setUp parameters
         """
-        home = getenv("HOME")
-        path.append('{}/build/sgongar/Euclid-tests/pipeline'.format(home))
 
-        from check import Check
 
     # TODO Improve side_effect
     @patch('misc.extract_settings', side_effect=extract_settings_mock)
@@ -58,9 +62,9 @@ class TestCheckOptions(TestCase):
         """
 
         """
-        from check import Check
-        from errors import BadSettings
-        import misc
+        # from check import Check
+        # from errors import BadSettings
+        # import misc
 
         argv[1] = ''
 
@@ -73,8 +77,8 @@ class TestCheckOptions(TestCase):
         """
 
         """
-        from check import Check
-        import misc
+        # from check import Check
+        # import misc
 
         argv[1] = '-full'
 
