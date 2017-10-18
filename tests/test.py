@@ -76,9 +76,9 @@ class TestCheckOptions(TestCase):
 
 class TestCheckNoOptions(TestCase):
 
-    @patch('misc.extract_settings', side_effect=extract_settings_mock)
     @patch('misc.setting_logger', side_effect=setting_logger_mock)
-    def test_nooptionspassed(self, extract_settings, setting_logger):
+    @patch('misc.extract_settings', side_effect=extract_settings_mock)
+    def test_nooptionspassed(self, setting_logger, extract_settings):
         argv[1] = '-wrong'
 
         return self.assertRaises(BadSettings, Check)
