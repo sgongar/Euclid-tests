@@ -24,7 +24,7 @@ path.append('{}/build/sgongar/Euclid-tests/pipeline'.format(home))
 
 from check import Check
 from errors import BadSettings
-import misc
+#import misc
 
 
 __author__ = "Samuel Gongora-Garcia"
@@ -59,7 +59,7 @@ class TestCheckOptions(TestCase):
     # TODO Improve side_effect
     @patch('misc.extract_settings', side_effect=extract_settings_mock)
     @patch('misc.setting_logger', side_effect=setting_logger_mock)
-    def test_NoOptionsPassed(self, extract_settings, setting_logger):
+    def test_nooptionspassed(self, extract_settings, setting_logger):
 
         # from check import Check
         # from errors import BadSettings
@@ -90,14 +90,6 @@ class TestCheckOptions(TestCase):
     #     argv[1] = '-full'
 
     #     self.assertTrue(Check)
-
-
-    def tearDown(self):
-        """
-        define tearDown parameters
-        """
-        pass
-
 
 if __name__ == '__main__':
     main()
