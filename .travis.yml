@@ -6,4 +6,4 @@ install:
   - pip install -r pipeline/test_modules.txt
 script:
   - cd tests
-  - trial test.py
+  - python -m unittest -v test.py
