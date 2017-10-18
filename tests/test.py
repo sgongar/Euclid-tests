@@ -51,7 +51,7 @@ class TestCheckOptions(TestCase):
 
     """
 
-    def setUp(self):
+    def setup(self):
         print blabla
 
 
@@ -67,7 +67,7 @@ class TestCheckOptions(TestCase):
 
         return self.assertTrue(Check)
 
-    def tearDrown(self):
+    def teardrown(self):
         pass
 
 """
