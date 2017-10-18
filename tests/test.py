@@ -100,7 +100,7 @@ class TestCheckOptions(TestCase):
 
     #     print misc.setting_logger
     #     print argv
-    #     test = Check()
+        test = Check()
 
     #     # self.assertRaises(BadSettings, Check)
 
