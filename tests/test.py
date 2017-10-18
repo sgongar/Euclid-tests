@@ -84,9 +84,9 @@ class TestCheckOptions(TestCase):
 
     # TODO Improve side_effect
     # @patch('misc.extract_settings', side_effect=extract_settings_mock)
-    # @patch('misc.setting_logger', side_effect=setting_logger_mock)
+    @patch('misc.setting_logger', side_effect=setting_logger_mock)
     # def test_nooptionspassed(self, extract_settings, setting_logger):
-    def test_nooptionspassed(self):
+    def test_nooptionspassed(self, setting_logger):
         print misc.setting_logger
 
     #     # from check import Check
