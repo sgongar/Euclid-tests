@@ -69,6 +69,8 @@ class TestCheckOptions(TestCase):
 
         argv[1] = '-wrong'
 
+
+        print misc.setting_logger
         print argv
         test = Check()
 
