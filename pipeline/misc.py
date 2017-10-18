@@ -298,8 +298,8 @@ def create_configurations(logger, prfs_d, mode):
     elif mode['type'] == 'scamp':
         l_crossid_radius = [10]  # seconds
         l_pixscale_maxerr = [1.2]  # scale-factor
-        l_posangle_maxerr = [0.5, 2.5, 5]  # degrees was 0.5, 5
-        l_position_maxerr = [0.083, 0.16, 0.64, 1.28]  # 0.083, 0.16, 0.32, 0.64, 1.28 [1, 2] s
+        l_posangle_maxerr = [0.5, 2.5]  # degrees was 0.5, 5
+        l_position_maxerr = [0.16, 0.64, 1.28]  # 0.083, 0.16, 0.32, 0.64, 1.28 [1, 2] s
 
         configurations = []
 

@@ -1,48 +1,64 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-"""Python script for time measurements
+"""Python script
 
+Versions:
 
 Todo:
     * Improve log messages
+    * astropy.io should be imported as a mocked module not a real one
 
 """
 
-from os import path
+from sys import modules, path
+from types import ModuleType
 
 from unittest import TestCase, main
 from mock import MagicMock, patch
-
-path.append("/pcdisk/holly/sgongora/Documents/Euclid/Euclid-tests/")
 
 
 __author__ = "Samuel Gongora-Garcia"
 __copyright__ = "Copyright 2017"
 __credits__ = ["Samuel Gongora-Garcia"]
-"""
-__license__ = "GPL"
-"""
 __version__ = "0.1"
 __maintainer__ = "Samuel Gongora-Garcia"
 __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
 
 
-class TestSimple(TestCase):
-
+def extract_settings_mock():
     """
     """
+    return True
 
+def setting_logger_mock():
+    """
+    """
+    return True
+
+class TestCheckOptions(TestCase):
+    """
+
+    """
     def setUp(self):
         """
         define setUp parameters
         """
-        pass
+        path.append("/mnt/g/dev/Euclid-tests/pipeline")
 
-    def test(self):
+    # TODO Improve side_effect
+    @patch('misc.extract_settings', side_effect=extract_settings_mock)
+    @patch('misc.setting_logger', side_effect=setting_logger_mock)
+    # @object(SatNetUI, 'initLogo', return_value=True)
+    def test_NoOptionsPassed(self, extract_settings, setting_logger):
+        """
 
-        return True
+        """
+        from check import Check
+        import misc
+
+        self.assertRaises(IndexError, Check)
 
     def tearDown(self):
         """

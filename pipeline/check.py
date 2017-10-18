@@ -59,9 +59,11 @@ class Check:
             if not self.catalog(logger, prfs_d):
                 raise CatalogueError("Catalog couldn't be created")
         elif argv[1] == '-sextractor':
-            self.sextractor(logger, prfs_d)
+            if not self.sextractor(logger, prfs_d):
+                raise Exception
         elif argv[1] == '-scamp':
-            self.scamp(logger, prfs_d, mode, confs)
+            if not self.scamp(logger, prfs_d, mode, confs):
+                return True
         elif argv[1] == '-filter':
             self.filt(logger, prfs_d, mode, confs, total_confs)
         elif argv[1] == '-check':

@@ -1,0 +1,4 @@
+astropy==2.0.2
+mock
+pandas==0.20.3
+statsmodels==0.8.0

@@ -93,14 +93,11 @@ class ScampPerformance:
                 o_df = self.check_source(catalog_n, o_cat, i_alpha, i_delta)
 
                 if o_df.empty is not True:
-                    print "haha"
                     boolean_l.append(True)
                     tmp_catalog.append(catalog_n)
                     tmp_pm.append(pm)
                     tmp_alpha.append(i_alpha)
                     tmp_delta.append(i_delta)
-
-                    print "True"
                 else:
                     # Appends alpha and delta to a temp list
                     # Just to check what happens in that area

@@ -5,6 +5,6 @@ cache: pip
 before_install:
   - sudo apt-get -y install $(cat pipeline/packages.txt)
 install:
-  - pip install -r pipeline/modules.txt
+  - pip install -r pipeline/test_modules.txt
 script:
   - python -m unittest discover -s tests
