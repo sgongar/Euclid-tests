@@ -81,7 +81,7 @@ class TestCheckOptions(TestCase):
         print "1", misc.setting_logger
         argv[1] = '-full'
 
-        self.assertTrue(Check)
+        return self.assertTrue(Check)
 
     # TODO Improve side_effect
     # @patch('misc.extract_settings', side_effect=extract_settings_mock)
@@ -101,9 +101,8 @@ class TestCheckOptions(TestCase):
 
     #     print misc.setting_logger
     #     print argv
-        test = Check()
 
-    #     # self.assertRaises(BadSettings, Check)
+        return self.assertRaises(BadSettings, Check)
 
 if __name__ == '__main__':
     main()
