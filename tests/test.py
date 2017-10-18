@@ -58,9 +58,10 @@ class TestCheckOptions(TestCase):
 
         """
         from check import Check
+        from errors import BadSettings
         import misc
 
-        self.assertRaises(IndexError, Check)
+        self.assertRaises(BadSettings, Check)
 
     def tearDown(self):
         """
