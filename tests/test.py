@@ -7,10 +7,11 @@ Versions:
 
 Todo:
     * Improve log messages
-    * astropy.io should be imported as a mocked module not a real one
+    * 
 
 """
 
+from os import getenv
 from sys import modules, path
 from types import ModuleType
 
@@ -45,8 +46,7 @@ class TestCheckOptions(TestCase):
         """
         define setUp parameters
         """
-        import os
-        home = os.getenv("HOME")
+        home = getenv("HOME")
         path.append('{}/build/sgongar/Euclid-tests/pipeline'.format(home))
 
     # TODO Improve side_effect
@@ -59,9 +59,17 @@ class TestCheckOptions(TestCase):
         """
         from check import Check
         from errors import BadSettings
-        import misc
+        # import misc
 
         self.assertRaises(BadSettings, Check)
+
+    def test_FullOptionChoosen(self):
+        """
+
+        """
+        from check import Check
+        test = Check()
+
 
     def tearDown(self):
         """
