@@ -45,7 +45,7 @@ class TestCheckOptions(TestCase):
 
     """
 
-    def setUp(self):
+    def setUp_fulloptionchoosen(self):
         home = getenv("HOME")
         path.append('{}/build/sgongar/Euclid-tests/pipeline'.format(home))
         # path.append('/mnt/g/dev/Euclid-tests/pipeline')
