@@ -60,10 +60,13 @@ class TestCheckOptions(TestCase):
         from errors import BadSettings
         import misc
 
+        argv[1] = ''
+
         self.assertRaises(BadSettings, Check)
 
     @patch('misc.extract_settings', side_effect=extract_settings_mock)
     @patch('misc.setting_logger', side_effect=setting_logger_mock)
+    @patch.object(Check, 'full_pipeline', return_value=True)
     def test_FullOptionChoosen(self, extract_settings, setting_logger):
         """
 
@@ -71,10 +74,9 @@ class TestCheckOptions(TestCase):
         from check import Check
         import misc
 
-        print argv
         argv[1] = '-full'
 
-        test = Check()
+        self.assertTrue(Check)
 
 
     def tearDown(self):
