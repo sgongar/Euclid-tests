@@ -69,6 +69,9 @@ class TestCheckOptions(TestCase):
 
         argv[1] = '-wrong'
 
+        print argv
+        test = Check()
+
         # self.assertRaises(BadSettings, Check)
 
     # @patch('misc.extract_settings', side_effect=extract_settings_mock)
