@@ -50,57 +50,29 @@ class TestCheckOptions(TestCase):
     """
 
     """
-    # TODO Improve side_effect
-    # @patch('misc.extract_settings', side_effect=extract_settings_mock)
-    # @patch('misc.setting_logger', side_effect=setting_logger_mock)
-    # def test_nooptionspassed(self, extract_settings, setting_logger):
-
-    #     # from check import Check
-    #     # from errors import BadSettings
-    #     # import misc
-
-    #     print misc.setting_logger
-
-    #     argv[1] = '-wrong'
-
-
-    #     print misc.setting_logger
-    #     print argv
-    #     test = Check()
-
-    #     # self.assertRaises(BadSettings, Check)
-
     @patch('misc.extract_settings', side_effect=extract_settings_mock)
     @patch('misc.setting_logger', side_effect=setting_logger_mock)
     @patch.object(Check, 'full_pipeline', return_value=True)
-    def test_FullOptionChoosen(self, extract_settings, setting_logger,
+    def test_fulloptionchoosen(self, extract_settings, setting_logger,
                                full_pipeline):
         """
 
         """
-        print "1", misc.setting_logger
         argv[1] = '-full'
 
         return self.assertTrue(Check)
 
-    # TODO Improve side_effect
-    # @patch('misc.extract_settings', side_effect=extract_settings_mock)
+class TestCheckNoOptions(TestCase):
+    """
+
+    """
+    @patch('misc.extract_settings', side_effect=extract_settings_mock)
     @patch('misc.setting_logger', side_effect=setting_logger_mock)
-    # def test_nooptionspassed(self, extract_settings, setting_logger):
-    def test_nooptionspassed(self, setting_logger):
-        print "2", misc.setting_logger
+    def test_nooptionspassed(self, extract_settings, setting_logger):
+        """
 
-    #     # from check import Check
-    #     # from errors import BadSettings
-    #     # import misc
-
-    #     print misc.setting_logger
-
-    #     argv[1] = '-wrong'
-
-
-    #     print misc.setting_logger
-    #     print argv
+        """
+        argv[1] = '-wrong'
 
         return self.assertRaises(BadSettings, Check)
 
