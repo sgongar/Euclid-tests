@@ -5,6 +5,9 @@
 
 Versions:
 
+Problems:
+    * setup has been ignored
+
 Todo:
     * Improve log messages
     * 
@@ -70,7 +73,7 @@ class TestCheckOptions(TestCase):
     def teardrown(self):
         pass
 
-"""
+
 class TestCheckNoOptions(TestCase):
 
     @patch('misc.extract_settings', side_effect=extract_settings_mock)
@@ -79,7 +82,7 @@ class TestCheckNoOptions(TestCase):
         argv[1] = '-wrong'
 
         return self.assertRaises(BadSettings, Check)
-"""
+
 
 """
 if __name__ == '__main__':
