@@ -45,6 +45,10 @@ class TestCheckOptions(TestCase):
         """
         define setUp parameters
         """
+        import os
+        print os.getenv("HOME")
+
+        
         path.append("/mnt/g/dev/Euclid-tests/pipeline")
 
     # TODO Improve side_effect
@@ -58,8 +62,7 @@ class TestCheckOptions(TestCase):
         from check import Check
         import misc
 
-        import os
-        print os.getenv("HOME")
+
 
         self.assertRaises(IndexError, Check)
 
