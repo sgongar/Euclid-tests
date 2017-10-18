@@ -3,6 +3,8 @@ python:
   - "2.7"
 cache: pip
 before_install:
+  - pwd
+  - ls
   - sudo apt-get -y install $(cat pipeline/packages.txt)
 install:
   - pip install -r pipeline/test_modules.txt
