@@ -12,7 +12,7 @@ Todo:
 """
 
 from os import getenv
-from sys import modules, path
+from sys import argv, modules, path
 from types import ModuleType
 
 from unittest import TestCase, main
@@ -70,6 +70,9 @@ class TestCheckOptions(TestCase):
         """
         from check import Check
         import misc
+
+        print argv
+        argv[1] = '-full'
 
         test = Check()
 
