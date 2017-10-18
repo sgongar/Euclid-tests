@@ -64,7 +64,7 @@ class TestCheckOptions(TestCase):
 
     @patch('misc.extract_settings', side_effect=extract_settings_mock)
     @patch('misc.setting_logger', side_effect=setting_logger_mock)
-    def test_FullOptionChoosen(self):
+    def test_FullOptionChoosen(self, extract_settings, setting_logger):
         """
 
         """
