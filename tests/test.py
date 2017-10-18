@@ -52,22 +52,25 @@ class TestCheckOptions(TestCase):
     # TODO Improve side_effect
     @patch('misc.extract_settings', side_effect=extract_settings_mock)
     @patch('misc.setting_logger', side_effect=setting_logger_mock)
-    # @object(SatNetUI, 'initLogo', return_value=True)
     def test_NoOptionsPassed(self, extract_settings, setting_logger):
         """
 
         """
         from check import Check
         from errors import BadSettings
-        # import misc
+        import misc
 
         self.assertRaises(BadSettings, Check)
 
+    @patch('misc.extract_settings', side_effect=extract_settings_mock)
+    @patch('misc.setting_logger', side_effect=setting_logger_mock)
     def test_FullOptionChoosen(self):
         """
 
         """
         from check import Check
+        import misc
+
         test = Check()
 
 
