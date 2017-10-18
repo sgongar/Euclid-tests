@@ -49,6 +49,8 @@ class TestCheckOptions(TestCase):
         home = getenv("HOME")
         path.append('{}/build/sgongar/Euclid-tests/pipeline'.format(home))
 
+        from check import Check
+
     # TODO Improve side_effect
     @patch('misc.extract_settings', side_effect=extract_settings_mock)
     @patch('misc.setting_logger', side_effect=setting_logger_mock)
