@@ -18,7 +18,13 @@ from types import ModuleType
 from unittest import TestCase, main
 from mock import MagicMock, patch
 
+home = getenv("HOME")
+path.append('{}/build/sgongar/Euclid-tests/pipeline'.format(home))
+# path.append('/mnt/g/dev/Euclid-tests/pipeline')
 
+from check import Check
+from errors import BadSettings
+import misc
 
 
 __author__ = "Samuel Gongora-Garcia"
@@ -46,14 +52,8 @@ class TestCheckOptions(TestCase):
     """
 
     def setUp(self):
-        print "helllloooo"
-        home = getenv("HOME")
-        path.append('{}/build/sgongar/Euclid-tests/pipeline'.format(home))
-        # path.append('/mnt/g/dev/Euclid-tests/pipeline')
+        print blabla
 
-        from check import Check
-        from errors import BadSettings
-        import misc
 
     @patch('misc.extract_settings', side_effect=extract_settings_mock)
     @patch('misc.setting_logger', side_effect=setting_logger_mock)
