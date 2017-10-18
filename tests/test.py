@@ -47,6 +47,7 @@ class TestCheckOptions(TestCase):
         """
         import os
         home = os.getenv("HOME")
+        print "home", home
         path.append('{}/Euclid-tests/pipeline'.format(home))
 
     # TODO Improve side_effect
