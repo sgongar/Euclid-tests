@@ -78,6 +78,7 @@ class TestCheckOptions(TestCase):
         """
 
         """
+        print "1", misc.setting_logger
         argv[1] = '-full'
 
         self.assertTrue(Check)
@@ -87,7 +88,7 @@ class TestCheckOptions(TestCase):
     @patch('misc.setting_logger', side_effect=setting_logger_mock)
     # def test_nooptionspassed(self, extract_settings, setting_logger):
     def test_nooptionspassed(self, setting_logger):
-        print misc.setting_logger
+        print "2", misc.setting_logger
 
     #     # from check import Check
     #     # from errors import BadSettings
