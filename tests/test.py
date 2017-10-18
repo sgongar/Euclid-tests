@@ -80,3 +80,6 @@ class TestCheckNoOptions(TestCase):
 
         return self.assertRaises(BadSettings, Check)
 """
+
+if __name__ == '__main__':
+    main()
