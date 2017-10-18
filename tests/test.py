@@ -51,39 +51,39 @@ class TestCheckOptions(TestCase):
 
     """
     # TODO Improve side_effect
-    @patch('misc.extract_settings', side_effect=extract_settings_mock)
-    @patch('misc.setting_logger', side_effect=setting_logger_mock)
-    def test_nooptionspassed(self, extract_settings, setting_logger):
-
-        # from check import Check
-        # from errors import BadSettings
-        # import misc
-
-        print misc.setting_logger
-
-        argv[1] = '-wrong'
-
-
-        print misc.setting_logger
-        print argv
-        test = Check()
-
-        # self.assertRaises(BadSettings, Check)
-
     # @patch('misc.extract_settings', side_effect=extract_settings_mock)
     # @patch('misc.setting_logger', side_effect=setting_logger_mock)
-    # @patch.object(Check, 'full_pipeline', return_value=True)
-    # def test_FullOptionChoosen(self, extract_settings, setting_logger,
-    #                            full_pipeline):
-    #     """
+    # def test_nooptionspassed(self, extract_settings, setting_logger):
 
-    #     """
     #     # from check import Check
+    #     # from errors import BadSettings
     #     # import misc
 
-    #     argv[1] = '-full'
+    #     print misc.setting_logger
 
-    #     self.assertTrue(Check)
+    #     argv[1] = '-wrong'
+
+
+    #     print misc.setting_logger
+    #     print argv
+    #     test = Check()
+
+    #     # self.assertRaises(BadSettings, Check)
+
+    @patch('misc.extract_settings', side_effect=extract_settings_mock)
+    @patch('misc.setting_logger', side_effect=setting_logger_mock)
+    @patch.object(Check, 'full_pipeline', return_value=True)
+    def test_FullOptionChoosen(self, extract_settings, setting_logger,
+                               full_pipeline):
+        """
+
+        """
+        # from check import Check
+        # import misc
+
+        argv[1] = '-full'
+
+        self.assertTrue(Check)
 
 if __name__ == '__main__':
     main()
