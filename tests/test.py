@@ -78,12 +78,31 @@ class TestCheckOptions(TestCase):
         """
 
         """
-        # from check import Check
-        # import misc
-
         argv[1] = '-full'
 
         self.assertTrue(Check)
+
+    # TODO Improve side_effect
+    # @patch('misc.extract_settings', side_effect=extract_settings_mock)
+    # @patch('misc.setting_logger', side_effect=setting_logger_mock)
+    # def test_nooptionspassed(self, extract_settings, setting_logger):
+    def test_nooptionspassed(self):
+        print misc.setting_logger
+
+    #     # from check import Check
+    #     # from errors import BadSettings
+    #     # import misc
+
+    #     print misc.setting_logger
+
+    #     argv[1] = '-wrong'
+
+
+    #     print misc.setting_logger
+    #     print argv
+    #     test = Check()
+
+    #     # self.assertRaises(BadSettings, Check)
 
 if __name__ == '__main__':
     main()
