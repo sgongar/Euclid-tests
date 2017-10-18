@@ -65,9 +65,11 @@ class TestCheckOptions(TestCase):
         # from errors import BadSettings
         # import misc
 
+        print misc.setting_logger
+
         argv[1] = '-wrong'
 
-        self.assertRaises(BadSettings, Check)
+        # self.assertRaises(BadSettings, Check)
 
     # @patch('misc.extract_settings', side_effect=extract_settings_mock)
     # @patch('misc.setting_logger', side_effect=setting_logger_mock)
