@@ -45,7 +45,7 @@ class TestCheckOptions(TestCase):
         """
         define setUp parameters
         """
-        path.append("/home/travis/build/sgongar/Euclid-tests/pipeline")
+        path.append("/mnt/g/dev/Euclid-tests/pipeline")
 
     # TODO Improve side_effect
     @patch('misc.extract_settings', side_effect=extract_settings_mock)
@@ -57,6 +57,9 @@ class TestCheckOptions(TestCase):
         """
         from check import Check
         import misc
+
+        import os
+        print os.getenv("HOME")
 
         self.assertRaises(IndexError, Check)
 
