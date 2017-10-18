@@ -5,4 +5,5 @@ cache: pip
 install:
   - pip install -r pipeline/test_modules.txt
 script:
-  - python -m unittest discover -s tests
+  - cd tests
+  - trial test.py
