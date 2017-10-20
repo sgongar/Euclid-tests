@@ -194,7 +194,7 @@ def create_sextractor_dict(logger, prfs_d, conf_num, cat_conf):
     @param conf_num:
     @param cat_conf:
 
-    @return analysis_dict:
+    @return analysis_d:
     """
 
     if cat_conf:
@@ -204,7 +204,7 @@ def create_sextractor_dict(logger, prfs_d, conf_num, cat_conf):
         mode = {'type': 'sextractor'}  # harcoded
         configurations, len_conf = create_configurations(logger, prfs_d, mode)
 
-    analysis_list = []
+    analysis_l = []
 
     if type(configurations[0]) is list:
         for configuration in range(len(configurations)):
@@ -215,24 +215,22 @@ def create_sextractor_dict(logger, prfs_d, conf_num, cat_conf):
             temp_list.append(configurations[configuration][2])
             temp_list.append(configurations[configuration][3])
             temp_list.append(configurations[configuration][4])
-            analysis_list.append(temp_list)
-        analysis_dict = {}
-        analysis_dict['deblend_nthresh'] = analysis_list[conf_num][0]
-        analysis_dict['deblend_mincount'] = analysis_list[conf_num][1]
-        analysis_dict['detect_thresh'] = analysis_list[conf_num][2]
-        analysis_dict['analysis_thresh'] = analysis_list[conf_num][3]
-        analysis_dict['detect_minarea'] = analysis_list[conf_num][4]
-        analysis_dict['filter'] = analysis_list[conf_num][5]
+            analysis_l.append(temp_list)
+        analysis_d = {'deblend_nthresh': analysis_l[conf_num][0],
+                      'deblend_mincount': analysis_l[conf_num][1],
+                      'detect_thresh': analysis_l[conf_num][2],
+                      'analysis_thresh': analysis_l[conf_num][3],
+                      'detect_minarea': analysis_l[conf_num][4],
+                      'filter': analysis_l[conf_num][5]}
     else:
-        analysis_dict = {}
-        analysis_dict['deblend_nthresh'] = configurations[0]
-        analysis_dict['deblend_mincount'] = configurations[1]
-        analysis_dict['detect_thresh'] = configurations[2]
-        analysis_dict['analysis_thresh'] = configurations[2]
-        analysis_dict['detect_minarea'] = configurations[3]
-        analysis_dict['filter'] = configurations[4]
+        analysis_d = {'deblend_nthresh': configurations[0],
+                      'deblend_mincount': configurations[1],
+                      'detect_thresh': configurations[2],
+                      'analysis_thresh': configurations[2],
+                      'detect_minarea': configurations[3],
+                      'filter': configurations[4]}
 
-    return analysis_dict, len_conf
+    return analysis_d, len_conf
 
 
 def create_scamp_dict(logger, prfs_d, conf_num):
@@ -279,7 +277,7 @@ def create_configurations(logger, prfs_d, mode):
     """
 
     if mode['type'] == 'sextractor':
-        l_deblending = [20, 30, 40]
+        l_deblending = [20]  # 20, 30, 40
         l_mincount = [0.001, 0.01]
         l_threshold = [1.5]
 
@@ -532,48 +530,20 @@ def pm_compute(logger, merged_db, full_db):
     logger.debug('Computing proper motion error')
     pme = Series(np.sqrt(np.array(pmealpha**2 + pmedelta**2), dtype=float))
 
-    freq_values = []
+    for i in set(full_db['SOURCE_NUMBER']):
+        full_db.loc[full_db['SOURCE_NUMBER'] == i,
+                    'PM'] = pm.loc[i - 1]
+        full_db.loc[full_db['SOURCE_NUMBER'] == i,
+                    'PMERR'] = pme.loc[i - 1]
+        full_db.loc[full_db['SOURCE_NUMBER'] == i,
+                    'PMALPHA'] = pmalpha.loc[i - 1]
+        full_db.loc[full_db['SOURCE_NUMBER'] == i,
+                    'PMDELTA'] = pmdelta.loc[i - 1]
+        full_db.loc[full_db['SOURCE_NUMBER'] == i,
+                    'PMALPHAERR'] = pmealpha.loc[i - 1]
 
-    freq_dict = Counter(full_db['SOURCE_NUMBER'].tolist())
-    sources_list = freq_dict.keys()
-
-    for source_ in sources_list:
-        freq_values.append(freq_dict[source_])
-
-    pm_list = []
-    pme_list = []
-    pmalpha_list = []
-    pmdelta_list = []
-    pmealpha_list = []
-    pmedelta_list = []
-
-    for idx, freq in enumerate(freq_values):
-        tmp = [pm.iloc[idx]] * freq
-        pm_list.append(tmp)
-        tmp = [pme.iloc[idx]] * freq
-        pme_list.append(tmp)
-        tmp = [pmalpha.iloc[idx]] * freq
-        pmalpha_list.append(tmp)
-        tmp = [pmdelta.iloc[idx]] * freq
-        pmdelta_list.append(tmp)
-        tmp = [pmealpha.iloc[idx]] * freq
-        pmealpha_list.append(tmp)
-        tmp = [pmedelta.iloc[idx]] * freq
-        pmedelta_list.append(tmp)
-
-    pm_list = [item for sublist in pm_list for item in sublist]
-    pme_list = [item for sublist in pme_list for item in sublist]
-    pmalpha_list = [item for sublist in pmalpha_list for item in sublist]
-    pmdelta_list = [item for sublist in pmdelta_list for item in sublist]
-    pmealpha_list = [item for sublist in pmealpha_list for item in sublist]
-    pmedelta_list = [item for sublist in pmedelta_list for item in sublist]
-
-    full_db['PM'] = Series(data=pm_list, index=full_db.index)
-    full_db['PMERR'] = Series(data=pme_list, index=full_db.index)
-    full_db['PMALPHA'] = Series(data=pmalpha_list, index=full_db.index)
-    full_db['PMDELTA'] = Series(data=pmdelta_list, index=full_db.index)
-    full_db['PMALPHAERR'] = Series(data=pmealpha_list, index=full_db.index)
-    full_db['PMDELTAERR'] = Series(data=pmedelta_list, index=full_db.index)
+    full_db.loc[full_db['SOURCE_NUMBER'] == i,
+                'PMDELTAERR'] = pmedelta.loc[i - 1]
 
     return full_db
 
