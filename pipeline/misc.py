@@ -183,7 +183,7 @@ def all_same(items):
     elif length_items > 2:
         return False, 0
     else:
-        raise Exception
+        print 'error', items
 
 
 def create_sextractor_dict(logger, prfs_d, conf_num, cat_conf):
@@ -830,6 +830,9 @@ def speeds_range(prfs_d, confidence):
 
 def cats_coherence(cats):
     """
+
+    :param cats:
+    :return:
     """
     step = -9  # For now it is harcoded
 

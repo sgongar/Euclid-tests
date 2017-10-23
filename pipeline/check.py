@@ -71,7 +71,7 @@ class Check:
         elif argv[1] == '-stats':
             self.stats(logger, prfs_d, confs, total_confs)
         elif argv[1] == '-scamp_performance':
-            self.scamp_performance(logger, prfs_d, mode, confs)
+            self.scamp_performance(logger, prfs_d, confs)
         elif argv[1] == '-help':
             pipeline_help(logger)
         else:
@@ -384,7 +384,7 @@ class Check:
 
         return True
 
-    def scamp_performance(self, logger, prfs_d, mode, scmp_confs):
+    def scamp_performance(self, logger, prfs_d, scmp_confs):
         """ Performs a complete pipeline to scamp output.
 
         @param logger:
@@ -399,13 +399,12 @@ class Check:
         mode = {'type': 'sextractor'}
         sex_confs, sex_confs_n = create_configurations(logger, prfs_d, mode)
 
+        idx = 0
         stats_d = {}
         for mag in prfs_d['mags']:
             for idx_scmp, scmp_conf in enumerate(scmp_confs):
                 for idx_sex, sex_conf in enumerate(sex_confs):
                     # Set an index.
-                    idx = idx_scmp + idx_sex
-
                     # Scamp configuration.
                     # Creates a dict from a particular configuration.
                     (scmp_d, len_confs) = create_scamp_dict(logger,
@@ -425,15 +424,18 @@ class Check:
                                                      conf[4])
 
                     # Runs performance analysis.
-                    stats_d[idx] = ScampPerformance().check(logger, prfs_d,
-                                                            mag, scmp_cf,
-                                                            sex_cf, idx)
+                    for confidence_ in prfs_d['confidences']:
+                        idx += 1
+                        stats_d[idx] = ScampPerformance().check(logger, prfs_d,
+                                                                mag, scmp_cf,
+                                                                sex_cf, idx,
+                                                                confidence_)
 
         tmp_d = {'PM': [], 'total': [], 'right': [], 'false': [],
                  'f_dr': [], 'f_pur': [], 'f_com': [], 'crossid': [],
                  'pixscale': [], 'posangle': [], 'position': [],
                  'deblending': [], 'threshold': [], 'mincount': [],
-                 'area': []}
+                 'area': [], 'confidence': []}
         for conf_key in stats_d.keys():
             for value_key in stats_d[conf_key].keys():
                 for value in stats_d[conf_key][value_key]:

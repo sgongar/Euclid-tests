@@ -3,6 +3,9 @@
 
 """Python script for
 
+Versions:
+- 0.2 Now supports confidence intervals
+
 Todo:
     * Improve log messages
 
@@ -10,7 +13,7 @@ Todo:
 
 from pandas import concat, read_csv, DataFrame
 
-from misc import setting_logger, check_distance
+from misc import all_same, speeds_range
 from regions import Create_regions
 
 
@@ -20,7 +23,7 @@ __credits__ = ["Samuel Gongora-Garcia"]
 """
 __license__ = "GPL"
 """
-__version__ = "0.1"
+__version__ = "0.2"
 __maintainer__ = "Samuel Gongora-Garcia"
 __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
@@ -31,7 +34,8 @@ class ScampPerformance:
     def __init__(self):
         pass
 
-    def check(self, logger, prfs_d, mag, scmp_cf, sex_cf, idx_file):
+    def check(self, logger, prfs_d, mag, scmp_cf, sex_cf,
+              idx_file, confidence_):
         """
 
         @param logger:
@@ -62,27 +66,37 @@ class ScampPerformance:
 
         # Open particular file!
 
-        filt_n = 'filt_{}_{}_5.csv'.format(scmp_cf, mag)
+        filt_n = 'filt_{}_{}_4.csv'.format(scmp_cf, mag)
         filter_o_n = '{}/{}/{}/{}'.format(prfs_d['filter_dir'],
                                           sex_cf, scmp_cf, filt_n)
 
         # Cross with filtered data - Opens datafile
         o_cat = read_csv('{}'.format(filter_o_n), index_col=0)
-        stats_d, out_d = self.create_dict(scmp_cf, sex_cf)
+        stats_d, out_d = self.create_dict(scmp_cf, sex_cf, confidence_)
 
+        # Gets unique sources from input data
         unique_sources = list(set(i_df['source'].tolist()))
 
+        # Loops over input data
         for idx_source, source_ in enumerate(unique_sources):
             # Gets associated data in input catalog
             cat = i_df[i_df['source'].isin([source_])]
+            # Creates lists for each source
             boolean_l = []
             tmp_catalog = []
+            tmp_source = []
             tmp_pm = []
             tmp_alpha = []
             tmp_delta = []
+            # Creates a flag for right detections
+            # Initial value will set to False
+            flag_detection = False
 
-            # Iterate over each source
+            # Iterate over each detection of each source
             for i, row in enumerate(cat.itertuples(), 1):
+                source_ = row.source
+                ccd_ = row.CCD
+                dither_ = row.dither_values
                 catalog_n = row.catalog
                 pm = row.pm_values
 
@@ -90,64 +104,94 @@ class ScampPerformance:
                 i_delta = row.delta_j2000
 
                 # Checks if there is a source closed to input one
-                o_df = self.check_source(catalog_n, o_cat, i_alpha, i_delta)
+                # o_cat contains data from output (filtered) catalog
+                o_df = self.check_source(catalog_n, o_cat,
+                                         i_alpha, i_delta)
 
+                # If there is one saves data from input data
                 if o_df.empty is not True:
-                    boolean_l.append(True)
-                    tmp_catalog.append(catalog_n)
-                    tmp_pm.append(pm)
-                    tmp_alpha.append(i_alpha)
-                    tmp_delta.append(i_delta)
+                    pm_mask = self.pm_filter(o_df, pm, prfs_d, confidence_)
+                    if pm_mask:
+                        if o_df['SOURCE_NUMBER'].size != 1:
+                            boolean_l.append('False')
+                        else:
+                            boolean_l.append('True')
+                        tmp_catalog.append(catalog_n)
+                        tmp_source.append(o_df['SOURCE_NUMBER'].iloc[0])
+                        tmp_pm.append(pm)
+                        tmp_alpha.append(i_alpha)
+                        tmp_delta.append(i_delta)
                 else:
-                    # Appends alpha and delta to a temp list
-                    # Just to check what happens in that area
-
                     # Create a big region file with all faults
+                    out_d['source'].append(source_)
+                    out_d['CCD'].append(ccd_)
+                    out_d['dither'].append(dither_)
                     out_d['catalog'].append(catalog_n)
                     out_d['PM'].append(pm)
                     out_d['alpha_j2000'].append(i_alpha)
                     out_d['delta_j2000'].append(i_delta)
 
-                    boolean_l.append(False)
+                    boolean_l.append('False')
 
             # Total number
             idx = stats_d['PM'].index(pm)
             stats_d['total'][idx] += 1
 
-            if len(list(set(boolean_l))) == 1 and list(set(boolean_l))[0] == True:
+            if len(tmp_source) is not 0:
+                flag_detection, sources_number = all_same(tmp_source)
+                if len(list(set(tmp_source))) > 1:
+                    print tmp_source
+
+#            if len(list(set(boolean_l))) == 1 and list(set(boolean_l))[0] == True:
+            if flag_detection and sources_number >= 3:
+                # print tmp_source
                 idx = stats_d['PM'].index(pm)
                 stats_d['right'][idx] += 1
-                print "catalog", tmp_catalog
-                print "pm", tmp_pm
-                print "tmp_alpha", tmp_alpha
-                print "tmp_delta", tmp_delta
+                # print "True", boolean_l
+                # print "catalog", tmp_catalog
+                # print "source", tmp_source
+                # print "pm", tmp_pm
+                # print "tmp_alpha", tmp_alpha
+                # print "tmp_delta", tmp_delta
             else:
                 # self.create_regions(tmp_alpha, tmp_delta, source_)
                 # self.show_regions()
+                # print "False", boolean_l
                 pass
-
-        """
-        stats_df = DataFrame(stats_d)
-        stats_df.to_csv('stats_{}.csv'.format(idx_file))
 
         out_df = DataFrame(out_d)
         # Saves output to easily readable files
-        out_df.to_csv('errors_{}.csv'.format(idx_file))
-        out_df.to_csv('errors_{}.reg'.format(idx_file),
+        out_df.to_csv('errors_{}_{}.csv'.format(idx_file, confidence_))
+        out_df.to_csv('errors_{}_{}.reg'.format(idx_file, confidence_),
                       index=False, header=False, sep=" ")
-        """
 
         return stats_d
+
+    def pm_filter(self, o_df, pm, prfs_d, confidence_):
+        """
+
+        :param o_df:
+        :param pm:
+        :param prfs_d:
+        :param confidence_:
+        :return:
+        """
+        pm_ranges = speeds_range(prfs_d, confidence_)
+        pm_range = pm_ranges[pm]
+
+        if pm_range[0] < float(o_df['PM']) < pm_range[1]:
+            return True
+        else:
+            return False
 
     def check_source(self, catalog_n, o_cat, i_alpha, i_delta):
         """
 
-        @param catalog_n:
-        @param o_cat:
-        @param i_alpha:
-        @param i_delta:
-
-        @return o_df:
+        :param catalog_n:
+        :param o_cat:
+        :param i_alpha:
+        :param i_delta:
+        :return:
         """
         tolerance = 0.001
 
@@ -188,7 +232,7 @@ class ScampPerformance:
         return True
     """
 
-    def create_dict(self, scmp_cf, sex_cf):
+    def create_dict(self, scmp_cf, sex_cf, confidence_):
         """
 
         @param scmp_cf:
@@ -214,6 +258,7 @@ class ScampPerformance:
         stats_d['threshold'] = []
         stats_d['mincount'] = []
         stats_d['area'] = []
+        stats_d['confidence'] = []
 
         for value_ in range(len(stats_d['PM'])):
             stats_d['crossid'].append(scamp_parameters[0])
@@ -224,14 +269,17 @@ class ScampPerformance:
             stats_d['threshold'].append(sex_parameters[1])
             stats_d['mincount'].append(sex_parameters[3])
             stats_d['area'].append(sex_parameters[4])
+            # Confidence
+            stats_d['confidence'].append(confidence_)
 
         for key_ in stats_keys:
             stats_d[key_] = []
             for value_ in range(len(stats_d['PM'])):
                 stats_d[key_].append(0)
 
+        # out dictionary
         out_keys = ['alpha_j2000', 'delta_j2000',
-                    'catalog', 'PM']
+                    'catalog', 'PM', 'source', 'CCD', 'dither']
         out_d = {}
 
         for key_ in out_keys:
