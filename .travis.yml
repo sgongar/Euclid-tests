@@ -3,7 +3,7 @@ python:
   - "2.7"
 install:
   - pwd
-  - apt-get install python-scipy
+  - sudo apt-get install -y python-scipy
   - pip install -r pipeline/test_modules.txt
 script:
   - cd tests
