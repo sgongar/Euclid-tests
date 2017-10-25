@@ -101,7 +101,7 @@ def get_cats(logger):
     prfs_d = extract_settings()
 
     mode = {'type': 'sextractor'}
-    confs, total_confs = create_configurations(logger, prfs_d, mode)
+    confs, total_confs = create_configurations(mode)
 
     folders = []
     for idx, conf_ in enumerate(confs):
@@ -202,7 +202,7 @@ def create_sextractor_dict(logger, prfs_d, conf_num, cat_conf):
         len_conf = 1
     else:
         mode = {'type': 'sextractor'}  # harcoded
-        configurations, len_conf = create_configurations(logger, prfs_d, mode)
+        configurations, len_conf = create_configurations(mode)
 
     analysis_l = []
 
@@ -246,7 +246,7 @@ def create_scamp_dict(logger, prfs_d, conf_num):
     scamp_list = []
     mode = {}
     mode['type'] = 'scamp'
-    configurations, len_conf = create_configurations(logger, prfs_d, mode)
+    configurations, len_conf = create_configurations(mode)
 
     for conf in configurations:
         temp_list = []
@@ -264,22 +264,16 @@ def create_scamp_dict(logger, prfs_d, conf_num):
     return scamp_dict, len_conf
 
 
-def create_configurations(logger, prfs_d, mode):
+def create_configurations(mode):
     """ creates a list of configuration lists merging
         different input parameters
-
-    @param logger: a logger object
-    @param prfs_d:
-    @param mode: sextractor or scamp
-
-    @return configurations: a list of lists containing all
-                            analysis configurations
+    :param mode: can be 'sextractor' or 'scamp'
+    :return:
     """
-
     if mode['type'] == 'sextractor':
-        l_deblending = [20]  # 20, 30, 40
+        l_deblending = [20, 30, 40]
         l_mincount = [0.001, 0.01]
-        l_threshold = [1.5]
+        l_threshold = [1.5, 3]
 
         l_area = [4]
         l_filter_name = ['models/gauss_2.0_5x5.conv']
@@ -296,8 +290,8 @@ def create_configurations(logger, prfs_d, mode):
     elif mode['type'] == 'scamp':
         l_crossid_radius = [10]  # seconds
         l_pixscale_maxerr = [1.2]  # scale-factor
-        l_posangle_maxerr = [0.5, 2.5]  # degrees was 0.5, 5
-        l_position_maxerr = [0.16, 0.64, 1.28]  # 0.083, 0.16, 0.32, 0.64, 1.28 [1, 2] s
+        l_posangle_maxerr = [0.5, 2.5]  # degrees
+        l_position_maxerr = [0.16, 0.64, 1.28]  # minutes
 
         configurations = []
 
@@ -398,11 +392,11 @@ def extract_settings():
     prfs_d['input_ref'] = ConfMap(Cf, "CatsDirs")['input_ref']
 
     prfs_d['first_star'] = ConfMap(Cf, "CatsOrganization")['first_star']
-    prfs_d['first_star'] = int(prfs_d['first_star']) - 1
+    prfs_d['first_star'] = int(prfs_d['first_star'])
     prfs_d['first_galaxy'] = ConfMap(Cf, "CatsOrganization")['first_galaxy']
-    prfs_d['first_galaxy'] = int(prfs_d['first_galaxy']) - 1
+    prfs_d['first_galaxy'] = int(prfs_d['first_galaxy'])
     prfs_d['first_sso'] = ConfMap(Cf, "CatsOrganization")['first_sso']
-    prfs_d['first_sso'] = int(prfs_d['first_sso']) - 1
+    prfs_d['first_sso'] = int(prfs_d['first_sso'])
 
     OutputDirs_list = ['plots_dir', 'results_dir', 'images_out', 'fits_out',
                        'report_out', 'dithers_out', 'catalogs_dir', 'tmp_out',
@@ -795,15 +789,13 @@ def compare_floats(f1, f2, allowed_error):
 def check_distance(x1, x2, y1, y2, allowed_error):
     """
 
-    @param x1:
-    @param x2:
-    @param y1:
-    @param y2:
-    @param allowed_error:
-
-    @return
+    :param x1:
+    :param x2:
+    :param y1:
+    :param y2:
+    :param allowed_error:
+    :return:
     """
-
     distance = hypot(x2 - x1, y2 - y1)
 
     if distance <= allowed_error:

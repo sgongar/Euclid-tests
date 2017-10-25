@@ -32,16 +32,23 @@ __status__ = "Development"
 class ScampPerformance:
 
     def __init__(self):
+        """
+
+        """
         pass
 
     def check(self, logger, prfs_d, mag, scmp_cf, sex_cf,
               idx_file, confidence_):
         """
 
-        @param logger:
-        @param prfs_d:
-
-        @return True: if everything goes alright.
+        :param logger:
+        :param prfs_d:
+        :param mag:
+        :param scmp_cf:
+        :param sex_cf:
+        :param idx_file:
+        :param confidence_:
+        :return:
         """
         # Creates an input dictionary with all input sources
         logger.debug('checking performance for {} and {}'.format(scmp_cf,
@@ -62,10 +69,17 @@ class ScampPerformance:
         i_df = concat(g for _, g in i_df.groupby('source')
                       if len(g) >= 3)
         i_df = i_df.reset_index(drop=True)
-        i_df.to_csv('input_sources.csv')
+        # i_df.to_csv('input_sources.csv')
+
+        """
+        alpha_df = i_df['alpha_j2000']
+        delta_df = i_df['delta_j2000']
+
+        df = concat([alpha_df, delta_df], axis=1)
+        df.to_csv('input_sources.reg')
+        """
 
         # Open particular file!
-
         filt_n = 'filt_{}_{}_4.csv'.format(scmp_cf, mag)
         filter_o_n = '{}/{}/{}/{}'.format(prfs_d['filter_dir'],
                                           sex_cf, scmp_cf, filt_n)
@@ -99,7 +113,6 @@ class ScampPerformance:
                 dither_ = row.dither_values
                 catalog_n = row.catalog
                 pm = row.pm_values
-
                 i_alpha = row.alpha_j2000
                 i_delta = row.delta_j2000
 
@@ -235,17 +248,17 @@ class ScampPerformance:
     def create_dict(self, scmp_cf, sex_cf, confidence_):
         """
 
-        @param scmp_cf:
-        @param sex_cf:
-
-        @return stats_d, out_d
+        :param scmp_cf:
+        :param sex_cf:
+        :param confidence_:
+        :return:
         """
         stats_keys = ['total', 'right', 'false',
                       'f_dr', 'f_pur', 'f_com']
 
         stats_d = {}
-        stats_d['PM'] = [0.001, 0.003, 0.01, 0.03, 0.1, 0.3,
-                         1, 3, 10, 30, 100, 300]
+        stats_d['PM'] = [0.0003, 0.001, 0.003, 0.01, 0.03,
+                         0.1, 0.3, 3, 10, 30, 100, 300]
 
         scamp_parameters = scmp_cf.split('_')
         sex_parameters = sex_cf.split('_')
@@ -285,8 +298,4 @@ class ScampPerformance:
         for key_ in out_keys:
             out_d[key_] = []
 
-        return stats_d, out_d
-
-
-if __name__ == '__main__':
-    performance = ScampPerformance()
+        return (stats_d, out_d)

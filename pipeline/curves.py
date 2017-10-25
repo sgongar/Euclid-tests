@@ -19,7 +19,7 @@ class PMs_vs_Detections:
         logger = setting_logger()
         prfs_d = extract_settings()
         mode = {'type': 'scamp'}
-        confs, total_confs = create_configurations(logger, prfs_d, mode)
+        confs, total_confs = create_configurations(mode)
 
         self.pms_vs_dect(logger, prfs_d, confs)
 
@@ -131,7 +131,7 @@ class Detections_vs_Tolerance:
         logger = setting_logger()
         prfs_d = extract_settings()
         mode = {'type': 'scamp'}
-        confs, total_confs = create_configurations(logger, prfs_d, mode)
+        confs, total_confs = create_configurations(mode)
 
         # Launchs instance
         # self.dect_vs_tol(logger, prfs_d, confs)
@@ -245,7 +245,7 @@ class Detections_vs_Created:
         logger = setting_logger()
         prfs_d = extract_settings()
         mode = {'type': 'scamp'}
-        confs, total_confs = create_configurations(logger, prfs_d, mode)
+        confs, total_confs = create_configurations(mode)
 
         # Launchs instance
         self.dect_vs_created(logger, prfs_d, confs)

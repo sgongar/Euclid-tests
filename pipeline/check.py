@@ -49,7 +49,7 @@ class Check:
         logger = setting_logger()
         prfs_d = extract_settings()
         mode = {'type': 'scamp'}
-        confs, total_confs = create_configurations(logger, prfs_d, mode)
+        confs, total_confs = create_configurations(mode)
 
         if argv[1] == '-full':
             if not self.full_pipeline(logger, prfs_d, mode,
@@ -132,7 +132,7 @@ class Check:
         """
         analysis_dir = prfs_d['fits_dir']
         mode = {'type': 'sextractor'}
-        confs, total_confs = create_configurations(logger, prfs_d, mode)
+        confs, total_confs = create_configurations(mode)
 
         # confs = [1]
 
@@ -187,7 +187,7 @@ class Check:
         @return True: if everything goes alright.
         """
         mode = {'type': 'sextractor'}
-        confs_sex, total_confs = create_configurations(logger, prfs_d, mode)
+        confs_sex, total_confs = create_configurations(mode)
 
         # confs_sex = [1]
 
@@ -229,7 +229,7 @@ class Check:
 
         # Sextractor configurations.
         mode = {'type': 'sextractor'}
-        sex_confs, sex_confs_n = create_configurations(logger, prfs_d, mode)
+        sex_confs, sex_confs_n = create_configurations(mode)
 
         for mag in prfs_d['mags']:
             for idx_filt in range(0, total_confs, prfs_d['cores_number']):
@@ -397,7 +397,7 @@ class Check:
 
         # Sextractor configurations.
         mode = {'type': 'sextractor'}
-        sex_confs, sex_confs_n = create_configurations(logger, prfs_d, mode)
+        sex_confs, sex_confs_n = create_configurations(mode)
 
         idx = 0
         stats_d = {}

@@ -666,6 +666,9 @@ def change_times_thread(logger, prfs_d, fits_image):
     print 'opening {} old header {} dither {}'.format(fits_image,
                                                       header['DATE-OBS'],
                                                       dither)
+    header['CTYPE1'] = 'RA---TAN-SIP'
+    header['CTYPE2'] = 'DEC--TAN-SIP'
+    """
     if dither == '1':
         header['DATE-OBS'] = prfs_d['time_1']
         # Change format
@@ -698,7 +701,7 @@ def change_times_thread(logger, prfs_d, fits_image):
                                                         header['DATE-OBS'],
                                                         header['MJD-OBS'],
                                                         dither)
-
+    """
     fits.writeto(prfs_d['fits_dir'] + '/' + fits_image + 'copy',
                  data, header, clobber=True)
 
@@ -777,9 +780,13 @@ if __name__ == '__main__':
                     [1, 2], [2, 0], [2, 1], [2, 2]]
             for opt_ in opts:
                 mag = '20-21'
-                sex_folders = ['20_1.5_1.5_0.1_4', '20_1.5_1.5_0.01_4',
-                               '20_1.5_1.5_0.001_4', '40_1.5_1.5_0.1_4',
-                               '40_1.5_1.5_0.01_4', '40_1.5_1.5_0.001_4']
+
+                sex_folders = ['20_1.5_1.5_0.001_4', '20_1.5_1.5_0.01_4',
+                               '20_3_3_0.001_4', '20_3_3_0.01_4',
+                               '30_1.5_1.5_0.001_4', '30_1.5_1.5_0.01_4',
+                               '30_3_3_0.001_4', '30_3_3_0.01_4',
+                               '40_1.5_1.5_0.001_4', '40_1.5_1.5_0.01_4',
+                               '40_3_3_0.001_4', '40_3_3_0.01_4']
                 cat_dir = prfs_d['output_cats']
                 for folder_ in sex_folders:
                     for d in range(1, 5, 1):

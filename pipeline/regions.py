@@ -167,20 +167,24 @@ class Create_regions:
             x_values = []
             y_values = []
 
-            speed_0_001 = range(self.prfs_d['first_sso'], 137447, 75)
-            speed_0_003 = range(self.prfs_d['first_sso'] + 10, 137457, 75)
-            speed_0_01 = range(self.prfs_d['first_sso'] + 20, 137467, 75)
-            speed_0_03 = range(self.prfs_d['first_sso'] + 30, 137477, 75)
-            speed_0_1 = range(self.prfs_d['first_sso'] + 40, 137487, 75)
-            speed_0_3 = range(self.prfs_d['first_sso'] + 50, 137497, 75)
-            speed_1 = range(self.prfs_d['first_sso'] + 60, 137507, 75)
+            speed_0_0003 = range(self.prfs_d['first_sso'], 137446, 75)
+            speed_0_001 = range(self.prfs_d['first_sso'] + 10, 137456, 75)
+            speed_0_003 = range(self.prfs_d['first_sso'] + 20, 137466, 75)
+            speed_0_01 = range(self.prfs_d['first_sso'] + 30, 137476, 75)
+            speed_0_03 = range(self.prfs_d['first_sso'] + 40, 137486, 75)
+            speed_0_1 = range(self.prfs_d['first_sso'] + 50, 137496, 75)
+            speed_0_3 = range(self.prfs_d['first_sso'] + 60, 137506, 75)
 
-            speed_3 = range(self.prfs_d['first_sso'] + 66, 137512, 75)
-            speed_10 = range(self.prfs_d['first_sso'] + 67, 137513, 75)
-            speed_30 = range(self.prfs_d['first_sso'] + 68, 137514, 75)
-            speed_100 = range(self.prfs_d['first_sso'] + 69, 137515, 75)
-            speed_300 = range(self.prfs_d['first_sso'] + 70, 137516, 75)
+            speed_3 = range(self.prfs_d['first_sso'] + 67, 137513, 75)
+            speed_10 = range(self.prfs_d['first_sso'] + 68, 137514, 75)
+            speed_30 = range(self.prfs_d['first_sso'] + 69, 137515, 75)
+            speed_100 = range(self.prfs_d['first_sso'] + 70, 137516, 75)
+            speed_300 = range(self.prfs_d['first_sso'] + 71, 137517, 75)
 
+
+            for index in speed_0_0003:
+                list_mag[index] = list_mag[index] - 2.5
+                list_pm[index] = 0.0003
             for index in speed_0_001:
                 list_mag[index] = list_mag[index] - 2.5
                 list_pm[index] = 0.001
@@ -199,9 +203,6 @@ class Create_regions:
             for index in speed_0_3:
                 list_mag[index] = list_mag[index] - 2.5
                 list_pm[index] = 0.3
-            for index in speed_1:
-                list_mag[index] = list_mag[index] - 2.5
-                list_pm[index] = 1
             for index in speed_3:
                 list_pm[index] = list_pm[index] - 1000
             for index in speed_10:
@@ -213,8 +214,8 @@ class Create_regions:
             for index in speed_300:
                 list_pm[index] = list_pm[index] - 1000
 
-            indexes = (speed_0_001 + speed_0_003 + speed_0_01 + speed_0_03 +
-                       speed_0_1 + speed_0_3 + speed_1 + speed_3 + speed_10 +
+            indexes = (speed_0_0003 + speed_0_001 + speed_0_003 + speed_0_01 +
+                       speed_0_03 + speed_0_1 + speed_0_3 + speed_3 + speed_10 +
                        speed_30 + speed_100 + speed_300)
             indexes = sorted(indexes)
 
@@ -225,8 +226,6 @@ class Create_regions:
 
             sources_df = concat([s1, s2, s3, s4], axis=1)
             sources_df = sources_df.iloc[indexes, :]
-
-            # sources_df.to_csv('test_{}.csv'.format(key_))
 
             ccd_loc = 'mag_20-21_CCD_x0_y0_d1.fits'
             fits_loc = '{}/{}'.format(self.prfs_d['fits_dir'], ccd_loc)
@@ -239,7 +238,7 @@ class Create_regions:
                 y_value = sources_df['Y_IMAGE'].as_matrix()[source_num]
                 regions_list.append([x_value, y_value])
 
-            input_regions = w.wcs_pix2world(regions_list, 1)
+            input_regions = w.all_pix2world(regions_list, 1)
 
             alpha_list = []
             delta_list = []
@@ -352,13 +351,13 @@ class Create_regions:
         x_values = []
         y_values = []
 
-        speed_0_001 = range(self.prfs_d['first_sso'], 137447, 75)
-        speed_0_003 = range(self.prfs_d['first_sso'] + 10, 137457, 75)
-        speed_0_01 = range(self.prfs_d['first_sso'] + 20, 137467, 75)
-        speed_0_03 = range(self.prfs_d['first_sso'] + 30, 137477, 75)
-        speed_0_1 = range(self.prfs_d['first_sso'] + 40, 137487, 75)
-        speed_0_3 = range(self.prfs_d['first_sso'] + 50, 137497, 75)
-        speed_1 = range(self.prfs_d['first_sso'] + 60, 137507, 75)
+        speed_0_0003 = range(self.prfs_d['first_sso'], 137447, 75)
+        speed_0_001 = range(self.prfs_d['first_sso'] + 10, 137457, 75)
+        speed_0_003 = range(self.prfs_d['first_sso'] + 20, 137467, 75)
+        speed_0_01 = range(self.prfs_d['first_sso'] + 30, 137477, 75)
+        speed_0_03 = range(self.prfs_d['first_sso'] + 40, 137487, 75)
+        speed_0_1 = range(self.prfs_d['first_sso'] + 50, 137497, 75)
+        speed_0_3 = range(self.prfs_d['first_sso'] + 60, 137507, 75)
 
         speed_3 = range(self.prfs_d['first_sso'] + 66, 137512, 75)
         speed_10 = range(self.prfs_d['first_sso'] + 67, 137513, 75)
@@ -366,6 +365,9 @@ class Create_regions:
         speed_100 = range(self.prfs_d['first_sso'] + 69, 137515, 75)
         speed_300 = range(self.prfs_d['first_sso'] + 70, 137516, 75)
 
+        for index in speed_0_0003:
+            list_mag[index] = list_mag[index] - 2.5
+            list_pm[index] = 0.0003
         for index in speed_0_001:
             list_mag[index] = list_mag[index] - 2.5
             list_pm[index] = 0.001
@@ -384,9 +386,6 @@ class Create_regions:
         for index in speed_0_3:
             list_mag[index] = list_mag[index] - 2.5
             list_pm[index] = 0.3
-        for index in speed_1:
-            list_mag[index] = list_mag[index] - 2.5
-            list_pm[index] = 1
         for index in speed_3:
             list_pm[index] = list_pm[index] - 1000
         for index in speed_10:
@@ -398,8 +397,8 @@ class Create_regions:
         for index in speed_300:
             list_pm[index] = list_pm[index] - 1000
 
-        indexes = (speed_0_001 + speed_0_003 + speed_0_01 + speed_0_03 +
-                   speed_0_1 + speed_0_3 + speed_1 + speed_3 + speed_10 +
+        indexes = (speed_0_0003 + speed_0_001 + speed_0_003 + speed_0_01 +
+                   speed_0_03 + speed_0_1 + speed_0_3 + speed_3 + speed_10 +
                    speed_30 + speed_100 + speed_300)
         indexes = sorted(indexes)
 
