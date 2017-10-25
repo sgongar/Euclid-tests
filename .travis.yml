@@ -4,7 +4,7 @@ python:
 install:
   - pwd
   - sudo apt-get install -y python-scipy
-  - pip install -r pipeline/test_modules.txt
+  - pip install --no-deps -r pipeline/test_modules.txt
 script:
   - cd tests
   - nosetests test.py
