@@ -3,7 +3,7 @@ python:
   - "2.7"
 install:
   - pwd
-  - sudo apt-get install -y python-scipy
+  - sudo apt-get install -y python-numpy python-scipy python-matplotlib ipython ipython-notebook python-pandas python-sympy python-nose
   - pip install --no-deps -r pipeline/test_modules.txt
 script:
   - cd tests
