@@ -585,11 +585,9 @@ def motion_filter(logger, db, r):
             x = np.array(epoch)
             y = np.array(dimension)
             if dimension == ra:
-                sigma = db.loc[db['SOURCE_NUMBER'] == source,
-                               'ERRA_WORLD'].tolist()
+                sigma = db.loc[db['SOURCE_NUMBER'] == source, 'ERRA_WORLD'].tolist()
             if dimension == dec:
-                sigma = db.loc[db['SOURCE_NUMBER'] == source,
-                               'ERRB_WORLD'].tolist()
+                sigma = db.loc[db['SOURCE_NUMBER'] == source, 'ERRB_WORLD'].tolist()
 
             edim = np.array([1 / var for var in sigma])
             x = sm.add_constant(x)

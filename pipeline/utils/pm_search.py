@@ -264,5 +264,3 @@ for source_i in unique_sources:
     pm = i_pm['pm_values'].iloc[0]
 
     print pm, i_pm_21, (pm / i_pm_21)
-
-

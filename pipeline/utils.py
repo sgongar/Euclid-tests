@@ -663,9 +663,9 @@ def change_times_thread(logger, prfs_d, fits_image):
                                 header=True)
     dither = fits_image[-6:-5]
 
-    print 'opening {} old header {} dither {}'.format(fits_image,
+    print('opening {} old header {} dither {}'.format(fits_image,
                                                       header['DATE-OBS'],
-                                                      dither)
+                                                      dither))
     header['CTYPE1'] = 'RA---TAN-SIP'
     header['CTYPE2'] = 'DEC--TAN-SIP'
     """
@@ -705,7 +705,7 @@ def change_times_thread(logger, prfs_d, fits_image):
     fits.writeto(prfs_d['fits_dir'] + '/' + fits_image + 'copy',
                  data, header, clobber=True)
 
-    print "saving to", prfs_d['fits_dir'], '/', fits_image, 'copy'
+    print("saving to", prfs_d['fits_dir'], '/', fits_image, 'copy')
 
     return True
 
@@ -735,9 +735,7 @@ if __name__ == '__main__':
     prfs_d = extract_settings()
 
     try:
-        if argv[1] == '-input':
-            print "input"
-        elif argv[1] == '-change':
+        if argv[1] == '-change':
             change_times(logger, prfs_d)
         elif argv[1] == '-rebase':
             cores_number = prfs_d['cores_number']

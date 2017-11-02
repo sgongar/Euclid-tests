@@ -71,13 +71,11 @@ class ScampPerformance:
         i_df = i_df.reset_index(drop=True)
         # i_df.to_csv('input_sources.csv')
 
-        """
-        alpha_df = i_df['alpha_j2000']
-        delta_df = i_df['delta_j2000']
+        # alpha_df = i_df['alpha_j2000']
+        # delta_df = i_df['delta_j2000']
 
-        df = concat([alpha_df, delta_df], axis=1)
-        df.to_csv('input_sources.reg')
-        """
+        # df = concat([alpha_df, delta_df], axis=1)
+        # df.to_csv('input_sources.reg')
 
         # Open particular file!
         filt_n = 'filt_{}_{}_4.csv'.format(scmp_cf, mag)
@@ -121,8 +119,9 @@ class ScampPerformance:
                 o_df = self.check_source(catalog_n, o_cat,
                                          i_alpha, i_delta)
 
+
                 # If there is one saves data from input data
-                if o_df.empty is not True:
+                if o_df.empty is not True and o_df['PM'].size == 1:
                     pm_mask = self.pm_filter(o_df, pm, prfs_d, confidence_)
                     if pm_mask:
                         if o_df['SOURCE_NUMBER'].size != 1:
@@ -257,8 +256,8 @@ class ScampPerformance:
                       'f_dr', 'f_pur', 'f_com']
 
         stats_d = {}
-        stats_d['PM'] = [0.0003, 0.001, 0.003, 0.01, 0.03,
-                         0.1, 0.3, 3, 10, 30, 100, 300]
+        stats_d['PM'] = [0.001, 0.003, 0.01, 0.03, 0.1, 0.3,
+                         1, 3, 10, 30, 100, 300]
 
         scamp_parameters = scmp_cf.split('_')
         sex_parameters = sex_cf.split('_')

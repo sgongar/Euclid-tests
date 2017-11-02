@@ -69,8 +69,8 @@ class Create_regions:
                                  name='DELTA_J2000')
 
                 full_t = concat([source_l, alpha_l, delta_l], axis=1)
-                print 'out to {}_d{}.csv'.format(self.input_catalogue[:-6],
-                                                 dithers.index(d) + 1)
+                print('out to {}_d{}.csv'.format(self.input_catalogue[:-6],
+                                                 dithers.index(d) + 1))
                 full_t.to_csv('{}_d{}.csv'.format(self.input_catalogue[:-6],
                                                   dithers.index(d) + 1))
         else:
@@ -82,7 +82,7 @@ class Create_regions:
                              name='DELTA_J2000')
 
             full_t = concat([source_l, alpha_l, delta_l], axis=1)
-            print 'writing to {}.csv'.format(self.input_catalogue[:-6])
+            print('writing to {}.csv'.format(self.input_catalogue[:-6]))
             full_t.to_csv('{}.csv'.format(self.input_catalogue[:-6]))
 
     def full_regions(self):
@@ -95,9 +95,7 @@ class Create_regions:
         dithers = [range(1, 34, 4), range(2, 35, 4),
                    range(3, 36, 4), range(4, 37, 4)]
 
-        # hdu_dict = {}
         for d in dithers:
-            print d
             hdu_d = hdu[hdu['CATALOG_NUMBER'].isin(d)]
 
             alpha_list = Series(hdu_d['ALPHA_J2000'].tolist(),
@@ -107,14 +105,12 @@ class Create_regions:
 
             # TODO Fix name to something readable!
             positions_table = concat([alpha_list, delta_list], axis=1)
-            print 'writing to {}_d{}.reg'.format(self.input_catalogue,
-                                                 dithers.index(d) + 1)
+            print('writing to {}_d{}.reg'.format(self.input_catalogue,
+                                                 dithers.index(d) + 1))
             positions_table.to_csv('{}_d{}.reg'.format(self.input_catalogue,
                                                        dithers.index(d) + 1),
                                    index=False, header=False, sep=" ")
 
-        # alpha_list = Series(hdu['ALPHA_J2000'].tolist(), name='ALPHA_J2000')
-        # delta_list = Series(hdu['DELTA_J2000'].tolist(), name='DELTA_J2000')
 
     def fits(self):
         """
@@ -123,14 +119,11 @@ class Create_regions:
         hdu_list = fits.open(self.input_catalogue)
         hdu = hdu_list[2].data
 
-        # alpha_list = Series(hdu['ALPHA_J2000'].tolist(), name='ALPHA_J2000')
-        # delta_list = Series(hdu['DELTA_J2000'].tolist(), name='DELTA_J2000')
-
         alpha_list = Series(hdu['X_WORLD'].tolist(), name='X_WORLD')
         delta_list = Series(hdu['Y_WORLD'].tolist(), name='Y_WORLD')
 
         positions_table = concat([alpha_list, delta_list], axis=1)
-        print 'writing to {}.reg'.format(self.input_catalogue[:-4])
+        print('writing to {}.reg'.format(self.input_catalogue[:-4]))
         positions_table.to_csv('{}.reg'.format(self.input_catalogue[:-4]),
                                index=False, header=False, sep=" ")
 
@@ -152,7 +145,9 @@ class Create_regions:
     def check_luca(self, save, complete):
         """
 
-        @return:
+        :param save:
+        :param complete:
+        :return:
         """
         input_d = self.input_catalogue
 
@@ -167,24 +162,17 @@ class Create_regions:
             x_values = []
             y_values = []
 
-            speed_0_0003 = range(self.prfs_d['first_sso'], 137446, 75)
-            speed_0_001 = range(self.prfs_d['first_sso'] + 10, 137456, 75)
-            speed_0_003 = range(self.prfs_d['first_sso'] + 20, 137466, 75)
-            speed_0_01 = range(self.prfs_d['first_sso'] + 30, 137476, 75)
-            speed_0_03 = range(self.prfs_d['first_sso'] + 40, 137486, 75)
-            speed_0_1 = range(self.prfs_d['first_sso'] + 50, 137496, 75)
-            speed_0_3 = range(self.prfs_d['first_sso'] + 60, 137506, 75)
+            speed_0_001 = range(self.prfs_d['first_sso'], 137378, 73)
+            speed_0_003 = range(self.prfs_d['first_sso'] + 10, 137388, 73)
+            speed_0_01 = range(self.prfs_d['first_sso'] + 20, 137398, 73)
+            speed_0_03 = range(self.prfs_d['first_sso'] + 30, 137408, 73)
+            speed_0_1 = range(self.prfs_d['first_sso'] + 40, 137418, 73)
+            speed_0_3 = range(self.prfs_d['first_sso'] + 50, 137428, 73)
+            speed_1 = range(self.prfs_d['first_sso'] + 60, 137438, 73)
+            speed_3 = range(self.prfs_d['first_sso'] + 67, 137445, 73)
+            speed_10 = range(self.prfs_d['first_sso'] + 68, 137446, 73)
+            speed_30 = range(self.prfs_d['first_sso'] + 69, 137447, 73)
 
-            speed_3 = range(self.prfs_d['first_sso'] + 67, 137513, 75)
-            speed_10 = range(self.prfs_d['first_sso'] + 68, 137514, 75)
-            speed_30 = range(self.prfs_d['first_sso'] + 69, 137515, 75)
-            speed_100 = range(self.prfs_d['first_sso'] + 70, 137516, 75)
-            speed_300 = range(self.prfs_d['first_sso'] + 71, 137517, 75)
-
-
-            for index in speed_0_0003:
-                list_mag[index] = list_mag[index] - 2.5
-                list_pm[index] = 0.0003
             for index in speed_0_001:
                 list_mag[index] = list_mag[index] - 2.5
                 list_pm[index] = 0.001
@@ -203,20 +191,19 @@ class Create_regions:
             for index in speed_0_3:
                 list_mag[index] = list_mag[index] - 2.5
                 list_pm[index] = 0.3
+            for index in speed_1:
+                list_mag[index] = list_mag[index] - 2.5
+                list_pm[index] = 1
             for index in speed_3:
                 list_pm[index] = list_pm[index] - 1000
             for index in speed_10:
                 list_pm[index] = list_pm[index] - 1000
             for index in speed_30:
                 list_pm[index] = list_pm[index] - 1000
-            for index in speed_100:
-                list_pm[index] = list_pm[index] - 1000
-            for index in speed_300:
-                list_pm[index] = list_pm[index] - 1000
 
-            indexes = (speed_0_0003 + speed_0_001 + speed_0_003 + speed_0_01 +
-                       speed_0_03 + speed_0_1 + speed_0_3 + speed_3 + speed_10 +
-                       speed_30 + speed_100 + speed_300)
+            indexes = (speed_0_001 + speed_0_003 + speed_0_01 + speed_0_03 +
+                       speed_0_1 + speed_0_3 + speed_1 + speed_3 + speed_10 +
+                       speed_30)
             indexes = sorted(indexes)
 
             s1 = Series(list_x, name='X_IMAGE', dtype=float64)

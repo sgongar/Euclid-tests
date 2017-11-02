@@ -111,7 +111,7 @@ i_x_3 = 4987.14480850314
 i_y_1 = 2929.31893847003
 i_y_2 = 2930.24464450869
 i_y_3 = 2931.17035054736
-"""
+
 # eighth object 1
 i_x_1 = 5280.94136043445
 i_x_2 = 5287.53489685115
@@ -120,7 +120,7 @@ i_x_3 = 5294.12843326784
 i_y_1 = 9383.98181934815
 i_y_2 = 9389.11864849003
 i_y_3 = 9394.25547763191
-
+"""
 fits_dir = '/home/sgongora/Documents/CarpetaCompartida/luca_data/v14/CCDs/'
 ccd_loc = 'mag_20-21_CCD_x0_y0_d1.fits'
 fits_loc = '{}/{}'.format(fits_dir, ccd_loc)
