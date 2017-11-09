@@ -26,7 +26,7 @@ from misc import setting_logger, extract_settings
 from misc import create_configurations, pipeline_help
 from misc import create_sextractor_dict, create_scamp_dict
 from pandas import DataFrame
-from performance import ScampPerformance
+from performance import SextractorPerformance, ScampPerformance
 from sextractor_aux import Sextractor, CatalogCreation
 from scamp_aux import Scamp, ScampFilter
 from stats_management import ExtractStats
@@ -70,6 +70,8 @@ class Check:
             self.check(logger, prfs_d, confs, total_confs)
         elif argv[1] == '-stats':
             self.stats(logger, prfs_d, confs, total_confs)
+        elif argv[1] == '-error_performance':
+            self.error_performance(logger, prfs_d, confs)
         elif argv[1] == '-scamp_performance':
             self.scamp_performance(logger, prfs_d, confs)
         elif argv[1] == '-help':
@@ -444,6 +446,77 @@ class Check:
         stats_df = DataFrame(tmp_d)
         stats_df.to_csv('stats.csv')
 
+        return True
+
+    def error_performance(self, logger, prfs_d, scmp_confs):
+        """ Performs a complete pipeline to scamp output.
+
+        @param logger:
+        @param prfs_d:
+        @param mode:
+        @param scmp_confs:
+
+        @return True if everything goes alright.
+        """
+        """
+        for mag_ in prfs_d['mags']:
+            for idx_stats in range(0, total_confs, prfs_d['cores_number']):
+                try:
+                    stats_j = []
+                    idx_proc = 0
+                    while len(stats_j) < prfs_d['cores_number']:
+                        idx = idx_stats + idx_proc
+                        logger.debug('creating configuration parameters')
+                        (scmp_d, len_confs) = create_scamp_dict(logger,
+                                                                prfs_d, idx)
+
+                        conf = [scmp_d['crossid_radius'],
+                                scmp_d['pixscale_maxerr'],
+                                scmp_d['posangle_maxerr'],
+                                scmp_d['position_maxerr']]
+
+                        f_conf = '{}_{}_{}_{}'.format(conf[0], conf[1],
+                                                      conf[2], conf[3])
+                        f_name = 'stats_{}_{}.csv'.format(f_conf, mag_)
+
+                        if not path.isfile(f_name):
+                            stats_p = Process(target=ExtractStats,
+                                              args=(logger, mag_, scmp_d,
+                                                    f_conf, filt,))
+                            stats_j.append(stats_p)
+                            stats_p.start()
+
+                        idx_proc += 1
+
+                    active_stats = list([j.is_alive() for j in stats_j])
+                    while True in active_stats:
+                        active_stats = list([j.is_alive() for j in stats_j])
+                        pass
+                    stats_j = []
+                except Exception as e:
+                    print(e)
+        """
+        stats_d = {}
+        idx = 0
+
+        # Sextractor configurations.
+        mode = {'type': 'sextractor'}
+        sex_confs, sex_confs_n = create_configurations(mode)
+
+        for mag in prfs_d['mags']:
+            for idx_sex, sex_conf in enumerate(sex_confs):
+                # Set an index.
+                # Sextractor configuration.
+                conf = [sex_conf[0], sex_conf[2], sex_conf[2],
+                        sex_conf[1], sex_conf[3]]
+                sex_cf = '{}_{}_{}_{}_{}'.format(conf[0], conf[1],
+                                                 conf[2], conf[3],
+                                                 conf[4])
+
+                # Runs performance analysis.
+                stats_d[idx] = SextractorPerformance().error(logger, prfs_d,
+                                                             mag, sex_cf)
+                idx += 1
         return True
 
 

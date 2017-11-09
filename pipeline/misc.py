@@ -608,6 +608,10 @@ def motion_filter(logger, db, r):
 def confidence_filter(logger, db, r):
     """
 
+    :param logger:
+    :param db:
+    :param r:
+    :return:
     """
     passed = []
     for i, source in enumerate(set(db['SOURCE_NUMBER'])):

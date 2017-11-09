@@ -142,6 +142,283 @@ class Create_regions:
         positions_table.to_csv('{}.reg'.format(self.input_catalogue),
                                index=False, header=False, sep=" ")
 
+    def check_stars(self, save, complete):
+        """
+
+        :param save:
+        :param complete:
+        :return:
+        """
+        input_d = self.input_catalogue
+
+        for dither_ in input_d.keys():
+            catalog = genfromtxt(input_d[dither_])
+
+            list_x = catalog[:, 0]
+            list_y = catalog[:, 1]
+            list_mag = catalog[:, 2]
+            list_pm = catalog[:, 3]
+
+            x_values = []
+            y_values = []
+
+            stars = range(0, 12471, 1)
+            indexes = sorted(stars)
+
+            s1 = Series(list_x, name='X_IMAGE', dtype=float64)
+            s2 = Series(list_y, name='Y_IMAGE', dtype=float64)
+            s3 = Series(list_mag, name='MAG_VALUES', dtype=float64)
+            s4 = Series(list_pm, name='PM_INPUT', dtype=float64)
+
+            sources_df = concat([s1, s2, s3, s4], axis=1)
+            sources_df = sources_df.iloc[indexes, :]
+
+            ccd_loc = 'mag_20-21_CCD_x0_y0_d1.fits'
+            fits_loc = '{}/{}'.format(self.prfs_d['fits_dir'], ccd_loc)
+            hdulist = fits.open(fits_loc)
+            w = WCS(hdulist[0].header)
+
+            regions_list = []
+            for source_num in range(sources_df['X_IMAGE'].as_matrix().size):
+                x_value = sources_df['X_IMAGE'].as_matrix()[source_num]
+                y_value = sources_df['Y_IMAGE'].as_matrix()[source_num]
+                regions_list.append([x_value, y_value])
+
+            input_regions = w.all_pix2world(regions_list, 1)
+
+            alpha_list = []
+            delta_list = []
+            for idx, regions in enumerate(input_regions):
+                alpha_list.append(regions[0])
+                delta_list.append(regions[1])
+                x_values.append(regions_list[idx][0])
+                y_values.append(regions_list[idx][1])
+
+            fits_files_all = get_fits_d(dither=dither_)
+
+            fits_dict = {}
+            for fits_ in fits_files_all:
+                CCD = fits_[-13:-8]
+                fits_file = self.prfs_d['fits_dir'] + '/' + fits_
+                fits_dict[CCD] = get_fits_limits(fits_file)
+
+            i = 0
+            CCD_list = []
+            for alpha_, delta_ in zip(alpha_list, delta_list):
+                i += 1
+                flag = True
+                for key_ in fits_dict.keys():
+                    below_ra = fits_dict[key_]['below_ra']
+                    above_ra = fits_dict[key_]['above_ra']
+                    below_dec = fits_dict[key_]['below_dec']
+                    above_dec = fits_dict[key_]['above_dec']
+                    alpha_comp = below_ra < alpha_ < above_ra
+                    delta_comp = below_dec < delta_ < above_dec
+                    if alpha_comp and delta_comp:
+                        CCD_list.append(key_)
+                        flag = False
+                if flag:
+                    CCD_list.append('False')
+
+            # Creates a list for all sources
+            source_list = range(0, len(alpha_list), 1)
+            # Populates a list for all sources with the dither number
+            dither_list = []
+            for dither_idx in range(len(alpha_list)):
+                dither_list.append(dither_)
+
+            cats = [['x0_y0', 1, 1], ['x0_y0', 2, 2], ['x0_y0', 3, 3],
+                    ['x0_y0', 4, 4], ['x0_y1', 1, 5], ['x0_y1', 2, 6],
+                    ['x0_y1', 3, 7], ['x0_y1', 4, 8], ['x0_y2', 1, 9],
+                    ['x0_y2', 2, 10], ['x0_y2', 3, 11], ['x0_y2', 4, 12],
+                    ['x1_y0', 1, 13], ['x1_y0', 2, 14], ['x1_y0', 3, 15],
+                    ['x1_y0', 4, 16], ['x1_y1', 1, 17], ['x1_y1', 2, 18],
+                    ['x1_y1', 3, 19], ['x1_y1', 4, 20], ['x1_y2', 1, 21],
+                    ['x1_y2', 2, 22], ['x1_y2', 3, 23], ['x1_y2', 4, 24],
+                    ['x2_y0', 1, 25], ['x2_y0', 2, 26], ['x2_y0', 3, 27],
+                    ['x2_y0', 4, 28], ['x2_y1', 1, 29], ['x2_y1', 2, 30],
+                    ['x2_y1', 3, 31], ['x2_y1', 4, 32], ['x2_y2', 1, 33],
+                    ['x2_y2', 2, 34], ['x2_y2', 3, 35], ['x2_y2', 4, 36]]
+
+            cats_list = []
+            for dither_, CCD_ in zip(dither_list, CCD_list):
+                flag = True
+                for cat_ in cats:
+                    if cat_[1] == dither_ and cat_[0] == CCD_:
+                        flag = False
+                        cats_list.append(cat_[2])
+
+                if flag:
+                    cats_list.append(False)
+
+            # Creates a serie of Pandas Series
+            source = Series(source_list, name='source')
+
+            alpha_j2000 = Series(alpha_list, name='alpha_j2000')
+            delta_j2000 = Series(delta_list, name='delta_j2000')
+            mag = Series(sources_df['MAG_VALUES'].tolist(), name='mag_values')
+            pm = Series(sources_df['PM_INPUT'].tolist(), name='pm_values')
+            dither = Series(dither_list, name='dither_values')
+            CCD = Series(CCD_list, name='CCD')
+            cat = Series(cats_list, name='catalog')
+
+            if complete:
+                sources_df = concat([source, cat, alpha_j2000, delta_j2000,
+                                     mag, pm, dither, CCD], axis=1)
+                sources_df = sources_df[~sources_df['CCD'].isin(['False'])]
+
+            else:
+                sources_df = concat([alpha_j2000, delta_j2000], axis=1)
+
+            dither_output = '{}/dither_{}'.format(self.prfs_d['dithers_out'],
+                                                  dither_)
+
+            if save and not path.isfile(dither_output):
+                sources_df.to_csv(dither_output)
+
+            input_d[dither_] = sources_df
+
+        return input_d
+
+    def check_galaxies(self, save, complete):
+        """
+
+        :param save:
+        :param complete:
+        :return:
+        """
+        input_d = self.input_catalogue
+
+        for dither_ in input_d.keys():
+            catalog = genfromtxt(input_d[dither_])
+
+            list_x = catalog[:, 0]
+            list_y = catalog[:, 1]
+            list_mag = catalog[:, 2]
+            list_pm = catalog[:, 3]
+
+            x_values = []
+            y_values = []
+
+            galaxies = range(12471, 134892, 1)
+            indexes = sorted(galaxies)
+
+            s1 = Series(list_x, name='X_IMAGE', dtype=float64)
+            s2 = Series(list_y, name='Y_IMAGE', dtype=float64)
+            s3 = Series(list_mag, name='MAG_VALUES', dtype=float64)
+            s4 = Series(list_pm, name='PM_INPUT', dtype=float64)
+
+            sources_df = concat([s1, s2, s3, s4], axis=1)
+            sources_df = sources_df.iloc[indexes, :]
+
+            ccd_loc = 'mag_20-21_CCD_x0_y0_d1.fits'
+            fits_loc = '{}/{}'.format(self.prfs_d['fits_dir'], ccd_loc)
+            hdulist = fits.open(fits_loc)
+            w = WCS(hdulist[0].header)
+
+            regions_list = []
+            for source_num in range(sources_df['X_IMAGE'].as_matrix().size):
+                x_value = sources_df['X_IMAGE'].as_matrix()[source_num]
+                y_value = sources_df['Y_IMAGE'].as_matrix()[source_num]
+                regions_list.append([x_value, y_value])
+
+            input_regions = w.all_pix2world(regions_list, 1)
+
+            alpha_list = []
+            delta_list = []
+            for idx, regions in enumerate(input_regions):
+                alpha_list.append(regions[0])
+                delta_list.append(regions[1])
+                x_values.append(regions_list[idx][0])
+                y_values.append(regions_list[idx][1])
+
+            fits_files_all = get_fits_d(dither=dither_)
+
+            fits_dict = {}
+            for fits_ in fits_files_all:
+                CCD = fits_[-13:-8]
+                fits_file = self.prfs_d['fits_dir'] + '/' + fits_
+                fits_dict[CCD] = get_fits_limits(fits_file)
+
+            i = 0
+            CCD_list = []
+            for alpha_, delta_ in zip(alpha_list, delta_list):
+                i += 1
+                flag = True
+                for key_ in fits_dict.keys():
+                    below_ra = fits_dict[key_]['below_ra']
+                    above_ra = fits_dict[key_]['above_ra']
+                    below_dec = fits_dict[key_]['below_dec']
+                    above_dec = fits_dict[key_]['above_dec']
+                    alpha_comp = below_ra < alpha_ < above_ra
+                    delta_comp = below_dec < delta_ < above_dec
+                    if alpha_comp and delta_comp:
+                        CCD_list.append(key_)
+                        flag = False
+                if flag:
+                    CCD_list.append('False')
+
+            # Creates a list for all sources
+            source_list = range(0, len(alpha_list), 1)
+            # Populates a list for all sources with the dither number
+            dither_list = []
+            for dither_idx in range(len(alpha_list)):
+                dither_list.append(dither_)
+
+            cats = [['x0_y0', 1, 1], ['x0_y0', 2, 2], ['x0_y0', 3, 3],
+                    ['x0_y0', 4, 4], ['x0_y1', 1, 5], ['x0_y1', 2, 6],
+                    ['x0_y1', 3, 7], ['x0_y1', 4, 8], ['x0_y2', 1, 9],
+                    ['x0_y2', 2, 10], ['x0_y2', 3, 11], ['x0_y2', 4, 12],
+                    ['x1_y0', 1, 13], ['x1_y0', 2, 14], ['x1_y0', 3, 15],
+                    ['x1_y0', 4, 16], ['x1_y1', 1, 17], ['x1_y1', 2, 18],
+                    ['x1_y1', 3, 19], ['x1_y1', 4, 20], ['x1_y2', 1, 21],
+                    ['x1_y2', 2, 22], ['x1_y2', 3, 23], ['x1_y2', 4, 24],
+                    ['x2_y0', 1, 25], ['x2_y0', 2, 26], ['x2_y0', 3, 27],
+                    ['x2_y0', 4, 28], ['x2_y1', 1, 29], ['x2_y1', 2, 30],
+                    ['x2_y1', 3, 31], ['x2_y1', 4, 32], ['x2_y2', 1, 33],
+                    ['x2_y2', 2, 34], ['x2_y2', 3, 35], ['x2_y2', 4, 36]]
+
+            cats_list = []
+            for dither_, CCD_ in zip(dither_list, CCD_list):
+                flag = True
+                for cat_ in cats:
+                    if cat_[1] == dither_ and cat_[0] == CCD_:
+                        flag = False
+                        cats_list.append(cat_[2])
+
+                if flag:
+                    cats_list.append(False)
+
+            # Creates a serie of Pandas Series
+            source = Series(source_list, name='source')
+
+            alpha_j2000 = Series(alpha_list, name='alpha_j2000')
+            delta_j2000 = Series(delta_list, name='delta_j2000')
+            mag = Series(sources_df['MAG_VALUES'].tolist(), name='mag_values')
+            pm = Series(sources_df['PM_INPUT'].tolist(), name='pm_values')
+            dither = Series(dither_list, name='dither_values')
+            CCD = Series(CCD_list, name='CCD')
+            cat = Series(cats_list, name='catalog')
+
+            if complete:
+                sources_df = concat([source, cat, alpha_j2000, delta_j2000,
+                                     mag, pm, dither, CCD], axis=1)
+                sources_df = sources_df[~sources_df['CCD'].isin(['False'])]
+
+            else:
+                sources_df = concat([alpha_j2000, delta_j2000], axis=1)
+
+            dither_output = '{}/dither_{}'.format(self.prfs_d['dithers_out'],
+                                                  dither_)
+
+            if save and not path.isfile(dither_output):
+                sources_df.to_csv(dither_output)
+
+            input_d[dither_] = sources_df
+
+        return input_d
+
+
     def check_luca(self, save, complete):
         """
 

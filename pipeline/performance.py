@@ -1,16 +1,23 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-"""Python script for
+"""Python script for performance
 
 Versions:
 - 0.2 Now supports confidence intervals
+- 0.3 Sextractor performance's added
 
 Todo:
     * Improve log messages
 
 """
+from os import makedirs, path
 
+from astropy.io import fits
+from astropy.table import Table
+from matplotlib.backends.backend_pdf import PdfPages
+import matplotlib.pyplot as plt
+from numpy import arange
 from pandas import concat, read_csv, DataFrame
 
 from misc import all_same, speeds_range
@@ -20,13 +27,293 @@ from regions import Create_regions
 __author__ = "Samuel Gongora-Garcia"
 __copyright__ = "Copyright 2017"
 __credits__ = ["Samuel Gongora-Garcia"]
-"""
-__license__ = "GPL"
-"""
-__version__ = "0.2"
+__version__ = "0.3"
 __maintainer__ = "Samuel Gongora-Garcia"
 __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
+
+
+class SextractorPerformance:
+
+    def __init__(self):
+        """
+
+        """
+        pass
+
+    def error(self, logger, prfs_d, mag, sex_cf):
+        """
+
+        :param logger:
+        :param prfs_d:
+        :param mag:
+        :param scmp_cf:
+        :param sex_cf:
+        :param idx_file:
+        :param confidence_:
+        :return:
+        """
+        # For now any file is saved
+        save = False
+
+        # Input sources
+        input_ssos_d = {}
+        for d in range(1, 5, 1):
+            input_ssos_d[d] = '{}/Cat_20-21_d{}.dat'.format(prfs_d['input_ref'],
+                                                            d)
+        input_ssos_d = Create_regions(input_ssos_d, prfs_d).check_luca(True, True)
+
+        # Creates a DataFrame from an input dictionary
+        input_ssos_l = []
+        for key_ in input_ssos_d.keys():
+            input_ssos_l.append(input_ssos_d[key_])
+
+        i_ssos_df = concat(input_ssos_l, axis=0)
+        i_ssos_df = i_ssos_df.reset_index(drop=True)
+
+        # Stars
+        input_stars_d = {}
+        for d in range(1, 5, 1):
+            input_stars_d[d] = '{}/Cat_20-21_d{}.dat'.format(prfs_d['input_ref'],
+                                                             d)
+        input_stars_d = Create_regions(input_stars_d, prfs_d).check_stars(True, True)
+
+        # Creates a DataFrame from an input dictionary
+        input_stars_l = []
+        for key_ in input_stars_d.keys():
+            input_stars_l.append(input_stars_d[key_])
+
+        i_stars_df = concat(input_stars_l, axis=0)
+        i_stars_df = i_stars_df.reset_index(drop=True)
+
+        # Galaxies
+        input_galaxies_d = {}
+        for d in range(1, 5, 1):
+            input_galaxies_d[d] = '{}/Cat_20-21_d{}.dat'.format(prfs_d['input_ref'],
+                                                                d)
+        input_galaxies_d = Create_regions(input_galaxies_d,
+                                          prfs_d).check_galaxies(True, True)
+
+        # Creates a DataFrame from an input dictionary
+        input_galaxies_l = []
+        for key_ in input_galaxies_d.keys():
+            input_galaxies_l.append(input_galaxies_d[key_])
+
+        i_galaxies_df = concat(input_galaxies_l, axis=0)
+        i_galaxies_df = i_galaxies_df.reset_index(drop=True)
+
+        # Creates an input dictionary with all input sources
+        logger.debug('checking performance for {}'.format(sex_cf))
+
+        opts = [[0, 0], [0, 1], [0, 2], [1, 0], [1, 1],
+                [1, 2], [2, 0], [2, 1], [2, 2]]
+        for opt in opts:
+            for dither in range(1, 5, 1):
+                # Lists definition
+                mags_stars = []
+                errors_a_stars = []
+                errors_b_stars = []
+                mags_galaxies = []
+                errors_a_galaxies = []
+                errors_b_galaxies = []
+                mags_ssos = []
+                errors_a_ssos = []
+                errors_b_ssos = []
+
+                cat_n = 'mag_{}_CCD_x{}_y{}_d{}.cat'.format(mag, opt[0], opt[1],
+                                                            dither)
+                cat_o_n = '{}/{}/{}'.format(prfs_d['fits_dir'], sex_cf, cat_n)
+
+                hdu_list = fits.open(cat_o_n)
+                o_cat = Table(hdu_list[2].data).to_pandas()
+
+                i_stars_d_df = i_stars_df[i_stars_df['dither_values'].isin([dither])]
+                i_galaxies_d_df = i_galaxies_df[i_galaxies_df['dither_values'].isin([dither])]
+                i_ssos_d_df = i_ssos_df[i_ssos_df['dither_values'].isin([dither])]
+                for idx, row in o_cat.iterrows():
+                    # tmp_flag = False
+                    tmp_count = 0
+
+                    i_alpha = row['ALPHA_J2000']
+                    i_delta = row['DELTA_J2000']
+                    o_df = self.search(i_stars_d_df, i_alpha, i_delta)
+                    if o_df.empty is not True:
+                        # tmp_flag = True
+                        mags_stars.append(row['MAG_AUTO'])
+                        errors_a_stars.append(row['ERRA_IMAGE'])
+                        errors_b_stars.append(row['ERRB_IMAGE'])
+                        tmp_count += 1
+                    o_df = self.search(i_galaxies_d_df, i_alpha, i_delta)
+                    if o_df.empty is not True:
+                        # tmp_flag = True
+                        mags_galaxies.append(row['MAG_AUTO'])
+                        errors_a_galaxies.append(row['ERRA_IMAGE'])
+                        errors_b_galaxies.append(row['ERRB_IMAGE'])
+                        tmp_count += 1
+                    o_df = self.search(i_ssos_d_df, i_alpha, i_delta)
+                    if o_df.empty is not True:
+                        # tmp_flag = True
+                        mags_ssos.append(row['MAG_AUTO'])
+                        errors_a_ssos.append(row['ERRA_IMAGE'])
+                        errors_b_ssos.append(row['ERRB_IMAGE'])
+                        tmp_count += 1
+
+                    # if tmp_count > 1:
+                    #     raise Exception
+
+                sextractor_folder = '{}/{}'.format(prfs_d['plots_dir'], sex_cf)
+                if not path.exists(sextractor_folder):
+                    makedirs(sextractor_folder)
+
+                with PdfPages('{}/{}_log.pdf'.format(sextractor_folder,
+                                                     cat_n[:-4])) as pdf:
+                    # plt.title('Source {} - {} - {}'.format(source_, coordinate, fitted.rsquared))
+                    fig = plt.figure(figsize=(16.53, 11.69), dpi=100)
+                    ax = fig.add_subplot(1, 1, 1)
+
+                    ax.semilogy(mags_stars, errors_a_stars, 'bs', markersize=1)
+                    ax.semilogy(mags_galaxies, errors_a_galaxies, 'gs', markersize=1)
+                    ax.semilogy(mags_ssos, errors_a_ssos, 'rs', markersize=1)
+
+                    ax.set_xlabel('mag')
+                    ax.set_ylabel('error a')
+                    ax.set_xlim([14, 28])
+                    # ax.set_ylim([0.001, 1])
+                    # ax.set_yscale('log')
+            
+                    # x-scale
+                    x_major_ticks = arange(14, 28, 0.5)
+                    x_minor_ticks = arange(14, 28, 0.1)
+                    ax.set_xticks(x_major_ticks, minor=False)
+                    ax.set_xticks(x_minor_ticks, minor=True)
+
+                    # y-scale
+                    # y_major_ticks = arange(0, 0.75, 0.25)
+                    # y_minor_ticks = arange(0, 0.75, 0.125)
+                    # ax.set_yticks(y_major_ticks, minor=True)
+                    # ax.set_yticks(y_minor_ticks, minor=True)
+
+                    """
+                    # ax.set_xlim([14, 28])
+                    # ax.set_xscale()
+                    # ax.set_ylim([0.001, 1])
+                    """
+                    ax.grid(b=True, which='major', linestyle='-', linewidth=2)
+                    ax.grid(b=True, which='minor', linestyle='--', linewidth=1)
+                    # plt.show()
+                    # print("params", list(params))
+                    pdf.savefig()
+                    plt.clf()  # Clear current figure
+
+                    # B parameters
+                    fig = plt.figure(figsize=(16.53, 11.69), dpi=100)
+                    ax = fig.add_subplot(1, 1, 1)
+
+                    ax.semilogy(mags_stars, errors_b_stars, 'bs', markersize=1)
+                    ax.semilogy(mags_galaxies, errors_b_galaxies, 'gs', markersize=1)
+                    ax.semilogy(mags_ssos, errors_b_ssos, 'rs', markersize=1)
+
+                    ax.set_xlabel('mag')
+                    ax.set_ylabel('error b')
+                    ax.set_xlim([14, 28])
+                    # ax.set_ylim([0.001, 1])
+                    # ax.set_yscale('log')
+
+                    # x-scale
+                    x_major_ticks = arange(14, 28, 0.5)
+                    x_minor_ticks = arange(14, 28, 0.1)
+                    ax.set_xticks(x_major_ticks, minor=False)
+                    ax.set_xticks(x_minor_ticks, minor=True)
+
+                    # y-scale
+                    # y_major_ticks = arange(0, 0.75, 0.25)
+                    # y_minor_ticks = arange(0, 0.75, 0.125)
+                    # ax.set_yticks(y_major_ticks, minor=True)
+                    # ax.set_yticks(y_minor_ticks, minor=True)
+
+                    """
+                    # ax.set_xlim([14, 28])
+                    # ax.set_xscale()
+                    # ax.set_ylim([0.001, 1])
+                    """
+                    ax.grid(b=True, which='major', linestyle='-', linewidth=2)
+                    ax.grid(b=True, which='minor', linestyle='--', linewidth=1)
+                    # plt.show()
+                    # print("params", list(params))
+                    pdf.savefig()
+
+
+    def search(self, o_cat, i_alpha, i_delta):
+        """
+
+        :param o_cat:
+        :param i_alpha:
+        :param i_delta:
+        :return:
+        """
+        tolerance = 0.0001
+
+        o_df = o_cat[o_cat['alpha_j2000'] + tolerance > i_alpha]
+        o_df = o_df[i_alpha > o_df['alpha_j2000'] - tolerance]
+        o_df = o_df[o_df['delta_j2000'] + tolerance > i_delta]
+        o_df = o_df[i_delta > o_df['delta_j2000'] - tolerance]
+
+        return o_df
+
+    def create_dict(self, scmp_cf, sex_cf, confidence_):
+        """
+
+        :param scmp_cf:
+        :param sex_cf:
+        :param confidence_:
+        :return:
+        """
+        stats_keys = ['total', 'right', 'false',
+                      'f_dr', 'f_pur', 'f_com']
+
+        stats_d = {}
+        stats_d['PM'] = [0.001, 0.003, 0.01, 0.03, 0.1, 0.3,
+                         1, 3, 10, 30, 100, 300]
+
+        scamp_parameters = scmp_cf.split('_')
+        sex_parameters = sex_cf.split('_')
+
+        stats_d['crossid'] = []
+        stats_d['pixscale'] = []
+        stats_d['posangle'] = []
+        stats_d['position'] = []
+        stats_d['deblending'] = []
+        stats_d['threshold'] = []
+        stats_d['mincount'] = []
+        stats_d['area'] = []
+        stats_d['confidence'] = []
+
+        for value_ in range(len(stats_d['PM'])):
+            stats_d['crossid'].append(scamp_parameters[0])
+            stats_d['pixscale'].append(scamp_parameters[1])
+            stats_d['posangle'].append(scamp_parameters[2])
+            stats_d['position'].append(scamp_parameters[3])
+            stats_d['deblending'].append(sex_parameters[0])
+            stats_d['threshold'].append(sex_parameters[1])
+            stats_d['mincount'].append(sex_parameters[3])
+            stats_d['area'].append(sex_parameters[4])
+            # Confidence
+            stats_d['confidence'].append(confidence_)
+
+        for key_ in stats_keys:
+            stats_d[key_] = []
+            for value_ in range(len(stats_d['PM'])):
+                stats_d[key_].append(0)
+
+        # out dictionary
+        out_keys = ['alpha_j2000', 'delta_j2000',
+                    'catalog', 'PM', 'source', 'CCD', 'dither']
+        out_d = {}
+
+        for key_ in out_keys:
+            out_d[key_] = []
+
+        return (stats_d, out_d)
 
 
 class ScampPerformance:
@@ -50,6 +337,9 @@ class ScampPerformance:
         :param confidence_:
         :return:
         """
+        # For now any file is saved
+        save = False
+
         # Creates an input dictionary with all input sources
         logger.debug('checking performance for {} and {}'.format(scmp_cf,
                                                                  sex_cf))
@@ -69,13 +359,17 @@ class ScampPerformance:
         i_df = concat(g for _, g in i_df.groupby('source')
                       if len(g) >= 3)
         i_df = i_df.reset_index(drop=True)
-        # i_df.to_csv('input_sources.csv')
 
-        # alpha_df = i_df['alpha_j2000']
-        # delta_df = i_df['delta_j2000']
+        # if save is true saves a csv file populated by input sources
+        # and a regions file of them.
+        if save:
+            i_df.to_csv('input_sources.csv')
 
-        # df = concat([alpha_df, delta_df], axis=1)
-        # df.to_csv('input_sources.reg')
+            alpha_df = i_df['alpha_j2000']
+            delta_df = i_df['delta_j2000']
+
+            df = concat([alpha_df, delta_df], axis=1)
+            df.to_csv('input_sources.reg')
 
         # Open particular file!
         filt_n = 'filt_{}_{}_4.csv'.format(scmp_cf, mag)

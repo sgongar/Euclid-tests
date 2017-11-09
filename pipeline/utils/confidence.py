@@ -5,8 +5,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import statsmodels.api as sm
 
-# source = input('Type source number: ')
-sources = [16067, 2091, 2013, 9637, 16902, 12179, 7340]
+source = input('Type source number: ')
+sources = [source]
+# sources = [16067, 2091, 2013, 9637, 16902, 12179, 7340]
 # sources = [13453, 4164, 4149, 21013, 13959, 2013, 19532,
 #            18054, 20130, 3984, 12146, 4891, 11401]
 
@@ -18,7 +19,7 @@ with PdfPages('curves') as pdf:
 
         passed = []
 
-        hdu_list = fits.open('/home/sgongora/Documents/CarpetaCompartida/20_3_3_0.01_4/10_1.2_0.5_0.16/full_10_1.2_0.5_0.16_20-21_1.cat')
+        hdu_list = fits.open('/home/sgongora/Documents/CarpetaCompartida/full_10_1.2_0.5_0.64_20-21_1.cat')
         db = Table(hdu_list[2].data).to_pandas()
 
         ra = db.loc[db['SOURCE_NUMBER'] == source_, 'ALPHA_J2000'].tolist()
