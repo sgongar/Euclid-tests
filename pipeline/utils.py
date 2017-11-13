@@ -8,19 +8,15 @@ from sys import argv
 
 from astropy.io import fits
 from astropy.table import Table
-from astropy.time import Time
 from astropy.wcs import WCS
 from pandas import concat, DataFrame, Series, read_csv
 from numpy import isclose, logical_and, genfromtxt, float64, sqrt
 
 from cats_management import rebase_catalogue, rewriting_catalogue
-from cats_management import cut_catalog
 from check_pm import Check_PM
-from images_management import get_fits_limits
 from misc import setting_logger, extract_settings, save_data
-from misc import check_distance, get_fits, all_same, compare_floats
+from misc import all_same, compare_floats
 from regions import Create_regions
-# from warnings import TooManyDetections
 
 
 def input_ssos(logger, prfs_d):
@@ -811,3 +807,31 @@ if __name__ == '__main__':
         print e
         logger.error(e)
         logger.error('Select a valid option')
+
+
+def input_regions():
+    """
+
+    :return:
+    """
+    prfs_d = extract_settings()
+
+    input_d = {}
+    for d in range(1, 5, 1):
+        input_d[d] = '{}/Cat_20-21_d{}.dat'.format(prfs_d['input_ref'], d)
+    input_d = Create_regions(input_d, prfs_d).check_luca(True, True)
+
+    # Creates a DataFrame from an input dictionary
+    input_l = []
+    for key_ in input_d.keys():
+        input_l.append(input_d[key_])
+
+    i_df = concat(input_l, axis=0)
+    # Look for < 3 coincidences
+    i_df = concat(g for _, g in i_df.groupby('source')
+                  if len(g) >= 3)
+    i_df = i_df.reset_index(drop=True)
+
+    # Saves sources
+    i_df.to_csv('input_sources.csv')
+

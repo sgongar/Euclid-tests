@@ -2,8 +2,9 @@
 # -*- coding: utf-8 -*-
 
 from astropy.io import fits
+from astropy.table import Table
 from astropy.wcs import WCS
-from math import sqrt, cos, radians
+from math import sqrt, cos, radians, hypot
 from numpy import genfromtxt, float64
 from pandas import concat, read_csv, Series
 from itertools import groupby
@@ -13,7 +14,7 @@ from operator import itemgetter
 # source_n = input('Catalog number: ')
 #
 # f_file = read_csv('/home/sgongora/Documents/CarpetaCompartida/filt_10_1.2_2.5_0.64_20-21_4.csv', index_col=0)
-#
+
 # f_pm = f_file[f_file['SOURCE_NUMBER'].isin([source_n])]
 #
 # alpha_1 = float(f_pm['ALPHA_J2000'].iloc[0])
@@ -36,6 +37,41 @@ from operator import itemgetter
 #
 # print pm_21, pm_32, f_pm
 # """
+"""
+source_n = input('Catalog number: ')
+
+f_file = read_csv('/mnt/e/Documentos/CarpetaCompartida/input_sources.csv', index_col=0)
+
+f_pm = f_file[f_file['source'].isin([source_n])]
+
+alpha_1 = float(f_pm['alpha_j2000'].iloc[0])
+alpha_2 = float(f_pm['alpha_j2000'].iloc[1])
+alpha_3 = float(f_pm['alpha_j2000'].iloc[2])
+alpha_4 = float(f_pm['alpha_j2000'].iloc[3])
+
+delta_1 = float(f_pm['delta_j2000'].iloc[0])
+delta_2 = float(f_pm['delta_j2000'].iloc[1])
+delta_3 = float(f_pm['delta_j2000'].iloc[2])
+delta_4 = float(f_pm['delta_j2000'].iloc[3])
+
+m_43 = hypot(alpha_4 - alpha_3, delta_4 - delta_3)
+m_32 = hypot(alpha_3 - alpha_2, delta_3 - delta_2)
+m_21 = hypot(alpha_2 - alpha_1, delta_2 - delta_1)
+
+pm_21 = (3600*m_21)/1003
+pm_21 = pm_21*3600
+
+pm_32 = (3600*m_32)/1003
+pm_32 = pm_32*3600
+
+pm_43 = (3600*m_43)/1003
+pm_43 = pm_43*3600
+
+#
+# f_pm = f_pm['PM'].iloc[0]
+#
+print pm_21, pm_32, pm_43
+"""
 #
 # input_ref = '/media/sf_CarpetaCompartida/luca_data/v14/Catalogs'
 # first_sso = 134895
@@ -224,6 +260,7 @@ from operator import itemgetter
 #     input_d[dither_] = sources_df
 
 # source_i = input('Input number: ')
+"""
 i_file = read_csv('/home/sgongora/Documents/CarpetaCompartida/input_sources.csv', index_col=0)
 
 unique_sources = list(set(i_file['source'].tolist()))
@@ -264,3 +301,60 @@ for source_i in unique_sources:
     pm = i_pm['pm_values'].iloc[0]
 
     print pm, i_pm_21, (pm / i_pm_21)
+"""
+
+source_n = input('Catalog number: ')
+
+o_file = fits.open('/mnt/e/Documentos/CarpetaCompartida/full_10_1.2_2.5_0.64_20-21_1.cat')
+o_cat = Table(o_file[2].data).to_pandas()
+
+o_df = o_cat[o_cat['SOURCE_NUMBER'].isin([source_n])]
+o_df = o_df[o_df['CATALOG_NUMBER'].isin([25])]
+alpha_1 = float(o_df['ALPHA_J2000'].iloc[0])
+delta_1 = float(o_df['DELTA_J2000'].iloc[0])
+time_1 = float(o_df['EPOCH'].iloc[0])
+
+o_df = o_cat[o_cat['SOURCE_NUMBER'].isin([source_n])]
+o_df = o_df[o_df['CATALOG_NUMBER'].isin([26])]
+alpha_2 = float(o_df['ALPHA_J2000'].iloc[0])
+delta_2 = float(o_df['DELTA_J2000'].iloc[0])
+time_2 = float(o_df['EPOCH'].iloc[0])
+
+o_df = o_cat[o_cat['SOURCE_NUMBER'].isin([source_n])]
+o_df = o_df[o_df['CATALOG_NUMBER'].isin([27])]
+alpha_3 = float(o_df['ALPHA_J2000'].iloc[0])
+delta_3 = float(o_df['DELTA_J2000'].iloc[0])
+time_3 = float(o_df['EPOCH'].iloc[0])
+
+# alpha_4 = float(o_df['ALPHA_J2000'].iloc[3])
+# delta_4 = float(o_df['DELTA_J2000'].iloc[3])
+
+
+print(time_1, time_2, time_3)
+
+print(time_3 - time_2)
+print(time_2 - time_1)
+
+m_41 = hypot(abs(alpha_3 - alpha_1), abs(delta_3 - delta_1))
+# m_43 = hypot(abs(alpha_4 - alpha_3), abs(delta_4 - delta_3))
+m_32 = hypot(abs(alpha_3 - alpha_2), abs(delta_3 - delta_2))
+m_21 = hypot(abs(alpha_2 - alpha_1), abs(delta_2 - delta_1))
+
+# m_41 = hypot(alpha_4 - alpha_)
+
+pm_21 = (3600*m_21)/1003
+pm_21 = pm_21*3600
+
+pm_32 = (3600*m_32)/1003
+pm_32 = pm_32*3600
+
+# pm_43 = (3600*m_43)/1003
+# pm_43 = pm_43*3600
+
+pm_41 = (3600*m_41)/2006
+pm_41 = pm_41*3600
+
+#
+# f_pm = f_pm['PM'].iloc[0]
+#
+print pm_21, pm_32, pm_41

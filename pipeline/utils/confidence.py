@@ -19,7 +19,7 @@ with PdfPages('curves') as pdf:
 
         passed = []
 
-        hdu_list = fits.open('/home/sgongora/Documents/CarpetaCompartida/full_10_1.2_0.5_0.64_20-21_1.cat')
+        hdu_list = fits.open('/mnt/e/Documentos/CarpetaCompartida/full_10_1.2_2.5_0.64_20-21_1.cat')
         db = Table(hdu_list[2].data).to_pandas()
 
         ra = db.loc[db['SOURCE_NUMBER'] == source_, 'ALPHA_J2000'].tolist()

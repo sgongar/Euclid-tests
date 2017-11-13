@@ -18,7 +18,7 @@ catalog_n = input('Catalog number: ')
 i_alpha = input('ALPHA_J2000: ')
 i_delta = input('DELTA_J2000: ')
 
-o_file = fits.open('/home/sgongora/Documents/CarpetaCompartida/full_10_1.2_0.5_0.64_20-21_1.cat')
+o_file = fits.open('/mnt/e/Documentos/CarpetaCompartida/full_10_1.2_2.5_0.64_20-21_1.cat')
 o_cat = Table(o_file[2].data).to_pandas()
 
 tolerance = 0.0002
