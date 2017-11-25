@@ -76,7 +76,8 @@ class Check:
         elif argv[1] == '-scamp_performance':
             self.scamp_performance(logger, prfs_d, confs)
         elif argv[1] == '-pm_performance':
-            self.pm_performance(logger, prfs_d, confs)
+            if not self.pm_performance(logger, prfs_d, confs):
+                raise Exception
         elif argv[1] == '-stats_performance':
             self.stats_performance(logger, prfs_d)
         elif argv[1] == '-help':
@@ -265,7 +266,7 @@ class Check:
 
                             filt_p = Process(target=ScampFilter,
                                              args=(logger, mag,
-                                                   scmp_d, scmp_cf, sex_d,))
+                                                   scmp_cf, sex_d,))
                             filt_j.append(filt_p)
                             filt_p.start()
 
@@ -430,12 +431,14 @@ class Check:
                                                      conf[2], conf[3],
                                                      conf[4])
 
+                    # bypassconfidence
+                    prfs_d['confidences'] = [1]
                     # Runs performance analysis.
                     for confidence_ in prfs_d['confidences']:
                         idx += 1
                         stats_d[idx] = ScampPerformance().check(logger, prfs_d,
                                                                 mag, scmp_cf,
-                                                                sex_cf, idx,
+                                                                sex_cf,
                                                                 confidence_)
 
         tmp_d = {'PM': [], 'total': [], 'right': [], 'false': [],
@@ -449,7 +452,7 @@ class Check:
                     tmp_d[value_key].append(value)
 
         stats_df = DataFrame(tmp_d)
-        stats_df.to_csv('stats.csv')
+        stats_df.to_csv('scamp_stats.csv')
 
         return True
 
@@ -523,12 +526,23 @@ class Check:
                                                      conf[2], conf[3],
                                                      conf[4])
 
+                    # bypassconfidence
+                    prfs_d['confidences'] = [1]
                     # Runs performance analysis.
                     for confidence_ in prfs_d['confidences']:
                         idx += 1
-                        stats_d[idx] = PMPerformance().check(logger, prfs_d,
-                                                             mag, scmp_cf,
-                                                             sex_cf, confidence_)
+                        stats_d = PMPerformance().check(logger, prfs_d,
+                                                        mag, scmp_cf,
+                                                        sex_cf, confidence_)
+
+        stats_df = DataFrame(stats_d, columns=['pm', 'mean', 'median',
+                                               'std', 'max', 'min',
+                                               'detected', 'total'])
+        stats_df = stats_df.sort_values(stats_df.columns[0], ascending=True)
+        stats_df = stats_df.reset_index(drop=True)
+        stats_df.to_csv('stats.csv')
+
+        return True
 
     def stats_performance(self, logger, prfs_d):
         """ Performs a complete pipeline to scamp output.

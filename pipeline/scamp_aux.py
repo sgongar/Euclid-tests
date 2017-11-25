@@ -1,11 +1,12 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-"""Python script for time measurements
+"""
 
 Versions:
 - 0.1: Initial release.
 - 0.2: Functions reorganised to two different classes.
+- 0.3: New organization for filter Class
 
 """
 
@@ -16,15 +17,15 @@ from astropy.io import fits
 from astropy.table import Table
 from pandas import concat
 
-from cats_management import merge_catalog
 from misc import pm_compute, pm_filter, extract_settings
+from misc import sn_filter
 from misc import motion_filter, confidence_filter, get_fits
 
-__author__ = "Samuel Gongora-Garcia"
+__author__ = "Samuel Góngora García"
 __copyright__ = "Copyright 2017"
-__credits__ = ["Samuel Gongora-Garcia"]
-__version__ = "0.2"
-__maintainer__ = "Samuel Gongora-Garcia"
+__credits__ = ["Samuel Góngora García"]
+__version__ = "0.3"
+__maintainer__ = "Samuel Góngora García"
 __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
 
@@ -98,8 +99,6 @@ class Scamp:
             if not path.exists(output_dir):
                 makedirs(output_dir)
 
-            print scmp_p
-
             process_scamp = Popen(scmp_p, shell=True)
             process_scamp.wait()
 
@@ -152,30 +151,32 @@ class Scamp:
 
 class ScampFilter:  # TODO Split scamp_filter method into single methodss
 
-    def __init__(self, logger, mag, scmp_d, scmp_cf, sex_d):
+    def __init__(self, logger, mag, scmp_cf, sex_d):
         """
 
-        @param mag:
-        @param scmp_d:
-        @param scmp_cf:
+        :param logger:
+        :param mag:
+        :param scmp_cf:
+        :param sex_d:
         """
         prfs_d = extract_settings()
 
         self.save = True  # "scmp_p",  save flag - set as True for catalogs saving
         (merged_db, full_db,
          filter_o_n) = self.scamp_filter(logger, prfs_d, mag,
-                                         scmp_d, scmp_cf, sex_d)
-        full_db = self.compute_pm(logger, prfs_d, merged_db,
-                                  full_db, filter_o_n)
+                                         scmp_cf, sex_d)
+        full_db = self.compute_pm(logger, merged_db, full_db, filter_o_n)
         self.filter_pm(logger, prfs_d, full_db, filter_o_n)
 
-    def scamp_filter(self, logger, prfs_d, mag, scmp_d, scmp_cf, sex_d):
+    def scamp_filter(self, logger, prfs_d, mag, scmp_cf, sex_d):
         """
 
-        @param logger:
-        @param prfs_d:
-        @param mag:
-        @param scmp_d:
+        :param logger:
+        :param prfs_d:
+        :param mag:
+        :param scmp_cf:
+        :param sex_d:
+        :return:
         """
         logger.info("Filtering scamp's output")
 
@@ -229,16 +230,14 @@ class ScampFilter:  # TODO Split scamp_filter method into single methodss
 
         return merged_db, full_db, filter_o_n
 
-    def compute_pm(self, logger, prfs_d, merged_db, full_db, filter_o_n):
+    def compute_pm(self, logger, merged_db, full_db, filter_o_n):
         """
 
-        @param logger:
-        @param prfs_d:
-        @param merged_db:
-        @param full_db:
-        @param filter_o_n:
-
-        @return full_db:
+        :param logger:
+        :param merged_db:
+        :param full_db:
+        :param filter_o_n:
+        :return:
         """
         # Computing pm
         logger.debug('computing proper motion')
@@ -252,37 +251,43 @@ class ScampFilter:  # TODO Split scamp_filter method into single methodss
     def filter_pm(self, logger, prfs_d, full_db, filter_o_n):
         """
 
-        @param logger:
-        @param prfs_d:
-        @param full_db:
+        :param logger:
+        :param prfs_d:
+        :param full_db:
+        :param filter_o_n:
+        :return:
         """
         logger.debug('after filtering detections')
-        full_db = pm_filter(full_db, prfs_d['pm_low'],
-                            prfs_d['pm_up'], prfs_d['pm_sn'])
+        full_db = pm_filter(full_db, prfs_d['pm_low'], prfs_d['pm_up'])
         if self.save:
             logger.debug('saving output to {}_3.csv'.format(filter_o_n))
             full_db.to_csv('{}_3.csv'.format(filter_o_n))
 
-        logger.debug('after proper motion')
-        full_db = motion_filter(logger, full_db, prfs_d['r_fit'])
+        full_db = sn_filter(full_db, prfs_d['pm_sn'])
         if self.save:
             logger.debug('saving output to {}_4.csv'.format(filter_o_n))
             full_db.to_csv('{}_4.csv'.format(filter_o_n))
 
-        logger.debug('after first filter')
-        full_db = confidence_filter(logger, full_db, prfs_d['r_fit'])
+        logger.debug('after proper motion')
+        full_db = motion_filter(full_db, prfs_d['r_fit'])
         if self.save:
             logger.debug('saving output to {}_5.csv'.format(filter_o_n))
             full_db.to_csv('{}_5.csv'.format(filter_o_n))
 
+        logger.debug('after first filter')
+        full_db = confidence_filter(full_db, prfs_d['r_fit'])
+        if self.save:
+            logger.debug('saving output to {}_6.csv'.format(filter_o_n))
+            full_db.to_csv('{}_6.csv'.format(filter_o_n))
+
     def check_dir(self, logger, prfs_d, sex_cf, scmp_cf):
         """
 
-        @param logger:
-        @param sex_cf:
-        @param scmp_cf:
-
-        @return True: if everything goes alright.
+        :param logger:
+        :param prfs_d:
+        :param sex_cf:
+        :param scmp_cf:
+        :return:
         """
         filter_dir = '{}/{}/{}'.format(prfs_d['filter_dir'], sex_cf, scmp_cf)
 

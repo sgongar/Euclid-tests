@@ -804,7 +804,7 @@ if __name__ == '__main__':
         else:
             "Wrong choice"
     except Exception as e:
-        print e
+        print(e)
         logger.error(e)
         logger.error('Select a valid option')
 

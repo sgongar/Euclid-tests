@@ -134,13 +134,13 @@ def get_os():
     """
 
     if 'fedora-23' in platform():
-        os_system = 'fedora'
+        os_system = 'test'
     elif 'Debian' in platform():
         os_system = 'debian'
     elif 'Ubuntu' in platform():
         os_system = 'ubuntu'
     elif 'fedora-26' in platform():
-        os_system = 'test'
+        os_system = 'fedora'
     elif 'centos' in platform():
         os_system = 'centos'
     else:
@@ -183,7 +183,7 @@ def all_same(items):
     elif length_items > 2:
         return False, 0
     else:
-        print 'error', items
+        print('error', items)
 
 
 def create_sextractor_dict(logger, prfs_d, conf_num, cat_conf):
@@ -255,11 +255,10 @@ def create_scamp_dict(logger, prfs_d, conf_num):
         temp_list.append(conf[2])
         temp_list.append(conf[3])
         scamp_list.append(temp_list)
-    scamp_dict = {}
-    scamp_dict['crossid_radius'] = scamp_list[conf_num][0]
-    scamp_dict['pixscale_maxerr'] = scamp_list[conf_num][1]
-    scamp_dict['posangle_maxerr'] = scamp_list[conf_num][2]
-    scamp_dict['position_maxerr'] = scamp_list[conf_num][3]
+    scamp_dict = {'crossid_radius': scamp_list[conf_num][0],
+                  'pixscale_maxerr': scamp_list[conf_num][1],
+                  'posangle_maxerr': scamp_list[conf_num][2],
+                  'position_maxerr': scamp_list[conf_num][3]}
 
     return scamp_dict, len_conf
 
@@ -271,9 +270,9 @@ def create_configurations(mode):
     :return:
     """
     if mode['type'] == 'sextractor':
-        l_deblending = [20, 30, 40]
-        l_mincount = [0.001, 0.01]
-        l_threshold = [1.5, 3]
+        l_deblending = [30]
+        l_mincount = [0.01]
+        l_threshold = [1.5]
 
         l_area = [4]
         l_filter_name = ['models/gauss_2.0_5x5.conv']
@@ -286,12 +285,14 @@ def create_configurations(mode):
                         for filt in l_filter_name:
                             configurations.append([deblending, mincount,
                                                    threshold, area, filt])
+        configurations_len = len(configurations)
+        return configurations, configurations_len
 
     elif mode['type'] == 'scamp':
-        l_crossid_radius = [10]  # seconds
-        l_pixscale_maxerr = [1.2]  # scale-factor
-        l_posangle_maxerr = [0.5, 2.5]  # degrees
-        l_position_maxerr = [0.16, 0.64, 1.28]  # minutes
+        l_crossid_radius = [10]  # [10] seconds
+        l_pixscale_maxerr = [1.2]  # [1.2] scale-factor
+        l_posangle_maxerr = [0.5]  # [0.5, 2.5] degrees
+        l_position_maxerr = [0.64]  # [0.16, 0.64, 1.28] minutes
 
         configurations = []
 
@@ -302,24 +303,24 @@ def create_configurations(mode):
                         configurations.append([crossid, pixscale,
                                                posangle, position])
 
-    configurations_len = len(configurations)
+        configurations_len = len(configurations)
 
-    return configurations, configurations_len
+        return configurations, configurations_len
 
 
-def ConfMap(Config, section):
+def ConfMap(config_, section):
     """
 
-    @param Config:
+    @param config_:
     @param section:
 
     @return dict1:
     """
     dict1 = {}
-    options = Config.options(section)
+    options = config_.options(section)
     for option in options:
         try:
-            dict1[option] = Config.get(section, option)
+            dict1[option] = config_.get(section, option)
             if dict1[option] == -1:
                 print("skip: %s" % option)
         except:
@@ -338,6 +339,7 @@ def extract_settings():
     Cf.read(".settings.ini")
 
     os_version = get_os()
+
     prfs_d = {}
     prfs_d['cat'] = ConfMap(Cf, "Version")['cat_version']
 
@@ -542,27 +544,35 @@ def pm_compute(logger, merged_db, full_db):
     return full_db
 
 
-def pm_filter(full_db, pm_low, pm_up, SN):
+def pm_filter(full_db, pm_low, pm_up):
     """ filters proper motions values according to their values
 
-    @param db:
-    @param pm_low:
-    @param pm_up:
-    @param SN:
-
-    @return db: a dataframe object
+    :param full_db:
+    :param pm_low:
+    :param pm_up:
+    :return: full_db
     """
     mask = (full_db['PM'] > float(pm_low)) & (full_db['PM'] < float(pm_up))
     full_db = full_db[mask]
 
-    # another mask for SN
+    return full_db
+
+
+def sn_filter(full_db, SN):
+    """
+
+    :param full_db:
+    :param SN:
+    :return: full_db
+    """
+    # mask for SN
     mask = full_db['PM'] / full_db['PMERR'] > float(SN)
     full_db = full_db[mask]
 
     return full_db
 
 
-def motion_filter(logger, db, r):
+def motion_filter(db, r):
     """ filter objects with a non-coherence movement
 
     @param logger: a logger object.
@@ -605,7 +615,7 @@ def motion_filter(logger, db, r):
     return db
 
 
-def confidence_filter(logger, db, r):
+def confidence_filter(db, r):
     """
 
     :param logger:
