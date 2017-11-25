@@ -4,8 +4,12 @@ pipeline/__pycache__/
 *.py[cod]
 *$py.class
 
+### pycharm IDE ###
+.idea/*
+
 ### virtualenv ###
 .venv/*
+pipeline/.venv/*
 
 ### Swarp files ###
 pipeline/swarp.xml
