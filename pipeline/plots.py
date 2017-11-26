@@ -14,12 +14,12 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 from math import modf
 
-from astropy import units as u
+from astropy import units
 from astropy.coordinates import Angle
 from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
-from numpy import arange, array, median
+import numpy as np
 
 
 __author__ = "Samuel Góngora García"
@@ -101,40 +101,140 @@ def create_x_ticks(epoch_seconds):
     :param epoch_seconds:
     :return: x_ticks
     """
-    # divisions = 4  # TODO
-
     x_difference = float(max(epoch_seconds)) - float(min(epoch_seconds))
     x_major_stp = (x_difference / 3)
     x_minor_stp = (x_difference / 6)
 
     # X-SCALE
     # Major steps
-    x_major_stps = arange((epoch_seconds[0] - x_major_stp * 1),
-                          (epoch_seconds[0] + x_major_stp * 4), x_major_stp)
+    x_major_stps = np.arange((epoch_seconds[0] - x_major_stp * 1),
+                             (epoch_seconds[0] + x_major_stp * 4), x_major_stp)
     # Minor steps
-    x_minor_stps = arange((epoch_seconds[0] - x_minor_stp * 2),
-                          (epoch_seconds[0] - x_minor_stp * 8),
-                          x_minor_stp)
+    x_minor_stps = np.arange((epoch_seconds[0] - x_minor_stp * 2),
+                             (epoch_seconds[0] - x_minor_stp * 8),
+                             x_minor_stp)
     x_ticks = {'major_t': x_major_stps, 'minor_t': x_minor_stps,
                'major_s': x_major_stp, 'minor_s': x_minor_stp}
 
     return x_ticks
 
 
-def create_y_ticks(alpha_seconds, hour, minute):
+def create_alpha_y_ticks(alpha_seconds, hour, minute):
     """
-    step = stp
 
     :param alpha_seconds:
     :param hour:
     :param minute:
-    :return: y_ticks
+    :return:
     """
     divisions = 4  #
 
     # Gets the major step between ticks thought the difference
     # between the maximum and the minimum value of alpha
     difference = float(max(alpha_seconds)) - float(min(alpha_seconds))
+    major_stp = (difference / divisions)
+    #
+    major_stp = round_number(major_stp)
+
+    # In order to avoid too crowned lines divisions will be less if
+    # steps are little
+    if float(major_stp) == 0.0001:
+        divisions = 2
+    elif float(major_stp) < 0.0001:
+        divisions = 2
+    else:
+        divisions = 4
+    minor_stp = (float(major_stp) / divisions)
+
+    # Gets maximum decimal position of major step
+    decimals = int(str(major_stp)[::-1].find('.'))
+
+    # todo, document!
+    major_margin = major_stp * (divisions / 2)
+    initial_major_stp = round(min(alpha_seconds), decimals) - major_margin
+    final_major_stp = round(max(alpha_seconds), decimals) + major_margin
+    major_stps = np.arange(initial_major_stp, final_major_stp, major_stp)
+    # todo, document!
+    minor_margin = minor_stp * divisions
+    initial_minor_stp = round(min(alpha_seconds), decimals) - minor_margin
+    final_minor_stp = round(max(alpha_seconds), decimals) + minor_margin
+    minor_stps = np.arange(initial_minor_stp, final_minor_stp, minor_stp)
+
+    # Formats major steps for be readable by matplotlib axis
+    alpha_major_stps = []
+    for idx_stp, stp_ in enumerate(major_stps):
+        if float('{:.6f}'.format(stp_)) > 60.000000:
+            minute_ = minute + 1
+            # todo decimal aproximation should b automatically, not hardcoded
+            # from decimal import Decimal
+            # d = Decimal(str(major_stp))
+            # u_decimals_pos = d.as_tuple().exponent
+            # decimals_pos = u_decimals_pos + (u_decimals_pos * -2)
+            stp_ = '{:.6f}'.format(stp_)
+            second_ = float(stp_) - 60.0
+            second_ = '{:.6f}'.format(second_)
+            alpha_major_stps.append('{}:{}:{}'.format(hour, minute_, second_))
+        elif float('{:.6f}'.format(stp_)) == 60.000000:
+            minute_ = minute + 1
+            # todo decimal aproximation should b automatically, not hardcoded
+            # from decimal import Decimal
+            # d = Decimal(str(major_stp))
+            # u_decimals_pos = d.as_tuple().exponent
+            # decimals_pos = u_decimals_pos + (u_decimals_pos * -2)
+            stp_ = '{:.6f}'.format(stp_)
+            second_ = float(stp_) - 60.0
+            second_ = '{:.6f}'.format(second_)
+            alpha_major_stps.append('{}:{}:{}'.format(hour, minute_, second_))
+        elif float('{:.6f}'.format(stp_)) < 0.000000:
+            # todo implement backward number
+            pass
+        elif float('{:.6f}'.format(stp_)) < 60.000000:
+            minute_ = minute
+            second_ = stp_
+            alpha_major_stps.append('{}:{}:{}'.format(hour, minute_, second_))
+    # Formats minor steps
+    alpha_minor_stps = []
+    for idx_stp, stp_ in enumerate(minor_stps):
+        # According step value... todo
+        if stp_ > 60.0:
+            minute_ = minute + 1
+            stp_ = '{:.6f}'.format(stp_)
+            second_ = float(stp_) - 60.0
+            second_ = '{:.6f}'.format(second_)
+            alpha_minor_stps.append('{}:{}:{}'.format(hour, minute_, second_))
+        elif float('{:.1f}'.format(stp_)) == 60.0:
+            minute_ = minute + 1
+            second_ = 0.0
+            second_ = '{:.6f}'.format(second_)
+            alpha_minor_stps.append('{}:{}:{}'.format(hour, minute_, second_))
+        else:
+            minute_ = minute
+            second_ = '{:.6f}'.format(stp_)
+            alpha_minor_stps.append('{}:{}:{}'.format(hour, minute_, second_))
+
+    # Creates a list of datatime objects
+    # Sometimes, seconds are greater than 59, this values should be
+    # filter in a better way
+    major_t = [datetime.strptime(t, "%H:%M:%S.%f") for t in alpha_major_stps]
+    minor_t = [datetime.strptime(t, "%H:%M:%S.%f") for t in alpha_minor_stps]
+    y_ticks = {'major_t': major_t, 'minor_t': minor_t,
+               'major_s': major_stp, 'minor_s': minor_stp}
+
+    return y_ticks
+
+
+def create_delta_y_ticks(delta_seconds):
+    """
+    step = stp
+
+    :param delta_seconds:
+    :return: y_ticks
+    """
+    divisions = 4  #
+
+    # Gets the major step between ticks thought the difference
+    # between the maximum and the minimum value of alpha
+    difference = float(max(delta_seconds)) - float(min(delta_seconds))
     major_stp = (difference / divisions)
     #
     major_stp = round_number(major_stp)
@@ -145,31 +245,16 @@ def create_y_ticks(alpha_seconds, hour, minute):
 
     # Major step list starts two times before and end two times after
     # known values
-    major_stps = arange(round(min(alpha_seconds), decimals) - major_stp * 2,
-                        round(max(alpha_seconds), decimals) + major_stp * 2,
-                        major_stp)
+    major_stps = np.arange(round(min(delta_seconds), decimals) - major_stp * 2,
+                           round(max(delta_seconds), decimals) + major_stp * 2,
+                           major_stp)
     # Minor step list starts eight times before and fend eight times
     # after know values
-    minor_stps = arange(round(min(alpha_seconds), decimals) - minor_stp * 8,
-                        round(max(alpha_seconds), decimals) + minor_stp * 8,
-                        minor_stp)
+    minor_stps = np.arange(round(min(delta_seconds), decimals) - minor_stp * 8,
+                           round(max(delta_seconds), decimals) + minor_stp * 8,
+                           minor_stp)
 
-    # Formats major steps for be readable by matplotlib axis
-    alpha_major_stps = []
-    for idx_stp, stp_ in enumerate(major_stps):
-        alpha_major_stps.append('{}:{}:{}'.format(hour, minute, stp_))
-    # Formats minor steps
-    alpha_minor_stps = []
-    for idx_stp, stp_ in enumerate(minor_stps):
-        alpha_minor_stps.append('{}:{}:{}'.format(hour, minute, stp_))
-
-    # Creates a list of datatime objects
-    # Sometimes, seconds are greater than 59, this values should be
-    # filter in a better way
-    y_ticks = {'major_t': [datetime.strptime(t,
-                                             "%H:%M:%S.%f") for t in alpha_major_stps],
-               'minor_t': [datetime.strptime(t,
-                                             "%H:%M:%S.%f") for t in alpha_minor_stps],
+    y_ticks = {'major_t': major_stps, 'minor_t': minor_stps,
                'major_s': major_stp, 'minor_s': minor_stp}
 
     return y_ticks
@@ -215,22 +300,23 @@ class PlotConfidence:
             ax = fig.add_subplot(1, 1, 1)
             ax.set_title('chi_squared: {}'.format(self.fitted_d['ra']))
 
-            alpha_tmpstmp = []
+            a_tmpstmp = []
             alpha_seconds = []
             tmp_hour = []
             tmp_minute = []
             for alpha_ in self.tmp_d['alpha']:
-                a = Angle(alpha_, u.degree)
+                a = Angle(alpha_, units.degree)
                 hms = a.hms
                 hour = int(hms[0])
                 tmp_hour.append(hour)
                 minute = int(hms[1])
                 tmp_minute.append(minute)
                 second = float("{0:.6f}".format(hms[2]))
-                alpha_tmpstmp.append('{}:{}:{}'.format(hour, minute, second))
+                a_tmpstmp.append('{}:{}:{}'.format(hour, minute, second))
                 alpha_seconds.append('{}'.format(second))
 
-            datetimes = [datetime.strptime(t, "%H:%M:%S.%f") for t in alpha_tmpstmp]
+            datetimes = [datetime.strptime(t,
+                                           "%H:%M:%S.%f") for t in a_tmpstmp]
 
             # X-AXIS Shared between input and output catalogs
             epoch_seconds = []
@@ -258,7 +344,8 @@ class PlotConfidence:
                 raise Exception
 
             # Creates y ticks (major and minor ones)
-            y_ticks = create_y_ticks(alpha_seconds, tmp_hour[0], tmp_minute[0])
+            y_ticks = create_alpha_y_ticks(alpha_seconds, tmp_hour[0],
+                                           tmp_minute[0])
             y_labels = create_labels(y_ticks['minor_t'])
 
             # x-ticks assignation
@@ -309,10 +396,13 @@ class PlotConfidence:
             ax.set_xlabel(x_label)
             # y-axis
             y_label_ra = 'Right ascension (")\n'
-            y_label_major_step = 'major step size {}"\n'.format(y_ticks['major_s'])
-            y_label_minor_step = 'minor step size {}"'.format(y_ticks['minor_s'])
+            major_s = y_ticks['major_s']
+            y_label_major_step = 'major step size {}"\n'.format(major_s)
+            minor_s = y_ticks['minor_s']
+            y_label_minor_step = 'minor step size {}"'.format(minor_s)
             ax.set_ylabel('{}{}{}'.format(y_label_ra, y_label_major_step,
                                           y_label_minor_step))
+
             # Plots data
             ax.plot(epoch_seconds, datetimes, 'bs', markersize=6,
                     label='extracted position')
@@ -329,9 +419,11 @@ class PlotConfidence:
             plt.clf()  # clear current figure
 
             #
-            #
             # DELTA PARAMETERS
-            #
+            # Another figure is created in order to plot delta output.
+            # X-axis values are shared between both figures but Y-axis for
+            # declination's output is showed in seconds (floats) instead
+            # datetime objects.
             #
             fig = plt.figure(figsize=plot_size, dpi=plot_dpi)
             ax = fig.add_subplot(1, 1, 1)
@@ -339,14 +431,18 @@ class PlotConfidence:
 
             delta_tmpstmp = []
             delta_seconds = []
+            tmp_degree = []
+            tmp_minute = []
             for delta_ in self.tmp_d['delta']:
-                d = Angle(delta_, u.degree)
+                d = Angle(delta_, units.degree)
                 dms = d.dms
                 degree = int(dms[0])
+                tmp_degree.append(degree)
                 minute = int(dms[1])
+                tmp_minute.append(minute)
                 second = float("{0:.6f}".format(dms[2]))
                 delta_tmpstmp.append('{}:{}.{}'.format(degree, minute, second))
-                delta_seconds.append('{}'.format(float("{0:.6f}".format(dms[2]))))
+                delta_seconds.append('{}'.format(second))
 
             ax.set_xlabel('EPOCH')
 
@@ -355,15 +451,19 @@ class PlotConfidence:
             delta_seconds = [float(i) for i in delta_seconds]
             delta_seconds = [float("{0:.6f}".format(i)) for i in delta_seconds]
 
-            y_ticks = create_y_ticks(delta_seconds, int(dms[0]), int(dms[1]))
+            # Check if all hours/minutes are same
+            if len(list(set(tmp_degree))) != 1:
+                raise Exception
+            if len(list(set(tmp_minute))) != 1:
+                raise Exception
 
-            print(len(y_ticks))
+            y_ticks = create_delta_y_ticks(delta_seconds)
 
             # x-ticks assignation
             ax.set_xticks(x_ticks['major_t'], minor=False)
             ax.set_xticks(x_ticks['minor_t'], minor=True)
             # x-ticks labels
-            # TODO
+
             # y-ticks assignation
             ax.set_yticks(y_ticks['major_t'], minor=False)
             ax.set_yticks(y_ticks['minor_t'], minor=True)
@@ -384,7 +484,7 @@ class PlotConfidence:
                 # variables for position and error representation
                 delta_position = delta_tmpstmp[idx_datetime_]
                 delta_str = '   delta {}'.format(delta_position)
-                error = self.tmp_d['error_b'][idx_datetime_] * 3600  # error on y
+                error = self.tmp_d['error_b'][idx_datetime_] * 3600  # error-y
                 error_fmt = float("{0:.6f}".format(error))  # error rounded
                 error_str = '   error {}'.format(error_fmt)
                 # annotation
@@ -400,8 +500,10 @@ class PlotConfidence:
 
             # Label creation
             y_label_ra = 'Declination (")\n'
-            y_label_major_step = 'major step size {}"\n'.format(y_ticks['major_s'])
-            y_label_minor_step = 'minor step size {}"'.format(y_ticks['minor_s'])
+            major_s = y_ticks['major_s']
+            y_label_major_step = 'major step size {}"\n'.format(major_s)
+            minor_s = y_ticks['minor_s']
+            y_label_minor_step = 'minor step size {}"'.format(minor_s)
             ax.set_ylabel('{}{}{}'.format(y_label_ra, y_label_major_step,
                                           y_label_minor_step))
 
@@ -415,3 +517,658 @@ class PlotConfidence:
 
             pdf.savefig()  # saves current figure
             plt.clf()  # clear current figure
+
+        return True
+
+
+class PlotBothConfidence:
+
+    def __init__(self, output_path, source, pm, mode, fitted_d, tmp_d):
+        """
+
+        :param output_path:
+        :param source:
+        :param pm:
+        :param mode:
+        :param fitted_d:
+        :param tmp_d: a dictionary ['i_alpha', 'i_delta', 'o_alpha', 'o_delta',
+                                    'error_a', 'error_b', 'epoch']
+        """
+        self.output_path = output_path
+        self.source = source
+        self.pm = pm
+        self.mode = mode  # Can be 'i' or 'o'
+        self.fitted_d = fitted_d
+        self.tmp_d = tmp_d
+
+        plot_size = [16.53, 11.69]
+        plot_dpi = 100
+
+        self.plot(plot_size, plot_dpi)
+
+    def plot(self, plot_size, plot_dpi):
+        """
+
+        :param plot_size:
+        :param plot_dpi:
+        :return:
+        """
+        pdf_name = '{}/{}_{}_{}.pdf'.format(self.output_path, self.source,
+                                            self.pm, self.mode)
+        with PdfPages(pdf_name) as pdf:
+            # ALPHA PARAMETERS
+            fig = plt.figure(figsize=plot_size, dpi=plot_dpi)
+            ax = fig.add_subplot(1, 1, 1)
+            ax.set_title('chi_squared: {}'.format(self.fitted_d['ra']))
+
+            # input_parameters
+            i_a_tmpstmp = []
+            i_alpha_seconds = []
+            i_tmp_hour = []
+            i_tmp_minute = []
+            for alpha_ in self.tmp_d['i_alpha']:
+                a = Angle(alpha_, units.degree)
+                hms = a.hms
+                hour = int(hms[0])
+                i_tmp_hour.append(hour)
+                minute = int(hms[1])
+                i_tmp_minute.append(minute)
+                second = float("{0:.6f}".format(hms[2]))
+                i_a_tmpstmp.append('{}:{}:{}'.format(hour, minute, second))
+                i_alpha_seconds.append('{}'.format(second))
+
+            i_datetimes = [datetime.strptime(t,
+                                             "%H:%M:%S.%f") for t in i_a_tmpstmp]
+
+            # output parameters
+            o_a_tmpstmp = []
+            o_alpha_seconds = []
+            o_tmp_hour = []
+            o_tmp_minute = []
+            for alpha_ in self.tmp_d['o_alpha']:
+                a = Angle(alpha_, units.degree)
+                hms = a.hms
+                hour = int(hms[0])
+                o_tmp_hour.append(hour)
+                minute = int(hms[1])
+                o_tmp_minute.append(minute)
+                second = float("{0:.6f}".format(hms[2]))
+                o_a_tmpstmp.append('{}:{}:{}'.format(hour, minute, second))
+                o_alpha_seconds.append('{}'.format(second))
+
+            o_datetimes = [datetime.strptime(t,
+                                             "%H:%M:%S.%f") for t in o_a_tmpstmp]
+
+            # X-AXIS Shared between input and output catalogs
+            epoch_seconds = []
+            for epoch_ in self.tmp_d['epoch']:
+                frac, whole = modf(epoch_)
+                seconds_ = frac * 365.25 * 24 * 60
+                epoch_seconds.append(seconds_)
+
+            # Creates x ticks (major and minor ones)
+            x_ticks = create_x_ticks(epoch_seconds)
+
+            for key_ in x_ticks.keys():
+                print(key_, x_ticks[key_])
+                print(' ')
+            print(' ')
+
+            """
+            # todo reformat!
+            # Y-AXIS
+            myformat = mdates.DateFormatter('%S.%f')
+            ax.yaxis.set_major_formatter(myformat)
+
+            # format elements in alpha_seconds list to floats
+            alpha_seconds = [float(i) for i in alpha_seconds]  # needed?
+            alpha_seconds = [float("{0:.6f}".format(i)) for i in
+                             alpha_seconds]
+
+            # Check if all hours/minutes are same
+            if len(list(set(tmp_hour))) != 1:
+                raise Exception
+            if len(list(set(tmp_minute))) != 1:
+                raise Exception
+
+            # Creates y ticks (major and minor ones)
+            y_ticks = create_alpha_y_ticks(alpha_seconds, tmp_hour[0],
+                                           tmp_minute[0])
+            y_labels = create_labels(y_ticks['minor_t'])
+
+            # x-ticks assignation
+            ax.set_xticks(x_ticks['major_t'], minor=False)
+            ax.set_xticks(x_ticks['minor_t'], minor=True)
+            # x-ticks labels
+
+            # y-ticks assignation
+            ax.set_yticks(y_ticks['major_t'], minor=False)
+            ax.set_yticks(y_ticks['minor_t'], minor=True)
+            # y-ticks labels
+            empty_string_labels = [''] * len(y_ticks['major_t'])
+            ax.set_yticklabels(empty_string_labels, minor=False)
+            ax.set_yticklabels(y_labels, minor=True)
+
+            # Formats grids
+            ax.grid(b=True, which='major', linestyle='-', linewidth=2)
+            ax.grid(b=True, which='minor', linestyle='--', linewidth=1)
+
+            # Annotations
+            for idx_datetime_, datetime_ in enumerate(datetimes):
+                # Format alpha
+                hour = datetime_.hour
+                minute = datetime_.minute
+                second = datetime_.second
+                msecond = datetime_.microsecond
+                alpha_str = '   alpha {}:{}:{}:{}'.format(hour, minute,
+                                                          second, msecond)
+                # Format error
+                error_seconds = self.tmp_d['error_a'][idx_datetime_] * 3600
+                error = float("{0:.6f}".format(error_seconds))
+                error_str = '   error  {}"'.format(error)
+                # Annotate position and error associated
+                ax.annotate('{}\n{}'.format(alpha_str, error_str),
+                            xy=(epoch_seconds[idx_datetime_], datetime_),
+                            textcoords='data', fontsize=13)
+
+            for idx_datetime_, datetime_ in enumerate(datetimes):
+                error_seconds = self.tmp_d['error_a'][idx_datetime_] * 3600
+                errorbar_size = timedelta(0, error_seconds)
+                ax.errorbar(epoch_seconds[idx_datetime_], datetime_,
+                            yerr=errorbar_size,
+                            fmt='o', ecolor='g', capthick=2, elinewidth=4)
+
+            # Axis labels creation
+            # x-axis
+            x_label = 'EPOCH (seconds)'
+            ax.set_xlabel(x_label)
+            # y-axis
+            y_label_ra = 'Right ascension (")\n'
+            major_s = y_ticks['major_s']
+            y_label_major_step = 'major step size {}"\n'.format(major_s)
+            minor_s = y_ticks['minor_s']
+            y_label_minor_step = 'minor step size {}"'.format(minor_s)
+            ax.set_ylabel('{}{}{}'.format(y_label_ra, y_label_major_step,
+                                          y_label_minor_step))
+
+            # Plots data
+            ax.plot(epoch_seconds, datetimes, 'bs', markersize=6,
+                    label='extracted position')
+            # In order to avoid scientific notation plot should be redrawn
+            ax = plt.gca()
+            ax.get_xaxis().get_major_formatter().set_useOffset(False)
+
+            # Plots a legend
+            plt.legend(loc=0, ncol=2, borderaxespad=0.)
+            plt.draw()
+
+            # Saves the current figure in pdf file
+            pdf.savefig()  # saves current figure
+            plt.clf()  # clear current figure
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            i_alpha_tmpstmp = []
+            i_alpha_seconds = []
+            tmp_hour = []
+            tmp_minute = []
+            for alpha_ in tmp_i_alpha:
+                a = Angle(alpha_, u.degree)
+                hms = a.hms
+                hour = int(hms[0])
+                tmp_hour.append(hour)
+                minute = int(hms[1])
+                tmp_minute.append(minute)
+                second = float("{0:.6f}".format(hms[2]))
+                i_alpha_tmpstmp.append('{}:{}:{}'.format(hour, minute, second))
+                i_alpha_seconds.append('{}'.format(second))
+
+            i_datetimes = [datetime.strptime(t, "%H:%M:%S.%f") for t in i_alpha_tmpstmp]
+
+            o_alpha_tmpstmp = []
+            o_alpha_seconds = []
+            tmp_hour = []
+            tmp_minute = []
+            for alpha_ in tmp_o_alpha:
+                a = Angle(alpha_, u.degree)
+                hms = a.hms
+                hour = int(hms[0])
+                tmp_hour.append(hour)
+                minute = int(hms[1])
+                tmp_minute.append(minute)
+                second = float("{0:.6f}".format(hms[2]))
+                o_alpha_tmpstmp.append('{}:{}:{}'.format(hour, minute, second))
+                o_alpha_seconds.append('{}'.format(second))
+
+            o_datetimes = [datetime.strptime(t, "%H:%M:%S.%f") for t in o_alpha_tmpstmp]
+
+            # X-AXIS Shared between input and output catalogs
+            epoch_seconds = []
+            for epoch_ in tmp_epoch:
+                frac, whole = modf(epoch_)
+                seconds_ = frac * 365.25 * 24 * 60
+                epoch_seconds.append(seconds_)
+
+            x_difference = float(max(epoch_seconds)) - float(min(epoch_seconds))
+            x_major_step = (x_difference / 3)
+            x_minor_step = (x_difference / 6)
+
+            # X-SCALE
+            x_major_ticks = [epoch_seconds[0] - x_major_step,
+                             epoch_seconds[0],
+                             epoch_seconds[0] + x_major_step,
+                             epoch_seconds[0] + x_major_step * 2,
+                             epoch_seconds[0] + x_major_step * 3,
+                             epoch_seconds[0] + x_major_step * 4]
+
+            x_minor_ticks = [epoch_seconds[0] - x_minor_step * 2,
+                             epoch_seconds[0] - x_minor_step,
+                             epoch_seconds[0],
+                             epoch_seconds[0] + x_minor_step,
+                             epoch_seconds[0] + x_minor_step * 2,
+                             epoch_seconds[0] + x_minor_step * 3,
+                             epoch_seconds[0] + x_minor_step * 4,
+                             epoch_seconds[0] + x_minor_step * 5,
+                             epoch_seconds[0] + x_minor_step * 6,
+                             epoch_seconds[0] + x_minor_step * 7,
+                             epoch_seconds[0] + x_minor_step * 8]
+
+            ax.set_xlabel('EPOCH')
+
+            # Y-AXIS
+            myformat = mdates.DateFormatter('%S.%f')
+            ax.yaxis.set_major_formatter(myformat)
+
+            # format elements in alpha_seconds list to floats
+            i_alpha_seconds = [float(i) for i in i_alpha_seconds]
+            i_alpha_seconds = [float("{0:.6f}".format(i)) for i in
+                               i_alpha_seconds]
+
+            # format elements in alpha_seconds list to floats
+            o_alpha_seconds = [float(i) for i in o_alpha_seconds]
+            o_alpha_seconds = [float("{0:.6f}".format(i)) for i in
+                               o_alpha_seconds]
+
+            # Gets maximum and minium value of alpha and delta (in seconds)
+            max_alpha_i = max(i_alpha_seconds)
+            max_alpha_o = max(o_alpha_seconds)
+            max_alpha = max([max_alpha_i, max_alpha_o])
+            min_alpha_i = min(i_alpha_seconds)
+            min_alpha_o = min(o_alpha_seconds)
+            min_alpha = min([min_alpha_i, min_alpha_o])
+
+            # Gets the major step between ticks thought the difference
+            # between the maximum and the minimum value of alpha
+            difference = float(max_alpha) - float(min_alpha)
+            major_step = (difference / 4)
+            major_step_t = self.significant_l(major_step)
+
+            # Rounds the float value of difference
+            first_digit = '%.2E' % Decimal(major_step - major_step_t)
+
+            if first_digit[0] == '-':
+                first_digit = int(first_digit[1])
+            else:
+                first_digit = int(first_digit[0])
+
+            # Redondea al alza el ultimo digio
+            if first_digit > 5:
+                last_digit = str(major_step_t)[-1]
+                last_digit = int(last_digit)
+                last_digit += 1
+                major_step_t = list(str(major_step_t))
+                major_step_t[-1] = last_digit
+                major_step_t = [str(i) for i in major_step_t]
+                major_step_t = ''.join(major_step_t)
+                major_step_t = float(major_step_t)
+            else:
+                pass  # do nothing
+
+            major_step = major_step_t
+            minor_step = (major_step / 4)
+
+            # Gets maximum decimal position of major step
+            step_decimals = int(str(major_step)[::-1].find('.'))
+
+            # Major step list starts two times before and end two times after
+            # known values
+            major_steps = arange(round(min_alpha,
+                                       step_decimals) - major_step * 2,
+                                 round(max_alpha,
+                                       step_decimals) + major_step * 2,
+                                 major_step)
+            # Minor step list starts eight times before and end eight times
+            # after know values
+            minor_steps = arange(round(min_alpha,
+                                       step_decimals) - minor_step * 8,
+                                 round(max_alpha,
+                                       step_decimals) + minor_step * 8,
+                                 minor_step)
+
+            # Formats major steps for be readable by matplotlib axis
+            i_alpha_major_steps = []
+            for idx_step, step_ in enumerate(major_steps):
+                # Check if all hours/minutes are same
+                if len(list(set(tmp_hour))) != 1:
+                    raise Exception
+                if len(list(set(tmp_minute))) != 1:
+                    raise Exception
+
+                # Gets hour and minute value
+                hour = tmp_hour[0]
+                minute = tmp_minute[0]
+                i_alpha_major_steps.append('{}:{}:{}'.format(hour, minute, step_))
+
+            # Creates a list of datatime objects
+            # Sometimes, seconds are greater than 59, this values should be
+            # filter in a better way
+            try:
+                i_alpha_steps_d = [datetime.strptime(t, "%H:%M:%S.%f") for t in i_alpha_major_steps]
+
+                # Formats minor steps
+                i_alpha_minor_steps = []
+                for idx_step, step_ in enumerate(minor_steps):
+                    # Check if all hours/minutes are same
+                    if len(list(set(tmp_hour))) != 1:
+                        raise Exception
+                    if len(list(set(tmp_minute))) != 1:
+                        raise Exception
+
+                    # Gets hour and minute value
+                    hour = tmp_hour[0]
+                    minute = tmp_minute[0]
+                    i_alpha_minor_steps.append('{}:{}:{}'.format(hour, minute, step_))
+
+                # Creates a list of datetime objects
+                i_alpha_minor_steps_d = [datetime.strptime(t, "%H:%M:%S.%f") for t in i_alpha_minor_steps]
+
+                # x-ticks assignation
+                ax.set_xticks(x_major_ticks, minor=False)
+                ax.set_xticks(x_minor_ticks, minor=True)
+                # x-ticks labels
+
+                # y-ticks assignation
+                ax.set_yticks(i_alpha_steps_d, minor=False)
+                ax.set_yticks(i_alpha_minor_steps_d, minor=True)
+                # y-ticks labels
+                empty_string_labels = [''] * len(major_steps)
+                ax.set_yticklabels(empty_string_labels, minor=False)
+                ax.set_yticklabels(minor_steps, minor=True)
+
+                # Formats grids
+                ax.grid(b=True, which='major', linestyle='-', linewidth=2)
+                ax.grid(b=True, which='minor', linestyle='--', linewidth=1)
+
+                for idx_datetime_, datetime_ in enumerate(i_datetimes):
+                    hour = datetime_.hour
+                    minute = datetime_.minute
+                    second = datetime_.second
+                    msecond = datetime_.microsecond
+                    alpha_str = '   alpha {}:{}:{}:{}'.format(hour, minute,
+                                                              second, msecond)
+                    error = float(
+                        "{0:.6f}".format(tmp_a_error[idx_datetime_] * 3600))
+                    error_str = '   error  {}"'.format(error)
+                    # Annotate position and error associated
+                    ax.annotate('{}\n{}'.format(alpha_str, error_str),
+                                xy=(epoch_seconds[idx_datetime_], datetime_),
+                                textcoords='data', fontsize=13)
+
+                for idx_datetime_, datetime_ in enumerate(i_datetimes):
+                    ax.errorbar(epoch_seconds[idx_datetime_], datetime_,
+                                yerr=timedelta(0, tmp_a_error[
+                                    idx_datetime_] * 3600),
+                                fmt='o', ecolor='g', capthick=2, elinewidth=4)
+
+                for idx_datetime_, datetime_ in enumerate(o_datetimes):
+                    hour = datetime_.hour
+                    minute = datetime_.minute
+                    second = datetime_.second
+                    msecond = datetime_.microsecond
+                    alpha_str = '   alpha {}:{}:{}:{}'.format(hour, minute,
+                                                              second, msecond)
+                    error = float(
+                        "{0:.6f}".format(tmp_a_error[idx_datetime_] * 3600))
+                    error_str = '   error  {}"'.format(error)
+                    # Annotate position and error associated
+                    ax.annotate('{}\n{}'.format(alpha_str, error_str),
+                                xy=(epoch_seconds[idx_datetime_], datetime_),
+                                textcoords='data', fontsize=13)
+
+                for idx_datetime_, datetime_ in enumerate(o_datetimes):
+                    ax.errorbar(epoch_seconds[idx_datetime_], datetime_,
+                                yerr=timedelta(0, tmp_a_error[
+                                    idx_datetime_] * 3600),
+                                fmt='o', ecolor='g', capthick=2, elinewidth=4)
+
+                # Label creation
+                y_label_ra = 'Right ascension (")\n'
+                y_label_major_step = 'major step size {}"\n'.format(major_step)
+                y_label_minor_step = 'minor step size {}"'.format(minor_step)
+                ax.set_ylabel('{}{}{}'.format(y_label_ra, y_label_major_step,
+                                              y_label_minor_step))
+                # Plots data
+                ax.plot(epoch_seconds, o_datetimes, 'bs', markersize=6,
+                        label='extracted position')
+                ax.plot(epoch_seconds, i_datetimes, 'bs', markersize=6,
+                        label='extracted position')
+                # In order to avoid scientific notation plot should be redrawn
+                ax = plt.gca()
+                ax.get_xaxis().get_major_formatter().set_useOffset(False)
+
+                # Plots a legend
+                plt.legend(loc=0, ncol=2, borderaxespad=0.)
+                plt.draw()
+
+                # Saves the current figure in pdf file
+                pdf.savefig()  # saves current figure
+                plt.clf()  # clear current figure
+
+                #
+                #
+                # DELTA PARAMETERS
+                #
+                #
+                fig = plt.figure(figsize=(16.53, 11.69), dpi=100)
+                ax = fig.add_subplot(1, 1, 1)
+                ax.set_title('catalog - chi_squared: {}'.format(fitted_d['dec']))
+
+                o_delta_tmpstmp = []
+                o_delta_seconds = []
+                for delta_ in tmp_i_delta:
+                    d = Angle(delta_, u.degree)
+                    dms = d.dms
+                    o_delta_tmpstmp.append(
+                        '{}:{}.{}'.format(int(dms[0]), int(dms[1]),
+                                          float("{0:.6f}".format(dms[2]))))
+                    o_delta_seconds.append(
+                        '{}'.format(float("{0:.6f}".format(dms[2]))))
+
+                ax.set_xlabel('EPOCH')
+
+                # Y-SCALE
+                # format elements in alpha_seconds list to floats
+                o_delta_seconds = [float(i) for i in o_delta_seconds]
+                o_delta_seconds = [float("{0:.6f}".format(i)) for i in
+                                   o_delta_seconds]
+
+                max_delta = max(o_delta_seconds)
+                min_delta = min(o_delta_seconds)
+
+                delta_difference = float(max_delta) - float(min_delta)
+                delta_major_step = (delta_difference / 4)
+                delta_major_step_t = self.significant_l(delta_major_step)
+
+                # Rounds the float value of difference
+                first_digit = '%.2E' % Decimal(delta_major_step - delta_major_step_t)
+
+                if first_digit[0] == '-':
+                    first_digit = int(first_digit[1])
+                else:
+                    first_digit = int(first_digit[0])
+
+                # Redondea al alza el ultimo digio
+                if first_digit > 5:
+                    last_digit = str(delta_major_step_t)[-1]
+                    last_digit = int(last_digit)
+                    last_digit += 1
+                    delta_major_step_t = list(str(delta_major_step_t))
+                    delta_major_step_t[-1] = last_digit
+                    delta_major_step_t = [str(i) for i in delta_major_step_t]
+                    delta_major_step_t = ''.join(delta_major_step_t)
+                    delta_major_step_t = float(delta_major_step_t)
+                else:
+                    pass  # do nothing
+
+                delta_major_step = delta_major_step_t
+                delta_minor_step = (delta_major_step / 4)
+
+                # Gets maximum decimal position of major step
+                step_decimals = int(str(delta_major_step)[::-1].find('.'))
+
+                # Major step list starts two times before and end two times
+                # after known values
+                major_steps = arange(round(min_delta,
+                                           step_decimals) - major_step * 2,
+                                     round(max_delta,
+                                           step_decimals) + major_step * 2,
+                                     delta_major_step)
+                # Minor step list starts eight times before and end eight times
+                # after know values
+                minor_steps = arange(round(min_delta,
+                                           step_decimals) - minor_step * 8,
+                                     round(max_delta,
+                                           step_decimals) + minor_step * 8,
+                                     delta_minor_step)
+
+                # x-ticks assignation
+                ax.set_xticks(x_major_ticks, minor=False)
+                ax.set_xticks(x_minor_ticks, minor=True)
+                # x-ticks labels
+                # TODO
+                # y-ticks assignation
+                # rounds float to six decimal position
+                # y_minor_ticks = [float("{0:.6f}".format(i)) for i in
+                #                  y_minor_ticks]
+                ax.set_yticks(major_steps, minor=False)
+                ax.set_yticks(minor_steps, minor=True)
+                # y-ticks labels
+                empty_string_labels = [''] * len(major_steps)
+                ax.set_yticklabels(empty_string_labels, minor=False)
+                # Converts floats into strings
+                # y_minor_ticks = [str(i) for i in y_minor_ticks]
+                ax.set_yticklabels(minor_steps, minor=True)
+
+                # Formats grids
+                ax.grid(b=True, which='major', linestyle='-', linewidth=2)
+                ax.grid(b=True, which='minor', linestyle='--', linewidth=1)
+
+                # Input annotations
+                for idx_datetime_, datetime_ in enumerate(i_datetimes):
+                    x = epoch_seconds[idx_datetime_]  # x position
+                    y = o_delta_seconds[idx_datetime_]  # y position
+                    # variables for position and error representation
+                    delta_position = o_delta_tmpstmp[idx_datetime_]
+                    delta_str = '   delta {}'.format(delta_position)
+                    error = tmp_b_error[idx_datetime_] * 3600  # error on y
+                    error_fmt = float("{0:.6f}".format(error))  # error rounded
+                    error_str = '   error {}'.format(error_fmt)
+                    # annotation
+                    ax.annotate('{}\n{}'.format(delta_str, error_str),
+                                xy=(x, y),
+                                textcoords='data', fontsize=13)
+
+                for idx_datetime_, datetime_ in enumerate(i_datetimes):
+                    x = epoch_seconds[idx_datetime_]  # x position
+                    y = o_delta_seconds[idx_datetime_]  # y position
+                    error = float(tmp_b_error[idx_datetime_] * 3600)  # error y
+                    ax.errorbar(x, y, yerr=error, fmt='o',
+                                ecolor='g', capthick=2, elinewidth=4)
+
+                # Output annotations
+                for idx_datetime_, datetime_ in enumerate(o_datetimes):
+                    x = epoch_seconds[idx_datetime_]  # x position
+                    y = o_delta_seconds[idx_datetime_]  # y position
+                    # variables for position and error representation
+                    delta_position = o_delta_tmpstmp[idx_datetime_]
+                    delta_str = '   delta {}'.format(delta_position)
+                    error = tmp_b_error[idx_datetime_] * 3600  # error on y
+                    error_fmt = float("{0:.6f}".format(error))  # error rounded
+                    error_str = '   error {}'.format(error_fmt)
+                    # annotation
+                    ax.annotate('{}\n{}'.format(delta_str, error_str),
+                                xy=(x, y),
+                                textcoords='data', fontsize=13)
+
+                for idx_datetime_, datetime_ in enumerate(o_datetimes):
+                    x = epoch_seconds[idx_datetime_]  # x position
+                    y = o_delta_seconds[idx_datetime_]  # y position
+                    error = float(tmp_b_error[idx_datetime_] * 3600)  # error y
+                    ax.errorbar(x, y, yerr=error, fmt='o',
+                                ecolor='g', capthick=2, elinewidth=4)
+                # Label creation
+                y_label_ra = 'Declination (")\n'
+                y_label_major_step = 'major step size {}"\n'.format(delta_major_step)
+                y_label_minor_step = 'minor step size {}"'.format(delta_minor_step)
+                ax.set_ylabel('{}{}{}'.format(y_label_ra, y_label_major_step,
+                                              y_label_minor_step))
+
+                ax.plot(epoch_seconds, o_delta_seconds, 'bs', markersize=6,
+                        label='extracted position')
+                ax.plot(epoch_seconds, o_datetimes, 'bs', markersize=6,
+                        label='extracted position')
+
+                ax = plt.gca()
+                ax.get_xaxis().get_major_formatter().set_useOffset(False)
+                plt.legend(loc=0, ncol=2, borderaxespad=0.)
+                plt.draw()
+
+                pdf.savefig()  # saves current figure
+                plt.clf()  # clear current figure
+                """
