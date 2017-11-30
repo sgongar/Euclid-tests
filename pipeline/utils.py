@@ -22,6 +22,9 @@ from regions import Create_regions
 def input_ssos(logger, prfs_d):
     """
 
+    :param logger:
+    :param prfs_d:
+    :return:
     """
     # Gets all possible values of proper motions
     ssos = read_csv('ssos.csv', index_col=0)
@@ -35,7 +38,7 @@ def input_ssos(logger, prfs_d):
         total_pms.append(float(df_ssos['pm_values'].iloc[0]))
 
     total_values = dict(Counter(total_pms))
-    print 'possible values are {}'.format(total_values)
+    print('possible values are {}'.format(total_values))
 
     # Gets right proper motion values
     (input_pm_list, output_pm_list) = modify_table(logger, prfs_d)
@@ -59,16 +62,12 @@ def input_ssos(logger, prfs_d):
             final_input_pm[final_input_pm.index(value_)] = 0.003
 
     test = dict(Counter(final_input_pm))
-    print 'right obtained value are {}'.format(test)
 
     # Gets obtained proper motion values
     file_sources = read_csv('filter_100_1.2_0.05_20-21_5.csv', index_col=0)
 
     sources = list(set(file_sources['SOURCE_NUMBER'].tolist()))
     total_pms = []
-
-    print sources
-    print file_sources['PM']
 
     """
     for source_ in sources:

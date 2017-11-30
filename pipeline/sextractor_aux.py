@@ -146,12 +146,9 @@ class CatalogCreation:
     def __init__(self, logger, analysis_d):
         """ creates a single catalogue for all images available
 
-        @param logger: a logger object
-        @param prfs_d: a dictionary with all configuration information
-
-        @return True: if everything goes right
+        :param logger: a logger object
+        :param analysis_d: a dictionary with all configuration information
         """
-
         prfs_d = extract_settings()
         mags = prfs_d['mags']
 

@@ -11,6 +11,7 @@ Todo:
 
 
 from collections import Counter
+from decimal import Decimal
 from math import hypot
 from multiprocessing import cpu_count
 from os import listdir, remove, rename, mkdir
@@ -25,25 +26,20 @@ from errors import BadSettings
 from logging import getLogger, config
 
 
-__author__ = "Samuel Gongora-Garcia"
+__author__ = "Samuel Góngora García"
 __copyright__ = "Copyright 2017"
-__credits__ = ["Samuel Gongora-Garcia"]
-"""
-__license__ = "GPL"
-"""
+__credits__ = ["Samuel Góngora García"]
 __version__ = "0.1"
-__maintainer__ = "Samuel Gongora-Garcia"
+__maintainer__ = "Samuel Góngora García"
 __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
 
 
 def get_fits(unique):
-    """ returns a list with all fits files availables
+    """
 
-    @param unique: a flag
-    @param folder: sextraction configuration
-
-    @return fits_list: a list with all fits files
+    :param unique:
+    :return:
     """
     prfs_d = extract_settings()
     fits_list = []
@@ -68,12 +64,10 @@ def get_fits(unique):
 
 
 def get_fits_d(dither):
-    """ returns a list with all fits files availables
+    """
 
-    @param unique: a flag
-    @param folder: sextraction configuration
-
-    @return fits_list: a list with all fits files
+    :param dither:
+    :return:
     """
     prfs_d = extract_settings()
     fits_list = []
@@ -91,12 +85,10 @@ def get_fits_d(dither):
     return list_out
 
 
-def get_cats(logger):
-    """ returns a list populated by all catalog files in output catalogs dir
+def get_cats():
+    """
 
-    @param logger: a logger object.
-
-    @return a cat_list: a list with all cat files.
+    :return:
     """
     prfs_d = extract_settings()
 
@@ -105,8 +97,7 @@ def get_cats(logger):
 
     folders = []
     for idx, conf_ in enumerate(confs):
-        (analysis_d, len_dicts) = create_sextractor_dict(logger, prfs_d,
-                                                         idx, cat_conf=False)
+        analysis_d, len_dicts = create_sextractor_dict(idx, False)
         folder_n = '{}_{}_{}_{}_{}'.format(analysis_d['deblend_nthresh'],
                                            analysis_d['analysis_thresh'],
                                            analysis_d['detect_thresh'],
@@ -155,10 +146,10 @@ def all_same(items):
     # be wrong
 
     length_items = len(list(set(items)))
-    items_w_o_False = [x for x in items if x != 'False']
+    items_w_o_false = [x for x in items if x != 'False']
 
     if length_items is 1 and 'False' not in dict(Counter(items)).keys():
-        return True, len(items_w_o_False)
+        return True, len(items_w_o_false)
     elif length_items is 1 and 'False' in dict(Counter(items)).keys():
         return False, 0
     elif length_items is 2 and 'False' not in dict(Counter(items)).keys():
@@ -186,11 +177,9 @@ def all_same(items):
         print('error', items)
 
 
-def create_sextractor_dict(logger, prfs_d, conf_num, cat_conf):
+def create_sextractor_dict(conf_num, cat_conf):
     """
 
-    @param logger: a logger object.
-    @param prfs_d:
     @param conf_num:
     @param cat_conf:
 
@@ -208,13 +197,12 @@ def create_sextractor_dict(logger, prfs_d, conf_num, cat_conf):
 
     if type(configurations[0]) is list:
         for configuration in range(len(configurations)):
-            temp_list = []
-            temp_list.append(configurations[configuration][0])
-            temp_list.append(configurations[configuration][1])
-            temp_list.append(configurations[configuration][2])
-            temp_list.append(configurations[configuration][2])
-            temp_list.append(configurations[configuration][3])
-            temp_list.append(configurations[configuration][4])
+            temp_list = [configurations[configuration][0],
+                         configurations[configuration][1],
+                         configurations[configuration][2],
+                         configurations[configuration][2],
+                         configurations[configuration][3],
+                         configurations[configuration][4]]
             analysis_l.append(temp_list)
         analysis_d = {'deblend_nthresh': analysis_l[conf_num][0],
                       'deblend_mincount': analysis_l[conf_num][1],
@@ -233,27 +221,19 @@ def create_sextractor_dict(logger, prfs_d, conf_num, cat_conf):
     return analysis_d, len_conf
 
 
-def create_scamp_dict(logger, prfs_d, conf_num):
+def create_scamp_dict(conf_num):
     """
 
-    @param logger: a logger object.
-    @param prfs_d:
-    @param scmp_conf:
-
-    @return analysis_dict:
+    :param conf_num:
+    :return:
     """
 
     scamp_list = []
-    mode = {}
-    mode['type'] = 'scamp'
+    mode = {'type': 'scamp'}
     configurations, len_conf = create_configurations(mode)
 
     for conf in configurations:
-        temp_list = []
-        temp_list.append(conf[0])
-        temp_list.append(conf[1])
-        temp_list.append(conf[2])
-        temp_list.append(conf[3])
+        temp_list = [conf[0], conf[1], conf[2], conf[3]]
         scamp_list.append(temp_list)
     scamp_dict = {'crossid_radius': scamp_list[conf_num][0],
                   'pixscale_maxerr': scamp_list[conf_num][1],
@@ -270,9 +250,11 @@ def create_configurations(mode):
     :return:
     """
     if mode['type'] == 'sextractor':
+#        l_deblending = [20, 30, 40]
         l_deblending = [30]
         l_mincount = [0.01]
-        l_threshold = [1.5]
+#        l_threshold = [1.5, 3]
+        l_threshold = [3]
 
         l_area = [4]
         l_filter_name = ['models/gauss_2.0_5x5.conv']
@@ -292,7 +274,8 @@ def create_configurations(mode):
         l_crossid_radius = [10]  # [10] seconds
         l_pixscale_maxerr = [1.2]  # [1.2] scale-factor
         l_posangle_maxerr = [0.5]  # [0.5, 2.5] degrees
-        l_position_maxerr = [0.64]  # [0.16, 0.64, 1.28] minutes
+        # [0.16, 0.64, 1.28] minutes
+        l_position_maxerr = [0.08, 0.16, 0.32, 0.64]
 
         configurations = []
 
@@ -308,7 +291,7 @@ def create_configurations(mode):
         return configurations, configurations_len
 
 
-def ConfMap(config_, section):
+def confmap(config_, section):
     """
 
     @param config_:
@@ -323,7 +306,7 @@ def ConfMap(config_, section):
             dict1[option] = config_.get(section, option)
             if dict1[option] == -1:
                 print("skip: %s" % option)
-        except:
+        except KeyError:
             print("exception on %s!" % option)
             dict1[option] = None
     return dict1
@@ -335,102 +318,101 @@ def extract_settings():
 
     @return prfs_d: a dictionary which contains all valuable data
     """
-    Cf = ConfigParser()
-    Cf.read(".settings.ini")
+    cf = ConfigParser()
+    cf.read(".settings.ini")
 
     os_version = get_os()
 
-    prfs_d = {}
-    prfs_d['cat'] = ConfMap(Cf, "Version")['cat_version']
+    prfs_d = {'cat': confmap(cf, "Version")['cat_version']}
 
     if os_version == 'fedora':
-        prfs_d['home'] = ConfMap(Cf, "HomeDirs")['fed_home']
+        prfs_d['home'] = confmap(cf, "HomeDirs")['fed_home']
     elif os_version == 'ubuntu':
-        prfs_d['home'] = ConfMap(Cf, "HomeDirs")['ub_home']
+        prfs_d['home'] = confmap(cf, "HomeDirs")['ub_home']
     elif os_version == 'test':
-        prfs_d['home'] = ConfMap(Cf, "HomeDirs")['test_home']
+        prfs_d['home'] = confmap(cf, "HomeDirs")['test_home']
     elif os_version == 'centos':
-        prfs_d['home'] = ConfMap(Cf, "HomeDirs")['centos_home']
+        prfs_d['home'] = confmap(cf, "HomeDirs")['centos_home']
     else:
         raise BadSettings('Operative system not chosen')
 
     if os_version == 'fedora':
-        prfs_d['version'] = ConfMap(Cf, "Version")['fed_version']
+        prfs_d['version'] = confmap(cf, "Version")['fed_version']
         prfs_d['version'] = prfs_d['version'] + prfs_d['cat']
     elif os_version == 'ubuntu':
-        prfs_d['version'] = ConfMap(Cf, "Version")['ub_version']
+        prfs_d['version'] = confmap(cf, "Version")['ub_version']
         prfs_d['version'] = prfs_d['version'] + prfs_d['cat']
     elif os_version == 'test':
-        prfs_d['version'] = ConfMap(Cf, "Version")['test_version']
+        prfs_d['version'] = confmap(cf, "Version")['test_version']
         prfs_d['version'] = prfs_d['version'] + prfs_d['cat']
     elif os_version == 'centos':
-        prfs_d['version'] = ConfMap(Cf, "Version")['centos_version']
+        prfs_d['version'] = confmap(cf, "Version")['centos_version']
         prfs_d['version'] = prfs_d['version'] + prfs_d['cat']
     else:
         raise BadSettings('Operative system not chosen')
 
-    prfs_d['fits_dir'] = ConfMap(Cf, "ImagesDirs")['fits_dir']
+    prfs_d['fits_dir'] = confmap(cf, "ImagesDirs")['fits_dir']
     prfs_d['fits_dir'] = prfs_d['version'] + prfs_d['fits_dir']
-    prfs_d['fpas_dir'] = ConfMap(Cf, "ImagesDirs")['fpas_dir']
+    prfs_d['fpas_dir'] = confmap(cf, "ImagesDirs")['fpas_dir']
     prfs_d['fpas_dir'] = prfs_d['version'] + prfs_d['fpas_dir']
     # TODO This hardcoded lines should be improve
-    prfs_d['fits_ref'] = ConfMap(Cf, "ImagesDirs")['fits_ref']
+    prfs_d['fits_ref'] = confmap(cf, "ImagesDirs")['fits_ref']
 
-    prfs_d['time_1'] = ConfMap(Cf, "ImagesTime")['time_1']
-    prfs_d['time_2'] = ConfMap(Cf, "ImagesTime")['time_2']
-    prfs_d['time_3'] = ConfMap(Cf, "ImagesTime")['time_3']
-    prfs_d['time_4'] = ConfMap(Cf, "ImagesTime")['time_4']
+    prfs_d['time_1'] = confmap(cf, "ImagesTime")['time_1']
+    prfs_d['time_2'] = confmap(cf, "ImagesTime")['time_2']
+    prfs_d['time_3'] = confmap(cf, "ImagesTime")['time_3']
+    prfs_d['time_4'] = confmap(cf, "ImagesTime")['time_4']
 
-    OutputDirs_list = ['conf_scamp', 'conf_sex', 'params_sex', 'params_cat',
+    outputdirs_list = ['conf_scamp', 'conf_sex', 'params_sex', 'params_cat',
                        'logger_config']
-    for conf_ in OutputDirs_list:
-        prfs_d[conf_] = ConfMap(Cf, "ConfigDirs")[conf_]
+    for conf_ in outputdirs_list:
+        prfs_d[conf_] = confmap(cf, "ConfigDirs")[conf_]
         prfs_d[conf_] = prfs_d['home'] + prfs_d[conf_]
 
-    prfs_d['output_cats'] = ConfMap(Cf, "CatsDirs")['output_cats']
+    prfs_d['output_cats'] = confmap(cf, "CatsDirs")['output_cats']
     prfs_d['output_cats'] = prfs_d['version'] + prfs_d['output_cats']
-    prfs_d['input_cats'] = ConfMap(Cf, "CatsDirs")['input_cats']
+    prfs_d['input_cats'] = confmap(cf, "CatsDirs")['input_cats']
     prfs_d['input_cats'] = prfs_d['version'] + prfs_d['input_cats']
-    prfs_d['input_ref'] = ConfMap(Cf, "CatsDirs")['input_ref']
+    prfs_d['input_ref'] = confmap(cf, "CatsDirs")['input_ref']
 
-    prfs_d['first_star'] = ConfMap(Cf, "CatsOrganization")['first_star']
+    prfs_d['first_star'] = confmap(cf, "CatsOrganization")['first_star']
     prfs_d['first_star'] = int(prfs_d['first_star'])
-    prfs_d['first_galaxy'] = ConfMap(Cf, "CatsOrganization")['first_galaxy']
+    prfs_d['first_galaxy'] = confmap(cf, "CatsOrganization")['first_galaxy']
     prfs_d['first_galaxy'] = int(prfs_d['first_galaxy'])
-    prfs_d['first_sso'] = ConfMap(Cf, "CatsOrganization")['first_sso']
+    prfs_d['first_sso'] = confmap(cf, "CatsOrganization")['first_sso']
     prfs_d['first_sso'] = int(prfs_d['first_sso'])
 
-    OutputDirs_list = ['plots_dir', 'results_dir', 'images_out', 'fits_out',
+    outputdirs_list = ['plots_dir', 'results_dir', 'images_out', 'fits_out',
                        'report_out', 'dithers_out', 'catalogs_dir', 'tmp_out',
                        'filter_dir']
-    for conf_ in OutputDirs_list:
-        prfs_d[conf_] = ConfMap(Cf, "OutputDirs")[conf_]
+    for conf_ in outputdirs_list:
+        prfs_d[conf_] = confmap(cf, "OutputDirs")[conf_]
         prfs_d[conf_] = prfs_d['home'] + prfs_d[conf_]
 
-    prfs_d['detections'] = int(ConfMap(Cf, "Misc")['detections'])
-    prfs_d['pm_low'] = float(ConfMap(Cf, "Misc")['pm_low'])
-    prfs_d['pm_up'] = float(ConfMap(Cf, "Misc")['pm_up'])
-    prfs_d['pm_sn'] = float(ConfMap(Cf, "Misc")['pm_sn'])
-    pms = ConfMap(Cf, "Misc")['pms']
+    prfs_d['detections'] = int(confmap(cf, "Misc")['detections'])
+    prfs_d['pm_low'] = float(confmap(cf, "Misc")['pm_low'])
+    prfs_d['pm_up'] = float(confmap(cf, "Misc")['pm_up'])
+    prfs_d['pm_sn'] = float(confmap(cf, "Misc")['pm_sn'])
+    pms = confmap(cf, "Misc")['pms']
     pms = pms.replace(",", " ")
     prfs_d['pms'] = [float(x) for x in pms.split()]
-    mags = ConfMap(Cf, "Misc")['mags']
+    mags = confmap(cf, "Misc")['mags']
     mags = mags.replace(",", " ")
     prfs_d['mags'] = mags.split()
-    confidences = ConfMap(Cf, "Misc")['confidences']
+    confidences = confmap(cf, "Misc")['confidences']
     confidences = confidences.replace(",", " ")
     prfs_d['confidences'] = [int(x) for x in confidences.split()]
-    cross_ids = ConfMap(Cf, "Misc")['cross_ids']
+    cross_ids = confmap(cf, "Misc")['cross_ids']
     cross_ids = cross_ids.replace(",", " ")
     prfs_d['cross_ids'] = [float(x) for x in cross_ids.split()]
-    prfs_d['r_fit'] = ConfMap(Cf, "Misc")['r_fit']
-    prfs_d['cores_number'] = ConfMap(Cf, "Misc")['cores_number']
+    prfs_d['r_fit'] = confmap(cf, "Misc")['r_fit']
+    prfs_d['cores_number'] = confmap(cf, "Misc")['cores_number']
     if prfs_d['cores_number'] == '0':
         prfs_d['cores_number'] = int(str(cpu_count()))
         # TODO should leave free at least 20% of processors
     else:
         prfs_d['cores_number'] = int(prfs_d['cores_number'])
-    prfs_d['tolerance'] = float(ConfMap(Cf, "Misc")['tolerance'])
+    prfs_d['tolerance'] = float(confmap(cf, "Misc")['tolerance'])
 
     return prfs_d
 
@@ -537,9 +519,8 @@ def pm_compute(logger, merged_db, full_db):
                     'PMDELTA'] = pmdelta.loc[i - 1]
         full_db.loc[full_db['SOURCE_NUMBER'] == i,
                     'PMALPHAERR'] = pmealpha.loc[i - 1]
-
-    full_db.loc[full_db['SOURCE_NUMBER'] == i,
-                'PMDELTAERR'] = pmedelta.loc[i - 1]
+        full_db.loc[full_db['SOURCE_NUMBER'] == i,
+                    'PMDELTAERR'] = pmedelta.loc[i - 1]
 
     return full_db
 
@@ -558,15 +539,15 @@ def pm_filter(full_db, pm_low, pm_up):
     return full_db
 
 
-def sn_filter(full_db, SN):
+def sn_filter(full_db, sn):
     """
 
     :param full_db:
-    :param SN:
+    :param sn:
     :return: full_db
     """
     # mask for SN
-    mask = full_db['PM'] / full_db['PMERR'] > float(SN)
+    mask = full_db['PM'] / full_db['PMERR'] > float(sn)
     full_db = full_db[mask]
 
     return full_db
@@ -575,11 +556,9 @@ def sn_filter(full_db, SN):
 def motion_filter(db, r):
     """ filter objects with a non-coherence movement
 
-    @param logger: a logger object.
-    @param db:
-    @param r:
-
-    @return data:
+    :param db:
+    :param r:
+    :return:
     """
     passed = []
 
@@ -595,9 +574,11 @@ def motion_filter(db, r):
             x = np.array(epoch)
             y = np.array(dimension)
             if dimension == ra:
-                sigma = db.loc[db['SOURCE_NUMBER'] == source, 'ERRA_WORLD'].tolist()
+                sigma = db.loc[db['SOURCE_NUMBER'] == source,
+                               'ERRA_WORLD'].tolist()
             if dimension == dec:
-                sigma = db.loc[db['SOURCE_NUMBER'] == source, 'ERRB_WORLD'].tolist()
+                sigma = db.loc[db['SOURCE_NUMBER'] == source,
+                               'ERRB_WORLD'].tolist()
 
             edim = np.array([1 / var for var in sigma])
             x = sm.add_constant(x)
@@ -618,7 +599,6 @@ def motion_filter(db, r):
 def confidence_filter(db, r):
     """
 
-    :param logger:
     :param db:
     :param r:
     :return:
@@ -857,3 +837,18 @@ def measure_distance(x2, x1, y2, y1):
     distance = np.sqrt((x2 - x1) * (x2 - x1) - (y2 - y1) * (y2 - y1))
 
     return distance
+
+
+def significant_l(number):
+    """
+
+    :param number:
+    :return:
+    """
+    len_ = len(str(number))
+    a = ('%.' + str(len_) + 'E') % Decimal(number)
+    significate_d = a.split(".")[0]
+    times = a.split("E")[1]
+    result = int(significate_d) * (10 ** int(times))
+
+    return result
