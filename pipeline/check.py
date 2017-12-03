@@ -153,7 +153,7 @@ class Check:
             if len_dicts != total_confs:
                 raise Exception
             # todo - implement a return!
-            Sextractor(self.logger, analysis_d, analysis_dir, True)
+            Sextractor(self.logger, analysis_d, analysis_dir)
 
             self.logger.debug('perfoming analysis over a bunch of files')
 
