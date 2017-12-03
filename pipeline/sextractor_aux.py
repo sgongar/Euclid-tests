@@ -182,7 +182,7 @@ class CatalogCreation:
 
         # Harcoded for single CCD catalog!
         logger.info('swarp process launched for mag {}'.format(mag))
-        logger.info('files {}/m_{}_*.fits'.format(prfs_d['fits_ref'], mag))
+        logger.info('files {}/mag_{}_*.fits'.format(prfs_d['fits_ref'], mag))
 
         c_11 = 'swarp {}/mag_{}_CCD_x?_y?_d?.fits'.format(prfs_d['fits_ref'],
                                                           mag)

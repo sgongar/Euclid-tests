@@ -3,17 +3,18 @@
 
 from collections import Counter
 from multiprocessing import Process
+
 from os import listdir
 from sys import argv
 
 from astropy.io import fits
 from astropy.table import Table
+from astropy.time import Time
 from astropy.wcs import WCS
 from pandas import concat, DataFrame, Series, read_csv
 from numpy import isclose, logical_and, genfromtxt, float64, sqrt
 
 from cats_management import rebase_catalogue, rewriting_catalogue
-from check_pm import Check_PM
 from misc import setting_logger, extract_settings, save_data
 from misc import all_same, compare_floats
 from regions import Create_regions
@@ -661,9 +662,7 @@ def change_times_thread(logger, prfs_d, fits_image):
     print('opening {} old header {} dither {}'.format(fits_image,
                                                       header['DATE-OBS'],
                                                       dither))
-    header['CTYPE1'] = 'RA---TAN-SIP'
-    header['CTYPE2'] = 'DEC--TAN-SIP'
-    """
+
     if dither == '1':
         header['DATE-OBS'] = prfs_d['time_1']
         # Change format
@@ -692,11 +691,11 @@ def change_times_thread(logger, prfs_d, fits_image):
     else:
         logger.debug('fits image not belonging to FPA')
 
-    print 'opens {} date-obs {} mjd-obs {} d {}'.format(fits_image,
+    print('opens {} date-obs {} mjd-obs {} d {}'.format(fits_image,
                                                         header['DATE-OBS'],
                                                         header['MJD-OBS'],
-                                                        dither)
-    """
+                                                        dither))
+
     fits.writeto(prfs_d['fits_dir'] + '/' + fits_image + 'copy',
                  data, header, clobber=True)
 

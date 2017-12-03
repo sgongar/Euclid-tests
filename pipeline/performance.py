@@ -380,6 +380,7 @@ class PMPerformance:
         filter_o_n = '{}/{}/{}/{}'.format(prfs_d['filter_dir'],
                                           sex_cf, scmp_cf, filt_n)
 
+
         # Cross with filtered data - Opens datafile
         o_cat = read_csv('{}'.format(filter_o_n), index_col=0)
 
@@ -759,7 +760,7 @@ class ScampPerformanceSSOs:
         :return:
         """
         # For now any file is saved
-        save = False
+        save = True
 
         # Creates an input dictionary with all input sources
         logger.debug('checking performance for {} and {}'.format(scmp_cf,
@@ -793,12 +794,13 @@ class ScampPerformanceSSOs:
             df.to_csv('input_sources.reg')
 
         # Open particular file!
-        filt_n = 'filt_{}_{}_3.csv'.format(scmp_cf, mag)
+        filt_n = 'filt_{}_{}_4.csv'.format(scmp_cf, mag)
         filter_o_n = '{}/{}/{}/{}'.format(self.prfs_d['filter_dir'],
                                           sex_cf, scmp_cf, filt_n)
 
         # Cross with filtered data - Opens datafile
         o_cat = read_csv('{}'.format(filter_o_n), index_col=0)
+
         stats_d, out_d = create_dict(scmp_cf, sex_cf, confidence_)
 
         # Gets unique sources from input data
@@ -812,10 +814,11 @@ class ScampPerformanceSSOs:
             tmp_d = {'boolean_l': [], 'catalog': [], 'source': [],
                      'epoch': [], 'i_pm': [],
                      'i_alpha': [], 'i_delta': [],
+                     'pm_alpha': [], 'pm_delta': [],
                      'o_alpha': [], 'o_delta': [],
                      'error_a': [], 'error_b': []}
 
-            pm = 0.0  # Raises a warning if variable pm it's not created
+            i_pm = 0.0  # Raises a warning if variable pm it's not created
             # Iterate over each detection of each source
             for i, row in enumerate(cat.itertuples(), 1):
                 # source_ = row.source
@@ -832,7 +835,7 @@ class ScampPerformanceSSOs:
 
                 # If there is one saves data from input data
                 if o_df.empty is not True and o_df['PM'].size == 1:
-                    pm_mask = self.pm_filter(o_df, pm, confidence_)
+                    pm_mask = self.pm_filter(o_df, i_pm, confidence_)
                     if pm_mask:
                         if o_df['SOURCE_NUMBER'].size != 1:
                             tmp_d['boolean_l'].append('False')
@@ -846,6 +849,10 @@ class ScampPerformanceSSOs:
                         tmp_d['i_pm'].append(i_pm)
                         tmp_d['i_alpha'].append(i_alpha)
                         tmp_d['i_delta'].append(i_delta)
+                        pm_alpha = float(o_df['PMALPHA'])
+                        tmp_d['pm_alpha'].append(pm_alpha)
+                        pm_delta = float(o_df['PMDELTA'])
+                        tmp_d['pm_delta'].append(pm_delta)
                         o_alpha = float(o_df['ALPHA_J2000'].iloc[0])
                         tmp_d['o_alpha'].append(o_alpha)
                         o_delta = float(o_df['DELTA_J2000'].iloc[0])
@@ -858,7 +865,7 @@ class ScampPerformanceSSOs:
                     tmp_d['boolean_l'].append('False')
 
             # Total number
-            idx = stats_d['PM'].index(pm)
+            idx = stats_d['PM'].index(i_pm)
             stats_d['total'][idx] += 1
 
             order_mask = check_cat_order(tmp_d['catalog'])
@@ -870,14 +877,15 @@ class ScampPerformanceSSOs:
                 flag_detection, sources_number = all_same(tmp_d['source'])
 
                 if flag_detection and sources_number >= 3:
-                    idx = stats_d['PM'].index(pm)
+                    idx = stats_d['PM'].index(i_pm)
                     stats_d['right'][idx] += 1
                     fitted_d = self.confidence(tmp_d['source'][0],
                                                scmp_cf, sex_cf)
 
                     pm = float(tmp_d['i_pm'][0])
-                    if pm == 0.1:
-                        self.plot(tmp_d, pm, fitted_d, scmp_cf, sex_cf)
+                    # if pm == 0.1:
+                    #     print(tmp_d.keys())
+                    self.plot(tmp_d, pm, fitted_d, scmp_cf, sex_cf)
             else:
                 pass
 
@@ -921,17 +929,18 @@ class ScampPerformanceSSOs:
 
         if both:
             mode = 'io'
-            tmp_d = {'i_alpha': tmp_d['i_alpha'], 'i_delta': tmp_d['i_delta'],
-                     'o_alpha': tmp_d['o_alpha'], 'o_delta': tmp_d['o_delta'],
-                     'error_a': tmp_d['error_a'], 'error_b': tmp_d['error_b'],
-                     'epoch': tmp_d['epoch']}
+            d_ = {'i_alpha': tmp_d['i_alpha'], 'i_delta': tmp_d['i_delta'],
+                  'pm_alpha': tmp_d['pm_alpha'], 'pm_delta': tmp_d['pm_delta'],
+                  'o_alpha': tmp_d['o_alpha'], 'o_delta': tmp_d['o_delta'],
+                  'error_a': tmp_d['error_a'], 'error_b': tmp_d['error_b'],
+                  'epoch': tmp_d['epoch'], 'i_pm': tmp_d['i_pm']}
             plot = PlotBothConfidence(output_path, tmp_d['source'][0],
-                                      pm, mode, fitted_d, tmp_d)
+                                      pm, mode, fitted_d, d_)
             if not plot:
                 raise Exception
         else:
             mode = 'o'
-            tmp_d = {'alpha': tmp_d['o_alpha'], 'delta': tmp_d['o_delta'],
+            dict_ = {'alpha': tmp_d['o_alpha'], 'delta': tmp_d['o_delta'],
                      'error_a': tmp_d['error_a'], 'error_b': tmp_d['error_b'],
                      'epoch': tmp_d['epoch']}
             plot = PlotConfidence(output_path, tmp_d['source'][0], pm, mode,

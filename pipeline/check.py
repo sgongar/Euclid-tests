@@ -118,11 +118,12 @@ class Check:
             raise Exception
         if not self.filt(total_confs):
             raise Exception
+        """
         if not self.check(confs, total_confs):
             raise Exception
         if not self.stats(total_confs):
             raise Exception
-
+        """
         return True
 
     def catalog(self):
