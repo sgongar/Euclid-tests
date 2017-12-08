@@ -19,10 +19,11 @@ Todo:
 
 from os import mkdir, path, remove
 from subprocess import Popen
+import sys
 
 from multiprocessing import Process
 
-from misc import extract_settings, get_fits
+from misc import extract_settings, get_fits, create_folder
 
 
 __author__ = "Samuel Gongora-Garcia"
@@ -36,26 +37,24 @@ __status__ = "Development"
 
 class Sextractor:
 
-    def __init__(self, logger, analysis_d, analysis_dir):
+    def __init__(self, logger, analysis_d):
         """
 
         """
         self.prfs_d = extract_settings()
-        self.sextractor_process(logger, analysis_d, analysis_dir)
+        self.sextractor_process(logger, analysis_d)
 
-    def sextractor_process(self, logger, analysis_d, analysis_dir):
+    def sextractor_process(self, logger, analysis_d):
         """
 
         :param logger:
         :param analysis_d:
-        :param analysis_dir:
         :return:
         """
         logger.info('Starting sextractor process for fits images')
 
         mags = self.prfs_d['mags']
-
-        print('mags {}'.format(mags))
+        analysis_dir = self.prfs_d['fits_dir']
 
         folder_n = '{}_{}_{}_{}_{}'.format(analysis_d['deblend_nthresh'],
                                            analysis_d['analysis_thresh'],
@@ -75,14 +74,10 @@ class Sextractor:
                         sex_file = fits_files[idx]
                         folder_loc = '{}/{}/CCDs/{}'.format(analysis_dir, mag_,
                                                             folder_n)
-                        try:
-                            if not path.isfile(folder_loc):
-                                mkdir(folder_loc)
-                        except OSError:
-                            logger.debug(
-                                'Folder {} already created'.format(folder_n))
+                        create_folder(logger, folder_loc)
                         cat_name = '{}.cat'.format(fits_files[idx][:-5])
 
+                        # sextractor input and output
                         sex_input = '{}/{}/CCDs/{}'.format(analysis_dir, mag_,
                                                            sex_file)
                         sex_output = '{}/{}'.format(folder_loc, cat_name)
@@ -145,10 +140,9 @@ class CatalogCreation:
         mags = self.prfs_d['mags']
 
         cat_j = []
-        for proc in range(0, len(mags), 1):
-            mag = mags[proc]
+        for mag_ in self.prfs_d['mags']:
             cat_p = Process(target=self.catalogue_thread,
-                            args=(logger, self.prfs_d, analysis_d, mag,))
+                            args=(logger, analysis_d, mag_,))
             cat_j.append(cat_p)
             cat_p.start()
 
@@ -174,13 +168,15 @@ class CatalogCreation:
         logger.info('files {}/mag_{}_*.fits'.format(self.prfs_d['fits_ref'],
                                                     mag))
 
-        ccd_names = 'mag_{}_CCD_x?_y?_d?.fits'.format(mag)
+        ccd_names = 'CCD_x?_y?_Stars.fits'.format(mag)
         c_11 = 'swarp {}/{}'.format(self.prfs_d['fits_ref'], ccd_names)
         c_12 = ' -IMAGEOUT_NAME {} -WEIGHTOUT_NAME {}'.format(coadd_loc,
                                                               coadd_w_loc)
         c_13 = ' -WEIGHT_TYPE NONE -VERBOSE_TYPE QUIET'
         c_14 = ' -GAIN_KEYWORD GAIN'
         c_1 = c_11 + c_12 + c_13 + c_14
+
+        print('c_1 {}'.format(c_1))
 
         process_1 = Popen(c_1, shell=True)
         process_1.wait()
@@ -194,11 +190,7 @@ class CatalogCreation:
 
         # Check if folder exists
         conf_folder = '{}/{}'.format(self.prfs_d['fits_ref'], folder_sex)
-        try:
-            if not path.isfile(conf_folder):
-                mkdir(conf_folder)
-        except OSError:
-            logger.debug('folder {} created'.format(conf_folder))
+        create_folder(logger, conf_folder)
 
         cat_loc = '{}/catalog_{}.cat'.format(conf_folder, mag)
 
@@ -215,6 +207,7 @@ class CatalogCreation:
         c_28 = ' -DEBLEND_MINCONT {}'.format(analysis_d['deblend_mincount'])
         c_2 = c_21 + c_22 + c_23 + c_24 + c_25 + c_26 + c_27 + c_28
 
+        print('c_2 {}'.format(c_2))
         process_2 = Popen(c_2, shell=True)
         process_2.wait()
         logger.info('Sextractor process for catalogue finished')

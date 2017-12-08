@@ -14,8 +14,9 @@ from collections import Counter
 from decimal import Decimal
 from math import hypot
 from multiprocessing import cpu_count
-from os import listdir, remove, rename, mkdir
+from os import listdir, remove, rename, makedirs, path
 from platform import platform
+import sys
 
 from ConfigParser import ConfigParser
 import numpy as np
@@ -35,16 +36,19 @@ __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
 
 
-def get_fits(unique):
+def get_fits(unique, mag):
     """
 
     :param unique:
+    :param mag:
     :return:
     """
     prfs_d = extract_settings()
     fits_list = []
 
-    files = listdir('{}'.format(prfs_d['fits_dir']))
+    fits_dir = '{}/{}/CCDs/'.format(prfs_d['fits_dir'], mag)
+
+    files = listdir('{}'.format(fits_dir))
     for file_ in files:
         if file_[:1] == 'm' and file_[-5:] == '.fits':
             fits_list.append(file_)
@@ -63,16 +67,17 @@ def get_fits(unique):
         return fits_list
 
 
-def get_fits_d(dither):
+def get_fits_d(mag_, dither):
     """
 
+    :param mag_:
     :param dither:
     :return:
     """
     prfs_d = extract_settings()
     fits_list = []
 
-    files = listdir('{}'.format(prfs_d['fits_dir']))
+    files = listdir('{}/{}/CCDs/'.format(prfs_d['fits_dir'], mag_))
     for file_ in files:
         if file_[:1] == 'm' and file_[-5:] == '.fits':
             fits_list.append(file_)
@@ -235,6 +240,7 @@ def create_scamp_dict(conf_num):
     for conf in configurations:
         temp_list = [conf[0], conf[1], conf[2], conf[3]]
         scamp_list.append(temp_list)
+    print('scamp_list {}'.format(scamp_list))
     scamp_dict = {'crossid_radius': scamp_list[conf_num][0],
                   'pixscale_maxerr': scamp_list[conf_num][1],
                   'posangle_maxerr': scamp_list[conf_num][2],
@@ -250,11 +256,9 @@ def create_configurations(mode):
     :return:
     """
     if mode['type'] == 'sextractor':
-#        l_deblending = [20, 30, 40]
-        l_deblending = [30]
+        l_deblending = [20, 30, 40]
         l_mincount = [0.01]
-#        l_threshold = [1.5, 3]
-        l_threshold = [3]
+        l_threshold = [1.5, 3]
 
         l_area = [4]
         l_filter_name = ['models/gauss_2.0_5x5.conv']
@@ -275,7 +279,7 @@ def create_configurations(mode):
         l_pixscale_maxerr = [1.2]  # [1.2] scale-factor
         l_posangle_maxerr = [0.5]  # [0.5, 2.5] degrees
         # [0.16, 0.64, 1.28] minutes
-        l_position_maxerr = [0.16]
+        l_position_maxerr = [0.16, 0.32, 0.64]
 
         configurations = []
 
@@ -352,7 +356,9 @@ def extract_settings():
         raise BadSettings('Operative system not chosen')
 
     prfs_d['fits_dir'] = confmap(cf, "ImagesDirs")['fits_dir']
-    prfs_d['fits_dir'] = prfs_d['version'] + prfs_d['fits_dir']
+    # prfs_d['fits_dir'] = prfs_d['version'] + prfs_d['fits_dir']
+    prfs_d['fits_dir'] = prfs_d['version']  # hardcoded
+
     prfs_d['fpas_dir'] = confmap(cf, "ImagesDirs")['fpas_dir']
     prfs_d['fpas_dir'] = prfs_d['version'] + prfs_d['fpas_dir']
     # TODO This hardcoded lines should be improve
@@ -484,7 +490,7 @@ def get_limits(first_list, second_list):
     return limits
 
 
-def pm_compute(logger, merged_db, full_db):
+def                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    pm_compute(logger, merged_db, full_db):
     """ given a merged catalogue and a full one return a full catalogue with
         proper motions in arcseconds per hour
 
@@ -852,3 +858,23 @@ def significant_l(number):
     result = int(significate_d) * (10 ** int(times))
 
     return result
+
+
+def create_folder(logger, folder):
+    """ creates a folder if it is necessary
+
+    :param logger:
+    :param folder:
+    :return:
+    """
+
+    try:
+        if not path.isfile(folder):
+            makedirs(folder)
+        return True
+    except OSError:
+        logger.debug('Folder {} already created'.format(folder))
+        return True
+    except:
+        print("Unexpected error:", sys.exc_info()[0])
+        raise

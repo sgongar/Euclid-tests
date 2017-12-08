@@ -36,12 +36,12 @@ __status__ = "Development"
 
 class Create_regions:
 
-    def __init__(self, input_catalogue, prfs_d):
+    def __init__(self, input_catalog, prfs_d):
         """
 
-        @param input_catalogue:
+        @param input_catalog:
         """
-        self.input_catalogue = input_catalogue
+        self.input_catalogue = input_catalog
         self.prfs_d = prfs_d
 
     def full_cats(self):
@@ -82,7 +82,6 @@ class Create_regions:
                              name='DELTA_J2000')
 
             full_t = concat([source_l, alpha_l, delta_l], axis=1)
-            print('writing to {}.csv'.format(self.input_catalogue[:-6]))
             full_t.to_csv('{}.csv'.format(self.input_catalogue[:-6]))
 
     def full_regions(self):
@@ -111,7 +110,6 @@ class Create_regions:
                                                        dithers.index(d) + 1),
                                    index=False, header=False, sep=" ")
 
-
     def fits(self):
         """
 
@@ -123,7 +121,6 @@ class Create_regions:
         delta_list = Series(hdu['Y_WORLD'].tolist(), name='Y_WORLD')
 
         positions_table = concat([alpha_list, delta_list], axis=1)
-        print('writing to {}.reg'.format(self.input_catalogue[:-4]))
         positions_table.to_csv('{}.reg'.format(self.input_catalogue[:-4]),
                                index=False, header=False, sep=" ")
 
@@ -266,7 +263,6 @@ class Create_regions:
                 sources_df = concat([source, cat, alpha_j2000, delta_j2000,
                                      mag, pm, dither, CCD], axis=1)
                 sources_df = sources_df[~sources_df['CCD'].isin(['False'])]
-
             else:
                 sources_df = concat([alpha_j2000, delta_j2000], axis=1)
 
@@ -418,10 +414,10 @@ class Create_regions:
 
         return input_d
 
-
-    def check_luca(self, save, complete):
+    def check_luca(self, mag_, save, complete):
         """
 
+        :param mag_:
         :param save:
         :param complete:
         :return:
@@ -491,8 +487,9 @@ class Create_regions:
             sources_df = concat([s1, s2, s3, s4], axis=1)
             sources_df = sources_df.iloc[indexes, :]
 
-            ccd_loc = 'mag_20-21_CCD_x0_y0_d1.fits'
-            fits_loc = '{}/{}'.format(self.prfs_d['fits_dir'], ccd_loc)
+            ccd_loc = 'mag_{}_CCD_x0_y0_d1.fits'.format(mag_)
+            fits_loc = '{}/{}/CCDs/{}'.format(self.prfs_d['fits_dir'], mag_,
+                                              ccd_loc)
             hdulist = fits.open(fits_loc)
             w = WCS(hdulist[0].header)
 
@@ -512,12 +509,13 @@ class Create_regions:
                 x_values.append(regions_list[idx][0])
                 y_values.append(regions_list[idx][1])
 
-            fits_files_all = get_fits_d(dither=dither_)
+            fits_files_all = get_fits_d(mag_, dither=dither_)
 
             fits_dict = {}
             for fits_ in fits_files_all:
                 CCD = fits_[-13:-8]
-                fits_file = self.prfs_d['fits_dir'] + '/' + fits_
+                fits_file = '{}/{}/CCDs/{}'.format(self.prfs_d['fits_dir'],
+                                                   mag_, fits_)
                 fits_dict[CCD] = get_fits_limits(fits_file)
 
             i = 0
@@ -583,8 +581,8 @@ class Create_regions:
             if complete:
                 sources_df = concat([source, cat, alpha_j2000, delta_j2000,
                                      mag, pm, dither, CCD], axis=1)
+                sources_df.to_csv('test_{}.csv'.format(dither_))
                 sources_df = sources_df[~sources_df['CCD'].isin(['False'])]
-
             else:
                 sources_df = concat([alpha_j2000, delta_j2000], axis=1)
 

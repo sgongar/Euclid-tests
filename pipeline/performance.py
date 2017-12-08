@@ -15,17 +15,20 @@ Todo:
 
 """
 from os import makedirs, path
+from subprocess import Popen
 
 from astropy.io import fits
 from astropy.table import Table
 from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
 from numpy import arange, array, median
-from pandas import concat, read_csv, DataFrame
+from pandas import concat, read_csv, DataFrame, Series
 import statsmodels.api as sm
 
-from misc import all_same, extract_settings, speeds_range
+from misc import all_same, extract_settings
+from misc import create_folder, speeds_range
 from plots import PlotConfidence, PlotBothConfidence
+from pyds9 import DS9
 from regions import Create_regions
 
 
@@ -104,6 +107,22 @@ def create_dict(scmp_cf, sex_cf, confidence_):
         out_d[key_] = []
 
     return stats_d, out_d
+
+
+def cut_catalog(o_cat, margin, limits):
+    """
+
+    :param o_cat:
+    :param margin:
+    :param limits:
+    :return:
+    """
+    o_df = o_cat[o_cat['ALPHA_J2000'] + margin > limits['max_alpha']]
+    o_df = o_df[limits['min_alpha'] > o_df['ALPHA_J2000'] - margin]
+    o_df = o_df[o_df['DELTA_J2000'] + margin > limits['max_delta']]
+    o_df = o_df[limits['min_delta'] > o_df['DELTA_J2000'] - margin]
+
+    return o_df
 
 
 def check_source(catalog_n, o_cat, i_alpha, i_delta):
@@ -247,7 +266,8 @@ class StatsPerformance:
             input_galaxies_d[d] = '{}{}{}.dat'.format(self.prfs_d['input_ref'],
                                                       i_cat_n, d)
         input_galaxies_d = Create_regions(input_galaxies_d,
-                                          self.prfs_d).check_galaxies(True, True)
+                                          self.prfs_d).check_galaxies(True,
+                                                                      True)
 
         # Creates a DataFrame from an input dictionary
         input_galaxies_l = []
@@ -272,8 +292,8 @@ class StatsPerformance:
                 errors_a_ssos = []
                 errors_b_ssos = []
 
-                cat_n = 'mag_{}_CCD_x{}_y{}_d{}.cat'.format(mag, opt[0], opt[1],
-                                                            dither)
+                cat_n = 'mag_{}_CCD_x{}_y{}_d{}.cat'.format(mag, opt[0],
+                                                            opt[1], dither)
                 cat_o_n = '{}/{}/{}'.format(self.prfs_d['fits_dir'],
                                             sex_cf, cat_n)
 
@@ -380,13 +400,11 @@ class PMPerformance:
         filter_o_n = '{}/{}/{}/{}'.format(prfs_d['filter_dir'],
                                           sex_cf, scmp_cf, filt_n)
 
-
         # Cross with filtered data - Opens datafile
         o_cat = read_csv('{}'.format(filter_o_n), index_col=0)
 
         # Gets unique sources from input data
         unique_sources = list(set(i_df['source'].tolist()))
-
 
         # Loops over input data
         for idx_source, source_ in enumerate(unique_sources):
@@ -477,6 +495,7 @@ class PMPerformance:
         :param pm:
         :param prfs_d:
         :param confidence_:
+        :param bypassfilter:
         :return:
         """
         pm_ranges = speeds_range(prfs_d, confidence_)
@@ -505,8 +524,9 @@ class PMPerformance:
         if not path.exists(sextractor_folder):
             makedirs(sextractor_folder)
 
-        with PdfPages('{}/pm/{}/{}_{}_cmp.pdf'.format(prfs_d['plots_dir'], sex_cf,
-                                                      scmp_cf, confidence_)) as pdf:
+        with PdfPages('{}/pm/{}/{}_{}_cmp.pdf'.format(prfs_d['plots_dir'],
+                                                      sex_cf, scmp_cf,
+                                                      confidence_)) as pdf:
             fig = plt.figure(figsize=(16.53, 11.69), dpi=100)
             ax = fig.add_subplot(1, 1, 1)
 
@@ -740,36 +760,42 @@ class SextractorPerformance:
 
 class ScampPerformanceSSOs:
 
-    def __init__(self):
+    def __init__(self, logger, mag, scmp_cf, sex_cf, confidence_):
         """
 
         """
         self.bypassfilter = True
         self.prfs_d = extract_settings()
 
+        self.mag = mag
+        self.scmp_cf = scmp_cf
+        self.sex_cf = sex_cf
+        self.confidence_ = confidence_
+
+        self.check(logger)
         pass
 
-    def check(self, logger, mag, scmp_cf, sex_cf, confidence_):
+    def check(self, logger):
         """
 
         :param logger:
-        :param mag:
-        :param scmp_cf:
-        :param sex_cf:
-        :param confidence_:
         :return:
         """
         # For now any file is saved
         save = True
 
         # Creates an input dictionary with all input sources
-        logger.debug('checking performance for {} and {}'.format(scmp_cf,
-                                                                 sex_cf))
+        logger.debug('checking performance for {} and {}'.format(self.scmp_cf,
+                                                                 self.sex_cf))
+
         input_d = {}
         for d in range(1, 5, 1):
-            cat_name = '{}/Cat_20-21_d{}'.format(self.prfs_d['input_ref'], d)
+            cat_loc = '{}/{}/Catalogs'.format(self.prfs_d['fits_dir'],
+                                              self.mag)
+            cat_name = '{}/Cat_20-21_d{}'.format(cat_loc, d)
             input_d[d] = '{}.dat'.format(cat_name)
-        input_d = Create_regions(input_d, self.prfs_d).check_luca(True, True)
+        input_d = Create_regions(input_d, self.prfs_d).check_luca(self.mag,
+                                                                  False, True)
 
         # Creates a DataFrame from an input dictionary
         input_l = []
@@ -794,14 +820,16 @@ class ScampPerformanceSSOs:
             df.to_csv('input_sources.reg')
 
         # Open particular file!
-        filt_n = 'filt_{}_{}_4.csv'.format(scmp_cf, mag)
-        filter_o_n = '{}/{}/{}/{}'.format(self.prfs_d['filter_dir'],
-                                          sex_cf, scmp_cf, filt_n)
+        filt_n = 'filt_{}_{}_4.csv'.format(self.scmp_cf, self.mag)
+        filter_o_n = '{}/{}/{}/{}/{}'.format(self.prfs_d['filter_dir'],
+                                             self.mag, self.sex_cf,
+                                             self.scmp_cf, filt_n)
 
         # Cross with filtered data - Opens datafile
         o_cat = read_csv('{}'.format(filter_o_n), index_col=0)
 
-        stats_d, out_d = create_dict(scmp_cf, sex_cf, confidence_)
+        stats_d, out_d = create_dict(self.scmp_cf, self.sex_cf,
+                                     self.confidence_)
 
         # Gets unique sources from input data
         unique_sources = list(set(i_df['source'].tolist()))
@@ -829,13 +857,14 @@ class ScampPerformanceSSOs:
                 i_alpha = row.alpha_j2000
                 i_delta = row.delta_j2000
 
+                print('catalog_n {}'.format(catalog_n))
                 # Checks if there is a source closed to input one
                 # o_cat contains data from output (filtered) catalog
                 o_df = check_source(catalog_n, o_cat, i_alpha, i_delta)
 
                 # If there is one saves data from input data
                 if o_df.empty is not True and o_df['PM'].size == 1:
-                    pm_mask = self.pm_filter(o_df, i_pm, confidence_)
+                    pm_mask = self.pm_filter(o_df, i_pm, self.confidence_)
                     if pm_mask:
                         if o_df['SOURCE_NUMBER'].size != 1:
                             tmp_d['boolean_l'].append('False')
@@ -844,6 +873,7 @@ class ScampPerformanceSSOs:
                         tmp_d['catalog'].append(catalog_n)
                         source = int(o_df['SOURCE_NUMBER'].iloc[0])
                         tmp_d['source'].append(source)
+                        print(o_df['EPOCH'])
                         epoch = float(o_df['EPOCH'].iloc[0])
                         tmp_d['epoch'].append(epoch)
                         tmp_d['i_pm'].append(i_pm)
@@ -877,15 +907,27 @@ class ScampPerformanceSSOs:
                 flag_detection, sources_number = all_same(tmp_d['source'])
 
                 if flag_detection and sources_number >= 3:
+                    print('epoch {}'.format(tmp_d['epoch']))
                     idx = stats_d['PM'].index(i_pm)
                     stats_d['right'][idx] += 1
                     fitted_d = self.confidence(tmp_d['source'][0],
-                                               scmp_cf, sex_cf)
+                                               self.scmp_cf, self.sex_cf)
 
                     pm = float(tmp_d['i_pm'][0])
-                    # if pm == 0.1:
-                    #     print(tmp_d.keys())
-                    self.plot(tmp_d, pm, fitted_d, scmp_cf, sex_cf)
+
+                    # Output folder creation
+                    plots_dir = self.prfs_d['plots_dir']
+                    self.output_path = '{}/mv/{}/{}/{}'.format(plots_dir,
+                                                               self.scmp_cf,
+                                                               self.sex_cf,
+                                                               pm)
+                    create_folder(logger, self.output_path)
+
+                    self.plot(tmp_d, pm, fitted_d)
+                    # input_fits = 'test'
+                    # regions_d = self.create_regions(tmp_d['source'][0],
+                    #                                 o_cat, tmp_d)
+                    # self.image(input_fits)
             else:
                 pass
 
@@ -909,23 +951,16 @@ class ScampPerformanceSSOs:
         else:
             return False
 
-    def plot(self, tmp_d, pm, fitted_d, scmp_cf, sex_cf):
+    def plot(self, tmp_d, pm, fitted_d):
         """
 
         :param tmp_d:
         :param pm:
         :param fitted_d:
-        :param scmp_cf:
-        :param sex_cf:
         :return:
         """
         # Set True to plot input and output data
         both = True
-
-        output_path = '{}/mv/{}/{}/{}'.format(self.prfs_d['plots_dir'],
-                                              scmp_cf, sex_cf, pm)
-        if not path.exists(output_path):
-            makedirs(output_path)
 
         if both:
             mode = 'io'
@@ -934,7 +969,7 @@ class ScampPerformanceSSOs:
                   'o_alpha': tmp_d['o_alpha'], 'o_delta': tmp_d['o_delta'],
                   'error_a': tmp_d['error_a'], 'error_b': tmp_d['error_b'],
                   'epoch': tmp_d['epoch'], 'i_pm': tmp_d['i_pm']}
-            plot = PlotBothConfidence(output_path, tmp_d['source'][0],
+            plot = PlotBothConfidence(self.output_path, tmp_d['source'][0],
                                       pm, mode, fitted_d, d_)
             if not plot:
                 raise Exception
@@ -943,8 +978,8 @@ class ScampPerformanceSSOs:
             dict_ = {'alpha': tmp_d['o_alpha'], 'delta': tmp_d['o_delta'],
                      'error_a': tmp_d['error_a'], 'error_b': tmp_d['error_b'],
                      'epoch': tmp_d['epoch']}
-            plot = PlotConfidence(output_path, tmp_d['source'][0], pm, mode,
-                                  fitted_d, tmp_d)
+            plot = PlotConfidence(self.output_path, tmp_d['source'][0], pm,
+                                  mode, fitted_d, dict_)
 
             if not plot:
                 raise Exception
@@ -958,7 +993,7 @@ class ScampPerformanceSSOs:
         :return:
         """
         catalogs_dir = self.prfs_d['catalogs_dir']
-        configuration_dir = '/{}/{}'.format(sex_cf, scmp_cf)
+        configuration_dir = '/{}/{}/{}'.format(self.mag, sex_cf, scmp_cf)
         cat_name = '/full_{}_20-21_1.cat'.format(scmp_cf)
         hdu_list = fits.open('{}{}{}'.format(catalogs_dir,
                                              configuration_dir, cat_name))
@@ -1004,6 +1039,68 @@ class ScampPerformanceSSOs:
                 fitted_d[dimension_] = fitted
 
         return fitted_d
+
+    def image(self, input_fits):
+        """
+
+        :return:
+        """
+        d = DS9()
+        # Open file
+        open_file = 'file {}'.format(input_fits)
+        d.set(open_file)
+        scale = 'scale histequ'
+        d.set(scale)
+        load_regions = 'regions load'
+        d.set(load_regions)
+        cmd_12 = '-regions -format xy '
+        # load inputs regions
+        cmd_13 = '{}{}.reg '.format(self.output_path)
+        # cmd_14 = '-saveimage jpeg {} -exit'.format(output_image)
+
+        return True
+
+    def create_regions(self, source, o_cat, tmp_d):
+        """
+
+        :param source:
+        :param o_cat:
+        :param tmp_d:
+        :return:
+        """
+        # En azul! Valores totales
+        # Gets full list of alpha/delta coordinates
+        alpha_l = tmp_d['i_alpha'] + tmp_d['o_alpha']
+        delta_l = tmp_d['i_delta'] + tmp_d['o_delta']
+
+        d_limits = {'max_alpha': float(max(alpha_l)),
+                    'min_alpha': float(min(alpha_l)),
+                    'max_delta': float(max(delta_l)),
+                    'min_delta': float(min(delta_l))}
+
+        margin = 0.001
+        o_df = cut_catalog(o_cat, margin, d_limits)
+
+        # o_df.to_csv('{}.reg'.format(source), index=False,
+        #             header=False, sep=" ")
+        # Tests reasons
+        f_regions_filename = 'f_{}.reg'.format(source)
+        o_df.to_csv(f_regions_filename, index=False, sep=" ")
+
+        # En rojo! Input values from Luca's
+        alpha_list = Series(tmp_d['i_alpha'], name='ALPHA_J2000')
+        delta_list = Series(tmp_d['i_delta'], name='DELTA_J2000')
+
+        i_df = concat([alpha_list, delta_list], axis=1)
+        # i_df.to_csv('i_{}.reg'.format(source), index=False,
+        #             header=False, sep=" ")
+        i_regions_filename = 'i_{}.reg'.format(source)
+        i_df.to_csv(i_regions_filename, index=False, sep=" ")
+
+        d_regions_filename = {'f_filename': f_regions_filename,
+                              'i_filename': i_regions_filename}
+
+        return d_regions_filename
 
 
 class ScampPerformanceStars:
@@ -1127,99 +1224,3 @@ class ScampPerformanceStars:
         stats_df.to_csv('test_{}_{}.csv'.format(sex_cf, scmp_cf))
 
         return stats_d
-
-    # def plot(self, source, tmp_epoch, tmp_i_alpha, tmp_i_delta,
-    #          tmp_o_alpha, tmp_o_delta, tmp_a_error, tmp_b_error,
-    #          pm, fitted_d, scmp_cf, sex_cf):
-    #     """
-    #
-    #     :param source:
-    #     :param tmp_epoch:
-    #     :param tmp_i_alpha:
-    #     :param tmp_i_delta:
-    #     :param tmp_o_alpha:
-    #     :param tmp_o_delta:
-    #     :param tmp_a_error:
-    #     :param tmp_b_error:
-    #     :param pm:
-    #     :param fitted_d:
-    #     :param scmp_cf:
-    #     :param sex_cf:
-    #     :return:
-    #     """
-    #     # Set True to plot input and output data
-    #     both = True
-    #
-    #     output_path = '{}/mv/{}/{}/{}'.format(self.prfs_d['plots_dir'],
-    #                                           scmp_cf, sex_cf, pm)
-    #     if not path.exists(output_path):
-    #         makedirs(output_path)
-    #
-    #     if both:
-    #         mode = 'io'
-    #         tmp_d = {'i_alpha': tmp_i_alpha, 'i_delta': tmp_i_delta,
-    #                  'o_alpha': tmp_o_alpha, 'o_delta': tmp_o_delta,
-    #                  'error_a': tmp_a_error, 'error_b': tmp_b_error,
-    #                  'epoch': tmp_epoch}
-    #         plot = PlotBothConfidence(output_path, source, pm, mode,
-    #                                   fitted_d, tmp_d)
-    #         if not plot:
-    #             raise Exception
-    #     else:
-    #         mode = 'o'
-    #         tmp_d = {'alpha': tmp_o_alpha, 'delta': tmp_o_delta,
-    #                  'error_a': tmp_a_error, 'error_b': tmp_b_error,
-    #                  'epoch': tmp_epoch}
-    #         plot = PlotConfidence(output_path, source, pm, mode,
-    #                               fitted_d, tmp_d)
-    #
-    #         if not plot:
-    #             raise Exception
-
-    # def confidence(self, source, scmp_cf, sex_cf):
-    #     """
-    #
-    #     :param source:
-    #     :param scmp_cf:
-    #     :param sex_cf:
-    #     :return:
-    #     """
-    #     catalogs_dir = self.prfs_d['catalogs_dir']
-    #     configuration_dir = '/{}/{}'.format(sex_cf, scmp_cf)
-    #     cat_name = '/full_{}_20-21_1.cat'.format(scmp_cf)
-    #     hdu_list = fits.open('{}{}{}'.format(catalogs_dir,
-    #                                          configuration_dir, cat_name))
-    #     db = Table(hdu_list[2].data).to_pandas()
-    #
-    #     ra = db.loc[db['SOURCE_NUMBER'] == source, 'ALPHA_J2000'].tolist()
-    #     dec = db.loc[db['SOURCE_NUMBER'] == source, 'DELTA_J2000'].tolist()
-    #     epoch = db.loc[db['SOURCE_NUMBER'] == source, 'EPOCH'].tolist()
-    #
-    #     edims = []
-    #     epochs = []
-    #     dimensions = []
-    #     fitted_d = {}
-    #
-    #     for dimension in [ra, dec]:
-    #         x = array(epoch)
-    #         epochs.append(x)  # epochs list
-    #         y = array(dimension)
-    #         dimensions.append(y)  # dimensions list
-    #         if dimension == ra:
-    #             sigma = db.loc[db['SOURCE_NUMBER'] == source,
-    #                            'ERRA_WORLD'].tolist()
-    #             dimension_ = 'ra'
-    #         if dimension == dec:
-    #             sigma = db.loc[db['SOURCE_NUMBER'] == source,
-    #                            'ERRB_WORLD'].tolist()
-    #             dimension_ = 'dec'
-    #         edim = array([1 / var for var in sigma])
-    #         edims.append(edim)
-    #         x = sm.add_constant(x)
-    #         # model = sm.WLS(y, x, weigths=edim)
-    #         model = sm.WLS(y, x)
-    #         fitted = model.fit()
-    #         fitted = fitted.rsquared
-    #         fitted_d[dimension_] = fitted
-    #
-    #     return fitted_d
