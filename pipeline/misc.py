@@ -14,9 +14,8 @@ from collections import Counter
 from decimal import Decimal
 from math import hypot
 from multiprocessing import cpu_count
-from os import listdir, remove, rename, makedirs, path
+from os import listdir, remove, rename, makedirs, path, mkdir
 from platform import platform
-import sys
 
 from ConfigParser import ConfigParser
 import numpy as np
@@ -256,9 +255,11 @@ def create_configurations(mode):
     :return:
     """
     if mode['type'] == 'sextractor':
-        l_deblending = [20, 30, 40]
+        # l_deblending = [20, 30, 40]
+        l_deblending = [30]
         l_mincount = [0.01]
-        l_threshold = [1.5, 3]
+        # l_threshold = [1.5, 3]
+        l_threshold = [1.5]
 
         l_area = [4]
         l_filter_name = ['models/gauss_2.0_5x5.conv']
@@ -277,9 +278,10 @@ def create_configurations(mode):
     elif mode['type'] == 'scamp':
         l_crossid_radius = [10]  # [10] seconds
         l_pixscale_maxerr = [1.2]  # [1.2] scale-factor
+        # l_posangle_maxerr = [0.5, 2.5]
         l_posangle_maxerr = [0.5]  # [0.5, 2.5] degrees
-        # [0.16, 0.64, 1.28] minutes
-        l_position_maxerr = [0.16, 0.32, 0.64]
+        # l_position_maxerr = [0.16, 0.32, 0.64]
+        l_position_maxerr = [0.16]
 
         configurations = []
 
@@ -490,7 +492,7 @@ def get_limits(first_list, second_list):
     return limits
 
 
-def                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    pm_compute(logger, merged_db, full_db):
+def pm_compute(logger, merged_db, full_db):
     """ given a merged catalogue and a full one return a full catalogue with
         proper motions in arcseconds per hour
 
@@ -875,6 +877,5 @@ def create_folder(logger, folder):
     except OSError:
         logger.debug('Folder {} already created'.format(folder))
         return True
-    except:
-        print("Unexpected error:", sys.exc_info()[0])
-        raise
+    except Exception as e:
+        print('Unexpected error: {}'.format(e))

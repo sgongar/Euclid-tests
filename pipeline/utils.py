@@ -601,7 +601,7 @@ def check_thread(logger, prfs_d, i_cats_t, o_cats, dither):
     return True
 
 
-def change_times(logger, prfs_d):
+def change_times(logger, prfs_d, mag):
     """
     hardcoded times:
     2021-06-26T09:00:00.00000
@@ -616,7 +616,8 @@ def change_times(logger, prfs_d):
 
     """
     core_number = int(prfs_d['cores_number'])
-    files = listdir(prfs_d['fits_dir'])
+    fits_dir = '{}/{}/CCDs'.format(prfs_d['fits_dir'], mag)
+    files = listdir(fits_dir)
     fits_files = []
 
     for file in files:
@@ -654,52 +655,47 @@ def change_times_thread(logger, prfs_d, fits_image):
 
     @return True:
     """
+    fits_dir = '{}/{}/CCDs'.format(prfs_d['fits_dir'], mag)
 
-    data, header = fits.getdata(prfs_d['fits_dir'] + '/' + fits_image,
+    data, header = fits.getdata('{}/{}'.format(fits_dir, fits_image),
                                 header=True)
     dither = fits_image[-6:-5]
-
-    print('opening {} old header {} dither {}'.format(fits_image,
-                                                      header['DATE-OBS'],
-                                                      dither))
 
     if dither == '1':
         header['DATE-OBS'] = prfs_d['time_1']
         # Change format
         t = Time(prfs_d['time_1'])
         t.format = 'mjd'
-        # header['MJD-OBS'] = str(t)
         header['MJD-OBS'] = float(str(t))
     elif dither == '2':
         header['DATE-OBS'] = prfs_d['time_2']
         t = Time(prfs_d['time_2'])
         t.format = 'mjd'
-        # header['MJD-OBS'] = str(t)
         header['MJD-OBS'] = float(str(t))
     elif dither == '3':
         header['DATE-OBS'] = prfs_d['time_3']
         t = Time(prfs_d['time_3'])
         t.format = 'mjd'
-        # header['MJD-OBS'] = str(t)
         header['MJD-OBS'] = float(str(t))
     elif dither == '4':
         header['DATE-OBS'] = prfs_d['time_4']
         t = Time(prfs_d['time_4'])
         t.format = 'mjd'
-        # header['MJD-OBS'] = str(t)
         header['MJD-OBS'] = float(str(t))
     else:
-        logger.debug('fits image not belonging to FPA')
+        header['DATE-OBS'] = prfs_d['time_1']
+        # Change format
+        t = Time(prfs_d['time_1'])
+        t.format = 'mjd'
+        header['MJD-OBS'] = float(str(t))
 
     print('opens {} date-obs {} mjd-obs {} d {}'.format(fits_image,
                                                         header['DATE-OBS'],
                                                         header['MJD-OBS'],
                                                         dither))
 
-    fits.writeto(prfs_d['fits_dir'] + '/' + fits_image + 'copy',
+    fits.writeto('{}/{}_copy'.format(fits_dir, fits_image),
                  data, header, clobber=True)
-
-    print("saving to", prfs_d['fits_dir'], '/', fits_image, 'copy')
 
     return True
 
@@ -730,7 +726,9 @@ if __name__ == '__main__':
 
     try:
         if argv[1] == '-change':
-            change_times(logger, prfs_d)
+            for mag in prfs_d['mags']:
+                print('mag {}'.format(mag))
+                change_times(logger, prfs_d, mag)
         elif argv[1] == '-rebase':
             cores_number = prfs_d['cores_number']
             if cores_number > len(prfs_d['mags']):

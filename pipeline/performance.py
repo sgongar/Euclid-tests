@@ -773,7 +773,6 @@ class ScampPerformanceSSOs:
         self.confidence_ = confidence_
 
         self.check(logger)
-        pass
 
     def check(self, logger):
         """
@@ -794,8 +793,7 @@ class ScampPerformanceSSOs:
                                               self.mag)
             cat_name = '{}/Cat_20-21_d{}'.format(cat_loc, d)
             input_d[d] = '{}.dat'.format(cat_name)
-        input_d = Create_regions(input_d, self.prfs_d).check_luca(self.mag,
-                                                                  False, True)
+        input_d = Create_regions(input_d).check_luca(self.mag, False, True)
 
         # Creates a DataFrame from an input dictionary
         input_l = []
@@ -808,16 +806,8 @@ class ScampPerformanceSSOs:
                       if len(g) >= 3)
         i_df = i_df.reset_index(drop=True)
 
-        # if save is true saves a csv file populated by input sources
-        # and a regions file of them.
         if save:
-            i_df.to_csv('input_sources.csv')
-
-            alpha_df = i_df['alpha_j2000']
-            delta_df = i_df['delta_j2000']
-
-            df = concat([alpha_df, delta_df], axis=1)
-            df.to_csv('input_sources.reg')
+            self.create_regions_files(i_df)
 
         # Open particular file!
         filt_n = 'filt_{}_{}_4.csv'.format(self.scmp_cf, self.mag)
@@ -840,11 +830,10 @@ class ScampPerformanceSSOs:
             cat = i_df[i_df['source'].isin([source_])]
             # Creates lists for each source
             tmp_d = {'boolean_l': [], 'catalog': [], 'source': [],
-                     'epoch': [], 'i_pm': [],
-                     'i_alpha': [], 'i_delta': [],
-                     'pm_alpha': [], 'pm_delta': [],
-                     'o_alpha': [], 'o_delta': [],
-                     'error_a': [], 'error_b': []}
+                     'epoch': [], 'i_pm': [], 'i_pm_alpha': [],
+                     'i_pm_delta': [], 'i_alpha': [], 'i_delta': [],
+                     'o_pm_alpha': [], 'o_pm_delta': [], 'o_alpha': [],
+                     'o_delta': [], 'error_a': [], 'error_b': []}
 
             i_pm = 0.0  # Raises a warning if variable pm it's not created
             # Iterate over each detection of each source
@@ -854,10 +843,11 @@ class ScampPerformanceSSOs:
                 # dither_ = row.dither_values
                 catalog_n = row.catalog
                 i_pm = row.pm_values
+                i_pm_alpha = row.pm_alpha
+                i_pm_delta = row.pm_delta
                 i_alpha = row.alpha_j2000
                 i_delta = row.delta_j2000
 
-                print('catalog_n {}'.format(catalog_n))
                 # Checks if there is a source closed to input one
                 # o_cat contains data from output (filtered) catalog
                 o_df = check_source(catalog_n, o_cat, i_alpha, i_delta)
@@ -866,31 +856,11 @@ class ScampPerformanceSSOs:
                 if o_df.empty is not True and o_df['PM'].size == 1:
                     pm_mask = self.pm_filter(o_df, i_pm, self.confidence_)
                     if pm_mask:
-                        if o_df['SOURCE_NUMBER'].size != 1:
-                            tmp_d['boolean_l'].append('False')
-                        else:
-                            tmp_d['boolean_l'].append('True')
-                        tmp_d['catalog'].append(catalog_n)
-                        source = int(o_df['SOURCE_NUMBER'].iloc[0])
-                        tmp_d['source'].append(source)
-                        print(o_df['EPOCH'])
-                        epoch = float(o_df['EPOCH'].iloc[0])
-                        tmp_d['epoch'].append(epoch)
-                        tmp_d['i_pm'].append(i_pm)
-                        tmp_d['i_alpha'].append(i_alpha)
-                        tmp_d['i_delta'].append(i_delta)
-                        pm_alpha = float(o_df['PMALPHA'])
-                        tmp_d['pm_alpha'].append(pm_alpha)
-                        pm_delta = float(o_df['PMDELTA'])
-                        tmp_d['pm_delta'].append(pm_delta)
-                        o_alpha = float(o_df['ALPHA_J2000'].iloc[0])
-                        tmp_d['o_alpha'].append(o_alpha)
-                        o_delta = float(o_df['DELTA_J2000'].iloc[0])
-                        tmp_d['o_delta'].append(o_delta)
-                        errora_world = float(o_df['ERRA_WORLD'].iloc[0])
-                        tmp_d['error_a'].append(errora_world)
-                        errorb_world = float(o_df['ERRB_WORLD'].iloc[0])
-                        tmp_d['error_b'].append(errorb_world)
+                        # populate a dictionary of temporal data
+                        tmp_d = self.populate_tmp_dict(catalog_n, i_pm,
+                                                       i_pm_alpha, i_pm_delta,
+                                                       i_alpha, i_delta,
+                                                       o_df, tmp_d)
                 else:
                     tmp_d['boolean_l'].append('False')
 
@@ -907,7 +877,6 @@ class ScampPerformanceSSOs:
                 flag_detection, sources_number = all_same(tmp_d['source'])
 
                 if flag_detection and sources_number >= 3:
-                    print('epoch {}'.format(tmp_d['epoch']))
                     idx = stats_d['PM'].index(i_pm)
                     stats_d['right'][idx] += 1
                     fitted_d = self.confidence(tmp_d['source'][0],
@@ -965,8 +934,11 @@ class ScampPerformanceSSOs:
         if both:
             mode = 'io'
             d_ = {'i_alpha': tmp_d['i_alpha'], 'i_delta': tmp_d['i_delta'],
-                  'pm_alpha': tmp_d['pm_alpha'], 'pm_delta': tmp_d['pm_delta'],
+                  'i_pm_alpha': tmp_d['i_pm_alpha'],
+                  'i_pm_delta': tmp_d['i_pm_delta'],
                   'o_alpha': tmp_d['o_alpha'], 'o_delta': tmp_d['o_delta'],
+                  'o_pm_alpha': tmp_d['o_pm_alpha'],
+                  'o_pm_delta': tmp_d['o_pm_delta'],
                   'error_a': tmp_d['error_a'], 'error_b': tmp_d['error_b'],
                   'epoch': tmp_d['epoch'], 'i_pm': tmp_d['i_pm']}
             plot = PlotBothConfidence(self.output_path, tmp_d['source'][0],
@@ -977,6 +949,10 @@ class ScampPerformanceSSOs:
             mode = 'o'
             dict_ = {'alpha': tmp_d['o_alpha'], 'delta': tmp_d['o_delta'],
                      'error_a': tmp_d['error_a'], 'error_b': tmp_d['error_b'],
+                     'i_pm': tmp_d['i_pm'], 'i_pm_alpha': tmp_d['i_pm_alpha'],
+                     'i_pm_delta': tmp_d['i_pm_delta'],
+                     'o_pm_alpha': tmp_d['o_pm_alpha'],
+                     'o_pm_delta': tmp_d['o_pm_delta'],
                      'epoch': tmp_d['epoch']}
             plot = PlotConfidence(self.output_path, tmp_d['source'][0], pm,
                                   mode, fitted_d, dict_)
@@ -1020,11 +996,10 @@ class ScampPerformanceSSOs:
                 edim = array([1 / var for var in sigma])
                 edims.append(edim)
                 x = sm.add_constant(x)
-                # model = sm.WLS(y, x, weigths=edim)
-                model = sm.WLS(y, x)
+                model = sm.WLS(y, x, weigths=edim)
                 fitted = model.fit()
-                fitted = fitted.rsquared
-                fitted_d[dimension_] = fitted
+                chi_squared = fitted.rsquared
+                fitted_d[dimension_] = chi_squared
             elif dimension == dec:
                 sigma = db.loc[db['SOURCE_NUMBER'] == source,
                                'ERRB_WORLD'].tolist()
@@ -1032,17 +1007,17 @@ class ScampPerformanceSSOs:
                 edim = array([1 / var for var in sigma])
                 edims.append(edim)
                 x = sm.add_constant(x)
-                # model = sm.WLS(y, x, weigths=edim)
-                model = sm.WLS(y, x)
+                model = sm.WLS(y, x, weigths=edim)
                 fitted = model.fit()
-                fitted = fitted.rsquared
-                fitted_d[dimension_] = fitted
+                chi_squared = fitted.rsquared
+                fitted_d[dimension_] = chi_squared
 
         return fitted_d
 
     def image(self, input_fits):
         """
 
+        :param input_fits:
         :return:
         """
         d = DS9()
@@ -1101,6 +1076,65 @@ class ScampPerformanceSSOs:
                               'i_filename': i_regions_filename}
 
         return d_regions_filename
+
+    def create_regions_files(self, i_df):
+        """
+
+        :param i_df:
+        :return:
+        """
+        # Saves a csv file populated by input sources
+        # and a regions file of them.
+        i_df.to_csv('input_sources.csv')
+
+        alpha_df = i_df['alpha_j2000']
+        delta_df = i_df['delta_j2000']
+
+        df = concat([alpha_df, delta_df], axis=1)
+        df.to_csv('input_sources.reg')
+
+    def populate_tmp_dict(self, catalog_n, i_pm, i_pm_alpha, i_pm_delta,
+                          i_alpha, i_delta, o_df, tmp_d):
+        """
+
+        :param catalog_n:
+        :param i_pm:
+        :param i_pm_alpha:
+        :param i_pm_delta:
+        :param i_alpha:
+        :param i_delta:
+        :param o_df:
+        :param tmp_d:
+        :return:
+        """
+        if o_df['SOURCE_NUMBER'].size != 1:
+            tmp_d['boolean_l'].append('False')
+        else:
+            tmp_d['boolean_l'].append('True')
+        tmp_d['catalog'].append(catalog_n)
+        source = int(o_df['SOURCE_NUMBER'].iloc[0])
+        tmp_d['source'].append(source)
+        epoch = float(o_df['EPOCH'].iloc[0])
+        tmp_d['epoch'].append(epoch)
+        tmp_d['i_pm'].append(i_pm)
+        tmp_d['i_pm_alpha'].append(i_pm_alpha)
+        tmp_d['i_pm_delta'].append(i_pm_delta)
+        tmp_d['i_alpha'].append(i_alpha)
+        tmp_d['i_delta'].append(i_delta)
+        pm_alpha = float(o_df['PMALPHA'])
+        tmp_d['o_pm_alpha'].append(pm_alpha)
+        pm_delta = float(o_df['PMDELTA'])
+        tmp_d['o_pm_delta'].append(pm_delta)
+        o_alpha = float(o_df['ALPHA_J2000'].iloc[0])
+        tmp_d['o_alpha'].append(o_alpha)
+        o_delta = float(o_df['DELTA_J2000'].iloc[0])
+        tmp_d['o_delta'].append(o_delta)
+        errora_world = float(o_df['ERRA_WORLD'].iloc[0])
+        tmp_d['error_a'].append(errora_world)
+        errorb_world = float(o_df['ERRB_WORLD'].iloc[0])
+        tmp_d['error_b'].append(errorb_world)
+
+        return tmp_d
 
 
 class ScampPerformanceStars:

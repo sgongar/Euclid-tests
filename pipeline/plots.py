@@ -286,25 +286,29 @@ class PlotConfidence:
             # ALPHA PARAMETERS
             fig = plt.figure(figsize=plot_size, dpi=plot_dpi)
             ax = fig.add_subplot(1, 1, 1)
-            ax.set_title('chi_squared: {}'.format(self.fitted_d['ra']))
+            chi_squared_title = 'chi_squared: {}'.format(self.fitted_d['ra'])
+            pm_alpha_cat = float("{0:.6f}".format(self.tmp_d['i_pm_alpha'][0]))
+            pm_alpha_cat_str = 'catalog {}'.format(pm_alpha_cat)
+            pm_alpha_ext = float("{0:.6f}".format(self.tmp_d['o_pm_alpha'][0]))
+            pm_alpha_ext_str = 'extracted {}'.format(pm_alpha_ext)
+            pm_alpha_comp = '{} / {}'.format(pm_alpha_ext_str,
+                                             pm_alpha_cat_str)
+            ax.set_title('{}\n{}'.format(chi_squared_title, pm_alpha_comp))
 
-            a_tmpstmp = []
+            alpha_tmpstmp = []
             alpha_seconds = []
             tmp_hour = []
             tmp_minute = []
             for alpha_ in self.tmp_d['alpha']:
                 a = Angle(alpha_, units.degree)
-                hms = a.hms
-                hour = int(hms[0])
-                tmp_hour.append(hour)
-                minute = int(hms[1])
+                dms = a.dms
+                degree = int(dms[0])
+                tmp_hour.append(degree)
+                minute = int(dms[1])
                 tmp_minute.append(minute)
-                second = float("{0:.6f}".format(hms[2]))
-                a_tmpstmp.append('{}:{}:{}'.format(hour, minute, second))
+                second = float("{0:.6f}".format(dms[2]))
+                alpha_tmpstmp.append('{}:{}:{}'.format(degree, minute, second))
                 alpha_seconds.append('{}'.format(second))
-
-            datetimes = [datetime.strptime(t,
-                                           "%H:%M:%S.%f") for t in a_tmpstmp]
 
             # X-AXIS Shared between input and output catalogs
             epoch_seconds = []
@@ -332,9 +336,11 @@ class PlotConfidence:
                 raise Exception
 
             # Creates y ticks (major and minor ones)
-            y_ticks = create_alpha_y_ticks(alpha_seconds, tmp_hour[0],
-                                           tmp_minute[0])
-            y_labels = create_labels(y_ticks['minor_t'])
+            # y_ticks = create_alpha_y_ticks(alpha_seconds, tmp_hour[0],
+            #                                tmp_minute[0])
+            # y_labels = create_labels(y_ticks['minor_t'])
+
+            y_ticks = create_delta_y_ticks(alpha_seconds)
 
             # x-ticks assignation
             ax.set_xticks(x_ticks['major_t'], minor=False)
@@ -347,36 +353,32 @@ class PlotConfidence:
             # y-ticks labels
             empty_string_labels = [''] * len(y_ticks['major_t'])
             ax.set_yticklabels(empty_string_labels, minor=False)
-            ax.set_yticklabels(y_labels, minor=True)
+            ax.set_yticklabels(y_ticks['minor_t'], minor=True)
 
             # Formats grids
             ax.grid(b=True, which='major', linestyle='-', linewidth=2)
             ax.grid(b=True, which='minor', linestyle='--', linewidth=1)
 
             # Annotations
-            for idx_datetime_, datetime_ in enumerate(datetimes):
-                # Format alpha
-                hour = datetime_.hour
-                minute = datetime_.minute
-                second = datetime_.second
-                msecond = datetime_.microsecond
-                alpha_str = '   alpha {}:{}:{}:{}'.format(hour, minute,
-                                                          second, msecond)
-                # Format error
-                error_seconds = self.tmp_d['error_a'][idx_datetime_] * 3600
-                error = float("{0:.6f}".format(error_seconds))
-                error_str = '   error  {}"'.format(error)
-                # Annotate position and error associated
+            for idx_alpha in range(0, len(alpha_tmpstmp), 1):
+                x = epoch_seconds[idx_alpha]  # x position
+                y = alpha_seconds[idx_alpha]  # y position
+                # variables for position and error representation
+                alpha_position = alpha_tmpstmp[idx_alpha]
+                alpha_str = '   alpha {}'.format(alpha_position)
+                error = self.tmp_d['error_b'][idx_alpha] * 3600  # error-y
+                error_fmt = float("{0:.6f}".format(error))  # error rounded
+                error_str = '   error {}'.format(error_fmt)
+                # annotation
                 ax.annotate('{}\n{}'.format(alpha_str, error_str),
-                            xy=(epoch_seconds[idx_datetime_], datetime_),
-                            textcoords='data', fontsize=13)
+                            xy=(x, y), textcoords='data', fontsize=13)
 
-            for idx_datetime_, datetime_ in enumerate(datetimes):
-                error_seconds = self.tmp_d['error_a'][idx_datetime_] * 3600
-                errorbar_size = timedelta(0, error_seconds)
-                ax.errorbar(epoch_seconds[idx_datetime_], datetime_,
-                            yerr=errorbar_size,
-                            fmt='o', ecolor='g', capthick=2, elinewidth=4)
+            for idx_alpha in range(0, len(alpha_tmpstmp), 1):
+                x = epoch_seconds[idx_alpha]  # x position
+                y = alpha_seconds[idx_alpha]  # y position
+                error = float(self.tmp_d['error_b'][idx_alpha] * 3600)
+                ax.errorbar(x, y, yerr=error, fmt='o',
+                            ecolor='g', capthick=2, elinewidth=4)
 
             # Axis labels creation
             # x-axis
@@ -392,7 +394,7 @@ class PlotConfidence:
                                           y_label_minor_step))
 
             # Plots data
-            ax.plot(epoch_seconds, datetimes, 'bs', markersize=6,
+            ax.plot(epoch_seconds, alpha_seconds, 'bs', markersize=6,
                     label='extracted position')
             # In order to avoid scientific notation plot should be redrawn
             ax = plt.gca()
@@ -415,7 +417,14 @@ class PlotConfidence:
             #
             fig = plt.figure(figsize=plot_size, dpi=plot_dpi)
             ax = fig.add_subplot(1, 1, 1)
-            ax.set_title('chi_squared: {}'.format(self.fitted_d['dec']))
+            chi_squared_title = 'chi_squared: {}'.format(self.fitted_d['dec'])
+            pm_delta_cat = float("{0:.6f}".format(self.tmp_d['i_pm_delta'][0]))
+            pm_delta_cat_str = 'catalog {}'.format(pm_delta_cat)
+            pm_delta_ext = float("{0:.6f}".format(self.tmp_d['o_pm_delta'][0]))
+            pm_delta_ext_str = 'extracted {}'.format(pm_delta_ext)
+            pm_delta_comp = '{} / {}'.format(pm_delta_ext_str,
+                                             pm_delta_cat_str)
+            ax.set_title('{}\n{}'.format(chi_squared_title, pm_delta_comp))
 
             delta_tmpstmp = []
             delta_seconds = []
@@ -466,23 +475,23 @@ class PlotConfidence:
             ax.grid(b=True, which='major', linestyle='-', linewidth=2)
             ax.grid(b=True, which='minor', linestyle='--', linewidth=1)
 
-            for idx_datetime_, datetime_ in enumerate(datetimes):
-                x = epoch_seconds[idx_datetime_]  # x position
-                y = delta_seconds[idx_datetime_]  # y position
+            for idx_delta in range(0, len(delta_tmpstmp), 1):
+                x = epoch_seconds[idx_delta]  # x position
+                y = delta_seconds[idx_delta]  # y position
                 # variables for position and error representation
-                delta_position = delta_tmpstmp[idx_datetime_]
+                delta_position = delta_tmpstmp[idx_delta]
                 delta_str = '   delta {}'.format(delta_position)
-                error = self.tmp_d['error_b'][idx_datetime_] * 3600  # error-y
+                error = self.tmp_d['error_b'][idx_delta] * 3600  # error-y
                 error_fmt = float("{0:.6f}".format(error))  # error rounded
                 error_str = '   error {}'.format(error_fmt)
                 # annotation
                 ax.annotate('{}\n{}'.format(delta_str, error_str),
                             xy=(x, y), textcoords='data', fontsize=13)
 
-            for idx_datetime_, datetime_ in enumerate(datetimes):
-                x = epoch_seconds[idx_datetime_]  # x position
-                y = delta_seconds[idx_datetime_]  # y position
-                error = float(self.tmp_d['error_b'][idx_datetime_] * 3600)
+            for idx_delta in range(0, len(delta_tmpstmp), 1):
+                x = epoch_seconds[idx_delta]  # x position
+                y = delta_seconds[idx_delta]  # y position
+                error = float(self.tmp_d['error_b'][idx_delta] * 3600)
                 ax.errorbar(x, y, yerr=error, fmt='o',
                             ecolor='g', capthick=2, elinewidth=4)
 
@@ -547,9 +556,14 @@ class PlotBothConfidence:
             # ALPHA PARAMETERS
             fig = plt.figure(figsize=plot_size, dpi=plot_dpi)
             ax = fig.add_subplot(1, 1, 1)
-            title_chi = 'chi_squared: {}'.format(self.fitted_d['ra'])
-            title_pm = 'pm_alpha {}'.format(self.tmp_d['pm_alpha'][0])
-            ax.set_title('{}\n{}'.format(title_chi, title_pm))
+            chi_squared_title = 'chi_squared: {}'.format(self.fitted_d['ra'])
+            pm_alpha_cat = float("{0:.6f}".format(self.tmp_d['i_pm_alpha'][0]))
+            pm_alpha_cat_str = 'catalog {}'.format(pm_alpha_cat)
+            pm_alpha_ext = float("{0:.6f}".format(self.tmp_d['o_pm_alpha'][0]))
+            pm_alpha_ext_str = 'extracted {}'.format(pm_alpha_ext)
+            pm_alpha_comp = '{} / {}'.format(pm_alpha_ext_str,
+                                             pm_alpha_cat_str)
+            ax.set_title('{}\n{}'.format(chi_squared_title, pm_alpha_comp))
 
             # input_parameters
             plot_flag = True
@@ -733,9 +747,14 @@ class PlotBothConfidence:
             #
             fig = plt.figure(figsize=plot_size, dpi=plot_dpi)
             ax = fig.add_subplot(1, 1, 1)
-            title_chi = 'chi_squared: {}'.format(self.fitted_d['dec'])
-            title_pm = 'pm_delta {}'.format(self.tmp_d['pm_delta'][0])
-            ax.set_title('{}\n{}'.format(title_chi, title_pm))
+            chi_squared_title = 'chi_squared: {}'.format(self.fitted_d['dec'])
+            pm_delta_cat = float("{0:.6f}".format(self.tmp_d['i_pm_delta'][0]))
+            pm_delta_cat_str = 'catalog {}'.format(pm_delta_cat)
+            pm_delta_ext = float("{0:.6f}".format(self.tmp_d['o_pm_delta'][0]))
+            pm_delta_ext_str = 'extracted {}'.format(pm_delta_ext)
+            pm_delta_comp = '{} / {}'.format(pm_delta_ext_str,
+                                             pm_delta_cat_str)
+            ax.set_title('{}\n{}'.format(chi_squared_title, pm_delta_comp))
 
             plot_flag = True
             i_d_tmpstmp = []

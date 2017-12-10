@@ -17,9 +17,8 @@ Todo:
 """
 
 
-from os import mkdir, path, remove
+from os import remove
 from subprocess import Popen
-import sys
 
 from multiprocessing import Process
 
@@ -53,7 +52,6 @@ class Sextractor:
         """
         logger.info('Starting sextractor process for fits images')
 
-        mags = self.prfs_d['mags']
         analysis_dir = self.prfs_d['fits_dir']
 
         folder_n = '{}_{}_{}_{}_{}'.format(analysis_d['deblend_nthresh'],
@@ -62,7 +60,7 @@ class Sextractor:
                                            analysis_d['deblend_mincount'],
                                            analysis_d['detect_minarea'])
 
-        for mag_ in mags:  # TODO Implement mag selection
+        for mag_ in self.prfs_d['mags']:
             fits_files = get_fits(unique=False, mag=mag_)
             for image_idx in range(0, len(fits_files),
                                    self.prfs_d['cores_number']):
@@ -137,7 +135,6 @@ class CatalogCreation:
         :param analysis_d: a dictionary with all configuration information
         """
         self.prfs_d = extract_settings()
-        mags = self.prfs_d['mags']
 
         cat_j = []
         for mag_ in self.prfs_d['mags']:
@@ -175,8 +172,6 @@ class CatalogCreation:
         c_13 = ' -WEIGHT_TYPE NONE -VERBOSE_TYPE QUIET'
         c_14 = ' -GAIN_KEYWORD GAIN'
         c_1 = c_11 + c_12 + c_13 + c_14
-
-        print('c_1 {}'.format(c_1))
 
         process_1 = Popen(c_1, shell=True)
         process_1.wait()

@@ -9,7 +9,7 @@ Todo:
 
 """
 
-
+from math import cos, sin, radians
 from os import path
 
 from astropy.io import fits
@@ -19,7 +19,7 @@ from numpy import genfromtxt, float64
 from pandas import concat, read_csv, Series
 
 from images_management import get_fits_limits
-from misc import get_fits, get_fits_d
+from misc import get_fits, get_fits_d, extract_settings
 
 
 __author__ = "Samuel Gongora-Garcia"
@@ -36,13 +36,13 @@ __status__ = "Development"
 
 class Create_regions:
 
-    def __init__(self, input_catalog, prfs_d):
+    def __init__(self, input_catalog):
         """
 
         @param input_catalog:
         """
         self.input_catalogue = input_catalog
-        self.prfs_d = prfs_d
+        self.prfs_d = extract_settings()
 
     def full_cats(self):
         """
@@ -431,6 +431,10 @@ class Create_regions:
             list_y = catalog[:, 1]
             list_mag = catalog[:, 2]
             list_pm = catalog[:, 3]
+            list_angle = catalog[:, 4]
+            total_length = len(list_x)
+            list_alpha_pm = range(0, total_length, 1)
+            list_delta_pm = range(0, total_length, 1)
 
             x_values = []
             y_values = []
@@ -446,33 +450,57 @@ class Create_regions:
             speed_10 = range(self.prfs_d['first_sso'] + 68, 137446, 73)
             speed_30 = range(self.prfs_d['first_sso'] + 69, 137447, 73)
 
+            # Gets proper angles
+            list_angle = [abs(angle_) for angle_ in list_angle]
+
+            # Gets proper motion
             for index in speed_0_001:
                 list_mag[index] = list_mag[index] - 2.5
                 list_pm[index] = 0.001
+                list_alpha_pm[index] = 0.001 * cos(radians(list_angle[index]))
+                list_delta_pm[index] = 0.001 * sin(radians(list_angle[index]))
             for index in speed_0_003:
                 list_mag[index] = list_mag[index] - 2.5
                 list_pm[index] = 0.003
+                list_alpha_pm[index] = 0.003 * cos(radians(list_angle[index]))
+                list_delta_pm[index] = 0.003 * sin(radians(list_angle[index]))
             for index in speed_0_01:
                 list_mag[index] = list_mag[index] - 2.5
                 list_pm[index] = 0.01
+                list_alpha_pm[index] = 0.01 * cos(radians(list_angle[index]))
+                list_delta_pm[index] = 0.01 * sin(radians(list_angle[index]))
             for index in speed_0_03:
                 list_mag[index] = list_mag[index] - 2.5
                 list_pm[index] = 0.03
+                list_alpha_pm[index] = 0.03 * cos(radians(list_angle[index]))
+                list_delta_pm[index] = 0.03 * sin(radians(list_angle[index]))
             for index in speed_0_1:
                 list_mag[index] = list_mag[index] - 2.5
                 list_pm[index] = 0.1
+                list_alpha_pm[index] = 0.1 * cos(radians(list_angle[index]))
+                list_delta_pm[index] = 0.1 * sin(radians(list_angle[index]))
             for index in speed_0_3:
                 list_mag[index] = list_mag[index] - 2.5
                 list_pm[index] = 0.3
+                list_alpha_pm[index] = 0.3 * cos(radians(list_angle[index]))
+                list_delta_pm[index] = 0.3 * sin(radians(list_angle[index]))
             for index in speed_1:
                 list_mag[index] = list_mag[index] - 2.5
                 list_pm[index] = 1
+                list_alpha_pm[index] = 1 * cos(radians(list_angle[index]))
+                list_delta_pm[index] = 1 * sin(radians(list_angle[index]))
             for index in speed_3:
                 list_pm[index] = list_pm[index] - 1000
+                list_alpha_pm[index] = 3 * cos(radians(list_angle[index]))
+                list_delta_pm[index] = 3 * sin(radians(list_angle[index]))
             for index in speed_10:
                 list_pm[index] = list_pm[index] - 1000
+                list_alpha_pm[index] = 10 * cos(radians(list_angle[index]))
+                list_delta_pm[index] = 10 * sin(radians(list_angle[index]))
             for index in speed_30:
                 list_pm[index] = list_pm[index] - 1000
+                list_alpha_pm[index] = 30 * cos(radians(list_angle[index]))
+                list_delta_pm[index] = 30 * sin(radians(list_angle[index]))
 
             indexes = (speed_0_001 + speed_0_003 + speed_0_01 + speed_0_03 +
                        speed_0_1 + speed_0_3 + speed_1 + speed_3 + speed_10 +
@@ -483,8 +511,11 @@ class Create_regions:
             s2 = Series(list_y, name='Y_IMAGE', dtype=float64)
             s3 = Series(list_mag, name='MAG_VALUES', dtype=float64)
             s4 = Series(list_pm, name='PM_INPUT', dtype=float64)
+            s5 = Series(list_alpha_pm, name='PM_ALPHA', dtype=float64)
+            s6 = Series(list_delta_pm, name='PM_DELTA', dtype=float64)
+            s7 = Series(list_angle, name='ANGLE_INPUT', dtype=float64)
 
-            sources_df = concat([s1, s2, s3, s4], axis=1)
+            sources_df = concat([s1, s2, s3, s4, s5, s6, s7], axis=1)
             sources_df = sources_df.iloc[indexes, :]
 
             ccd_loc = 'mag_{}_CCD_x0_y0_d1.fits'.format(mag_)
@@ -574,13 +605,18 @@ class Create_regions:
             delta_j2000 = Series(delta_list, name='delta_j2000')
             mag = Series(sources_df['MAG_VALUES'].tolist(), name='mag_values')
             pm = Series(sources_df['PM_INPUT'].tolist(), name='pm_values')
+            pm_alpha = Series(sources_df['PM_ALPHA'].tolist(), name='pm_alpha')
+            pm_delta = Series(sources_df['PM_DELTA'].tolist(), name='pm_delta')
+            angle = Series(sources_df['ANGLE_INPUT'].tolist(),
+                           name='angle_values')
             dither = Series(dither_list, name='dither_values')
             CCD = Series(CCD_list, name='CCD')
             cat = Series(cats_list, name='catalog')
 
             if complete:
                 sources_df = concat([source, cat, alpha_j2000, delta_j2000,
-                                     mag, pm, dither, CCD], axis=1)
+                                     mag, pm, pm_alpha, pm_delta,
+                                     angle, dither, CCD], axis=1)
                 sources_df.to_csv('test_{}.csv'.format(dither_))
                 sources_df = sources_df[~sources_df['CCD'].isin(['False'])]
             else:

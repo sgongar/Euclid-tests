@@ -70,13 +70,13 @@ class Check:
 
         # Scamp configurations.
         mode = {'type': 'scamp'}
-        self.scamp_confs, scamp_confs_n = create_configurations(mode)
+        self.scamp_confs, self.scamp_confs_n = create_configurations(mode)
         # Sextractor configurations.
         mode = {'type': 'sextractor'}
         self.sex_confs, sex_confs_n = create_configurations(mode)
 
         if argv[1] == '-full':
-            if not self.full_pipeline(scamp_confs, scamp_confs_n):
+            if not self.full_pipeline():
                 raise Exception
         elif argv[1] == '-catalog':
             if not self.catalog():
@@ -89,31 +89,28 @@ class Check:
                 raise Exception
         elif argv[1] == '-filter':
             self.filt()
-        elif argv[1] == '-check':
-            self.check(scamp_confs, scamp_confs_n)
-        elif argv[1] == '-stats':
-            self.stats(scamp_confs_n)
-        elif argv[1] == '-error_performance':
-            self.error_performance()
+        # elif argv[1] == '-check':
+        #     self.check(self.scamp_confs, self.scamp_confs_n)
+        # elif argv[1] == '-stats':
+        #     self.stats(self.scamp_confs_n)
+        # elif argv[1] == '-error_performance':
+        #     self.error_performance()
         elif argv[1] == '-scamp_performance':
             self.scamp_performance()
         elif argv[1] == '-scamp_performance_stars':
-            self.scamp_performance_stars(scamp_confs)
+            self.scamp_performance_stars()
         elif argv[1] == '-pm_performance':
-            if not self.pm_performance(scamp_confs):
-                raise Exception
-        elif argv[1] == '-stats_performance':
-            self.stats_performance()
+            self.pm_performance()
+        # elif argv[1] == '-stats_performance':
+        #     self.stats_performance()
         elif argv[1] == '-help':
             pipeline_help(self.logger)
         else:
             raise BadSettings('not analysis option choosen')
 
-    def full_pipeline(self, confs, total_confs):
+    def full_pipeline(self):
         """
 
-        :param confs:
-        :param total_confs:
         :return:
         """
         """
@@ -122,9 +119,9 @@ class Check:
         """
         if not self.sextractor():
             raise Exception
-        if not self.scamp(confs):
+        if not self.scamp():
             raise Exception
-        if not self.filt(total_confs):
+        if not self.filt():
             raise Exception
         """
         if not self.check(confs, total_confs):
@@ -198,30 +195,30 @@ class Check:
         """
 
         confs = list(product(self.sex_confs, self.scamp_confs))
-        mag = '21-22'
 
-        for idx, conf_ in enumerate(confs):
-            filt_j = []
-            while len(filt_j) < self.prfs_d['cores_number'] + 1:
-                sex_d = {'deblend_mincount': conf_[0][1],
-                         'analysis_thresh': conf_[0][2],
-                         'detect_thresh': conf_[0][2],
-                         'deblend_nthresh': conf_[0][0],
-                         'detect_minarea': conf_[0][3],
-                         'filter': 'models/gauss_2.0_5x5.conv'}
+        for mag in self.prfs_d['mags']:
+            for idx, conf_ in enumerate(confs):
+                filt_j = []
+                while len(filt_j) < self.prfs_d['cores_number'] + 1:
+                    sex_d = {'deblend_mincount': conf_[0][1],
+                             'analysis_thresh': conf_[0][2],
+                             'detect_thresh': conf_[0][2],
+                             'deblend_nthresh': conf_[0][0],
+                             'detect_minarea': conf_[0][3],
+                             'filter': 'models/gauss_2.0_5x5.conv'}
 
-                scmp_cf = '{}_{}_{}_{}'.format(conf_[1][0], conf_[1][1],
-                                               conf_[1][2], conf_[1][3])
-                filt_p = Process(target=ScampFilter,
-                                 args=(self.logger, mag,
-                                       scmp_cf, sex_d,))
-                filt_j.append(filt_p)
-                filt_p.start()
+                    scmp_cf = '{}_{}_{}_{}'.format(conf_[1][0], conf_[1][1],
+                                                   conf_[1][2], conf_[1][3])
+                    filt_p = Process(target=ScampFilter,
+                                     args=(self.logger, mag,
+                                           scmp_cf, sex_d,))
+                    filt_j.append(filt_p)
+                    filt_p.start()
 
-            active_filt = list([j.is_alive() for j in filt_j])
-            while True in active_filt:
                 active_filt = list([j.is_alive() for j in filt_j])
-                pass
+                while True in active_filt:
+                    active_filt = list([j.is_alive() for j in filt_j])
+                    pass
 
         return True
 
@@ -320,7 +317,7 @@ class Check:
 
         print(len(confs))
 
-        for idx, conf_ in enumerate(confs):
+        for conf_ in confs:
             filt_j = []
             while len(filt_j) < self.prfs_d['cores_number'] + 1:
                 # bypassconfidence
@@ -420,21 +417,17 @@ class Check:
 
         return True
 
-    def pm_performance(self, scmp_confs):
+    def pm_performance(self):
         """ input pm vs output pm
+        todo - check syntax
 
-        :param scmp_confs:
         :return:
         """
-        # Sextractor configurations.
-        mode = {'type': 'sextractor'}
-        sex_confs, sex_confs_n = create_configurations(mode)
-
         idx = 0
         stats_d = {}
         for mag in self.prfs_d['mags']:
-            for idx_scmp, scmp_conf in enumerate(scmp_confs):
-                for idx_sex, sex_conf in enumerate(sex_confs):
+            for idx_scmp, scmp_conf in enumerate(self.scamp_confs):
+                for idx_sex, sex_conf in enumerate(self.sex_confs):
                     # Set an index.
                     # Scamp configuration.
                     # Creates a dict from a particular configuration.
