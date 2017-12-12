@@ -451,7 +451,7 @@ class Create_regions:
             speed_30 = range(self.prfs_d['first_sso'] + 69, 137447, 73)
 
             # Gets proper angles
-            list_angle = [abs(angle_) for angle_ in list_angle]
+            list_angle = [(angle_ + 180) for angle_ in list_angle]
 
             # Gets proper motion
             for index in speed_0_001:

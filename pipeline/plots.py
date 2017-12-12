@@ -286,14 +286,31 @@ class PlotConfidence:
             # ALPHA PARAMETERS
             fig = plt.figure(figsize=plot_size, dpi=plot_dpi)
             ax = fig.add_subplot(1, 1, 1)
-            chi_squared_title = 'chi_squared: {}'.format(self.fitted_d['ra'])
+            chi_squared = float("{0:.6f}".format(self.fitted_d['ra']))
+            chi_squared_title = 'chi_squared: {}'.format(chi_squared)
+
             pm_alpha_cat = float("{0:.6f}".format(self.tmp_d['i_pm_alpha'][0]))
             pm_alpha_cat_str = 'catalog {}'.format(pm_alpha_cat)
+
             pm_alpha_ext = float("{0:.6f}".format(self.tmp_d['o_pm_alpha'][0]))
             pm_alpha_ext_str = 'extracted {}'.format(pm_alpha_ext)
+
+            o_pm_alpha = float(self.tmp_d['o_pm_alpha'][0])
+            o_pm_alpha_err = float(self.tmp_d['o_pm_alpha_err'][0])
+            o_pm_alpha_sn = o_pm_alpha / o_pm_alpha_err
+            o_pm_alpha_sn = float("{0:.6f}".format(o_pm_alpha_sn))
+            pm_alpha_sn_str = 'SN {}'.format(o_pm_alpha_sn)
+            pm_alpha_ext_err = self.tmp_d['o_pm_alpha_err'][0]
+            pm_alpha_ext_err = float("{0:.6f}".format(pm_alpha_ext_err))
+            pm_alpha_ext_err_str = 'pm_error {}'.format(pm_alpha_ext_err)
+
             pm_alpha_comp = '{} / {}'.format(pm_alpha_ext_str,
                                              pm_alpha_cat_str)
-            ax.set_title('{}\n{}'.format(chi_squared_title, pm_alpha_comp))
+            pm_error_comp = '{} / {}'.format(pm_alpha_sn_str,
+                                             pm_alpha_ext_err_str)
+
+            ax.set_title('{}\n{}\n{}'.format(chi_squared_title, pm_alpha_comp,
+                                             pm_error_comp))
 
             alpha_tmpstmp = []
             alpha_seconds = []
@@ -406,7 +423,8 @@ class PlotConfidence:
 
             # Saves the current figure in pdf file
             pdf.savefig()  # saves current figure
-            plt.clf()  # clear current figure
+            # plt.clf()  # clear current figure
+            plt.close(fig)
 
             #
             # DELTA PARAMETERS
@@ -417,14 +435,31 @@ class PlotConfidence:
             #
             fig = plt.figure(figsize=plot_size, dpi=plot_dpi)
             ax = fig.add_subplot(1, 1, 1)
-            chi_squared_title = 'chi_squared: {}'.format(self.fitted_d['dec'])
+            chi_squared = float("{0:.6f}".format(self.fitted_d['dec']))
+            chi_squared_title = 'chi_squared: {}'.format(chi_squared)
+
             pm_delta_cat = float("{0:.6f}".format(self.tmp_d['i_pm_delta'][0]))
             pm_delta_cat_str = 'catalog {}'.format(pm_delta_cat)
+
             pm_delta_ext = float("{0:.6f}".format(self.tmp_d['o_pm_delta'][0]))
             pm_delta_ext_str = 'extracted {}'.format(pm_delta_ext)
+
+            o_pm_delta = float(self.tmp_d['o_pm_delta'][0])
+            o_pm_delta_err = float(self.tmp_d['o_pm_delta_err'][0])
+            o_pm_delta_sn = o_pm_delta / o_pm_delta_err
+            o_pm_delta_sn = float("{0:.6f}".format(o_pm_delta_sn))
+            pm_delta_sn_str = 'SN {}'.format(o_pm_delta_sn)
+            pm_delta_ext_err = self.tmp_d['o_pm_delta_err'][0]
+            pm_delta_ext_err = float("{0:.6f}".format(pm_delta_ext_err))
+            pm_delta_ext_err_str = 'pm_error {}'.format(pm_delta_ext_err)
+
             pm_delta_comp = '{} / {}'.format(pm_delta_ext_str,
                                              pm_delta_cat_str)
-            ax.set_title('{}\n{}'.format(chi_squared_title, pm_delta_comp))
+            pm_error_comp = '{} / {}'.format(pm_delta_sn_str,
+                                             pm_delta_ext_err_str)
+
+            ax.set_title('{}\n{}\n{}'.format(chi_squared_title, pm_delta_comp,
+                                             pm_error_comp))
 
             delta_tmpstmp = []
             delta_seconds = []
@@ -513,7 +548,8 @@ class PlotConfidence:
             plt.draw()
 
             pdf.savefig()  # saves current figure
-            plt.clf()  # clear current figure
+            # plt.clf()  # clear current figure
+            plt.close(fig)
 
         return True
 
@@ -556,14 +592,31 @@ class PlotBothConfidence:
             # ALPHA PARAMETERS
             fig = plt.figure(figsize=plot_size, dpi=plot_dpi)
             ax = fig.add_subplot(1, 1, 1)
-            chi_squared_title = 'chi_squared: {}'.format(self.fitted_d['ra'])
+            chi_squared = float("{0:.6f}".format(self.fitted_d['ra']))
+            chi_squared_title = 'chi_squared: {}'.format(chi_squared)
+
             pm_alpha_cat = float("{0:.6f}".format(self.tmp_d['i_pm_alpha'][0]))
             pm_alpha_cat_str = 'catalog {}'.format(pm_alpha_cat)
+
             pm_alpha_ext = float("{0:.6f}".format(self.tmp_d['o_pm_alpha'][0]))
             pm_alpha_ext_str = 'extracted {}'.format(pm_alpha_ext)
+
+            o_pm_alpha = float(self.tmp_d['o_pm_alpha'][0])
+            o_pm_alpha_err = float(self.tmp_d['o_pm_alpha_err'][0])
+            o_pm_alpha_sn = o_pm_alpha / o_pm_alpha_err
+            o_pm_alpha_sn = float("{0:.6f}".format(o_pm_alpha_sn))
+            pm_alpha_sn_str = 'SN {}'.format(o_pm_alpha_sn)
+            pm_alpha_ext_err = self.tmp_d['o_pm_alpha_err'][0]
+            pm_alpha_ext_err = float("{0:.6f}".format(pm_alpha_ext_err))
+            pm_alpha_ext_err_str = 'pm_error {}'.format(pm_alpha_ext_err)
+
             pm_alpha_comp = '{} / {}'.format(pm_alpha_ext_str,
                                              pm_alpha_cat_str)
-            ax.set_title('{}\n{}'.format(chi_squared_title, pm_alpha_comp))
+            pm_error_comp = '{} / {}'.format(pm_alpha_sn_str,
+                                             pm_alpha_ext_err_str)
+
+            ax.set_title('{}\n{}\n{}'.format(chi_squared_title, pm_alpha_comp,
+                                             pm_error_comp))
 
             # input_parameters
             plot_flag = True
@@ -571,7 +624,7 @@ class PlotBothConfidence:
             i_alpha_seconds = []
             i_tmp_hour = []
             i_tmp_minute = []
-            for alpha_ in self.tmp_d['i_alpha']:
+            for alpha_ in self.tmp_d['i_alpha']:  # fixme change to dms
                 a = Angle(alpha_, units.degree)
                 hms = a.hms
                 hour = int(hms[0])
@@ -737,6 +790,7 @@ class PlotBothConfidence:
                 # Saves the current figure in pdf file
                 pdf.savefig()  # saves current figure
             plt.clf()  # clear current figure
+            plt.close(fig)
 
             #
             # DELTA PARAMETERS
@@ -747,14 +801,31 @@ class PlotBothConfidence:
             #
             fig = plt.figure(figsize=plot_size, dpi=plot_dpi)
             ax = fig.add_subplot(1, 1, 1)
-            chi_squared_title = 'chi_squared: {}'.format(self.fitted_d['dec'])
+            chi_squared = float("{0:.6f}".format(self.fitted_d['dec']))
+            chi_squared_title = 'chi_squared: {}'.format(chi_squared)
+
             pm_delta_cat = float("{0:.6f}".format(self.tmp_d['i_pm_delta'][0]))
             pm_delta_cat_str = 'catalog {}'.format(pm_delta_cat)
+
             pm_delta_ext = float("{0:.6f}".format(self.tmp_d['o_pm_delta'][0]))
             pm_delta_ext_str = 'extracted {}'.format(pm_delta_ext)
+
+            o_pm_delta = float(self.tmp_d['o_pm_delta'][0])
+            o_pm_delta_err = float(self.tmp_d['o_pm_delta_err'][0])
+            o_pm_delta_sn = o_pm_delta / o_pm_delta_err
+            o_pm_delta_sn = float("{0:.6f}".format(o_pm_delta_sn))
+            pm_delta_sn_str = 'SN {}'.format(o_pm_delta_sn)
+            pm_delta_ext_err = self.tmp_d['o_pm_delta_err'][0]
+            pm_delta_ext_err = float("{0:.6f}".format(pm_delta_ext_err))
+            pm_delta_ext_err_str = 'pm_error {}'.format(pm_delta_ext_err)
+
             pm_delta_comp = '{} / {}'.format(pm_delta_ext_str,
                                              pm_delta_cat_str)
-            ax.set_title('{}\n{}'.format(chi_squared_title, pm_delta_comp))
+            pm_error_comp = '{} / {}'.format(pm_delta_sn_str,
+                                             pm_delta_ext_err_str)
+
+            ax.set_title('{}\n{}\n{}'.format(chi_squared_title, pm_delta_comp,
+                                             pm_error_comp))
 
             plot_flag = True
             i_d_tmpstmp = []
@@ -889,4 +960,6 @@ class PlotBothConfidence:
                 plt.draw()
 
                 pdf.savefig()  # saves current figure
-                plt.clf()  # clear current figure
+
+            plt.clf()  # clear current figure
+            plt.close(fig)

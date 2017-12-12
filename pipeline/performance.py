@@ -205,12 +205,11 @@ def check_cat_order(cat_list):
 
 
 class StatsPerformance:
-    def __init__(self, prfs_d):
+    def __init__(self):
         """
 
-        :param prfs_d:
         """
-        self.prfs_d = prfs_d
+        self.prfs_d = extract_settings()
 
     def error(self, logger, mag, sex_cf):
         """
@@ -230,10 +229,10 @@ class StatsPerformance:
         # Input sources
         input_ssos_d = {}
         for d in range(1, 5, 1):
-            cat_name = '{}/Cat_20-21_d{}'.format(self.prfs_d['input_ref'], d)
+            cat_loc = '{}/{}/Catalogs'.format(self.prfs_d['fits_dir'], mag)
+            cat_name = '{}/Cat_20-21_d{}'.format(cat_loc, d)
             input_ssos_d[d] = '{}.dat'.format(cat_name)
-        input_ssos_d = Create_regions(input_ssos_d,
-                                      self.prfs_d).check_luca(True, True)
+        input_ssos_d = Create_regions(input_ssos_d).check_luca(mag, False, True)
 
         # Creates a DataFrame from an input dictionary
         input_ssos_l = []
@@ -243,13 +242,13 @@ class StatsPerformance:
         i_ssos_df = concat(input_ssos_l, axis=0)
         i_ssos_df = i_ssos_df.reset_index(drop=True)
 
-        # Stars
+        # Input stars
         input_stars_d = {}
         for d in range(1, 5, 1):
-            cat_name = '{}/Cat_20-21_d{}'.format(self.prfs_d['input_ref'], d)
+            cat_loc = '{}/{}/Catalogs'.format(self.prfs_d['fits_dir'], mag)
+            cat_name = '{}/Cat_20-21_d{}'.format(cat_loc, d)
             input_stars_d[d] = '{}.dat'.format(cat_name)
-        input_stars_d = Create_regions(input_stars_d,
-                                       self.prfs_d).check_stars(True, True)
+        input_stars_d = Create_regions(input_stars_d).check_luca(mag, False, True)
 
         # Creates a DataFrame from an input dictionary
         input_stars_l = []
@@ -259,15 +258,14 @@ class StatsPerformance:
         i_stars_df = concat(input_stars_l, axis=0)
         i_stars_df = i_stars_df.reset_index(drop=True)
 
-        # Galaxies
+        # Input stars
         input_galaxies_d = {}
         for d in range(1, 5, 1):
-            i_cat_n = '/Cat_20-21_d'
-            input_galaxies_d[d] = '{}{}{}.dat'.format(self.prfs_d['input_ref'],
-                                                      i_cat_n, d)
-        input_galaxies_d = Create_regions(input_galaxies_d,
-                                          self.prfs_d).check_galaxies(True,
-                                                                      True)
+            cat_loc = '{}/{}/Catalogs'.format(self.prfs_d['fits_dir'], mag)
+            cat_name = '{}/Cat_20-21_d{}'.format(cat_loc, d)
+            input_galaxies_d[d] = '{}.dat'.format(cat_name)
+        input_galaxies_d = Create_regions(input_galaxies_d).check_luca(mag, False,
+                                                                       True)
 
         # Creates a DataFrame from an input dictionary
         input_galaxies_l = []
@@ -294,8 +292,8 @@ class StatsPerformance:
 
                 cat_n = 'mag_{}_CCD_x{}_y{}_d{}.cat'.format(mag, opt[0],
                                                             opt[1], dither)
-                cat_o_n = '{}/{}/{}'.format(self.prfs_d['fits_dir'],
-                                            sex_cf, cat_n)
+                cat_o_n = '{}/{}/CCDs/{}/{}'.format(self.prfs_d['fits_dir'],
+                                                    mag, sex_cf, cat_n)
 
                 hdu_list = fits.open(cat_o_n)
                 o_cat = Table(hdu_list[2].data).to_pandas()
@@ -356,14 +354,14 @@ class PMPerformance:
         """
         self.bypassfilter = True
         self.plot = False
+        self.prfs_d = extract_settings()
 
         pass
 
-    def check(self, logger, prfs_d, mag, scmp_cf, sex_cf, confidence_):
+    def check(self, logger, mag, scmp_cf, sex_cf, confidence_):
         """
 
         :param logger:
-        :param prfs_d:
         :param mag:
         :param scmp_cf:
         :param sex_cf:
@@ -378,9 +376,9 @@ class PMPerformance:
                                                                  sex_cf))
         input_d = {}
         for d in range(1, 5, 1):
-            input_d[d] = '{}/Cat_20-21_d{}.dat'.format(prfs_d['input_ref'],
+            input_d[d] = '{}/Cat_20-21_d{}.dat'.format(self.prfs_d['input_ref'],
                                                        d)
-        input_d = Create_regions(input_d, prfs_d).check_luca(True, True)
+        input_d = Create_regions(input_d).check_luca(mag, True, True)
 
         # Creates a DataFrame from an input dictionary
         input_l = []
@@ -396,8 +394,8 @@ class PMPerformance:
         i_df.to_csv('input.csv')
 
         # Open particular file!
-        filt_n = 'filt_{}_{}_3.csv'.format(scmp_cf, mag)
-        filter_o_n = '{}/{}/{}/{}'.format(prfs_d['filter_dir'],
+        filt_n = 'filt_{}_{}_4.csv'.format(scmp_cf, mag)
+        filter_o_n = '{}/{}/{}/{}'.format(self.prfs_d['filter_dir'],
                                           sex_cf, scmp_cf, filt_n)
 
         # Cross with filtered data - Opens datafile
@@ -433,8 +431,7 @@ class PMPerformance:
 
                 # If there is one saves data from input data
                 if o_df.empty is not True and o_df['PM'].size == 1:
-                    pm_mask = self.pm_filter(o_df, i_pm, prfs_d,
-                                             confidence_, self.bypassfilter)
+                    pm_mask = self.pm_filter(o_df, i_pm, confidence_)
                     if pm_mask:
                         if o_df['SOURCE_NUMBER'].size != 1:
                             boolean_l.append('False')
@@ -482,13 +479,13 @@ class PMPerformance:
             # print(" ")
 
         if self.plot:
-            if not self.plot_comp(prfs_d, sex_cf, scmp_cf,
-                                  input_pm, output_pm, confidence_):
+            if not self.plot_comp(sex_cf, scmp_cf, input_pm, output_pm,
+                                  confidence_):
                 raise Exception
 
         return stats_d
 
-    def pm_filter(self, o_df, pm, prfs_d, confidence_, bypassfilter):
+    def pm_filter(self, o_df, pm, confidence_):
         """
 
         :param o_df:
@@ -498,21 +495,19 @@ class PMPerformance:
         :param bypassfilter:
         :return:
         """
-        pm_ranges = speeds_range(prfs_d, confidence_)
+        pm_ranges = speeds_range(self.prfs_d, confidence_)
         pm_range = pm_ranges[pm]
 
         if pm_range[0] < float(o_df['PM']) < pm_range[1]:
             return True
-        elif bypassfilter:
+        elif self.bypassfilter:
             return True
         else:
             return False
 
-    def plot_comp(self, prfs_d, sex_cf, scmp_cf,
-                  input_pm, output_pm, confidence_):
-        """
+    def plot_comp(self, sex_cf, scmp_cf, input_pm, output_pm, confidence_):
+        """ fixme support for multiple mags
 
-        :param prfs_d:
         :param sex_cf:
         :param scmp_cf:
         :param input_pm:
@@ -520,11 +515,11 @@ class PMPerformance:
         :param confidence_:
         :return:
         """
-        sextractor_folder = '{}/pm/{}'.format(prfs_d['plots_dir'], sex_cf)
+        sextractor_folder = '{}/pm/{}'.format(self.prfs_d['plots_dir'], sex_cf)
         if not path.exists(sextractor_folder):
             makedirs(sextractor_folder)
 
-        with PdfPages('{}/pm/{}/{}_{}_cmp.pdf'.format(prfs_d['plots_dir'],
+        with PdfPages('{}/pm/{}/{}_{}_cmp.pdf'.format(self.prfs_d['plots_dir'],
                                                       sex_cf, scmp_cf,
                                                       confidence_)) as pdf:
             fig = plt.figure(figsize=(16.53, 11.69), dpi=100)
@@ -607,8 +602,7 @@ class SextractorPerformance:
         for d in range(1, 5, 1):
             cat_name = '{}/Cat_20-21_d{}'.format(self.prfs_d['input_ref'], d)
             input_ssos_d[d] = '{}.dat'.format(cat_name)
-        input_ssos_d = Create_regions(input_ssos_d,
-                                      self.prfs_d).check_luca(True, True)
+        input_ssos_d = Create_regions(input_ssos_d).check_luca(True, True)
 
         # Creates a DataFrame from an input dictionary
         input_ssos_l = []
@@ -623,8 +617,7 @@ class SextractorPerformance:
         for d in range(1, 5, 1):
             cat_name = '{}/Cat_20-21_d{}'.format(self.prfs_d['input_ref'], d)
             input_stars_d[d] = '{}.dat'.format(cat_name)
-        input_stars_d = Create_regions(input_stars_d,
-                                       self.prfs_d).check_stars(True, True)
+        input_stars_d = Create_regions(input_stars_d).check_stars(True, True)
 
         # Creates a DataFrame from an input dictionary
         input_stars_l = []
@@ -639,9 +632,8 @@ class SextractorPerformance:
         for d in range(1, 5, 1):
             cat_name = '{}/Cat_20-21_d{}'.format(self.prfs_d['input_ref'], d)
             input_galaxies_d[d] = '{}.dat'.format(cat_name)
-        input_galaxies_d = Create_regions(input_galaxies_d,
-                                          self.prfs_d).check_galaxies(True,
-                                                                      True)
+        input_galaxies_d = Create_regions(input_galaxies_d).check_galaxies(True,
+                                                                           True)
 
         # Creates a DataFrame from an input dictionary
         input_galaxies_l = []
@@ -829,12 +821,7 @@ class ScampPerformanceSSOs:
             # Gets associated data in input catalog
             cat = i_df[i_df['source'].isin([source_])]
             # Creates lists for each source
-            tmp_d = {'boolean_l': [], 'catalog': [], 'source': [],
-                     'epoch': [], 'i_pm': [], 'i_pm_alpha': [],
-                     'i_pm_delta': [], 'i_alpha': [], 'i_delta': [],
-                     'o_pm_alpha': [], 'o_pm_delta': [], 'o_alpha': [],
-                     'o_delta': [], 'error_a': [], 'error_b': []}
-
+            tmp_d = self.redo_tmp_d()
             i_pm = 0.0  # Raises a warning if variable pm it's not created
             # Iterate over each detection of each source
             for i, row in enumerate(cat.itertuples(), 1):
@@ -843,7 +830,7 @@ class ScampPerformanceSSOs:
                 # dither_ = row.dither_values
                 catalog_n = row.catalog
                 i_pm = row.pm_values
-                i_pm_alpha = row.pm_alpha
+                i_pm_alpha = row.pm_alpha  # this is wrong! fixme
                 i_pm_delta = row.pm_delta
                 i_alpha = row.alpha_j2000
                 i_delta = row.delta_j2000
@@ -929,7 +916,7 @@ class ScampPerformanceSSOs:
         :return:
         """
         # Set True to plot input and output data
-        both = True
+        both = False
 
         if both:
             mode = 'io'
@@ -939,6 +926,8 @@ class ScampPerformanceSSOs:
                   'o_alpha': tmp_d['o_alpha'], 'o_delta': tmp_d['o_delta'],
                   'o_pm_alpha': tmp_d['o_pm_alpha'],
                   'o_pm_delta': tmp_d['o_pm_delta'],
+                  'o_pm_alpha_err': tmp_d['o_pm_alpha_err'],
+                  'o_pm_delta_err': tmp_d['o_pm_delta_err'],
                   'error_a': tmp_d['error_a'], 'error_b': tmp_d['error_b'],
                   'epoch': tmp_d['epoch'], 'i_pm': tmp_d['i_pm']}
             plot = PlotBothConfidence(self.output_path, tmp_d['source'][0],
@@ -953,6 +942,8 @@ class ScampPerformanceSSOs:
                      'i_pm_delta': tmp_d['i_pm_delta'],
                      'o_pm_alpha': tmp_d['o_pm_alpha'],
                      'o_pm_delta': tmp_d['o_pm_delta'],
+                     'o_pm_alpha_err': tmp_d['o_pm_alpha_err'],
+                     'o_pm_delta_err': tmp_d['o_pm_delta_err'],
                      'epoch': tmp_d['epoch']}
             plot = PlotConfidence(self.output_path, tmp_d['source'][0], pm,
                                   mode, fitted_d, dict_)
@@ -1093,6 +1084,21 @@ class ScampPerformanceSSOs:
         df = concat([alpha_df, delta_df], axis=1)
         df.to_csv('input_sources.reg')
 
+    def redo_tmp_d(self):
+        """
+
+        :return:
+        """
+        tmp_d = {'boolean_l': [], 'catalog': [], 'source': [],
+                 'epoch': [], 'i_pm': [], 'i_pm_alpha': [],
+                 'i_pm_delta': [], 'i_alpha': [], 'i_delta': [],
+                 'o_pm_alpha': [], 'o_pm_delta': [],
+                 'o_pm_alpha_err': [], 'o_pm_delta_err': [],
+                 'o_alpha': [],
+                 'o_delta': [], 'error_a': [], 'error_b': []}
+
+        return tmp_d
+
     def populate_tmp_dict(self, catalog_n, i_pm, i_pm_alpha, i_pm_delta,
                           i_alpha, i_delta, o_df, tmp_d):
         """
@@ -1121,10 +1127,16 @@ class ScampPerformanceSSOs:
         tmp_d['i_pm_delta'].append(i_pm_delta)
         tmp_d['i_alpha'].append(i_alpha)
         tmp_d['i_delta'].append(i_delta)
+        # Extracted proper motions
         pm_alpha = float(o_df['PMALPHA'])
         tmp_d['o_pm_alpha'].append(pm_alpha)
         pm_delta = float(o_df['PMDELTA'])
         tmp_d['o_pm_delta'].append(pm_delta)
+        # Errors related to proper motion
+        pm_alpha_error = float(o_df['PMALPHAERR'])
+        tmp_d['o_pm_alpha_err'].append(pm_alpha_error)
+        pm_delta_error = float(o_df['PMDELTAERR'])
+        tmp_d['o_pm_delta_err'].append(pm_delta_error)
         o_alpha = float(o_df['ALPHA_J2000'].iloc[0])
         tmp_d['o_alpha'].append(o_alpha)
         o_delta = float(o_df['DELTA_J2000'].iloc[0])
@@ -1162,7 +1174,7 @@ class ScampPerformanceStars:
         for d in range(1, 5, 1):
             cat_name = '{}/Cat_20-21_d{}'.format(self.prfs_d['input_ref'], d)
             input_d[d] = '{}.dat'.format(cat_name)
-        input_d = Create_regions(input_d, self.prfs_d).check_luca(True, True)
+        input_d = Create_regions(input_d).check_luca(True, True)
 
         # Creates a DataFrame from an input dictionary
         input_l = []

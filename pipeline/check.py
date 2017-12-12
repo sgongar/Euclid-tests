@@ -101,8 +101,8 @@ class Check:
             self.scamp_performance_stars()
         elif argv[1] == '-pm_performance':
             self.pm_performance()
-        # elif argv[1] == '-stats_performance':
-        #     self.stats_performance()
+        elif argv[1] == '-stats_performance':
+            self.stats_performance()
         elif argv[1] == '-help':
             pipeline_help(self.logger)
         else:
@@ -445,8 +445,7 @@ class Check:
                     # Runs performance analysis.
                     for confidence_ in self.prfs_d['confidences']:
                         idx += 1
-                        stats_d = PMPerformance().check(self.logger,
-                                                        self.prfs_d, mag,
+                        stats_d = PMPerformance().check(self.logger, mag,
                                                         scmp_cf, sex_cf,
                                                         confidence_)
 
@@ -483,11 +482,22 @@ class Check:
                                                  conf[4])
 
                 # Runs performance analysis.
-                stats_d[idx] = StatsPerformance(self.prfs_d).error(self.logger,
-                                                                   mag, sex_cf)
+                stats_d[idx] = StatsPerformance().error(self.logger, mag,
+                                                        sex_cf)
                 idx += 1
 
-        stats_df = DataFrame(stats_d)
+        tmp_d = {'conf': [], 'm_a_stars': [], 'm_b_stars': [], 'm_a_gals': [],
+                 'm_b_gals': [], 'm_a_ssos': [], 'm_b_ssos': [],
+                 's_a_stars': [], 's_b_stars': [], 's_a_gals': [],
+                 's_b_gals': [], 's_a_ssos': [], 's_b_ssos': []}
+        for conf_key in stats_d.keys():
+            print('keys {}'.format(stats_d.keys()))
+            """
+            for value_key in stats_d[conf_key].keys():
+                for value in stats_d[conf_key][value_key]:
+                    tmp_d[value_key].append(value)
+            """
+        stats_df = DataFrame(tmp_d)
         stats_df.to_csv('std.csv')
 
         return True
