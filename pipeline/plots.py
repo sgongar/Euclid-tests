@@ -16,11 +16,15 @@ from math import modf
 
 from astropy import units
 from astropy.coordinates import Angle
+
 from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.dates as mdates
+import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
-from misc import significant_l
 import numpy as np
+from pyds9 import DS9
+
+from misc import significant_l, extract_settings
 
 
 __author__ = "Samuel Góngora García"
@@ -30,6 +34,58 @@ __version__ = "0.1"
 __maintainer__ = "Samuel Góngora García"
 __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
+
+
+def get_regions(input_fits, sex_cf, prfs_d, mag):
+    """
+
+    :param input_fits:
+    :param sex_cf:
+    :param prfs_d:
+    :param mag:
+    :return:
+    """
+    #
+    regions_dir = '{}/{}/CCDs/{}'.format(prfs_d['fits_dir'], mag, sex_cf)
+    regions_name = '{}.reg'.format(input_fits[-27:-5])
+    regions_file = '{}/{}'.format(regions_dir, regions_name)
+
+    return regions_file
+
+
+def image(input_fits, regions, alpha, delta, idx):
+    """
+
+    :param input_fits:
+    :param regions:
+    :param alpha:
+    :param delta:
+    :param idx:
+    :return:
+    """
+    d = DS9()
+    # Open file
+    open_file = 'file {}'.format(input_fits)
+    d.set(open_file)
+    # Changes scale
+    scale = 'scale zscale'
+    d.set(scale)
+    # Loads regions with format
+    d.set('regions load {}'.format(regions))
+    # Gets dir
+    # Saves image
+    pan_object = 'pan to {} {} wcs fk5 degree'.format(alpha, delta)
+    d.set(pan_object)
+    zoom_object = 'zoom to 4'
+    d.set(zoom_object)
+    save_image = 'saveimage png {}.png 100'.format(idx)
+    d.set(save_image)
+
+    img = mpimg.imread('{}.png'.format(idx))
+
+    # delete image
+
+    return img
 
 
 def create_labels(datetimes):
@@ -107,111 +163,7 @@ def create_x_ticks(epoch_seconds):
     return x_ticks
 
 
-def create_alpha_y_ticks(alpha_seconds, hour, minute):
-    """
-
-    :param alpha_seconds:
-    :param hour:
-    :param minute:
-    :return:
-    """
-    divisions = 4  #
-
-    # Gets the major step between ticks thought the difference
-    # between the maximum and the minimum value of alpha
-    difference = float(max(alpha_seconds)) - float(min(alpha_seconds))
-    major_stp = (difference / divisions)
-    #
-    major_stp = round_number(major_stp)
-
-    # In order to avoid too crowned lines divisions will be less if
-    # steps are little
-    if float(major_stp) == 0.0001:
-        divisions = 2
-    elif float(major_stp) < 0.0001:
-        divisions = 2
-    else:
-        divisions = 4
-    minor_stp = (float(major_stp) / divisions)
-
-    # Gets maximum decimal position of major step
-    decimals = int(str(major_stp)[::-1].find('.'))
-
-    # todo, document!
-    major_margin = major_stp * (divisions / 2)
-    initial_major_stp = round(min(alpha_seconds), decimals) - major_margin
-    final_major_stp = round(max(alpha_seconds), decimals) + major_margin
-    major_stps = np.arange(initial_major_stp, final_major_stp, major_stp)
-    # todo, document!
-    minor_margin = minor_stp * divisions
-    initial_minor_stp = round(min(alpha_seconds), decimals) - minor_margin
-    final_minor_stp = round(max(alpha_seconds), decimals) + minor_margin
-    minor_stps = np.arange(initial_minor_stp, final_minor_stp, minor_stp)
-
-    # Formats major steps for be readable by matplotlib axis
-    alpha_major_stps = []
-    for idx_stp, stp_ in enumerate(major_stps):
-        if float('{:.6f}'.format(stp_)) > 60.000000:
-            minute_ = minute + 1
-            # todo decimal aproximation should b automatically, not hardcoded
-            # from decimal import Decimal
-            # d = Decimal(str(major_stp))
-            # u_decimals_pos = d.as_tuple().exponent
-            # decimals_pos = u_decimals_pos + (u_decimals_pos * -2)
-            stp_ = '{:.6f}'.format(stp_)
-            second_ = float(stp_) - 60.0
-            second_ = '{:.6f}'.format(second_)
-            alpha_major_stps.append('{}:{}:{}'.format(hour, minute_, second_))
-        elif float('{:.6f}'.format(stp_)) == 60.000000:
-            minute_ = minute + 1
-            # todo decimal aproximation should b automatically, not hardcoded
-            # from decimal import Decimal
-            # d = Decimal(str(major_stp))
-            # u_decimals_pos = d.as_tuple().exponent
-            # decimals_pos = u_decimals_pos + (u_decimals_pos * -2)
-            stp_ = '{:.6f}'.format(stp_)
-            second_ = float(stp_) - 60.0
-            second_ = '{:.6f}'.format(second_)
-            alpha_major_stps.append('{}:{}:{}'.format(hour, minute_, second_))
-        elif float('{:.6f}'.format(stp_)) < 0.000000:
-            # todo implement backward number
-            pass
-        elif float('{:.6f}'.format(stp_)) < 60.000000:
-            minute_ = minute
-            second_ = stp_
-            alpha_major_stps.append('{}:{}:{}'.format(hour, minute_, second_))
-    # Formats minor steps
-    alpha_minor_stps = []
-    for idx_stp, stp_ in enumerate(minor_stps):
-        # According step value... todo
-        if stp_ > 60.0:
-            minute_ = minute + 1
-            stp_ = '{:.6f}'.format(stp_)
-            second_ = float(stp_) - 60.0
-            second_ = '{:.6f}'.format(second_)
-            alpha_minor_stps.append('{}:{}:{}'.format(hour, minute_, second_))
-        elif float('{:.1f}'.format(stp_)) == 60.0:
-            minute_ = minute + 1
-            second_ = 0.0
-            second_ = '{:.6f}'.format(second_)
-            alpha_minor_stps.append('{}:{}:{}'.format(hour, minute_, second_))
-        else:
-            minute_ = minute
-            second_ = '{:.6f}'.format(stp_)
-            alpha_minor_stps.append('{}:{}:{}'.format(hour, minute_, second_))
-
-    # Creates a list of datatime objects
-    # Sometimes, seconds are greater than 59, this values should be
-    # filter in a better way
-    major_t = [datetime.strptime(t, "%H:%M:%S.%f") for t in alpha_major_stps]
-    minor_t = [datetime.strptime(t, "%H:%M:%S.%f") for t in alpha_minor_stps]
-    y_ticks = {'major_t': major_t, 'minor_t': minor_t,
-               'major_s': major_stp, 'minor_s': minor_stp}
-
-    return y_ticks
-
-
-def create_delta_y_ticks(delta_seconds):
+def create_y_ticks(delta_seconds):
     """
     step = stp
 
@@ -250,7 +202,8 @@ def create_delta_y_ticks(delta_seconds):
 
 class PlotConfidence:
 
-    def __init__(self, output_path, source, pm, mode, fitted_d, tmp_d):
+    def __init__(self, output_path, source, pm, mode, fitted_d, tmp_d,
+                 fits, mag):
         """
 
         :param output_path:
@@ -261,30 +214,44 @@ class PlotConfidence:
         :param tmp_d: a dictionary ['alpha', 'delta',
                                     'error_a', 'error_b', 'epoch']
         """
+        self.prfs_d = extract_settings()
         self.output_path = output_path
         self.source = source
         self.pm = pm
         self.mode = mode  # Can be 'i' or 'o'
         self.fitted_d = fitted_d
         self.tmp_d = tmp_d
+        self.fits_files = fits
+        self.mag = mag
+        self.ccds = self.gets_ccd_names()
 
-        plot_size = [16.53, 11.69]
-        plot_dpi = 100
+        # Page size
+        self.plot_size = [16.53, 11.69]
+        self.plot_dpi = 100
 
-        self.plot(plot_size, plot_dpi)
+        self.plot()
 
-    def plot(self, plot_size, plot_dpi):
+    def gets_ccd_names(self):
         """
 
-        :param plot_size:
-        :param plot_dpi:
+        :return:
+        """
+        ccds = []
+        for ccd in self.fits_files:
+            ccds.append(ccd[-13:-5])
+
+        return ccds
+
+    def plot(self):
+        """
+
         :return:
         """
         pdf_name = '{}/{}_{}_{}.pdf'.format(self.output_path, self.source,
                                             self.pm, self.mode)
         with PdfPages(pdf_name) as pdf:
             # ALPHA PARAMETERS
-            fig = plt.figure(figsize=plot_size, dpi=plot_dpi)
+            fig = plt.figure(figsize=self.plot_size, dpi=self.plot_dpi)
             ax = fig.add_subplot(1, 1, 1)
             chi_squared = float("{0:.6f}".format(self.fitted_d['ra']))
             chi_squared_title = 'chi_squared: {}'.format(chi_squared)
@@ -352,12 +319,7 @@ class PlotConfidence:
             if len(list(set(tmp_minute))) != 1:
                 raise Exception
 
-            # Creates y ticks (major and minor ones)
-            # y_ticks = create_alpha_y_ticks(alpha_seconds, tmp_hour[0],
-            #                                tmp_minute[0])
-            # y_labels = create_labels(y_ticks['minor_t'])
-
-            y_ticks = create_delta_y_ticks(alpha_seconds)
+            y_alpha_ticks = create_y_ticks(alpha_seconds)
 
             # x-ticks assignation
             ax.set_xticks(x_ticks['major_t'], minor=False)
@@ -365,12 +327,12 @@ class PlotConfidence:
             # x-ticks labels
 
             # y-ticks assignation
-            ax.set_yticks(y_ticks['major_t'], minor=False)
-            ax.set_yticks(y_ticks['minor_t'], minor=True)
+            ax.set_yticks(y_alpha_ticks['major_t'], minor=False)
+            ax.set_yticks(y_alpha_ticks['minor_t'], minor=True)
             # y-ticks labels
-            empty_string_labels = [''] * len(y_ticks['major_t'])
+            empty_string_labels = [''] * len(y_alpha_ticks['major_t'])
             ax.set_yticklabels(empty_string_labels, minor=False)
-            ax.set_yticklabels(y_ticks['minor_t'], minor=True)
+            ax.set_yticklabels(y_alpha_ticks['minor_t'], minor=True)
 
             # Formats grids
             ax.grid(b=True, which='major', linestyle='-', linewidth=2)
@@ -403,9 +365,9 @@ class PlotConfidence:
             ax.set_xlabel(x_label)
             # y-axis
             y_label_ra = 'Right ascension (")\n'
-            major_s = y_ticks['major_s']
+            major_s = y_alpha_ticks['major_s']
             y_label_major_step = 'major step size {}"\n'.format(major_s)
-            minor_s = y_ticks['minor_s']
+            minor_s = y_alpha_ticks['minor_s']
             y_label_minor_step = 'minor step size {}"'.format(minor_s)
             ax.set_ylabel('{}{}{}'.format(y_label_ra, y_label_major_step,
                                           y_label_minor_step))
@@ -423,7 +385,6 @@ class PlotConfidence:
 
             # Saves the current figure in pdf file
             pdf.savefig()  # saves current figure
-            # plt.clf()  # clear current figure
             plt.close(fig)
 
             #
@@ -433,7 +394,7 @@ class PlotConfidence:
             # declination's output is showed in seconds (floats) instead
             # datetime objects.
             #
-            fig = plt.figure(figsize=plot_size, dpi=plot_dpi)
+            fig = plt.figure(figsize=self.plot_size, dpi=self.plot_dpi)
             ax = fig.add_subplot(1, 1, 1)
             chi_squared = float("{0:.6f}".format(self.fitted_d['dec']))
             chi_squared_title = 'chi_squared: {}'.format(chi_squared)
@@ -489,7 +450,7 @@ class PlotConfidence:
             if len(list(set(tmp_minute))) != 1:
                 raise Exception
 
-            y_ticks = create_delta_y_ticks(delta_seconds)
+            y_delta_ticks = create_y_ticks(delta_seconds)
 
             # x-ticks assignation
             ax.set_xticks(x_ticks['major_t'], minor=False)
@@ -497,14 +458,14 @@ class PlotConfidence:
             # x-ticks labels
 
             # y-ticks assignation
-            ax.set_yticks(y_ticks['major_t'], minor=False)
-            ax.set_yticks(y_ticks['minor_t'], minor=True)
+            ax.set_yticks(y_delta_ticks['major_t'], minor=False)
+            ax.set_yticks(y_delta_ticks['minor_t'], minor=True)
             # y-ticks labels
-            empty_string_labels = [''] * len(y_ticks['major_t'])
+            empty_string_labels = [''] * len(y_delta_ticks['major_t'])
             ax.set_yticklabels(empty_string_labels, minor=False)
             # Converts floats into strings
             # y_minor_ticks = [str(i) for i in y_minor_ticks]
-            ax.set_yticklabels(y_ticks['minor_t'], minor=True)
+            ax.set_yticklabels(y_delta_ticks['minor_t'], minor=True)
 
             # Formats grids
             ax.grid(b=True, which='major', linestyle='-', linewidth=2)
@@ -532,10 +493,11 @@ class PlotConfidence:
 
             # Label creation
             y_label_ra = 'Declination (")\n'
-            major_s = y_ticks['major_s']
+            major_s = y_delta_ticks['major_s']
             y_label_major_step = 'major step size {}"\n'.format(major_s)
-            minor_s = y_ticks['minor_s']
+            minor_s = y_delta_ticks['minor_s']
             y_label_minor_step = 'minor step size {}"'.format(minor_s)
+
             ax.set_ylabel('{}{}{}'.format(y_label_ra, y_label_major_step,
                                           y_label_minor_step))
 
@@ -548,8 +510,61 @@ class PlotConfidence:
             plt.draw()
 
             pdf.savefig()  # saves current figure
-            # plt.clf()  # clear current figure
             plt.close(fig)
+
+            #
+            # IMAGES
+            #
+
+            # Gets limits
+            alpha_center = 0
+            delta_center = 0
+            if len(self.tmp_d['alpha']) == 3:
+                alpha_center = self.tmp_d['alpha'][1]
+                delta_center = self.tmp_d['delta'][1]
+            elif len(self.tmp_d['alpha']) == 4:
+                alpha_sum = self.tmp_d['alpha'][1] + self.tmp_d['alpha'][2]
+                alpha_center = alpha_sum / 2
+                delta_sum = self.tmp_d['delta'][1] + self.tmp_d['delta'][2]
+                delta_center = delta_sum / 2
+
+            if alpha_center is 0 or delta_center is 0:
+                raise Exception
+
+            for idx in range(0, len(self.tmp_d['alpha']), 1):
+                # Get regions for desired fits file
+                print(self.fits_files)
+                regions_file = get_regions(self.fits_files[idx],
+                                           self.tmp_d['sex_cf'][0],
+                                           self.prfs_d, self.mag)
+
+                # Creates image
+                img = image(self.fits_files[idx], regions_file,
+                            alpha_center, delta_center, idx)
+
+                img = img[1:-50, :]
+
+                fig = plt.figure(figsize=self.plot_size, dpi=self.plot_dpi)
+                ax = fig.add_subplot(1, 1, 1)
+                plt.imshow(img)
+
+                labels = [item.get_text() for item in ax.get_xticklabels()]
+
+                empty_string_labels = [''] * len(labels)
+                ax.set_xticklabels(empty_string_labels)
+
+                labels = [item.get_text() for item in ax.get_yticklabels()]
+
+                empty_string_labels = [''] * len(labels)
+                ax.set_yticklabels(empty_string_labels)
+
+                ax.set_ylabel('right ascension')
+                ax.set_xlabel('declination')
+
+                pdf.savefig()
+                plt.close(fig)
+
+            # Loads images in pdf file
 
         return True
 
@@ -696,11 +711,9 @@ class PlotBothConfidence:
 
             if plot_flag:
                 alpha_seconds = i_alpha_seconds + o_alpha_seconds
-                hour = i_tmp_hour[0]
-                minute = i_tmp_minute[0]
 
                 # Creates y ticks (major and minor ones)
-                y_ticks = create_alpha_y_ticks(alpha_seconds, hour, minute)
+                y_ticks = create_y_ticks(alpha_seconds)
 
                 y_labels = create_labels(y_ticks['minor_t'])
 
@@ -887,7 +900,7 @@ class PlotBothConfidence:
                 plot_flag = False
 
             if plot_flag:
-                y_ticks = create_delta_y_ticks(delta_seconds)
+                y_ticks = create_y_ticks(delta_seconds)
 
                 # x-ticks assignation
                 ax.set_xticks(x_ticks['major_t'], minor=False)
@@ -961,5 +974,4 @@ class PlotBothConfidence:
 
                 pdf.savefig()  # saves current figure
 
-            plt.clf()  # clear current figure
             plt.close(fig)

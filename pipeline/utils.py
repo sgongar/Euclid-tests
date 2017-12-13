@@ -749,50 +749,46 @@ if __name__ == '__main__':
             save_data(logger, prfs_d, 1)
         elif argv[1] == '-check':
             check(logger, prfs_d)
-        elif argv[1] == '-PM':
-            check_pm = Check_PM(logger)
         elif argv[1] == '-full_cats':
             i_c1 = '/mnt/c/CCDs'
             i_c2 = '/full_10_1.2_5_1_20-21_1.cat'
             i_c = i_c1 + i_c2
 
             logger.debug('opening catalog file {}'.format(i_c))
-            Create_regions(i_c, prfs_d).full_cats()
+            Create_regions(i_c).full_cats()
         elif argv[1] == '-full_regions':
             i_c1 = '/mnt/c/CCDs'
             i_c2 = '/full_10_1.2_5_1_20-21_1.cat'
             i_c = i_c1 + i_c2
 
             logger.debug('opening catalog file {}'.format(i_c))
-            Create_regions(i_c, prfs_d).full_regions()
+            Create_regions(i_c).full_regions()
         elif argv[1] == '-regions':
             opts = [[0, 0], [0, 1], [0, 2], [1, 0], [1, 1],
                     [1, 2], [2, 0], [2, 1], [2, 2]]
             for opt_ in opts:
-                mag = '20-21'
+                mag = '21-22'
 
-                sex_folders = ['20_1.5_1.5_0.001_4', '20_1.5_1.5_0.01_4',
-                               '20_3_3_0.001_4', '20_3_3_0.01_4',
-                               '30_1.5_1.5_0.001_4', '30_1.5_1.5_0.01_4',
-                               '30_3_3_0.001_4', '30_3_3_0.01_4',
-                               '40_1.5_1.5_0.001_4', '40_1.5_1.5_0.01_4',
-                               '40_3_3_0.001_4', '40_3_3_0.01_4']
-                cat_dir = prfs_d['output_cats']
+                sex_folders = ['20_1.5_1.5_0.01_4', '20_3_3_0.01_4',
+                               '30_1.5_1.5_0.01_4', '30_3_3_0.01_4',
+                               '40_1.5_1.5_0.01_4', '40_3_3_0.01_4']
+                cat_dir = prfs_d['fits_dir']
                 for folder_ in sex_folders:
                     for d in range(1, 5, 1):
-                        i_c = '{}/{}/mag_{}_CCD_x{}_y{}_d{}.cat'.format(cat_dir,
-                                                                        folder_,
-                                                                        mag,
-                                                                        opt_[0],
-                                                                        opt_[1], d)
-                        Create_regions(i_c, prfs_d).fits()
+                        cat_name = 'mag_{}_CCD_x{}_y{}_d{}.cat'.format(mag,
+                                                                       opt_[0],
+                                                                       opt_[1],
+                                                                       d)
+                        i_c = '{}/{}/CCDs/{}/{}'.format(cat_dir, mag, folder_,
+                                                        cat_name)
+                        Create_regions(i_c).fits()
                         logger.debug('opening catalog file {}'.format(i_c))
         elif argv[1] == '-luca_check':
             input_d = {}
             for d in range(1, 5, 1):
                 input_d[d] = '{}/Cat_20-21_d{}.dat'.format(prfs_d['input_ref'],
                                                            d)
-            Create_regions(input_d, prfs_d).check_luca(True, True)
+            Create_regions(input_d).check_luca(True, True)
         elif argv[1] == '-modify':
             list_1, list_2 = modify_table(logger, prfs_d)
         elif argv[1] == '-input':
