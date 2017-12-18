@@ -9,13 +9,14 @@ Todo:
 """
 
 from collections import Counter
-from math import hypot
-from numpy import isclose
 from os import listdir, getcwd, path, makedirs
 
+from astropy.io import fits
+from astropy.table import Table
+from numpy import sqrt
 from pandas import concat, DataFrame, read_csv
 
-from misc import extract_settings, speeds_range
+from misc import extract_settings, speeds_range, all_same
 
 __author__ = "Samuel Góngora García"
 __copyright__ = "Copyright 2017"
@@ -26,97 +27,126 @@ __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
 
 
+def search(o_cat, catalog_n, i_alpha, i_delta):
+    """
+
+    :param o_cat:
+    :param i_alpha:
+    :param i_delta:
+    :return:
+    """
+    tolerance = 0.0001
+
+    o_df = o_cat[o_cat['catalog'].isin([catalog_n])]
+    o_df = o_df[o_df['alpha_j2000'] + tolerance > i_alpha]
+    o_df = o_df[i_alpha > o_df['alpha_j2000'] - tolerance]
+    o_df = o_df[o_df['delta_j2000'] + tolerance > i_delta]
+    o_df = o_df[i_delta > o_df['delta_j2000'] - tolerance]
+
+    return o_df
+
+
+def gets_speed(pm, speeds):
+    """
+
+    :param pm:
+    :param speeds:
+    :return:
+    """
+    output_pm = 0.0
+
+    for key_ in speeds.keys():
+        if speeds[key_][1] > pm > speeds[key_][0]:
+            output_pm = float(key_)
+
+    return output_pm
+
+
 class ExtractStats:
 
-    def __init__(self, logger, mag, scmp_d, f_conf, filt):
+    def __init__(self, logger, mag, sex_cf, sex_d, scmp_cf, scmp_d):
         """
 
-        @param logger:
-        @param mag:
-        @param scmp_d:
-        @param f_conf:
-        @filt: a boolean variable
-
+        :param logger:
+        :param mag:
+        :param sex_cf:
+        :param scmp_cf:
         """
-        prfs_d = extract_settings()
+        self.prfs_d = extract_settings()
 
-        (df_filter, df_input,
-         df_output, valid_sources) = self.extract_stats(logger, prfs_d,
-                                                        mag, scmp_d, f_conf)
+        self.mag = mag
+        self.sex_cf = sex_cf
+        self.sex_d = sex_d
+        self.scmp_cf = scmp_cf
+        self.scmp_d = scmp_d
 
-        if filt:
-            self.filtered_stats(prfs_d, df_filter, df_input,
-                                df_output, valid_sources, scmp_d, mag, f_conf)
-        else:
-            self.total_stats()
+        self.logger = logger
 
-    def extract_stats(self, logger, prfs_d, mag, scmp_d, f_conf):
+        (df_filter, df_input, valid_sources,
+         data_full, data_merged) = self.extract_stats()
+
+        self.filter_stats(df_filter, df_input, valid_sources,
+                          data_full, data_merged)
+
+    def extract_stats(self):
         """
 
         @param logger: a logger object.
-        @param prfs_d: a dictionary with all script parameters.
         @param mag: magnitude gap to be analysed.
-        @param scmp_d: a dictionary with sextractor/scamp parameters.
 
         @return stats_d:
         """
         # Gets all sources detected by scamp after filtering process
         # Opens csv file
-        filtered_cat_n = '{}/filt_{}_{}__5.csv'.format(prfs_d['results_dir'],
-                                                       f_conf, mag)
-        logger.debug('reading filtered catalog {}'.format(filtered_cat_n))
-        df_filter = read_csv(filtered_cat_n, index_col=0)
+        filt_cat_dir = '{}/{}/{}/{}'.format(self.prfs_d['filter_dir'], self.mag,
+                                            self.sex_cf, self.scmp_cf)
+        filt_cat_name = 'filt_{}_{}_2.csv'.format(self.scmp_cf, self.mag)
+        filt_cat_loc = '{}/{}'.format(filt_cat_dir, filt_cat_name)
+        self.logger.debug('reading filtered catalog {}'.format(filt_cat_loc))
+
+        df_filter = read_csv(filt_cat_loc, index_col=0)
         df_filter = concat(g for _, g in df_filter.groupby("SOURCE_NUMBER")
-                           if len(g) >= int(prfs_d['detections']))
+                           if len(g) >= int(self.prfs_d['detections']))
 
         # Gets all unique sources after filter
-        logger.debug('getting unique sources from post-filter scamp catalog')
+        self.logger.debug('getting unique sources from post-filter scamp catalog')
         valid_sources = list(set(df_filter['SOURCE_NUMBER'].tolist()))
 
         # Gets all sources created from Luca's
-        df_input = read_csv('{}_{}_ssos.csv'.format(f_conf, mag), index_col=0)
+        df_input = read_csv('input_sources.csv', index_col=0)
 
-        # Gets all sources detected by sextractor and scamp
-        # This is useful for know how many objects could be
-        # detected without filter TODO Check!
-        df_output = read_csv('{}_{}_sso_cat.csv'.format(f_conf, mag),
-                             index_col=0)
+        results_dir = '{}/{}/{}/{}'.format(self.prfs_d['catalogs_dir'],
+                                           self.mag, self.sex_cf, self.scmp_cf)
+        full_n = '{}/full_{}_{}_1.cat'.format(results_dir, self.scmp_cf,
+                                              self.mag)
+        full_cat = fits.open(full_n)
+        data_full = Table(full_cat[2].data).to_pandas()
+        data_full = concat(g for _, g in data_full.groupby('SOURCE_NUMBER')
+                           if len(g) >= 3)
+        data_full = data_full.reset_index(drop=True)
 
-        # TODO Check if it's necessary!
-        # Gets all sources detected by scamp before filtering process.
-        # Useful for obtained scamp calculated proper motion.
-        # merged_n = '{}/merged_{}_1.cat'.format(prfs_d['results_dir'], f_conf)
-        # merged_cat = fits.open(merged_n)
-        # data_merged = Table(merged_cat[2].data).to_pandas()
+        merged_n = '{}/merged_{}_{}_1.cat'.format(results_dir, self.scmp_cf,
+                                                  self.mag)
+        merged_cat = fits.open(merged_n)
+        data_merged = Table(merged_cat[2].data).to_pandas()
 
-        return (df_filter, df_input, df_output, valid_sources)
+        return df_filter, df_input, valid_sources, data_full, data_merged
 
-    def filtered_stats(self, prfs_d, df_filter, df_input, df_output,
-                       valid_sources, scmp_d, mag, f_conf):
+    def filter_stats(self, df_filter, df_input, valid_sources,
+                     data_full, data_merged):
         """
 
-        @param prfs_d:
-        @param df_filter: a DataFrame
-        @param df_input:
-        @param df_output:
-        @param valid_sources: a list with all sources found by sextractor and
-        scamp and filtered.
-        @param scmp_d:
-        @param mag:
-        @param f_conf:
-
-        Important parameters:
-        @df_filter: a DataFrame object which contains all ssos filtered.
-        @df_input: a DataFrame object which contains all ssos created.
-        @df_output: a DataFrame object which contains all ssos detected by
-                    sextractor and scamp. These sources were checked against
-                    positions obtained from ssos.csv.
+        :param df_filter:
+        :param df_input:
+        :param valid_sources:
+        :return:
         """
         # Confidence values to be tested
-        confidence_list = prfs_d['confidences']
+        confidence_list = self.prfs_d['confidences']
         # Created dictionaries for all outputs
-        filt_d, pm_d, stats_d = create_dicts()
+        filt_d, pm_d, stats_d = create_dicts()  # fixme check dictionaries vars
 
+        confidence_list = [100]
         # Looks for sources one by one in sextractor/scamp catalog
         # Try to find if they're an SSO or not
         # source_ number refered to custom catalog, not sextractor/scamp one
@@ -127,356 +157,140 @@ class ExtractStats:
             # and their frequencies
             total_pms = self.speeds_distribution(df_input)
             total_values = dict(Counter(total_pms))
+
             # values is a list with all different proper motions availables
             values = sorted(total_values.keys())
+
             # Harcoded TODO
-            speeds = speeds_range(prfs_d, confidence_)
-            empty_value = 0
+            speeds = speeds_range(self.prfs_d, confidence_)
+
+            empty_value = 0.0
             for value_ in values:
                 stats_d['confidence'].append(confidence_)
-                stats_d['position_maxerr'].append(scmp_d['position_maxerr'])
-                stats_d['posangle_maxerr'].append(scmp_d['posangle_maxerr'])
-                stats_d['pixscale_maxerr'].append(scmp_d['pixscale_maxerr'])
-                stats_d['cross_id'].append(scmp_d['crossid_radius'])
-                stats_d['mag'].append(mag)
+                position_maxerr = self.scmp_d['position_maxerr']
+                stats_d['position_maxerr'].append(position_maxerr)
+                posangle_maxerr = self.scmp_d['posangle_maxerr']
+                stats_d['posangle_maxerr'].append(posangle_maxerr)
+                pixscale_maxerr = self.scmp_d['pixscale_maxerr']
+                stats_d['pixscale_maxerr'].append(pixscale_maxerr)
+                crossid_radius = self.scmp_d['crossid_radius']
+                deblending = self.sex_d['deblending']
+                stats_d['deblending'].append(deblending)
+                mincount = self.sex_d['mincount']
+                stats_d['mincount'].append(mincount)
+                threshold = self.sex_d['threshold']
+                stats_d['threshold'].append(threshold)
+                area = self.sex_d['area']
+                stats_d['area'].append(area)
+                stats_d['cross_id'].append(crossid_radius)
+                stats_d['mag'].append(self.mag)
                 stats_d['pm'].append(value_)
-                stats_d['input_number'].append(total_values[value_])
-                stats_d['total_filter'].append(empty_value)
-                stats_d['right_filter'].append(empty_value)
-                # stats_d['f_dr'].append(empty_value)
-                # stats_d['f_com'].append(empty_value)
+                stats_d['N_true'].append(total_values[value_])
+                stats_d['N_meas'].append(empty_value)
+                stats_d['N_se'].append(empty_value)
+                stats_d['N_meas-N_se'].append(empty_value)
+                stats_d['f_dr'].append(empty_value)
+                stats_d['f_pur'].append(empty_value)
+                stats_d['f_com'].append(empty_value)
 
-            # valid_sources comes from post-filter
-            for i, source_ in enumerate(valid_sources):
-                # Source presents at filter's output
-                str_source = str(source_)
-                int_source = int(source_)
+            sources = dict(Counter(df_filter['SOURCE_NUMBER'].tolist()))
+            sources = sources.keys()
 
-                # A ver, en df_output tengo las fuentes de entrada asociadas a
-                # las fuentes de salida. Asi que busco si la source de mi
-                # estudio se encuentra alli
-                # TODO Change name at input file!!
-                d_o = df_output[df_output['scamp_source_number'].isin([str_source])]
-                # If it's empty there is not a real SSO in post-filter scamp source
-                # so this sources goes to total sources but not to real ones
+            # Mira a todas las fuentes
+            for source_ in sources:
+                tmp_flag = []
+                tmp_pm_in = []
+                # Saca los datos del catalogo para cada objeto
+                o_source = data_merged[data_merged['SOURCE_NUMBER'].isin([source_])]
+                o_pm_alpha = float(o_source['PMALPHA_J2000']) / 8.75e6
+                o_pm_delta = float(o_source['PMDELTA_J2000']) / 8.75e6
 
-                # Source is a real SSO
-                # Obtengo la velocidad que he obtenido del catalogo post-filter
-                d_f = df_filter[df_filter['SOURCE_NUMBER'].isin([int_source])]
-                pm_output = float(d_f['PM'].iloc[0])
-                # y el valor de la fuente segun el catalogo de luca
+                # Saca el proper motion de cada objeto
+                o_pm = sqrt(o_pm_alpha ** 2 + o_pm_delta ** 2)
+                o_pm_norm = gets_speed(o_pm, speeds)
 
-                if d_o.empty is not True:
-                    for ccd_ in range(0, 3, 1):
-                        position_maxerr = scmp_d['position_maxerr']
-                        pm_d['position_maxerr'].append(position_maxerr)
-                        posangle_maxerr = scmp_d['posangle_maxerr']
-                        pm_d['posangle_maxerr'].append(posangle_maxerr)
-                        pixscale_maxerr = scmp_d['pixscale_maxerr']
-                        pm_d['pixscale_maxerr'].append(pixscale_maxerr)
-                        crossid_radius = scmp_d['crossid_radius']
-                        pm_d['cross_id'].append(crossid_radius)
-                        pm_d['mag'].append(mag)
-
-                        # Source values
-                        pm_d['source_scamp'].append(int_source)
-                        luca_source = int(d_o['sources'].iloc[0])
-                        pm_d['source_luca'].append(luca_source)
-
-                        # Obtengo la velocidad asociada
-                        # Para ello utilizo el catalogo ssos.csv
-                        d_i = df_input[df_input['source'].isin([luca_source])]
-                        alpha_source = float(d_i['alpha_j2000'].iloc[ccd_])
-                        pm_d['alpha_source'].append(alpha_source)
-                        delta_source = float(d_i['delta_j2000'].iloc[ccd_])
-                        pm_d['delta_source'].append(delta_source)
-
-                        # pm_input, pm_output
-                        pm_input = float(d_i['pm_values'].iloc[0])
-                        pm_d['pm_input'].append(pm_input)
-                        pm_d['pm_output'].append(pm_output)
-
-                        # alpha, delta, present at filter output
-                        alpha_detected = float(d_f['ALPHA_J2000'].iloc[ccd_])
-                        pm_d['alpha_detected'].append(alpha_detected)
-                        delta_detected = float(d_f['DELTA_J2000'].iloc[ccd_])
-                        pm_d['delta_detected'].append(delta_detected)
-
-                        # Difference between input/output
-                        alpha_difference = alpha_source - alpha_detected
-                        alpha_difference = alpha_difference * 3600  # to secs
-                        pm_d['alpha_difference'].append(alpha_difference)
-                        delta_difference = delta_source - delta_detected
-                        delta_difference = delta_difference * 3600  # to secs
-                        pm_d['delta_difference'].append(delta_difference)
-                        total_difference = hypot(alpha_difference,
-                                                 delta_difference)
-                        pm_d['total_difference'].append(total_difference)
-
-                        ccd = d_i['CCD'].iloc[ccd_]
-                        pm_d['CCD'].append(ccd)
-                        dither = d_i['dither_values'].iloc[ccd_]
-                        pm_d['dither'].append(dither)
-
-                    # Once proper motions are obtained dispersion should be
-                    # calculated
-                    if pm_input < pm_output:
-                        dispersion = (pm_output / pm_input) * 100
-                    elif pm_input > pm_output:
-                        dispersion = (pm_output / pm_input) * 100
-
-                    for ccd_ in range(0, 3, 1):
-                        pm_d['confidence'].append(confidence_)
-                        pm_d['dispersion'].append(dispersion)
-
-                    # If dispersion is lower than confidence the SSO is right
-                    if isclose(dispersion, 100, atol=confidence_):
-                        for ccd_ in range(0, 3, 1):
-                            pm_d['flag_dispersion'].append(False)
-                        idx = stats_d['pm'].index(pm_input)
-                        idx = idx + (12 * confidence_list.index(confidence_))
-                        stats_d['right_filter'][idx] += 1
-                        stats_d['total_filter'][idx] += 1
-                    # else the object is process as a false positive
+                # Saca el catalog, alpha y delta para cada instante del objeto
+                # df_source = data_full[data_full['SOURCE_NUMBER'].isin([source_])]
+                df_source = df_filter[df_filter['SOURCE_NUMBER'].isin([source_])]
+                for idx, row in df_source.iterrows():
+                    catalog_n = int(row.CATALOG_NUMBER)
+                    # Saca el alpha y el delta de cada objeto
+                    alpha = float(row.ALPHA_J2000)
+                    delta = float(row.DELTA_J2000)
+                    # Busca si el objeto es un sso o no
+                    i_df = search(df_input, catalog_n, alpha, delta)
+                    if i_df.empty is not True:
+                        tmp_flag.append('True')
+                        i_pm = float(i_df['pm_values'].iloc[0])
+                        tmp_pm_in.append(i_pm)
                     else:
-                        for ccd_ in range(0, 3, 1):
-                            pm_d['flag_dispersion'].append(True)
-                        # TODO As these lines are equal to next ones,
-                        # a new function should be created?
-                        # There is a "null" pm for cases that cannot be
-                        # organizados
-                        pm_normalized = 0
-                        for key_ in speeds.keys():
-                            # print "fuera", type(speeds[key_][0]), pm_output
-                            # print "fuera_2", speeds[key_][0], speeds[key_][1]
-                            if speeds[key_][0] < pm_output < speeds[key_][1]:
-                                pm_normalized = key_
-                                # print "dentro", pm_normalized, key_
+                        tmp_flag.append('False')
 
-                        if pm_normalized is not 0:
-                            idx = stats_d['pm'].index(pm_normalized)
-                            # idx_tmp should be changing across results
-                            idx_tmp = 12 * confidence_list.index(confidence_)
-                            idx = idx + idx_tmp
-                            stats_d['total_filter'][idx] += 1
-
-                elif d_o.empty is True:
-                    # Source is not an SSO
-                    # Obten la velocidad que te dio para ver donde lo metes
-                    # de errores vamos
-                    # There is a "null" pm for cases that cannot be
-                    # organizados
-                    pm_normalized = 0
-                    for key_ in speeds.keys():
-                        # print "fuera", type(speeds[key_][0]), pm_output
-                        # print "fuera_2", speeds[key_][0], speeds[key_][1]
-                        if speeds[key_][0] < pm_output < speeds[key_][1]:
-                            pm_normalized = key_
-                            # print "dentro", pm_normalized, key_
-
-                    if pm_normalized is not 0:
-                        idx = stats_d['pm'].index(pm_normalized)
-                        idx = idx + (12 * confidence_list.index(confidence_))
-                        stats_d['total_filter'][idx] += 1
-
-        for i, value_ in enumerate(stats_d['input_number']):
-            total_number = float(stats_d['total_filter'][i])
-            input_number = float(stats_d['input_number'][i])
-            right_number = float(stats_d['right_filter'][i])
-            f_dr = total_number / input_number
-            stats_d['f_dr'].append(f_dr)
-            f_com = right_number / input_number
-            stats_d['f_com'].append(f_com)
-
-        df_stats = DataFrame(stats_d)
-        df_stats.to_csv('stats/stats_{}.csv'.format(f_conf))
-
-        df_pm = DataFrame(pm_d)
-        df_pm.to_csv('stats/pm_{}.csv'.format(f_conf))
-
-    def total_stats(self, prfs_d, df_filter, df_input, df_output,
-                    valid_sources, scmp_d, mag, f_conf):
-        """
-
-        """
-        # Looks for sources one by one in sextractor/scamp catalog
-        # Try to find if they're an SSO or not
-        # source_ number refered to custom catalog, not sextractor/scamp one
-        # Confidence values, how pm can be away from real value
-        # Confidence values to be tested
-
-        confidence_list = prfs_d['confidences']
-        # Created dictionaries for all outputs
-        filt_d, pm_d, stats_d = create_dicts()
-
-        # Looks for sources one by one in sextractor/scamp catalog
-        # Try to find if they're an SSO or not
-        # source_ number refered to custom catalog, not sextractor/scamp one
-        # Confidence values, how pm can be away from real value
-        for confidence_ in confidence_list:
-            # total_pms is a list with all proper motions
-            # total values is a dict with all proper motions
-            # and their frequencies
-            total_pms = self.speeds_distribution(df_input)
-            total_values = dict(Counter(total_pms))
-            # values is a list with all different proper motions availables
-            values = sorted(total_values.keys())
-            speeds = speeds_range(prfs_d, confidence_)
-            empty_value = 0
-            for value_ in values:
-                stats_d['confidence'].append(confidence_)
-                stats_d['position_maxerr'].append(scmp_d['position_maxerr'])
-                stats_d['posangle_maxerr'].append(scmp_d['posangle_maxerr'])
-                stats_d['pixscale_maxerr'].append(scmp_d['pixscale_maxerr'])
-                stats_d['cross_id'].append(scmp_d['crossid_radius'])
-                stats_d['mag'].append(mag)
-                stats_d['pm'].append(value_)
-                stats_d['input_number'].append(total_values[value_])
-                stats_d['total_filter'].append(empty_value)
-                stats_d['right_filter'].append(empty_value)
-                # stats_d['f_dr'].append(empty_value)
-                # stats_d['f_com'].append(empty_value)
-
-            # valid_sources comes from post-filter
-            for i, source_ in enumerate(valid_sources):
-                # Source presents at filter's output
-                str_source = str(source_)
-                int_source = int(source_)
-
-                # A ver, en df_output tengo las fuentes de entrada asociadas a
-                # las fuentes de salida. Asi que busco si la source de mi
-                # estudio se encuentra alli
-                # TODO Change name at input file!!
-                d_o = df_output[df_output['scamp_source_number'].isin([str_source])]
-                # If it's empty there is not a real SSO in post-filter scamp source
-                # so this sources goes to total sources but not to real ones
-
-                # Source is a real SSO
-                # Obtengo la velocidad que he obtenido del catalogo post-filter
-                d_f = df_filter[df_filter['SOURCE_NUMBER'].isin([int_source])]
-                pm_output = float(d_f['PM'].iloc[0])
-                # y el valor de la fuente segun el catalogo de luca
-
-                if d_o.empty is not True:
-                    for ccd_ in range(0, 3, 1):
-                        position_maxerr = scmp_d['position_maxerr']
-                        pm_d['position_maxerr'].append(position_maxerr)
-                        posangle_maxerr = scmp_d['posangle_maxerr']
-                        pm_d['posangle_maxerr'].append(posangle_maxerr)
-                        pixscale_maxerr = scmp_d['pixscale_maxerr']
-                        pm_d['pixscale_maxerr'].append(pixscale_maxerr)
-                        crossid_radius = scmp_d['crossid_radius']
-                        pm_d['cross_id'].append(crossid_radius)
-                        pm_d['mag'].append(mag)
-
-                        # Source values
-                        pm_d['source_scamp'].append(int_source)
-                        luca_source = int(d_o['sources'].iloc[0])
-                        pm_d['source_luca'].append(luca_source)
-
-                        # Obtengo la velocidad asociada
-                        # Para ello utilizo el catalogo ssos.csv
-                        d_i = df_input[df_input['source'].isin([luca_source])]
-                        alpha_source = float(d_i['alpha_j2000'].iloc[ccd_])
-                        pm_d['alpha_source'].append(alpha_source)
-                        delta_source = float(d_i['delta_j2000'].iloc[ccd_])
-                        pm_d['delta_source'].append(delta_source)
-
-                        # pm_input, pm_output
-                        pm_input = float(d_i['pm_values'].iloc[0])
-                        pm_d['pm_input'].append(pm_input)
-                        pm_d['pm_output'].append(pm_output)
-
-                        # alpha, delta, present at filter output
-                        alpha_detected = float(d_f['ALPHA_J2000'].iloc[ccd_])
-                        pm_d['alpha_detected'].append(alpha_detected)
-                        delta_detected = float(d_f['DELTA_J2000'].iloc[ccd_])
-                        pm_d['delta_detected'].append(delta_detected)
-
-                        ccd = d_i['CCD'].iloc[ccd_]
-                        pm_d['CCD'].append(ccd)
-                        dither = d_i['dither_values'].iloc[ccd_]
-                        pm_d['dither'].append(dither)
-
-                    # Once proper motions are obtained dispersion should be
-                    # calculated
-                    if pm_input < pm_output:
-                        dispersion = pm_output / pm_input
-                    elif pm_input > pm_output:
-                        dispersion = pm_output / pm_input
-                    else:
-                        raise Exception  # TODO what value will be get?
-
-                    for ccd_ in range(0, 3, 1):
-                        pm_d['confidence'].append(confidence_)
-                        pm_d['dispersion'].append(dispersion)
-
-                    # If dispersion is lower than confidence the SSO is right
-                    if dispersion < confidence_:
-                        for ccd_ in range(0, 3, 1):
-                            pm_d['flag_dispersion'].append(False)
-                        idx = stats_d['pm'].index(pm_input)
-                        idx = idx + (12 * confidence_list.index(confidence_))
-                        stats_d['right_filter'][idx] += 1
-                        stats_d['total_filter'][idx] += 1
-                    # else the object is process as a false positive
-                    else:
-                        for ccd_ in range(0, 3, 1):
-                            pm_d['flag_dispersion'].append(True)
-                        # TODO As these lines are equal to next ones,
-                        # a new function should be created?
-                        # There is a "null" pm for cases that cannot be
-                        # organizados
-                        pm_normalized = 0
-                        for key_ in speeds.keys():
-                            # print "fuera", type(speeds[key_][0]), pm_output
-                            # print "fuera_2", speeds[key_][0], speeds[key_][1]
-                            if speeds[key_][0] < pm_output < speeds[key_][1]:
-                                pm_normalized = key_
-                                # print "dentro", pm_normalized, key_
-
-                        if pm_normalized is not 0:
-                            idx = stats_d['pm'].index(pm_normalized)
-                            # idx_tmp should be changing across results
-                            idx_tmp = 12 * confidence_list.index(confidence_)
-                            idx = idx + idx_tmp
-                            stats_d['total_filter'][idx] += 1
-
-                elif d_o.empty is True:
-                    # Source is not an SSO
-                    # Obten la velocidad que te dio para ver donde lo metes
-                    # de errores vamos
-                    # There is a "null" pm for cases that cannot be
-                    # organizados
-                    pm_normalized = 0
-                    for key_ in speeds.keys():
-                        # print "fuera", type(speeds[key_][0]), pm_output
-                        # print "fuera_2", speeds[key_][0], speeds[key_][1]
-                        if speeds[key_][0] < pm_output < speeds[key_][1]:
-                            pm_normalized = key_
-                            # print "dentro", pm_normalized, key_
-
-                    if pm_normalized is not 0:
-                        idx = stats_d['pm'].index(pm_normalized)
-                        idx = idx + (12 * confidence_list.index(confidence_))
-                        stats_d['total_filter'][idx] += 1
+                if o_pm_norm != 0.0:  # scamp has detected some movement
+                    idx = values.index(o_pm_norm)
+                    stats_d['N_meas'][idx] += 1
+                    # checks if dataframes for each dither are not empty
+                    flag_right, flag_number_right = all_same(tmp_flag)
+                    if flag_right:  # flag True - object is an SSO
+                        # checks if PM in all input dataframes are equal
+                        flag_pm, flag_number_pm = all_same(tmp_pm_in)
+                        if flag_pm:
+                            idx = values.index(o_pm_norm)  # gets idx for extracted pm
+                            if tmp_pm_in[0] == o_pm_norm:  # right pm
+                                stats_d['N_se'][idx] += 1
+                                flag = True
+                            else:  # wrong pm
+                                stats_d['N_meas-N_se'][idx] += 1
+                                flag = False
+                        else:
+                            pass  # fixme strange error, should raise something
+                    else:  # flag False - object is not an SSO
+                        idx = values.index(o_pm_norm) # gets idx for extracted pm
+                        stats_d['N_meas-N_se'][idx] += 1
                 else:
-                    raise Exception
+                    pass  # star!
 
-        for i, value_ in enumerate(stats_d['input_number']):
-            total_number = float(stats_d['total_filter'][i])
-            input_number = float(stats_d['input_number'][i])
-            right_number = float(stats_d['right_filter'][i])
-            f_dr = total_number / input_number
-            stats_d['f_dr'].append(f_dr)
-            f_com = right_number / input_number
-            stats_d['f_com'].append(f_com)
+            for idx in range(0, len(stats_d['f_dr']), 1):
+                n_meas = stats_d['N_meas'][idx]
+                n_se = stats_d['N_se'][idx]
+                n_true = stats_d['N_true'][idx]
+                try:
+                    f_dr = n_meas / n_true
+                    f_dr = float("{0:.2f}".format(f_dr))
+                    stats_d['f_dr'][idx] = f_dr
+                except ZeroDivisionError:
+                    stats_d['f_dr'][idx] = 'nan'
+                try:
+                    f_pur = n_se / n_meas
+                    f_pur = float("{0:.2f}".format(f_pur))
+                    stats_d['f_pur'][idx] = f_pur
+                except ZeroDivisionError:
+                    stats_d['f_pur'][idx] = 'nan'
+                try:
+                    f_com = n_se / n_true
+                    f_com = float("{0:.2f}".format(f_com))
+                    stats_d['f_com'][idx] = f_com
+                except ZeroDivisionError:
+                    stats_d['f_com'][idx] = 'nan'
+        # N_meas: number of all detected sources(including false detections)
+        # N_se: number of simulated sources recovered by source extraction
+        # N_true: number of simulated input sources
+        # f_dr: detection rate f_pur: purity
+        # f_com: completeness
 
-        df_stats = DataFrame(stats_d)
-        df_stats.to_csv('stats/stats_{}_.csv'.format(f_conf))
+        # f_dr = N_meas / N_true = (N_se + N_false) / N_true
+        # f_pur = N_se / N_meas = N_se / (N_se + N_false)
+        # f_com = f_dr * f_pur = N_se / N_true
 
-        df_pm = DataFrame(pm_d)
-        df_pm.to_csv('stats/pm_{}_.csv'.format(f_conf))
+        df_stats = DataFrame(stats_d,
+                             columns=['confidence', 'cross_id',
+                                      'pixscale_maxerr', 'position_maxerr',
+                                      'posangle_maxerr', 'deblending',
+                                      'mincount', 'threshold', 'area', 'mag',
+                                      'pm', 'N_true', 'N_se', 'N_meas-N_se',
+                                      'N_meas', 'f_dr', 'f_pur', 'f_com'])
+        df_stats.to_csv('stats_{}_{}_{}.csv'.format(self.sex_cf, self.scmp_cf,
+                                                    self.mag))
 
     def speeds_distribution(self, df_input):
         """
@@ -564,8 +378,9 @@ def create_dicts():
         pm_dict[key_] = []
 
     stats_keys = ['cross_id', 'pixscale_maxerr', 'posangle_maxerr',
-                  'position_maxerr', 'confidence', 'mag', 'pm', 'input_number',
-                  'total_filter', 'right_filter', 'f_dr', 'f_com']
+                  'position_maxerr', 'confidence', 'deblending', 'mincount',
+                  'threshold', 'area','mag', 'pm', 'N_true', 'N_meas', 'N_se',
+                  'N_meas-N_se', 'f_dr', 'f_pur', 'f_com']
     stats_dict = {}
     for key_ in stats_keys:
         stats_dict[key_] = []

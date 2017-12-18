@@ -290,7 +290,8 @@ class PlotConfidence:
                 tmp_hour.append(degree)
                 minute = int(dms[1])
                 tmp_minute.append(minute)
-                second = float("{0:.6f}".format(dms[2]))
+                # second = float("{0:.6f}".format(dms[2]))
+                second = float("{0:.6f}".format(a.arcsecond))
                 alpha_tmpstmp.append('{}:{}:{}'.format(degree, minute, second))
                 alpha_seconds.append('{}'.format(second))
 
@@ -433,7 +434,8 @@ class PlotConfidence:
                 tmp_degree.append(degree)
                 minute = int(dms[1])
                 tmp_minute.append(minute)
-                second = float("{0:.6f}".format(dms[2]))
+                # second = float("{0:.6f}".format(dms[2]))
+                second = float("{0:.6f}".format(a.arcsecond))
                 delta_tmpstmp.append('{}:{}.{}'.format(degree, minute, second))
                 delta_seconds.append('{}'.format(second))
 

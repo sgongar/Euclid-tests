@@ -255,10 +255,10 @@ def create_configurations(mode):
     :return:
     """
     if mode['type'] == 'sextractor':
-        l_deblending = [20, 30, 40]
+        l_deblending = [30]
         # l_deblending = [30]
         l_mincount = [0.01]
-        l_threshold = [1.5, 3]
+        l_threshold = [1.5]
         # l_threshold = [1.5]
 
         l_area = [4]
@@ -280,7 +280,7 @@ def create_configurations(mode):
         l_pixscale_maxerr = [1.2]  # [1.2] scale-factor
         # l_posangle_maxerr = [0.5, 2.5]
         l_posangle_maxerr = [0.5]  # [0.5, 2.5] degrees
-        l_position_maxerr = [0.16, 0.32, 0.64]
+        l_position_maxerr = [0.16]
         # l_position_maxerr = [0.16]
 
         configurations = []

@@ -27,7 +27,7 @@ from misc import setting_logger, extract_settings
 from misc import create_configurations, pipeline_help
 from misc import create_sextractor_dict, create_scamp_dict
 from pandas import DataFrame
-from performance import SextractorPerformance
+from sextractor_performance import SextractorPerformance
 from scamp_performance import ScampPerformanceSSOs, ScampPerformanceStars
 from performance import PMPerformance, StatsPerformance
 from sextractor_aux import Sextractor, CatalogCreation
@@ -91,8 +91,8 @@ class Check:
             self.filt()
         # elif argv[1] == '-check':
         #     self.check(self.scamp_confs, self.scamp_confs_n)
-        # elif argv[1] == '-stats':
-        #     self.stats(self.scamp_confs_n)
+        elif argv[1] == '-stats':
+            self.stats(self.scamp_confs_n)
         # elif argv[1] == '-error_performance':
         #     self.error_performance()
         elif argv[1] == '-scamp_performance':
@@ -250,7 +250,6 @@ class Check:
                     while True in active_check:
                         active_check = list([j.is_alive() for j in check_j])
                         pass
-                    # check_j = []
                 except IndexError:
                     print("finished")
 
@@ -269,38 +268,45 @@ class Check:
         :param total_confs:
         :return:
         """
+        confs = list(product(self.sex_confs, self.scamp_confs))
+        mag = '20-21'
 
-        for mag_ in self.prfs_d['mags']:
-            for idx_stats in range(0, total_confs, self.prfs_d['cores_number']):
-                try:
-                    stats_j = []
-                    idx_proc = 0
-                    while len(stats_j) < self.prfs_d['cores_number']:
-                        idx_scmp = idx_stats + idx_proc
-                        self.logger.debug('creating configuration parameters')
-                        scmp_d, scmp_cf = scamp_f_name(idx_scmp)
+        for idx in range(0, len(confs), self.prfs_d['cores_number']):
+            filt_j = []
+            while len(filt_j) < self.prfs_d['cores_number']:
+                # bypassconfidence
+                # Runs performance analysis.
+                i = idx + len(filt_j)
 
-                        f_name = 'stats_{}_{}.csv'.format(scmp_cf, mag_)
+                sex_cf = '{}_{}_{}_{}_{}'.format(confs[i][0][0], confs[i][0][2],
+                                                 confs[i][0][2],
+                                                 confs[i][0][1],
+                                                 confs[i][0][3])
+                scmp_cf = '{}_{}_{}_{}'.format(confs[i][1][0],
+                                               confs[i][1][1],
+                                               confs[i][1][2],
+                                               confs[i][1][3])
+                sex_d = {'deblending': confs[i][0][0],
+                         'mincount': confs[i][0][1],
+                         'threshold': confs[i][0][2],
+                         'area': confs[i][0][3]}
 
-                        filt = True
-                        if not path.isfile(f_name):
-                            stats_p = Process(target=ExtractStats,
-                                              args=(self.logger, mag_, scmp_d,
-                                                    scmp_cf, filt,))
-                            stats_j.append(stats_p)
-                            stats_p.start()
+                scmp_d = {'crossid_radius': confs[i][1][0],
+                          'pixscale_maxerr': confs[i][1][1],
+                          'posangle_maxerr': confs[i][1][2],
+                          'position_maxerr': confs[i][1][3]}
 
-                        idx_proc += 1
+                # f_name = 'stats_{}_{}.csv'.format(scmp_cf, mag)
+                filt_p = Process(target=ExtractStats,
+                                 args=(self.logger, mag, sex_cf, sex_d,
+                                       scmp_cf, scmp_d, ))
+                filt_j.append(filt_p)
+                filt_p.start()
 
-                    active_stats = list([j.is_alive() for j in stats_j])
-                    while True in active_stats:
-                        active_stats = list([j.is_alive() for j in stats_j])
-                        pass
-                except Exception as e:
-                    print(e)
-
-        if not merge_stats(self.logger, self.prfs_d):
-            raise Exception
+            active_filt = list([j.is_alive() for j in filt_j])
+            while True in active_filt:
+                active_filt = list([j.is_alive() for j in filt_j])
+                pass
 
         return True
 
