@@ -18,8 +18,37 @@ import statsmodels.api as sm
 
 from misc import all_same, extract_settings
 from misc import create_folder, speeds_range
-from plots import PlotConfidence
+from plots import PlotConfidence, PlotError
 from regions import Create_regions
+
+
+def redo_tmp_d():
+    """ Creates a dictionary
+
+    :return: tmp_d
+    """
+    tmp_d = {'sex_cf': [], 'scmp_cf': [], 'boolean_l': [], 'catalog': [],
+             'CCD': [], 'source': [], 'epoch': [], 'i_pm': [],
+             'i_pm_alpha': [], 'i_pm_delta': [], 'i_alpha': [],
+             'i_delta': [], 'o_pm_alpha': [], 'o_pm_delta': [],
+             'o_pm_alpha_err': [], 'o_pm_delta_err': [], 'o_alpha': [],
+             'o_delta': [], 'error_a': [], 'error_b': []}
+
+    return tmp_d
+
+
+def redo_err_d():
+    """ Creates a dictionary
+
+    :return: err_d
+    """
+    err_d = {'sex_cf': [], 'scmp_cf': [], 'catalog': [],
+             'CCD': [], 'source': [], 'scmp_source': [], 'i_pm': [],
+             'i_pm_alpha': [], 'i_pm_delta': [], 'o_pm': [], 'o_pm_alpha': [],
+             'o_pm_delta': [], 'i_alpha': [], 'i_delta': [], 'o_alpha': [],
+             'o_delta': []}
+
+    return err_d
 
 
 def check_star(catalog_n, i_df, o_alpha, o_delta):
@@ -31,7 +60,7 @@ def check_star(catalog_n, i_df, o_alpha, o_delta):
     :param o_delta:
     :return:
     """
-    tolerance = 0.0001
+    tolerance = 0.0005  # was 0.0001
 
     i_df = i_df[i_df['catalog'].isin([catalog_n])]
     i_df = i_df[i_df['alpha_j2000'] + tolerance > o_alpha]
@@ -88,7 +117,7 @@ def check_source(catalog_n, o_cat, i_alpha, i_delta):
     :param i_delta:
     :return:
     """
-    tolerance = 0.0001
+    tolerance = 0.0005  # 1.8 arcsecond
 
     o_df = o_cat[o_cat['CATALOG_NUMBER'].isin([catalog_n])]
     o_df = o_df[o_df['ALPHA_J2000'] + tolerance > i_alpha]
@@ -160,6 +189,7 @@ class ScampPerformanceSSOs:
 
         """
         self.bypassfilter = True
+        self.checkerror = True
         self.prfs_d = extract_settings()
 
         self.mag = mag
@@ -176,7 +206,7 @@ class ScampPerformanceSSOs:
         :return:
         """
         # For now any file is saved
-        save = True
+        save = False
 
         # Creates an input dictionary with all input sources
         logger.debug('checking performance for {} and {}'.format(self.scmp_cf,
@@ -200,12 +230,13 @@ class ScampPerformanceSSOs:
         i_df = concat(g for _, g in i_df.groupby('source')
                       if len(g) >= 3)
         i_df = i_df.reset_index(drop=True)
+        i_df.to_csv('inputs.csv')
 
         if save:
             self.create_regions_files(i_df)
 
         # Open particular file!
-        filt_n = 'filt_{}_{}_4.csv'.format(self.scmp_cf, self.mag)
+        filt_n = 'filt_{}_{}_2.csv'.format(self.scmp_cf, self.mag)
         filter_o_n = '{}/{}/{}/{}/{}'.format(self.prfs_d['filter_dir'],
                                              self.mag, self.sex_cf,
                                              self.scmp_cf, filt_n)
@@ -219,15 +250,17 @@ class ScampPerformanceSSOs:
         # Gets unique sources from input data
         unique_sources = list(set(i_df['source'].tolist()))
 
+        unique_sources = [24, 274, 284, 314]
         # Loops over input data
         for idx_source, source_ in enumerate(unique_sources):
             # Gets associated data in input catalog
-            cat = i_df[i_df['source'].isin([source_])]
+            cat_df = i_df[i_df['source'].isin([source_])]
             # Creates lists for each source
-            tmp_d = self.redo_tmp_d()
+            tmp_d = redo_tmp_d()
+            err_d = redo_err_d()
             i_pm = 0.0  # Raises a warning if variable pm it's not created
             # Iterate over each detection of each source
-            for i, row in enumerate(cat.itertuples(), 1):
+            for i, row in enumerate(cat_df.itertuples(), 1):
                 # source_ = row.source
                 # ccd_ = row.CCD
                 # dither_ = row.dither_values
@@ -246,13 +279,60 @@ class ScampPerformanceSSOs:
                 if o_df.empty is not True and o_df['PM'].size == 1:
                     pm_mask = self.pm_filter(o_df, i_pm, self.confidence_)
                     if pm_mask:
-                        # populate a dictionary of temporal data
-                        tmp_d = self.populate_tmp_dict(catalog_n, i_pm,
-                                                       i_pm_alpha, i_pm_delta,
-                                                       i_alpha, i_delta,
-                                                       o_df, tmp_d)
+                        if self.checkerror:
+                            scmp_source = float(o_df['SOURCE_NUMBER'].iloc[0])
+                            o_alpha = float(o_df['ALPHA_J2000'].iloc[0])
+                            o_delta = float(o_df['DELTA_J2000'].iloc[0])
+                            o_pm = float(o_df['PM'].iloc[0])
+                            o_pm_alpha = float(o_df['PMALPHA'].iloc[0])
+                            o_pm_delta = float(o_df['PMDELTA'].iloc[0])
+                            print('o_alpha {}'.format(o_alpha))
+                            print('o_delta {}'.format(o_delta))
+                            err_d = self.populate_err_dict(catalog_n, i_pm,
+                                                           i_pm_alpha, i_alpha,
+                                                           i_pm_delta, i_delta,
+                                                           o_pm, o_pm_alpha,
+                                                           o_pm_delta,
+                                                           cat_df, err_d,
+                                                           scmp_source,
+                                                           o_alpha, o_delta)
+                        else:
+                            # Populate a dictionary of temporal data
+                            # for data plotting
+                            tmp_d = self.populate_tmp_dict(catalog_n, i_pm,
+                                                           i_pm_alpha, i_alpha,
+                                                           i_pm_delta, i_delta,
+                                                           o_df, tmp_d)
                 else:
                     tmp_d['boolean_l'].append('False')
+                    # cat_df is an input catalog!
+                    # should look to this area, where is in that area
+                    """
+                    scmp_source = float(o_df['SOURCE_NUMBER'].iloc[0])
+                    o_alpha = float(o_df['ALPHA_J2000'].iloc[0])
+                    o_delta = float(o_df['DELTA_J2000'].iloc[0])
+                    o_pm = float(o_df['PM'].iloc[0])
+                    o_pm_alpha = float(o_df['PMALPHA'].iloc[0])
+                    o_pm_delta = float(o_df['PMDELTA'].iloc[0])
+                    err_d = self.populate_err_dict(catalog_n, i_pm, i_pm_alpha,
+                                                   i_alpha, i_pm_delta,
+                                                   i_delta, o_pm, o_pm_alpha,
+                                                   o_pm_delta, cat_df, err_d,
+                                                   scmp_source, o_alpha,
+                                                   o_delta)
+                    """
+                    scmp_source = False
+                    o_alpha = False
+                    o_delta = False
+                    o_pm = False
+                    o_pm_alpha = False
+                    o_pm_delta = False
+                    err_d = self.populate_err_dict(catalog_n, i_pm, i_pm_alpha,
+                                                   i_alpha, i_pm_delta,
+                                                   i_delta, o_pm, o_pm_alpha,
+                                                   o_pm_delta, cat_df, err_d,
+                                                   scmp_source, o_alpha,
+                                                   o_delta)
 
             # Total number
             idx = stats_d['PM'].index(i_pm)
@@ -263,10 +343,32 @@ class ScampPerformanceSSOs:
             if not order_mask:
                 raise Exception
 
-            if len(tmp_d['source']) is not 0:
-                flag_detection, sources_number = all_same(tmp_d['source'])
+            # plot errors!
+            if len(err_d['scmp_source']) is not 0 and err_d['scmp_source'][0] is not False:
+                flag_detection, sources_number = all_same(err_d['scmp_source'])
 
                 if flag_detection and sources_number >= 3:
+                    if self.checkerror:
+                        print('yes')
+                        # Output folder creation
+                        plots_dir = self.prfs_d['plots_dir']
+                        output_path = '{}/err/{}/{}/{}'.format(plots_dir,
+                                                               self.scmp_cf,
+                                                               self.sex_cf,
+                                                               err_d['i_pm'][0])
+                        create_folder(logger, output_path)
+
+                        fits_ = []  # todo - move to dictionary
+                        for idx, catalog_ in enumerate(err_d['catalog']):
+                            ccd = self.get_ccd(catalog_)
+                            fits_.append(ccd)
+
+                        fitted_d = self.confidence(err_d['scmp_source'][0],
+                                                   self.scmp_cf, self.sex_cf)
+
+                        ok = 'yes'
+                        self.plot_err(output_path, err_d, fits_, ok, fitted_d)
+                    """
                     idx = stats_d['PM'].index(i_pm)
                     stats_d['right'][idx] += 1
                     fitted_d = self.confidence(tmp_d['source'][0],
@@ -283,14 +385,60 @@ class ScampPerformanceSSOs:
                     create_folder(logger, self.output_path)
 
                     fits = []  # todo - move to dictionary
-                    print('tmp_d {}'.format(tmp_d['catalog']))
                     for idx, catalog_ in enumerate(tmp_d['catalog']):
                         ccd = self.get_ccd(catalog_)
                         fits.append(ccd)
 
                     self.plot(tmp_d, pm, fitted_d, fits)
+                    """
+                else:
+                    if self.checkerror:
+                        print('2')
+                        # Output folder creation
+                        plots_dir = self.prfs_d['plots_dir']
+                        output_path = '{}/err/{}/{}/{}'.format(plots_dir,
+                                                               self.scmp_cf,
+                                                               self.sex_cf,
+                                                               err_d['i_pm'][0])
+                        create_folder(logger, output_path)
+                    
+                        fits_ = []  # todo - move to dictionary
+                        for idx, catalog_ in enumerate(err_d['catalog']):
+                            ccd = self.get_ccd(catalog_)
+                            fits_.append(ccd)
+
+                        fitted_d = self.confidence(err_d['scmp_source'][0],
+                                                   self.scmp_cf, self.sex_cf)
+
+                        ok = '2'
+                        self.plot_err(output_path, err_d, fits_, ok, fitted_d)
+                    else:
+                        pass  # nothing to do
             else:
-                pass
+                if self.checkerror:
+                    print('3')
+                    # Output folder creation
+                    plots_dir = self.prfs_d['plots_dir']
+                    output_path = '{}/err/{}/{}/{}'.format(plots_dir,
+                                                           self.scmp_cf,
+                                                           self.sex_cf,
+                                                           err_d['i_pm'][0])
+                    create_folder(logger, output_path)
+
+                    fits_ = []  # todo - move to dictionary
+                    for idx, catalog_ in enumerate(err_d['catalog']):
+                        ccd = self.get_ccd(catalog_)
+                        fits_.append(ccd)
+
+                        """
+                        fitted_d = self.confidence(err_d['scmp_source'][0],
+                                                   self.scmp_cf, self.sex_cf)
+                        """
+                        fitted_d = {'ra': 'empty', 'dec': 'empty'}
+                    ok = '3'
+                    self.plot_err(output_path, err_d, fits_, ok, fitted_d)
+                else:
+                    pass  # nothing to do
 
         return stats_d
 
@@ -357,6 +505,18 @@ class ScampPerformanceSSOs:
 
             if not plot:
                 raise Exception
+
+    def plot_err(self, output_dir, err_d, fits_, ok, fitted_d):
+        """
+
+        :param output_dir:
+        :param err_d:
+        :param fits_:
+        :param ok:
+        :param fitted_d:
+        :return:
+        """
+        PlotError(output_dir, err_d, fits_, self.mag, ok, fitted_d)
 
     def confidence(self, source, scmp_cf, sex_cf):
         """
@@ -462,27 +622,23 @@ class ScampPerformanceSSOs:
         """
         # Saves a csv file populated by input sources
         # and a regions file of them.
-        i_df.to_csv('input_sources.csv')
-
+        i_df.to_csv('inputs.csv')
         alpha_df = i_df['alpha_j2000']
         delta_df = i_df['delta_j2000']
 
         df = concat([alpha_df, delta_df], axis=1)
-        df.to_csv('input_sources.reg')
+        input_regs = '{}/full.reg'.format(self.prfs_d['dithers_out'])
+        df.to_csv(input_regs, index=False, header=False, sep=" ")
 
-    def redo_tmp_d(self):
-        """
+        for dither in range(1, 5, 1):
+            i_df_dither = i_df[i_df['dither_values'].isin([dither])]
+            alpha_df = i_df_dither['alpha_j2000']
+            delta_df = i_df_dither['delta_j2000']
 
-        :return:
-        """
-        tmp_d = {'sex_cf': [], 'scmp_cf': [], 'boolean_l': [], 'catalog': [],
-                 'CCD': [], 'source': [], 'epoch': [], 'i_pm': [],
-                 'i_pm_alpha': [], 'i_pm_delta': [], 'i_alpha': [],
-                 'i_delta': [], 'o_pm_alpha': [], 'o_pm_delta': [],
-                 'o_pm_alpha_err': [], 'o_pm_delta_err': [], 'o_alpha': [],
-                 'o_delta': [], 'error_a': [], 'error_b': []}
-
-        return tmp_d
+            df = concat([alpha_df, delta_df], axis=1)
+            input_regs = '{}/dither_{}.reg'.format(self.prfs_d['dithers_out'],
+                                                   dither)
+            df.to_csv(input_regs, index=False, header=False, sep=" ")
 
     def populate_tmp_dict(self, catalog_n, i_pm, i_pm_alpha, i_pm_delta,
                           i_alpha, i_delta, o_df, tmp_d):
@@ -534,6 +690,59 @@ class ScampPerformanceSSOs:
         tmp_d['error_b'].append(errorb_world)
 
         return tmp_d
+
+    def populate_err_dict(self, catalog_n, i_pm, i_pm_alpha, i_alpha,
+                          i_pm_delta, i_delta, o_pm, o_pm_alpha, o_pm_delta,
+                          cat_df, err_d, scmp_source, o_alpha, o_delta):
+        """
+
+        :param catalog_n:
+        :param i_pm:
+        :param i_pm_alpha:
+        :param i_alpha:
+        :param i_pm_delta:
+        :param i_delta:
+        :param o_pm:
+        :param o_pm_alpha:
+        :param o_pm_delta:
+        :param cat_df:
+        :param err_d:
+        :param scmp_source:
+        :return:
+        """
+        err_d['sex_cf'].append(self.sex_cf)
+        err_d['scmp_cf'].append(self.scmp_cf)
+        err_d['catalog'].append(catalog_n)
+        source = int(cat_df['source'].iloc[0])
+        err_d['source'].append(source)
+        err_d['scmp_source'].append(scmp_source)
+        err_d['i_pm'].append(i_pm)
+        err_d['i_pm_alpha'].append(i_pm_alpha)
+        err_d['i_pm_delta'].append(i_pm_delta)
+        err_d['i_alpha'].append(i_alpha)
+        err_d['i_delta'].append(i_delta)
+        if o_pm is False:
+            err_d['o_pm'].append(False)
+        else:
+            err_d['o_pm'].append(o_pm)
+        if o_pm_alpha is False:
+            err_d['o_pm_alpha'].append(False)
+        else:
+            err_d['o_pm_alpha'].append(o_pm_alpha)
+        if o_pm_delta is False:
+            err_d['o_pm_delta'].append(False)
+        else:
+            err_d['o_pm_delta'].append(o_pm_delta)
+        if o_alpha is False:
+            err_d['o_alpha'].append(False)
+        else:
+            err_d['o_alpha'].append(o_alpha)
+        if o_delta is False:
+            err_d['o_delta'].append(False)
+        else:
+            err_d['o_delta'].append(o_delta)
+
+        return err_d
 
     def get_ccd(self, catalog_n):
         """

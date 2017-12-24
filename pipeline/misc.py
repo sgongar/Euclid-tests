@@ -280,8 +280,8 @@ def create_configurations(mode):
         l_pixscale_maxerr = [1.2]  # [1.2] scale-factor
         # l_posangle_maxerr = [0.5, 2.5]
         l_posangle_maxerr = [0.5]  # [0.5, 2.5] degrees
+        # l_position_maxerr = [0.04, 0.08]
         l_position_maxerr = [0.16]
-        # l_position_maxerr = [0.16]
 
         configurations = []
 

@@ -18,7 +18,7 @@ from astropy import units
 from astropy.coordinates import Angle
 
 from matplotlib.backends.backend_pdf import PdfPages
-import matplotlib.dates as mdates
+from matplotlib.ticker import FormatStrFormatter
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 import numpy as np
@@ -53,14 +53,41 @@ def get_regions(input_fits, sex_cf, prfs_d, mag):
     return regions_file
 
 
-def image(input_fits, regions, alpha, delta, idx):
+def get_zoom_level(pm):
     """
 
+    :param pm:
+    :return: zoom
+    """
+    if pm == 30:
+        zoom = 1
+    elif pm == 10:
+        zoom = 2
+    elif pm == 0.01:
+        zoom = 32
+    elif pm == 0.003:
+        zoom = 64
+    elif pm == 0.001:
+        zoom = 96
+    else:
+        zoom = 16
+
+    return zoom
+
+
+def image(input_regions, input_fits, regions, alpha, delta, idx, pm,
+          p_alpha, p_delta):
+    """
+
+    :param input_regions:
     :param input_fits:
     :param regions:
     :param alpha:
     :param delta:
     :param idx:
+    :param pm:
+    :param p_alpha:
+    :param p_delta:
     :return:
     """
     d = DS9()
@@ -72,12 +99,19 @@ def image(input_fits, regions, alpha, delta, idx):
     d.set(scale)
     # Loads regions with format
     d.set('regions load {}'.format(regions))
-    # Gets dir
+    # Loads input regions
+    d.set('regions load {}'.format(input_regions))
     # Saves image
     pan_object = 'pan to {} {} wcs fk5 degree'.format(alpha, delta)
     d.set(pan_object)
-    zoom_object = 'zoom to 4'
+    zoom = get_zoom_level(pm)
+    zoom_object = 'zoom to {}'.format(zoom)
     d.set(zoom_object)
+    if idx > 0:
+        crosshair = 'crosshair {} {} wcs fk5 degree'.format(p_alpha, p_delta)
+        d.set(crosshair)
+    else:
+        pass
     save_image = 'saveimage png {}.png 100'.format(idx)
     d.set(save_image)
 
@@ -535,14 +569,19 @@ class PlotConfidence:
 
             for idx in range(0, len(self.tmp_d['alpha']), 1):
                 # Get regions for desired fits file
-                print(self.fits_files)
                 regions_file = get_regions(self.fits_files[idx],
                                            self.tmp_d['sex_cf'][0],
                                            self.prfs_d, self.mag)
 
+                if idx == 0:
+                    p_alpha = 0
+                    p_delta = 0
+                else:
+                    p_alpha = self.tmp_d['alpha'][idx - 1]
+                    p_delta = self.tmp_d['delta']
                 # Creates image
                 img = image(self.fits_files[idx], regions_file,
-                            alpha_center, delta_center, idx)
+                            alpha_center, delta_center, idx, p_alpha, p_delta)
 
                 img = img[1:-50, :]
 
@@ -977,3 +1016,333 @@ class PlotBothConfidence:
                 pdf.savefig()  # saves current figure
 
             plt.close(fig)
+
+
+class PlotError:
+
+    def __init__(self, output_path, err_d, fits_, mag, ok, fitted_d):
+        """
+        
+        :param output_path: 
+        :param err_d: 
+        """
+        self.prfs_d = extract_settings()
+        self.output_path = output_path
+        self.err_d = err_d
+        self.fits_files = fits_
+        self.ccds = self.gets_ccd_names(fits_)
+        self.mag = mag
+        self.ok = ok
+        self.fitted_d = fitted_d
+
+        # Page size
+        self.plot_size = [16.53, 11.69]
+        self.plot_dpi = 100
+
+        print("err_d['o_alpha'] {}".format(self.err_d['o_alpha']))
+        print("err_d['o_delta'] {}".format(self.err_d['o_delta']))
+
+        # self.plot()
+
+    def gets_ccd_names(self, fits_):
+        """
+
+        :return:
+        """
+        ccds = []
+        for ccd in fits_:
+            ccds.append(ccd[-13:-5])
+
+        return ccds
+
+    def plot(self):
+        """
+
+        :return:
+        """
+        pdf_name = '{}/{}.pdf'.format(self.output_path, self.err_d['source'][0])
+
+        with PdfPages(pdf_name) as pdf:
+            # ALPHA PARAMETERS
+            fig = plt.figure(figsize=self.plot_size, dpi=self.plot_dpi)
+            ax_1 = plt.subplot2grid((1, 5), (0, 0), colspan=4)
+
+            #
+            ax_1.xaxis.set_major_formatter(FormatStrFormatter('%.6f'))
+            ax_1.yaxis.set_major_formatter(FormatStrFormatter('%.6f'))
+            #
+
+            source_str = 'source {}'.format(self.err_d['source'][0])
+            pm_str = 'input_pm {}'.format(self.err_d['i_pm'][0])
+            ok_str = 'ok {}'.format(self.ok)
+            ax_1.set_title('{}\n{} - {}'.format(source_str, pm_str, ok_str))
+
+            # alpha coordinates
+            i_alpha_tmpstmp = []
+            i_alpha_seconds = []
+            i_alpha_arcseconds = []
+            tmp_hour = []
+            tmp_minute = []
+            for alpha_ in self.err_d['i_alpha']:
+                a = Angle(alpha_, units.degree)
+                dms = a.dms
+                degree = int(dms[0])
+                tmp_hour.append(degree)
+                minute = int(dms[1])
+                tmp_minute.append(minute)
+                second = float("{0:.6f}".format(dms[2]))
+                arcsecond = float("{0:.6f}".format(a.arcsecond))
+                i_alpha_tmpstmp.append('{}:{}:{}'.format(degree, minute,
+                                                         second))
+                i_alpha_seconds.append('{}'.format(second))
+                i_alpha_arcseconds.append(arcsecond)
+
+            if self.err_d['o_alpha'] is not False:
+                o_alpha_tmpstmp = []
+                o_alpha_seconds = []
+                tmp_hour = []
+                tmp_minute = []
+                for alpha_ in self.err_d['o_alpha']:
+                    a = Angle(alpha_, units.degree)
+                    dms = a.dms
+                    degree = int(dms[0])
+                    tmp_hour.append(degree)
+                    minute = int(dms[1])
+                    tmp_minute.append(minute)
+                    second = float("{0:.6f}".format(dms[2]))
+                    o_alpha_tmpstmp.append('{}:{}:{}'.format(degree, minute,
+                                                             second))
+                    o_alpha_seconds.append('{}'.format(second))
+
+
+                alpha_seconds = i_alpha_seconds + o_alpha_seconds
+            else:
+                alpha_seconds = i_alpha_seconds
+
+            # delta coordinates
+            i_delta_tmpstmp = []
+            i_delta_seconds = []
+            tmp_degree = []
+            tmp_minute = []
+            for delta_ in self.err_d['i_delta']:
+                d = Angle(delta_, units.degree)
+                dms = d.dms
+                degree = int(dms[0])
+                tmp_degree.append(degree)
+                minute = int(dms[1])
+                tmp_minute.append(minute)
+                second = float("{0:.6f}".format(dms[2]))
+                i_delta_tmpstmp.append('{}:{}.{}'.format(degree, minute, second))
+                i_delta_seconds.append('{}'.format(second))
+
+            if self.err_d['o_delta'] is not False:
+                o_delta_tmpstmp = []
+                o_delta_seconds = []
+                tmp_degree = []
+                tmp_minute = []
+                for delta_ in self.err_d['o_delta']:
+                    d = Angle(delta_, units.degree)
+                    dms = d.dms
+                    degree = int(dms[0])
+                    tmp_degree.append(degree)
+                    minute = int(dms[1])
+                    tmp_minute.append(minute)
+                    second = float("{0:.6f}".format(dms[2]))
+                    o_delta_tmpstmp.append('{}:{}.{}'.format(degree, minute, second))
+                    o_delta_seconds.append('{}'.format(second))
+
+                delta_seconds = i_delta_seconds + o_delta_seconds
+            else:
+                delta_seconds = i_delta_seconds
+
+            i_alpha_seconds = [float(i) for i in i_alpha_seconds]  # needed?
+            i_alpha_seconds = [float("{0:.6f}".format(i)) for i in i_alpha_seconds]
+            i_delta_seconds = [float(i) for i in i_delta_seconds]  # needed?
+            i_delta_seconds = [float("{0:.6f}".format(i)) for i in i_delta_seconds]
+
+            o_alpha_seconds = [float(i) for i in o_alpha_seconds]  # needed?
+            o_alpha_seconds = [float("{0:.6f}".format(i)) for i in o_alpha_seconds]
+            o_delta_seconds = [float(i) for i in o_delta_seconds]  # needed?
+            o_delta_seconds = [float("{0:.6f}".format(i)) for i in o_delta_seconds]
+
+            alpha_seconds = [float(i) for i in alpha_seconds]  # needed?
+            alpha_seconds = [float("{0:.6f}".format(i)) for i in alpha_seconds]
+            delta_seconds = [float(i) for i in delta_seconds]  # needed?
+            delta_seconds = [float("{0:.6f}".format(i)) for i in delta_seconds]
+
+            try:
+                x_ticks = create_y_ticks(alpha_seconds)
+                y_ticks = create_y_ticks(delta_seconds)
+            except ZeroDivisionError:
+                print('alpha: {}'.format(self.err_d['i_alpha']))
+                print('delta: {}'.format(self.err_d['i_delta']))
+                print('source {}'.format(self.err_d['source'][0]))
+                raise Exception
+
+            # x-ticks assignation
+            ax_1.set_xticks(x_ticks['major_t'], minor=False)
+            ax_1.set_xticklabels(x_ticks['major_t'])
+            ax_1.set_xticks(x_ticks['minor_t'], minor=True)
+
+            # y-ticks assignation
+            ax_1.set_yticks(y_ticks['major_t'], minor=False)
+            ax_1.set_yticklabels(y_ticks['major_t'])
+            ax_1.set_yticks(y_ticks['minor_t'], minor=True)
+
+            # Formats grids
+            ax_1.grid(b=True, which='major', linestyle='-', linewidth=2)
+            ax_1.grid(b=True, which='minor', linestyle='--', linewidth=1)
+
+            # x-axis
+            x_label_ra = 'Right ascension \n'
+            major_s = x_ticks['major_s']
+            x_label_major_step = 'major step size {}"\n'.format(major_s)
+            minor_s = x_ticks['minor_s']
+            x_label_minor_step = 'minor step size {}"'.format(minor_s)
+            ax_1.set_xlabel('{}{}{}'.format(x_label_ra, x_label_major_step,
+                                            x_label_minor_step))
+            # x-axis
+            y_label_ra = 'Declination \n'
+            major_s = y_ticks['major_s']
+            y_label_major_step = 'major step size {}"\n'.format(major_s)
+            minor_s = y_ticks['minor_s']
+            y_label_minor_step = 'minor step size {}"'.format(minor_s)
+            ax_1.set_ylabel('{}{}{}'.format(y_label_ra, y_label_major_step,
+                                            y_label_minor_step))
+
+            # Plots data
+            ax_1.plot(i_alpha_seconds, i_delta_seconds, 'bs', markersize=6,
+                      label='catalog position')
+            if self.err_d['o_delta'] is not False:
+                ax_1.plot(o_alpha_seconds, o_delta_seconds, 'rs', markersize=6,
+                          label='extracted position')
+
+            # Plots a legend
+            plt.legend(loc=0, ncol=2, borderaxespad=0.)
+            plt.setp(ax_1.get_xticklabels(), visible=True)
+            plt.setp(ax_1.get_yticklabels(), visible=True)
+            plt.draw()
+
+            ax_2 = plt.subplot2grid((1, 5), (0, 4))
+
+            i_pm = float("{0:.6f}".format(self.err_d['i_pm'][0]))
+            i_pm_alpha = float("{0:.6f}".format(self.err_d['i_pm_alpha'][0]))
+            i_pm_delta = float("{0:.6f}".format(self.err_d['i_pm_delta'][0]))
+            o_pm = float("{0:.6f}".format(self.err_d['o_pm'][0]))
+            o_pm_alpha = float("{0:.6f}".format(self.err_d['o_pm_alpha'][0]))
+            o_pm_delta = float("{0:.6f}".format(self.err_d['o_pm_delta'][0]))
+            if type(self.fitted_d['ra']) is str:
+                chi_ra = 'empty'
+            else:
+                chi_ra = float("{0:.6f}".format(self.fitted_d['ra']))
+            if type(self.fitted_d['dec']) is str:
+                chi_dec = 'empty'
+            else:
+                chi_dec = float("{0:.6f}".format(self.fitted_d['dec']))
+
+            table_ = [['', 'catalog values'],
+                      ['cat_pm', i_pm],
+                      ['cat_pm_alpha', i_pm_alpha],
+                      ['cat_pm_delta', i_pm_delta],
+                      ['', 'extracted values'],
+                      ['ext_pm', o_pm],
+                      ['ext_pm_alpha', o_pm_alpha],
+                      ['ext_pm_delta', o_pm_delta],
+                      ['', 'chi squared'],
+                      ['chi_squared_ra', chi_ra],
+                      ['chi_squared_dec', chi_dec]]
+
+            # ax_2.axis('tight')
+            ax_2.axis('off')
+            # ax_2.axis('on')
+            data_table = ax_2.table(cellText=table_, colLabels=None,
+                                    loc='center')
+            data_table.set_fontsize(14)
+
+            # fig.tight_layout()
+
+            # Saves the current figure in pdf file
+            pdf.savefig()  # saves current figure
+            plt.close(fig)
+
+            #
+            # IMAGES
+            #
+
+            # Gets limits
+            alpha_center = 0
+            delta_center = 0
+            if len(self.err_d['i_alpha']) == 2:
+                alpha_sum = self.err_d['i_alpha'][0] + self.err_d['i_alpha'][1]
+                alpha_center = alpha_sum / 2
+                delta_sum = self.err_d['i_delta'][0] + self.err_d['i_delta'][1]
+                delta_center = delta_sum / 2
+            elif len(self.err_d['i_alpha']) == 3:
+                alpha_center = self.err_d['i_alpha'][1]
+                delta_center = self.err_d['i_delta'][1]
+            elif len(self.err_d['i_alpha']) == 4:
+                alpha_sum = self.err_d['i_alpha'][1] + self.err_d['i_alpha'][2]
+                alpha_center = alpha_sum / 2
+                delta_sum = self.err_d['i_delta'][1] + self.err_d['i_delta'][2]
+                delta_center = delta_sum / 2
+
+            if alpha_center is 0 or delta_center is 0:
+                print("self.err_d['i_alpha'] {}".format(self.err_d['i_alpha']))
+                print("self.err_d['i_delta'] {}".format(self.err_d['i_delta']))
+
+                raise Exception
+
+            for idx in range(0, len(self.err_d['i_alpha']), 1):
+                # Get regions for desired fits file
+                regions_file = get_regions(self.fits_files[idx],
+                                           self.err_d['sex_cf'][0],
+                                           self.prfs_d, self.mag)
+
+                input_regions = '{}/pipeline/inputs.reg'.format(self.prfs_d['home'])
+
+                # Creates image
+                dither = self.fits_files[idx][-6:-5]
+                i_regs = '{}/dither_{}.reg'.format(self.prfs_d['dithers_out'],
+                                                    dither)
+                if idx == 0:
+                    p_alpha = 0
+                    p_delta = 0
+                else:
+                    p_alpha = self.err_d['i_alpha'][idx - 1]
+                    p_delta = self.err_d['i_delta'][idx - 1]
+
+                img = image(i_regs, self.fits_files[idx], regions_file,
+                            alpha_center, delta_center, idx,
+                            float(self.err_d['i_pm'][0]), p_alpha, p_delta)
+
+                img = img[1:-50, :]  # Removes ds9's legend
+
+                fig = plt.figure(figsize=self.plot_size, dpi=self.plot_dpi)
+                # ax_1 = fig.add_subplot(2, 1, 1)
+                ax_1 = fig.add_subplot(1, 1, 1)
+
+                plt.imshow(img)
+
+                labels = [item.get_text() for item in ax_1.get_xticklabels()]
+
+                empty_string_labels = [''] * len(labels)
+                ax_1.set_xticklabels(empty_string_labels)
+
+                labels = [item.get_text() for item in ax_1.get_yticklabels()]
+
+                empty_string_labels = [''] * len(labels)
+                ax_1.set_yticklabels(empty_string_labels)
+
+                ax_1.set_xlabel('right ascension')
+                ax_1.set_ylabel('declination')
+
+                # ax_2 = fig.add_subplot(2, 1, 2)
+                # clust_data = np.random.random((10, 3))
+                # collabel = ("col 1", "col 2", "col 3")
+                # ax_2.axis('tight')
+                # ax_2.axis('off')
+                # the_table = ax_2.table(cellText=clust_data,
+                #                        colLabels=collabel, loc='center')
+
+                pdf.savefig()
+                plt.close(fig)

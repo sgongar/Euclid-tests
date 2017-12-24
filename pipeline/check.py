@@ -315,32 +315,25 @@ class Check:
 
         @return True if everything goes alright.
         """
-        idx = 0
         stats_d = {}
 
+        idx = 0
         confs = list(product(self.sex_confs, self.scamp_confs))
         mag = '20-21'
 
-        print(len(confs))
-
         for conf_ in confs:
-            filt_j = []
-            while len(filt_j) < self.prfs_d['cores_number'] + 1:
-                # bypassconfidence
-                self.prfs_d['confidences'] = [1]
-                # Runs performance analysis.
-                for confidence_ in self.prfs_d['confidences']:
-                    idx += 1
-                    sex_cf = '{}_{}_{}_{}_{}'.format(conf_[0][0], conf_[0][2],
-                                                     conf_[0][2], conf_[0][1],
-                                                     conf_[0][3])
-                    scmp_cf = '{}_{}_{}_{}'.format(conf_[1][0], conf_[1][1],
-                                                   conf_[1][2], conf_[1][3])
+            for confidence_ in self.prfs_d['confidences']:
+                idx += 1
 
-                    filt_j.append('test')
-                    stats_d[idx] = ScampPerformanceSSOs(self.logger, mag,
-                                                        scmp_cf, sex_cf,
-                                                        confidence_)
+                sex_cf = '{}_{}_{}_{}_{}'.format(conf_[0][0], conf_[0][2],
+                                                 conf_[0][2], conf_[0][1],
+                                                 conf_[0][3])
+                scmp_cf = '{}_{}_{}_{}'.format(conf_[1][0], conf_[1][1],
+                                               conf_[1][2], conf_[1][3])
+
+                stats_d[idx] = ScampPerformanceSSOs(self.logger, mag,
+                                                    scmp_cf, sex_cf,
+                                                    confidence_)
 
         """
         tmp_d = {'PM': [], 'total': [], 'right': [], 'false': [],
