@@ -22,6 +22,54 @@ from plots import PlotConfidence, PlotError
 from regions import Create_regions
 
 
+def redo_stats_d():
+    """ Creates a dictionary
+
+    :return: tmp_d
+    """
+    stats_d = {'sex_cf': [], 'scmp_cf': [], 'i_pm': [], 'total_number': [],
+               'non-SSOs': [], 'SSOs': [], 'f_dr': [], 'f_pur': [],
+               'f_com': []}
+
+    return stats_d
+
+
+def populate_stats_d(stats_d, sex_cf, scmp_cf):
+    """
+
+    :param stats_d:
+    :param sex_cf:
+    :param scmp_cf:
+    :return:
+    """
+    prfs_d = extract_settings()
+    initial_int = 0
+    initial_float = 0.0
+
+    stats_d['sex_cf'].append(sex_cf)
+    stats_d['scmp_cf'].append(scmp_cf)
+    stats_d['i_pm'].append(initial_int)
+    stats_d['total_number'].append(initial_int)
+    stats_d['non-SSOs'].append(initial_int)
+    stats_d['SSOs'].append(initial_float)
+    stats_d['f_dr'].append(initial_float)
+    stats_d['f_pur'].append(initial_float)
+    stats_d['f_com'].append(initial_float)
+
+    for pm_ in prfs_d['pms']:
+        stats_d['sex_cf'].append(sex_cf)
+        stats_d['scmp_cf'].append(scmp_cf)
+        stats_d['i_pm'].append(pm_)
+        stats_d['total_number'].append(initial_int)
+        stats_d['non-SSOs'].append(initial_int)
+        stats_d['SSOs'].append(initial_float)
+        stats_d['f_dr'].append(initial_float)
+        stats_d['f_pur'].append(initial_float)
+        stats_d['f_com'].append(initial_float)
+
+    return stats_d
+
+
 def redo_tmp_d():
     """ Creates a dictionary
 
@@ -60,7 +108,7 @@ def check_star(catalog_n, i_df, o_alpha, o_delta):
     :param o_delta:
     :return:
     """
-    tolerance = 0.0005  # was 0.0001
+    tolerance = 0.0005  # 1.8 arcsecond
 
     i_df = i_df[i_df['catalog'].isin([catalog_n])]
     i_df = i_df[i_df['alpha_j2000'] + tolerance > o_alpha]
@@ -117,13 +165,24 @@ def check_source(catalog_n, o_cat, i_alpha, i_delta):
     :param i_delta:
     :return:
     """
+    # tolerance = 0.0001  # 1.8 arcsecond
     tolerance = 0.0005  # 1.8 arcsecond
 
     o_df = o_cat[o_cat['CATALOG_NUMBER'].isin([catalog_n])]
+    # o_df.to_csv('1_{}.csv'.format(catalog_n))
+    # print('1 -- o_df {}'.format(o_df))
     o_df = o_df[o_df['ALPHA_J2000'] + tolerance > i_alpha]
+    # o_df.to_csv('2_{}.csv'.format(catalog_n))
+    # print('2 -- o_df {}'.format(o_df))
     o_df = o_df[i_alpha > o_df['ALPHA_J2000'] - tolerance]
+    # o_df.to_csv('3_{}.csv'.format(catalog_n))
+    # print('3 -- o_df {}'.format(o_df))
     o_df = o_df[o_df['DELTA_J2000'] + tolerance > i_delta]
+    # o_df.to_csv('4_{}.csv'.format(catalog_n))
+    # print('4 -- o_df {}'.format(o_df))
     o_df = o_df[i_delta > o_df['DELTA_J2000'] - tolerance]
+    # o_df.to_csv('5_{}.csv'.format(catalog_n))
+    # print('5 -- o_df {}'.format(o_df))
 
     return o_df
 
@@ -249,8 +308,13 @@ class ScampPerformanceSSOs:
 
         # Gets unique sources from input data
         unique_sources = list(set(i_df['source'].tolist()))
-
-        unique_sources = [24, 274, 284, 314]
+        """
+        unique_sources = []
+        for unique_source_ in unique_sources_:
+            if int(unique_source_) > 170:
+                unique_sources.append(unique_source_)
+        """
+        unique_sources = [17]
         # Loops over input data
         for idx_source, source_ in enumerate(unique_sources):
             # Gets associated data in input catalog
@@ -261,9 +325,12 @@ class ScampPerformanceSSOs:
             i_pm = 0.0  # Raises a warning if variable pm it's not created
             # Iterate over each detection of each source
             for i, row in enumerate(cat_df.itertuples(), 1):
-                # source_ = row.source
+                input_source = row.source
                 # ccd_ = row.CCD
+                # print('CCD {}'.format(ccd_))
                 # dither_ = row.dither_values
+                # print('dither {}'.format(dither_))
+
                 catalog_n = row.catalog
                 i_pm = row.pm_values
                 i_pm_alpha = row.pm_alpha  # this is wrong! fixme
@@ -271,9 +338,13 @@ class ScampPerformanceSSOs:
                 i_alpha = row.alpha_j2000
                 i_delta = row.delta_j2000
 
+                # print('i_alpha {}'.format(i_alpha))
+                # print('i_delta {}'.format(i_delta))
+
                 # Checks if there is a source closed to input one
                 # o_cat contains data from output (filtered) catalog
                 o_df = check_source(catalog_n, o_cat, i_alpha, i_delta)
+                print('o_df {}'.format(o_df))
 
                 # If there is one saves data from input data
                 if o_df.empty is not True and o_df['PM'].size == 1:
@@ -281,13 +352,14 @@ class ScampPerformanceSSOs:
                     if pm_mask:
                         if self.checkerror:
                             scmp_source = float(o_df['SOURCE_NUMBER'].iloc[0])
+                            # print('source {}'.format(scmp_source))
                             o_alpha = float(o_df['ALPHA_J2000'].iloc[0])
                             o_delta = float(o_df['DELTA_J2000'].iloc[0])
                             o_pm = float(o_df['PM'].iloc[0])
                             o_pm_alpha = float(o_df['PMALPHA'].iloc[0])
                             o_pm_delta = float(o_df['PMDELTA'].iloc[0])
-                            print('o_alpha {}'.format(o_alpha))
-                            print('o_delta {}'.format(o_delta))
+                            # print('o_alpha {}'.format(o_alpha))
+                            # print('o_delta {}'.format(o_delta))
                             err_d = self.populate_err_dict(catalog_n, i_pm,
                                                            i_pm_alpha, i_alpha,
                                                            i_pm_delta, i_delta,
@@ -334,6 +406,8 @@ class ScampPerformanceSSOs:
                                                    scmp_source, o_alpha,
                                                    o_delta)
 
+            logger.debug('input source is {}'.format(input_source))
+
             # Total number
             idx = stats_d['PM'].index(i_pm)
             stats_d['total'][idx] += 1
@@ -344,12 +418,24 @@ class ScampPerformanceSSOs:
                 raise Exception
 
             # plot errors!
-            if len(err_d['scmp_source']) is not 0 and err_d['scmp_source'][0] is not False:
+            if False in err_d['scmp_source']:
+                false_times = err_d['scmp_source'].count(False)
+            else:
+                false_times = 0
+
+            if false_times > 1:
+                false_flag = False
+            else:
+                false_flag = True
+
+            if len(err_d['scmp_source']) is not 0 and false_flag:
                 flag_detection, sources_number = all_same(err_d['scmp_source'])
+                if flag_detection is False:
+                    print(err_d['scmp_source'])
 
                 if flag_detection and sources_number >= 3:
                     if self.checkerror:
-                        print('yes')
+                        logger.debug('right detection')
                         # Output folder creation
                         plots_dir = self.prfs_d['plots_dir']
                         output_path = '{}/err/{}/{}/{}'.format(plots_dir,
@@ -363,11 +449,13 @@ class ScampPerformanceSSOs:
                             ccd = self.get_ccd(catalog_)
                             fits_.append(ccd)
 
-                        fitted_d = self.confidence(err_d['scmp_source'][0],
+                        fitted_d = self.confidence(logger,
+                                                   err_d['scmp_source'][1],
                                                    self.scmp_cf, self.sex_cf)
 
                         ok = 'yes'
                         self.plot_err(output_path, err_d, fits_, ok, fitted_d)
+
                     """
                     idx = stats_d['PM'].index(i_pm)
                     stats_d['right'][idx] += 1
@@ -393,7 +481,7 @@ class ScampPerformanceSSOs:
                     """
                 else:
                     if self.checkerror:
-                        print('2')
+                        logger.debug('wrong detection - not enough sources number')
                         # Output folder creation
                         plots_dir = self.prfs_d['plots_dir']
                         output_path = '{}/err/{}/{}/{}'.format(plots_dir,
@@ -406,17 +494,18 @@ class ScampPerformanceSSOs:
                         for idx, catalog_ in enumerate(err_d['catalog']):
                             ccd = self.get_ccd(catalog_)
                             fits_.append(ccd)
-
+                        """
                         fitted_d = self.confidence(err_d['scmp_source'][0],
                                                    self.scmp_cf, self.sex_cf)
-
+                        """
+                        fitted_d = {'ra': 'empty', 'dec': 'empty'}
                         ok = '2'
                         self.plot_err(output_path, err_d, fits_, ok, fitted_d)
                     else:
                         pass  # nothing to do
             else:
                 if self.checkerror:
-                    print('3')
+                    logger.debug('wrong detection - too many false detections')
                     # Output folder creation
                     plots_dir = self.prfs_d['plots_dir']
                     output_path = '{}/err/{}/{}/{}'.format(plots_dir,
@@ -518,7 +607,7 @@ class ScampPerformanceSSOs:
         """
         PlotError(output_dir, err_d, fits_, self.mag, ok, fitted_d)
 
-    def confidence(self, source, scmp_cf, sex_cf):
+    def confidence(self, logger, source, scmp_cf, sex_cf):
         """
 
         :param source:
@@ -537,7 +626,10 @@ class ScampPerformanceSSOs:
         dec = db.loc[db['SOURCE_NUMBER'] == source, 'DELTA_J2000'].tolist()
         epoch = db.loc[db['SOURCE_NUMBER'] == source, 'EPOCH'].tolist()
 
-        edims = []
+        # print('ra {}'.format(ra))
+        # print('dec {}'.format(dec))
+
+        # edims = []
         epochs = []
         dimensions = []
         fitted_d = {}
@@ -551,24 +643,39 @@ class ScampPerformanceSSOs:
                 sigma = db.loc[db['SOURCE_NUMBER'] == source,
                                'ERRA_WORLD'].tolist()
                 dimension_ = 'ra'
+                print('sigma ra {}'.format(sigma))
                 edim = array([1 / var for var in sigma])
-                edims.append(edim)
+                # edims.append(edim)
                 x = sm.add_constant(x)
                 model = sm.WLS(y, x, weigths=edim)
                 fitted = model.fit()
+                print(fitted.summary())
                 chi_squared = fitted.rsquared
                 fitted_d[dimension_] = chi_squared
             elif dimension == dec:
                 sigma = db.loc[db['SOURCE_NUMBER'] == source,
                                'ERRB_WORLD'].tolist()
+
+                print('sigma dec {}'.format(sigma))
                 dimension_ = 'dec'
                 edim = array([1 / var for var in sigma])
-                edims.append(edim)
+                # edims.append(edim)
                 x = sm.add_constant(x)
                 model = sm.WLS(y, x, weigths=edim)
                 fitted = model.fit()
+                print(fitted.summary())
                 chi_squared = fitted.rsquared
                 fitted_d[dimension_] = chi_squared
+
+        x = array(ra)
+        y = array(dec)
+        sigma = db.loc[db['SOURCE_NUMBER'] == source, 'ERRA_WORLD'].tolist()
+        edim = array([1 / var for var in sigma])
+        x = sm.add_constant(x)
+        model = sm.WLS(y, x, weigths=edim)
+        fitted = model.fit()
+        print('new {}'.format(fitted.summary()))
+        logger.debug('new chi-squared is {}'.format(fitted.rsquared))
 
         return fitted_d
 
@@ -779,30 +886,93 @@ class ScampPerformanceSSOs:
 
 class ScampPerformanceStars:
 
-    def __init__(self):
+    def __init__(self, logger, mag, sex_cf, scmp_cf):
         """
 
         """
+        self.logger = logger
+        self.mag = mag
+        self.sex_cf = sex_cf
+        self.scmp_cf = scmp_cf
+
         self.bypassfilter = True
         self.prfs_d = extract_settings()
 
-    def check(self, logger, mag, scmp_cf, sex_cf):
+        self.check()
+
+    def get_norm_speed(self, o_pm):
         """
 
-        :param logger:
-        :param mag:
+        :return:
+        """
+        speeds_d = speeds_range(self.prfs_d, 50)
+
+        pm_norm = 0
+        for key_ in speeds_d.keys():
+            low = speeds_d[key_][0]
+            high = speeds_d[key_][1]
+            if low < o_pm < high:
+                pm_norm = key_
+
+        return pm_norm
+
+    def confidence(self, logger, source, scmp_cf, sex_cf):
+        """
+
+        :param source:
         :param scmp_cf:
         :param sex_cf:
         :return:
         """
+        catalogs_dir = self.prfs_d['catalogs_dir']
+        configuration_dir = '/20-21/{}/{}'.format(sex_cf, scmp_cf)
+        cat_name = '/full_{}_20-21_1.cat'.format(scmp_cf)
+        hdu_list = fits.open('{}{}{}'.format(catalogs_dir,
+                                             configuration_dir, cat_name))
+        db = Table(hdu_list[2].data).to_pandas()
+
+        ra = db.loc[db['SOURCE_NUMBER'] == source, 'ALPHA_J2000'].tolist()
+        dec = db.loc[db['SOURCE_NUMBER'] == source, 'DELTA_J2000'].tolist()
+        epoch = db.loc[db['SOURCE_NUMBER'] == source, 'EPOCH'].tolist()
+
+        # print('ra {}'.format(ra))
+        # print('dec {}'.format(dec))
+
+        x = array(ra)
+        y = array(dec)
+        sigma = db.loc[db['SOURCE_NUMBER'] == source, 'ERRA_WORLD'].tolist()
+        x = sm.add_constant(x)
+        edim = array([1 / var for var in sigma])
+        model = sm.WLS(y, x, weigths=edim)
+        fitted = model.fit()
+        # logger.debug('new chi-squared is {}'.format(fitted.rsquared))
+
+        return fitted.rsquared
+
+    def check(self):
+        """
+
+        :return:
+        """
         # Creates an input dictionary with all input sources
-        logger.debug('checking performance for {} and {}'.format(scmp_cf,
-                                                                 sex_cf))
+        self.logger.debug('checking performance for {} and {}'.format(self.scmp_cf,
+                                                                      self.sex_cf))
+
+        """
+        stats_d = {'sex_cf': [], 'scmp_cf': [],
+                   'i_pm': [], 'total_number': [], 'non-SSOs': [], 'SSOs': [],
+                   'f_dr': [], 'f_pur': [], 'f_com': []}
+        """
+        stats_d = redo_stats_d()
+        stats_d = populate_stats_d(stats_d, self.sex_cf, self.scmp_cf)
+
         input_d = {}
         for d in range(1, 5, 1):
-            cat_name = '{}/Cat_20-21_d{}'.format(self.prfs_d['input_ref'], d)
+            cat_loc = '{}/{}/Catalogs'.format(self.prfs_d['fits_dir'],
+                                              self.mag)
+            cat_name = '{}/Cat_20-21_d{}'.format(cat_loc, d)
             input_d[d] = '{}.dat'.format(cat_name)
-        input_d = Create_regions(input_d).check_luca(True, True)
+        input_d = Create_regions(input_d).check_luca(self.mag, False, True)
 
         # Creates a DataFrame from an input dictionary
         input_l = []
@@ -811,14 +981,15 @@ class ScampPerformanceStars:
 
         i_df = concat(input_l, axis=0)
         # Look for < 3 coincidences
-        i_df = concat(g for _, g in i_df.groupby('source')
-                      if len(g) >= 3)
+        # i_df = concat(g for _, g in i_df.groupby('source')
+        #               if len(g) >= 3)
         i_df = i_df.reset_index(drop=True)
 
         # Open particular file!
-        filt_n = 'filt_{}_{}_3.csv'.format(scmp_cf, mag)
-        filter_o_n = '{}/{}/{}/{}'.format(self.prfs_d['filter_dir'],
-                                          sex_cf, scmp_cf, filt_n)
+        filt_n = 'filt_{}_{}_2.csv'.format(self.scmp_cf, self.mag)
+        filter_o_n = '{}/{}/{}/{}/{}'.format(self.prfs_d['filter_dir'],
+                                             self.mag, self.sex_cf,
+                                             self.scmp_cf, filt_n)
 
         # Cross with filtered data - Opens datafile
         o_cat = read_csv('{}'.format(filter_o_n), index_col=0)
@@ -826,75 +997,108 @@ class ScampPerformanceStars:
         # Gets unique sources from input data
         o_unique_sources = list(set(o_cat['SOURCE_NUMBER'].tolist()))
 
-        # Creates variables
-        right = 0
-        not_right = 0
-        total = 0
-        stats_d = {'source_l': [], 'catalog_l': [], 'alpha_l': [],
-                   'delta_l': [], 'pm_l': [], 'mag': [], 'error_a': [],
-                   'error_b': []}
-
+        print('unique_sources number {}'.format(len(o_unique_sources)))
         for source_ in o_unique_sources:
-            flag = False
-            tmp_d = {'source': [], 'catalog': [], 'i_pm': [],
-                     'i_alpha': [], 'i_delta': [], 'mag': [],
-                     'error_a': [], 'error_b': []}
+            tmp_d = {'flag': [], 'source': [], 'o_pm': []}
 
             o_df = o_cat[o_cat['SOURCE_NUMBER'].isin([source_])]
             for i, row in enumerate(o_df.itertuples(), 1):
                 source = row.SOURCE_NUMBER
                 catalog_n = row.CATALOG_NUMBER
-                i_alpha = row.ALPHA_J2000
-                i_delta = row.DELTA_J2000
-                pm = row.PM
-                mag = row.MAG
-                error_a = row.ERRA_WORLD
-                error_b = row.ERRB_WORLD
+                o_alpha = row.ALPHA_J2000
+                o_delta = row.DELTA_J2000
+                o_pm = row.PM
 
-                out_df = check_star(catalog_n, i_df, i_alpha, i_delta)
+                out_df = check_star(catalog_n, i_df, o_alpha, o_delta)
 
                 if out_df.empty:
                     # it's a star
-                    right += 1
-                    flag = True
+                    tmp_d['flag'].append('True')
                     tmp_d['source'].append(source)
-                    tmp_d['catalog'].append(catalog_n)
-                    tmp_d['i_alpha'].append(i_alpha)
-                    tmp_d['i_delta'].append(i_delta)
-                    tmp_d['i_pm'].append(pm)
-                    tmp_d['mag'].append(mag)
-                    tmp_d['error_a'].append(error_a)
-                    tmp_d['error_b'].append(error_b)
+                    tmp_d['o_pm'].append(o_pm)
+                    if o_pm > 5:
+                        print('o_pm {}'.format(o_pm))
+                        print('catalog_n {}'.format(catalog_n))
+                        print('o_alpha {}'.format(o_alpha))
+                        print('o_delta {}'.format(o_delta))
+                        print(o_df)
                 else:
                     # it's a SSO
-                    not_right += 1
-                    flag = False
+                    tmp_d['flag'].append('False')
+                    tmp_d['o_pm'].append(o_pm)
 
-                total += 1
+            flag_boolean, len_boolean = all_same(tmp_d['flag'])
+            flag_pm, len_pm = all_same(tmp_d['o_pm'])
 
-            if flag:
-                order_mask = check_cat_order(tmp_d['catalog'])
-                flag_detection, sources_number = all_same(tmp_d['source'])
+            # if tmp_d['flag'][0] is 'False':
+            #     print(' ')
+            #     print("tmp_d['flag'] {}".format(tmp_d['flag']))
+            #     print('flag_boolean {}'.format(flag_boolean))
+            #     print('len_boolean {}'.format(len_boolean))
+            #     print("tmp_d['o_pm'] {}".format(tmp_d['o_pm']))
+            #     print('flag_pm {}'.format(flag_pm))
+            #     print('len_pm {}'.format(len_pm))
 
-                if order_mask and sources_number >= 3:
-                    for tmp_source_ in tmp_d['source']:
-                        stats_d['source_l'].append(tmp_source_)
-                    for catalog_ in tmp_d['catalog']:
-                        stats_d['catalog_l'].append(catalog_)
-                    for i_alpha_ in tmp_d['i_alpha']:
-                        stats_d['alpha_l'].append(i_alpha_)
-                    for i_delta_ in tmp_d['i_delta']:
-                        stats_d['delta_l'].append(i_delta_)
-                    for pm_ in tmp_d['i_pm']:
-                        stats_d['pm_l'].append(pm_)
-                    for mag_ in tmp_d['mag']:
-                        stats_d['mag'].append(mag_)
-                    for erra_ in tmp_d['error_a']:
-                        stats_d['erra_world'].append(erra_)
-                    for errb_ in tmp_d['error_b']:
-                        stats_d['errb_world'].append(errb_)
+            # stats for non-SSOs
+            if flag_boolean and flag_pm:
+                o_pm_norm = self.get_norm_speed(tmp_d['o_pm'][0])
+
+                idx = stats_d['i_pm'].index(o_pm_norm)
+                # print('o_pm {}'.format(tmp_d['o_pm'][0]))
+                # print('o_pm_norm {}'.format(o_pm_norm))
+                # print('idx_{}'.format(idx))
+
+                stats_d['total_number'][idx] += 1
+                stats_d['non-SSOs'][idx] += 1
+
+                """
+                stats_d = {'sex_cf': [], 'scmp_cf': [],
+                           'i_pm': [], 'total_number': [], 'non-SSOs': [], 'SSOs': [],
+                           'f_dr': [], 'f_pur': [], 'f_com': []}
+                """
+            # stats for SSOs
+            elif flag_boolean is False and flag_pm:
+                o_pm_norm = self.get_norm_speed(tmp_d['o_pm'][0])
+
+                idx = stats_d['i_pm'].index(o_pm_norm)
+
+                stats_d['total_number'][idx] += 1
+                stats_d['SSOs'][idx] += 1
+
+
+                # order_mask = check_cat_order(tmp_d['catalog'])
+                # flag_detection, sources_number = all_same(tmp_d['source'])
+
+                # ok = self.confidence(logger, tmp_d['source'][0], scmp_cf,
+                #                      sex_cf)
+                # if ok < 0.99:
+                #     right_ones += 1
+                # else:
+                #     false_ones += 1
+                # if order_mask and sources_number >= 3:
+                #     for tmp_source_ in tmp_d['source']:
+                #         stats_d['source_l'].append(tmp_source_)
+                #     for catalog_ in tmp_d['catalog']:
+                #         stats_d['catalog_l'].append(catalog_)
+                #     for i_alpha_ in tmp_d['i_alpha']:
+                #         stats_d['alpha_l'].append(i_alpha_)
+                #     for i_delta_ in tmp_d['i_delta']:
+                #         stats_d['delta_l'].append(i_delta_)
+                #     for pm_ in tmp_d['i_pm']:
+                #         stats_d['pm_l'].append(pm_)
+                #     for mag_ in tmp_d['mag']:
+                #         stats_d['mag'].append(mag_)
+                #     for erra_ in tmp_d['error_a']:
+                #         stats_d['erra_world'].append(erra_)
+                #     for errb_ in tmp_d['error_b']:
+                #         stats_d['errb_world'].append(errb_)
 
         stats_df = DataFrame(stats_d)
-        stats_df.to_csv('test_{}_{}.csv'.format(sex_cf, scmp_cf))
+        stats_df.to_csv('test.csv')
+
+        print('i_pm {}'.format(stats_d['i_pm']))
+        print('total {}'.format(stats_d['total_number']))
+        print('no {}'.format(stats_d['non-SSOs']))
+        print('yes {}'.format(stats_d['SSOs']))
 
         return stats_d

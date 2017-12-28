@@ -259,7 +259,7 @@ def create_configurations(mode):
         # l_deblending = [30]
         l_mincount = [0.01]
         l_threshold = [1.5]
-        # l_threshold = [1.5]
+        # l_threshold = [1.5, 3]
 
         l_area = [4]
         l_filter_name = ['models/gauss_2.0_5x5.conv']
@@ -281,7 +281,7 @@ def create_configurations(mode):
         # l_posangle_maxerr = [0.5, 2.5]
         l_posangle_maxerr = [0.5]  # [0.5, 2.5] degrees
         # l_position_maxerr = [0.04, 0.08]
-        l_position_maxerr = [0.16]
+        l_position_maxerr = [0.01]
 
         configurations = []
 
@@ -665,7 +665,7 @@ def setting_logger():
         raise Exception
     """
     logger = getLogger("main_process")
-    logger.info("Program started")
+    logger.info("pipeline started")
     # logger.FileHandler('spam.log')
 
     return logger

@@ -379,9 +379,8 @@ class Check:
                                                      conf[4])
 
                     # Runs performance analysis.
-                    stats_d[idx] = ScampPerformanceStars().check(self.logger,
-                                                                 mag, scmp_cf,
-                                                                 sex_cf)
+                    stats_d[idx] = ScampPerformanceStars(self.logger, mag,
+                                                         sex_cf, scmp_cf)
                     idx += 1
 
         return True
