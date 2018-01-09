@@ -277,11 +277,11 @@ def create_configurations(mode):
 
     elif mode['type'] == 'scamp':
         l_crossid_radius = [10]  # [10] seconds
-        l_pixscale_maxerr = [1.2]  # [1.2] scale-factor
+        l_pixscale_maxerr = [1.1]  # [1.2] scale-factor
         # l_posangle_maxerr = [0.5, 2.5]
-        l_posangle_maxerr = [0.5]  # [0.5, 2.5] degrees
+        l_posangle_maxerr = [0.05]  # [0.5, 2.5] degrees
         # l_position_maxerr = [0.04, 0.08]
-        l_position_maxerr = [0.01]
+        l_position_maxerr = [0.005]
 
         configurations = []
 

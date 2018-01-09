@@ -12,14 +12,29 @@ Todo:
 """
 from astropy.io import fits
 from astropy.table import Table
-from numpy import array
+from numpy import array, std
 from pandas import concat, read_csv, DataFrame, Series
 import statsmodels.api as sm
+from scipy.odr import Model, ODR, RealData
+from scipy.stats import linregress
 
 from misc import all_same, extract_settings
 from misc import create_folder, speeds_range
 from plots import PlotConfidence, PlotError
+from plot_fitting import PlotFitting
 from regions import Create_regions
+
+
+def f(b, x):
+    """
+
+    :param b: is a vector of the parameters.
+    :param x: is an array of the current x values. is in the same format as
+    the x passed to Data or RealData.
+    :return: an array in the same format as y passed to RealData.
+    """
+
+    return b[0]*x + b[1]
 
 
 def redo_stats_d():
@@ -916,17 +931,15 @@ class ScampPerformanceStars:
 
         return pm_norm
 
-    def confidence(self, logger, source, scmp_cf, sex_cf):
+    def wls_confidence(self, source):
         """
 
         :param source:
-        :param scmp_cf:
-        :param sex_cf:
         :return:
         """
         catalogs_dir = self.prfs_d['catalogs_dir']
-        configuration_dir = '/20-21/{}/{}'.format(sex_cf, scmp_cf)
-        cat_name = '/full_{}_20-21_1.cat'.format(scmp_cf)
+        configuration_dir = '/20-21/{}/{}'.format(self.sex_cf, self.scmp_cf)
+        cat_name = '/full_{}_20-21_1.cat'.format(self.scmp_cf)
         hdu_list = fits.open('{}{}{}'.format(catalogs_dir,
                                              configuration_dir, cat_name))
         db = Table(hdu_list[2].data).to_pandas()
@@ -948,6 +961,145 @@ class ScampPerformanceStars:
         # logger.debug('new chi-squared is {}'.format(fitted.rsquared))
 
         return fitted.rsquared
+
+    def odr_confidence(self, source, tmp_d):
+        """
+
+        :param logger:
+        :param source:
+        :param sex_cf:
+        :param scmp_cf:
+        :return:
+        """
+
+        catalogs_dir = self.prfs_d['catalogs_dir']
+        configuration_dir = '/20-21/{}/{}'.format(self.sex_cf, self.scmp_cf)
+        cat_name = '/full_{}_20-21_1.cat'.format(self.scmp_cf)
+        hdu_list = fits.open('{}{}{}'.format(catalogs_dir,
+                                             configuration_dir, cat_name))
+        db = Table(hdu_list[2].data).to_pandas()
+
+        ra = db.loc[db['SOURCE_NUMBER'] == source, 'ALPHA_J2000'].tolist()
+        x = array(ra)
+        dec = db.loc[db['SOURCE_NUMBER'] == source, 'DELTA_J2000'].tolist()
+        y = array(dec)
+
+        epoch = db.loc[db['SOURCE_NUMBER'] == source, 'EPOCH'].tolist()
+
+        print('x {}'.format(x))
+        print('y {}'.format(y))
+        print('epoch {}'.format(epoch))
+
+        err_ra = db.loc[db['SOURCE_NUMBER'] == source, 'ERRA_WORLD'].tolist()
+        sx = array([1 / var for var in err_ra])
+        err_dec = db.loc[db['SOURCE_NUMBER'] == source, 'ERRB_WORLD'].tolist()
+        sy = array([1 / var for var in err_dec])
+
+        # sx = std(x)
+        # sy = std(y)
+
+        # print('ra {}'.format(ra[0]))
+        # print('dec {}'.format(dec[0]))
+        linreg = linregress(x, y)
+        # print('x {}'.format(x))
+        # print('y {}'.format(y))
+        # print('output {}'.format(linreg[0:2]))
+        # print('total output {}'.format(linreg))
+
+        linear = Model(f)
+        mydata = RealData(x, y, sx=sx, sy=sy)
+        # mydata = RealData(x, y)
+        # myodr = ODR(mydata, linear, beta0=[0])
+        tmp_linreg = list(linreg)
+        # print(tmp_linreg)
+        # print('test {}'.format(linreg[0:2]))
+        # print('err_ra {}'.format(err_ra))
+        myodr = ODR(mydata, linear,
+                    beta0=array([tmp_linreg[0], tmp_linreg[1]]),
+                    delta0=err_ra, job=0, partol=1000000,
+                    sstol=1000000, maxit=100)
+        print('odr {}'.format(myodr.partol))
+
+        myoutput = myodr.run()
+
+        # print('error {}'.format(myoutput.info))
+
+        # print fit parameters and 1-sigma estimates
+        popt = myoutput.beta
+        perr = myoutput.sd_beta
+        # print('fit parameter 1-sigma error')
+        # print('-----------')
+        # for i in range(len(popt)):
+        #     print(str(popt[i])+' +- '+str(perr[i]))
+
+        # print('popt {}'.format(popt))
+        # print('perr {}'.format(perr))
+
+        # prepare confidence level curves
+        nstd = 5.  # to draw 5-sigma intervals
+        # print('interval {}'.format(nstd * perr))
+        popt_up = popt + nstd * perr
+        popt_dw = popt - nstd * perr
+
+        # print('popt_up {}'.format(popt_up))
+        # print('popt_dw {}'.format(popt_dw))
+
+        from numpy import linspace
+        x_fit = linspace(min(x), max(x), 100)
+        fit = f(popt, x_fit)
+        fit_up = f(popt_up, x_fit)
+        fit_dw = f(popt_dw, x_fit)
+
+        std_ra = float(myoutput.cov_beta.item((0, 0)))
+        std_dec = float(myoutput.cov_beta.item((1, 1)))
+        cov_radec = float(myoutput.cov_beta.item((0, 1)))
+
+        print('std_ra {}'.format(std(ra)))
+        print('std_dec {}'.format(std(dec)))
+        # print('cov_radec {}'.format(cov_radec))
+
+        r_fit = cov_radec**2 / (std_ra * std_dec)
+        print('r_fit {}'.format(r_fit))
+
+        # import matplotlib.pyplot as plt
+        # from numpy import linspace
+        # fig = plt.figure()
+        # ax1 = fig.add_subplot(111)
+
+        a, b = myoutput.beta
+        sa, sb = myoutput.sd_beta
+
+        print(myoutput.pprint())
+
+        predicted_dec = []
+        for ra_ in ra:
+            slope = float(list(linreg)[0])
+            intercept = float(list(linreg)[1])
+            # print('slope {}'.format(slope))
+            # print('intercept {}'.format(intercept))
+            predicted_dec.append((slope * ra_) + intercept)
+
+        # print('dec {}'.format(dec))
+        # print('predicted_dec {}'.format(predicted_dec))
+
+        xp = linspace(min(ra), max(ra), 1000)
+        yp = a * xp + b
+
+        plot_d = {'x_odr': xp, 'y_odr': yp}
+        plots_dir = self.prfs_d['plots_dir']
+        output_path = '{}/err/{}/{}/{}'.format(plots_dir, self.scmp_cf,
+                                               self.sex_cf, err_d['i_pm'][0])
+        plot = PlotFitting(plot_d=plot_d, output_path=output_path)
+
+        # ax1.plot(xp, yp, 'r')
+        # ax1.plot(ra, dec, 'bs', markersize=6)
+        """
+        ax1.fill_between(x_fit, fit_up, fit_dw, alpha=.25,
+                         label='5-sigma interval')
+        plt.show()
+        """
+
+        return myoutput
 
     def check(self):
         """
@@ -1016,31 +1168,18 @@ class ScampPerformanceStars:
                     tmp_d['flag'].append('True')
                     tmp_d['source'].append(source)
                     tmp_d['o_pm'].append(o_pm)
-                    if o_pm > 5:
-                        print('o_pm {}'.format(o_pm))
-                        print('catalog_n {}'.format(catalog_n))
-                        print('o_alpha {}'.format(o_alpha))
-                        print('o_delta {}'.format(o_delta))
-                        print(o_df)
                 else:
                     # it's a SSO
                     tmp_d['flag'].append('False')
+                    tmp_d['source'].append(source)
                     tmp_d['o_pm'].append(o_pm)
 
             flag_boolean, len_boolean = all_same(tmp_d['flag'])
             flag_pm, len_pm = all_same(tmp_d['o_pm'])
 
-            # if tmp_d['flag'][0] is 'False':
-            #     print(' ')
-            #     print("tmp_d['flag'] {}".format(tmp_d['flag']))
-            #     print('flag_boolean {}'.format(flag_boolean))
-            #     print('len_boolean {}'.format(len_boolean))
-            #     print("tmp_d['o_pm'] {}".format(tmp_d['o_pm']))
-            #     print('flag_pm {}'.format(flag_pm))
-            #     print('len_pm {}'.format(len_pm))
-
             # stats for non-SSOs
             if flag_boolean and flag_pm:
+                print(tmp_d['flag'])
                 o_pm_norm = self.get_norm_speed(tmp_d['o_pm'][0])
 
                 idx = stats_d['i_pm'].index(o_pm_norm)
@@ -1051,6 +1190,10 @@ class ScampPerformanceStars:
                 stats_d['total_number'][idx] += 1
                 stats_d['non-SSOs'][idx] += 1
 
+                # wls_fit = self.wls_confidence(tmp_d['source'][0])
+
+                # odr_fit = self.odr_confidence(tmp_d['source'][0])
+
                 """
                 stats_d = {'sex_cf': [], 'scmp_cf': [],
                            'i_pm': [], 'total_number': [], 'non-SSOs': [], 'SSOs': [],
@@ -1058,19 +1201,25 @@ class ScampPerformanceStars:
                 """
             # stats for SSOs
             elif flag_boolean is False and flag_pm:
+                print(tmp_d['flag'])
                 o_pm_norm = self.get_norm_speed(tmp_d['o_pm'][0])
+                print(o_pm_norm)
 
                 idx = stats_d['i_pm'].index(o_pm_norm)
 
                 stats_d['total_number'][idx] += 1
                 stats_d['SSOs'][idx] += 1
 
+                # wls_fit = self.wls_confidence(tmp_d['source'][0])
+
+                odr_fit = self.odr_confidence(tmp_d['source'][0])
+                # res_var reduced chi-squared
+
+                print(' ')
+                print(' ')
 
                 # order_mask = check_cat_order(tmp_d['catalog'])
                 # flag_detection, sources_number = all_same(tmp_d['source'])
-
-                # ok = self.confidence(logger, tmp_d['source'][0], scmp_cf,
-                #                      sex_cf)
                 # if ok < 0.99:
                 #     right_ones += 1
                 # else:
