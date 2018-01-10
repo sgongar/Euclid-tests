@@ -279,9 +279,9 @@ def create_configurations(mode):
         l_crossid_radius = [10]  # [10] seconds
         l_pixscale_maxerr = [1.1]  # [1.2] scale-factor
         # l_posangle_maxerr = [0.5, 2.5]
-        l_posangle_maxerr = [0.05]  # [0.5, 2.5] degrees
+        l_posangle_maxerr = [0.5]  # [0.5, 2.5] degrees
         # l_position_maxerr = [0.04, 0.08]
-        l_position_maxerr = [0.005]
+        l_position_maxerr = [0.04]
 
         configurations = []
 
@@ -840,6 +840,11 @@ def cats_coherence(cats):
 def measure_distance(x2, x1, y2, y1):
     """
 
+    :param x2:
+    :param x1:
+    :param y2:
+    :param y1:
+    :return:
     """
 
     distance = np.sqrt((x2 - x1) * (x2 - x1) - (y2 - y1) * (y2 - y1))
@@ -875,7 +880,7 @@ def create_folder(logger, folder):
             makedirs(folder)
         return True
     except OSError:
-        logger.debug('Folder {} already created'.format(folder))
+        # logger.debug('Folder {} already created'.format(folder))
         return True
     except Exception as e:
         print('Unexpected error: {}'.format(e))

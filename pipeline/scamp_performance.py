@@ -12,7 +12,7 @@ Todo:
 """
 from astropy.io import fits
 from astropy.table import Table
-from numpy import array, std
+from numpy import array, std, sqrt, linspace
 from pandas import concat, read_csv, DataFrame, Series
 import statsmodels.api as sm
 from scipy.odr import Model, ODR, RealData
@@ -948,9 +948,6 @@ class ScampPerformanceStars:
         dec = db.loc[db['SOURCE_NUMBER'] == source, 'DELTA_J2000'].tolist()
         epoch = db.loc[db['SOURCE_NUMBER'] == source, 'EPOCH'].tolist()
 
-        # print('ra {}'.format(ra))
-        # print('dec {}'.format(dec))
-
         x = array(ra)
         y = array(dec)
         sigma = db.loc[db['SOURCE_NUMBER'] == source, 'ERRA_WORLD'].tolist()
@@ -958,20 +955,17 @@ class ScampPerformanceStars:
         edim = array([1 / var for var in sigma])
         model = sm.WLS(y, x, weigths=edim)
         fitted = model.fit()
-        # logger.debug('new chi-squared is {}'.format(fitted.rsquared))
 
         return fitted.rsquared
 
-    def odr_confidence(self, source, tmp_d):
+    def odr_confidence(self, star, source, tmp_d):
         """
 
-        :param logger:
+        :param star:
         :param source:
-        :param sex_cf:
-        :param scmp_cf:
+        :param tmp_d:
         :return:
         """
-
         catalogs_dir = self.prfs_d['catalogs_dir']
         configuration_dir = '/20-21/{}/{}'.format(self.sex_cf, self.scmp_cf)
         cat_name = '/full_{}_20-21_1.cat'.format(self.scmp_cf)
@@ -986,41 +980,21 @@ class ScampPerformanceStars:
 
         epoch = db.loc[db['SOURCE_NUMBER'] == source, 'EPOCH'].tolist()
 
-        print('x {}'.format(x))
-        print('y {}'.format(y))
-        print('epoch {}'.format(epoch))
-
         err_ra = db.loc[db['SOURCE_NUMBER'] == source, 'ERRA_WORLD'].tolist()
         sx = array([1 / var for var in err_ra])
         err_dec = db.loc[db['SOURCE_NUMBER'] == source, 'ERRB_WORLD'].tolist()
         sy = array([1 / var for var in err_dec])
 
-        # sx = std(x)
-        # sy = std(y)
-
-        # print('ra {}'.format(ra[0]))
-        # print('dec {}'.format(dec[0]))
         linreg = linregress(x, y)
-        # print('x {}'.format(x))
-        # print('y {}'.format(y))
-        # print('output {}'.format(linreg[0:2]))
-        # print('total output {}'.format(linreg))
 
         linear = Model(f)
         mydata = RealData(x, y, sx=sx, sy=sy)
-        # mydata = RealData(x, y)
-        # myodr = ODR(mydata, linear, beta0=[0])
-        tmp_linreg = list(linreg)
-        # print(tmp_linreg)
-        # print('test {}'.format(linreg[0:2]))
-        # print('err_ra {}'.format(err_ra))
+        tmp_linreg = list(linreg)  # temporary list for fitting output
         myodr = ODR(mydata, linear,
                     beta0=array([tmp_linreg[0], tmp_linreg[1]]),
-                    delta0=err_ra, job=0, partol=1000000,
-                    sstol=1000000, maxit=100)
-        print('odr {}'.format(myodr.partol))
+                    delta0=err_ra, job=0, maxit=100)
 
-        myoutput = myodr.run()
+        myoutput = myodr.run()  # run Orthogonal Distance Regression
 
         # print('error {}'.format(myoutput.info))
 
@@ -1041,25 +1015,25 @@ class ScampPerformanceStars:
         popt_up = popt + nstd * perr
         popt_dw = popt - nstd * perr
 
-        # print('popt_up {}'.format(popt_up))
-        # print('popt_dw {}'.format(popt_dw))
-
-        from numpy import linspace
         x_fit = linspace(min(x), max(x), 100)
         fit = f(popt, x_fit)
         fit_up = f(popt_up, x_fit)
         fit_dw = f(popt_dw, x_fit)
 
-        std_ra = float(myoutput.cov_beta.item((0, 0)))
-        std_dec = float(myoutput.cov_beta.item((1, 1)))
+        std_ra = sqrt(float(myoutput.cov_beta.item((0, 0))))
+        std_dec = sqrt(float(myoutput.cov_beta.item((1, 1))))
         cov_radec = float(myoutput.cov_beta.item((0, 1)))
 
-        print('std_ra {}'.format(std(ra)))
-        print('std_dec {}'.format(std(dec)))
-        # print('cov_radec {}'.format(cov_radec))
+        fit_odr = float(cov_radec / (std_ra * std_dec))
 
-        r_fit = cov_radec**2 / (std_ra * std_dec)
-        print('r_fit {}'.format(r_fit))
+        res_var = myoutput.res_var
+        print('res_var {}'.format(res_var))
+        print('std_dec {}'.format(std_dec))
+        r_2 = 1 - (res_var / std_dec)
+        print('r_2 {}'.format(r_2))
+        r_2 = sqrt(r_2)
+
+        print('r_2 {}'.format(r_2))
 
         # import matplotlib.pyplot as plt
         # from numpy import linspace
@@ -1069,7 +1043,7 @@ class ScampPerformanceStars:
         a, b = myoutput.beta
         sa, sb = myoutput.sd_beta
 
-        print(myoutput.pprint())
+        # print(myoutput.pprint())
 
         predicted_dec = []
         for ra_ in ra:
@@ -1085,15 +1059,17 @@ class ScampPerformanceStars:
         xp = linspace(min(ra), max(ra), 1000)
         yp = a * xp + b
 
-        plot_d = {'x_odr': xp, 'y_odr': yp}
+        fits_d = {'x_odr': xp, 'y_odr': yp, 'fit_odr': fit_odr}
         plots_dir = self.prfs_d['plots_dir']
-        output_path = '{}/err/{}/{}/{}'.format(plots_dir, self.scmp_cf,
-                                               self.sex_cf, err_d['i_pm'][0])
-        plot = PlotFitting(plot_d=plot_d, output_path=output_path)
+        output_path = '{}/fit/{}/{}/{}'.format(plots_dir, self.scmp_cf,
+                                               self.sex_cf,
+                                               tmp_d['i_pm'][0])
+        create_folder(self.logger, output_path)
 
+        plot = PlotFitting(star, tmp_d, output_path, fits_d)
+        """
         # ax1.plot(xp, yp, 'r')
         # ax1.plot(ra, dec, 'bs', markersize=6)
-        """
         ax1.fill_between(x_fit, fit_up, fit_dw, alpha=.25,
                          label='5-sigma interval')
         plt.show()
@@ -1151,7 +1127,10 @@ class ScampPerformanceStars:
 
         print('unique_sources number {}'.format(len(o_unique_sources)))
         for source_ in o_unique_sources:
-            tmp_d = {'flag': [], 'source': [], 'o_pm': []}
+            tmp_d = {'flag': [], 'source': [], 'i_alpha': [], 'i_delta': [],
+                     'o_alpha': [], 'o_delta': [], 'i_pm': [], 'i_pm_alpha': [],
+                     'i_pm_delta': [], 'o_pm': [], 'o_pm_alpha': [],
+                     'o_pm_delta': [], 'o_pm_norm': []}
 
             o_df = o_cat[o_cat['SOURCE_NUMBER'].isin([source_])]
             for i, row in enumerate(o_df.itertuples(), 1):
@@ -1160,6 +1139,8 @@ class ScampPerformanceStars:
                 o_alpha = row.ALPHA_J2000
                 o_delta = row.DELTA_J2000
                 o_pm = row.PM
+                o_pm_alpha = row.PMALPHA
+                o_pm_delta = row.PMDELTA
 
                 out_df = check_star(catalog_n, i_df, o_alpha, o_delta)
 
@@ -1172,38 +1153,45 @@ class ScampPerformanceStars:
                     # it's a SSO
                     tmp_d['flag'].append('False')
                     tmp_d['source'].append(source)
+                    i_alpha = out_df['alpha_j2000'].iloc[0]
+                    tmp_d['i_alpha'].append(i_alpha)
+                    i_delta = out_df['delta_j2000'].iloc[0]
+                    tmp_d['i_delta'].append(i_delta)
+                    tmp_d['o_alpha'].append(o_alpha)
+                    tmp_d['o_delta'].append(o_delta)
+                    i_pm = out_df['pm_values'].iloc[0]
+                    tmp_d['i_pm'].append(i_pm)
+                    i_pm_alpha = out_df['pm_alpha'].iloc[0]
+                    tmp_d['i_pm_alpha'].append(i_pm_alpha)
+                    i_pm_delta = out_df['pm_delta'].iloc[0]
+                    tmp_d['i_pm_delta'].append(i_pm_delta)
                     tmp_d['o_pm'].append(o_pm)
+                    tmp_d['o_pm_alpha'].append(o_pm_alpha)
+                    tmp_d['o_pm_delta'].append(o_pm_delta)
 
             flag_boolean, len_boolean = all_same(tmp_d['flag'])
             flag_pm, len_pm = all_same(tmp_d['o_pm'])
 
             # stats for non-SSOs
             if flag_boolean and flag_pm:
-                print(tmp_d['flag'])
                 o_pm_norm = self.get_norm_speed(tmp_d['o_pm'][0])
+                for idx in range(0, len(tmp_d['o_pm']), 1):
+                    tmp_d['o_pm_norm'].append(o_pm_norm)
 
                 idx = stats_d['i_pm'].index(o_pm_norm)
-                # print('o_pm {}'.format(tmp_d['o_pm'][0]))
-                # print('o_pm_norm {}'.format(o_pm_norm))
-                # print('idx_{}'.format(idx))
 
                 stats_d['total_number'][idx] += 1
                 stats_d['non-SSOs'][idx] += 1
 
                 # wls_fit = self.wls_confidence(tmp_d['source'][0])
+                star = True
+                odr_fit = self.odr_confidence(star, tmp_d['source'][0], tmp_d)
 
-                # odr_fit = self.odr_confidence(tmp_d['source'][0])
-
-                """
-                stats_d = {'sex_cf': [], 'scmp_cf': [],
-                           'i_pm': [], 'total_number': [], 'non-SSOs': [], 'SSOs': [],
-                           'f_dr': [], 'f_pur': [], 'f_com': []}
-                """
             # stats for SSOs
             elif flag_boolean is False and flag_pm:
-                print(tmp_d['flag'])
                 o_pm_norm = self.get_norm_speed(tmp_d['o_pm'][0])
-                print(o_pm_norm)
+                for idx in range(0, len(tmp_d['o_pm']), 1):
+                    tmp_d['o_pm_norm'].append(o_pm_norm)
 
                 idx = stats_d['i_pm'].index(o_pm_norm)
 
@@ -1211,12 +1199,8 @@ class ScampPerformanceStars:
                 stats_d['SSOs'][idx] += 1
 
                 # wls_fit = self.wls_confidence(tmp_d['source'][0])
-
-                odr_fit = self.odr_confidence(tmp_d['source'][0])
-                # res_var reduced chi-squared
-
-                print(' ')
-                print(' ')
+                star = False
+                odr_fit = self.odr_confidence(star, tmp_d['source'][0], tmp_d)
 
                 # order_mask = check_cat_order(tmp_d['catalog'])
                 # flag_detection, sources_number = all_same(tmp_d['source'])
