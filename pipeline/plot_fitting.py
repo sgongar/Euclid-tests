@@ -272,6 +272,7 @@ class PlotFitting:
     def fit_view(self, pdf):
         """ shows extractions and fittings
 
+        :rtype: object
         :param pdf:
         :return:
         """
@@ -281,7 +282,10 @@ class PlotFitting:
         ax_1 = plt.subplot2grid((1, 5), (0, 0), colspan=4)
 
         source_str = 'source {}'.format(self.data_d['source'][0])
-        pm_str = 'input_pm {}'.format(self.data_d['i_pm'][0])
+        if self.star:
+            pm_str = 'input_pm 0'
+        else:
+            pm_str = 'input_pm {}'.format(self.data_d['i_pm'][0])
         # ok_str = 'ok {}'.format(self.ok)
         ax_1.set_title('{}\n{}'.format(source_str, pm_str))
 
@@ -304,7 +308,7 @@ class PlotFitting:
             print('alpha: {}'.format(self.data_d['i_alpha']))
             print('delta: {}'.format(self.data_d['i_delta']))
             print('source {}'.format(self.data_d['source'][0]))
-            raise Exception
+            # raise Exception
 
         # x-ticks assignation
         ax_1.set_xticks(x_ticks['major_t'], minor=False)
@@ -345,9 +349,14 @@ class PlotFitting:
 
         ax_2 = plt.subplot2grid((1, 5), (0, 4))
 
-        i_pm = float("{0:.6f}".format(self.data_d['i_pm'][1]))
-        i_pm_alpha = float("{0:.6f}".format(self.data_d['i_pm_alpha'][1]))
-        i_pm_delta = float("{0:.6f}".format(self.data_d['i_pm_delta'][1]))
+        if self.star:
+            i_pm = 0.0
+            i_pm_alpha = 0.0
+            i_pm_delta = 0.0
+        else:
+            i_pm = float("{0:.6f}".format(self.data_d['i_pm'][1]))
+            i_pm_alpha = float("{0:.6f}".format(self.data_d['i_pm_alpha'][1]))
+            i_pm_delta = float("{0:.6f}".format(self.data_d['i_pm_delta'][1]))
         o_pm = float("{0:.6f}".format(self.data_d['o_pm'][1]))
         o_pm_alpha = float("{0:.6f}".format(self.data_d['o_pm_alpha'][1]))
         o_pm_delta = float("{0:.6f}".format(self.data_d['o_pm_delta'][1]))
@@ -375,6 +384,115 @@ class PlotFitting:
         pdf.savefig()
         plt.close(fig)
 
+    # def fits_images(self, pdf):
+    #     """
+    #
+    #     :param pdf:
+    #     :return:
+    #     """
+    #     # Gets limits
+    #     alpha_center = 0
+    #     delta_center = 0
+    #     if len(self.data_d['i_alpha']) == 2:
+    #         alpha_sum = self.data_d['i_alpha'][0] + self.data_d['i_alpha'][1]
+    #         alpha_center = alpha_sum / 2
+    #         delta_sum = self.data_d['i_delta'][0] + self.data_d['i_delta'][1]
+    #         delta_center = delta_sum / 2
+    #     elif len(self.data_d['i_alpha']) == 3:
+    #         alpha_center = self.data_d['i_alpha'][1]
+    #         delta_center = self.data_d['i_delta'][1]
+    #     elif len(self.data_d['i_alpha']) == 4:
+    #         alpha_sum = self.data_d['i_alpha'][1] + self.data_d['i_alpha'][2]
+    #         alpha_center = alpha_sum / 2
+    #         delta_sum = self.data_d['i_delta'][1] + self.data_d['i_delta'][2]
+    #         delta_center = delta_sum / 2
+    #
+    #     if alpha_center is 0 or delta_center is 0:
+    #         print('ERROR')
+    #         print("self.err_d['i_alpha'] {}".format(self.data_d['i_alpha']))
+    #         print("self.err_d['i_delta'] {}".format(self.data_d['i_delta']))
+    #
+    #         raise Exception
+    #
+    #     for idx in range(0, len(self.data_d['i_alpha']), 1):
+    #         # Get regions for desired fits file
+    #         regions_file = get_regions(self.fits_files[idx],
+    #                                    self.data_d['sex_cf'][0],
+    #                                    self.prfs_d, self.mag)
+    #
+    #         # Creates image
+    #         dither = self.fits_files[idx][-6:-5]
+    #         i_regs = '{}/dither_{}.reg'.format(self.prfs_d['dithers_out'],
+    #                                            dither)
+    #         if idx == 0:
+    #             p_alpha = 0
+    #             p_delta = 0
+    #         else:
+    #             p_alpha = self.data_d['i_alpha'][idx - 1]
+    #             p_delta = self.data_d['i_delta'][idx - 1]
+    #
+    #         # Zoomed image
+    #         zoom = True
+    #         img = image(i_regs, self.fits_files[idx], regions_file,
+    #                     alpha_center, delta_center, idx,
+    #                     float(self.data_d['i_pm'][0]), p_alpha, p_delta,
+    #                     zoom)
+    #
+    #         img = img[1:-50, :]  # Removes ds9's legend
+    #
+    #         fig = plt.figure(figsize=self.plot_size, dpi=self.plot_dpi)
+    #         ax_1 = fig.add_subplot(1, 1, 1)
+    #         ax_1.set_title('Dither {} - Enlarged view '.format(dither))
+    #
+    #         plt.imshow(img)
+    #
+    #         labels = [item.get_text() for item in ax_1.get_xticklabels()]
+    #
+    #         empty_string_labels = [''] * len(labels)
+    #         ax_1.set_xticklabels(empty_string_labels)
+    #
+    #         labels = [item.get_text() for item in ax_1.get_yticklabels()]
+    #
+    #         empty_string_labels = [''] * len(labels)
+    #         ax_1.set_yticklabels(empty_string_labels)
+    #
+    #         ax_1.set_xlabel('right ascension')
+    #         ax_1.set_ylabel('declination')
+    #
+    #         pdf.savefig()
+    #         plt.close(fig)
+    #
+    #         # Wide image
+    #         zoom = False
+    #         img = image(i_regs, self.fits_files[idx], regions_file,
+    #                     alpha_center, delta_center, idx,
+    #                     float(self.err_d['i_pm'][0]), p_alpha, p_delta,
+    #                     zoom)
+    #
+    #         img = img[1:-50, :]  # Removes ds9's legend
+    #
+    #         fig = plt.figure(figsize=self.plot_size, dpi=self.plot_dpi)
+    #         ax_1 = fig.add_subplot(1, 1, 1)
+    #         ax_1.set_title('Dither {} - Wide view '.format(dither))
+    #
+    #         plt.imshow(img)
+    #
+    #         labels = [item.get_text() for item in ax_1.get_xticklabels()]
+    #
+    #         empty_string_labels = [''] * len(labels)
+    #         ax_1.set_xticklabels(empty_string_labels)
+    #
+    #         labels = [item.get_text() for item in ax_1.get_yticklabels()]
+    #
+    #         empty_string_labels = [''] * len(labels)
+    #         ax_1.set_yticklabels(empty_string_labels)
+    #
+    #         ax_1.set_xlabel('right ascension')
+    #         ax_1.set_ylabel('declination')
+    #
+    #         pdf.savefig()
+    #         plt.close(fig)
+
     def plot(self):
         """
 
@@ -400,112 +518,3 @@ class PlotFitting:
     #         ccds.append(ccd[-13:-5])
     #
     #     return ccds
-    #
-    #         #
-    #         # IMAGES
-    #         #
-    #
-    #         # Gets limits
-    #         alpha_center = 0
-    #         delta_center = 0
-    #         if len(self.err_d['i_alpha']) == 2:
-    #             alpha_sum = self.err_d['i_alpha'][0] + self.err_d['i_alpha'][1]
-    #             alpha_center = alpha_sum / 2
-    #             delta_sum = self.err_d['i_delta'][0] + self.err_d['i_delta'][1]
-    #             delta_center = delta_sum / 2
-    #         elif len(self.err_d['i_alpha']) == 3:
-    #             alpha_center = self.err_d['i_alpha'][1]
-    #             delta_center = self.err_d['i_delta'][1]
-    #         elif len(self.err_d['i_alpha']) == 4:
-    #             alpha_sum = self.err_d['i_alpha'][1] + self.err_d['i_alpha'][2]
-    #             alpha_center = alpha_sum / 2
-    #             delta_sum = self.err_d['i_delta'][1] + self.err_d['i_delta'][2]
-    #             delta_center = delta_sum / 2
-    #
-    #         if alpha_center is 0 or delta_center is 0:
-    #             print('ERROR')
-    #             print("self.err_d['i_alpha'] {}".format(self.err_d['i_alpha']))
-    #             print("self.err_d['i_delta'] {}".format(self.err_d['i_delta']))
-    #
-    #             raise Exception
-    #
-    #         for idx in range(0, len(self.err_d['i_alpha']), 1):
-    #             # Get regions for desired fits file
-    #             regions_file = get_regions(self.fits_files[idx],
-    #                                        self.err_d['sex_cf'][0],
-    #                                        self.prfs_d, self.mag)
-    #
-    #             # Creates image
-    #             dither = self.fits_files[idx][-6:-5]
-    #             i_regs = '{}/dither_{}.reg'.format(self.prfs_d['dithers_out'],
-    #                                                dither)
-    #             if idx == 0:
-    #                 p_alpha = 0
-    #                 p_delta = 0
-    #             else:
-    #                 p_alpha = self.err_d['i_alpha'][idx - 1]
-    #                 p_delta = self.err_d['i_delta'][idx - 1]
-    #
-    #             # Zoomed image
-    #             zoom = True
-    #             img = image(i_regs, self.fits_files[idx], regions_file,
-    #                         alpha_center, delta_center, idx,
-    #                         float(self.err_d['i_pm'][0]), p_alpha, p_delta,
-    #                         zoom)
-    #
-    #             img = img[1:-50, :]  # Removes ds9's legend
-    #
-    #             fig = plt.figure(figsize=self.plot_size, dpi=self.plot_dpi)
-    #             ax_1 = fig.add_subplot(1, 1, 1)
-    #             ax_1.set_title('Dither {} - Enlarged view '.format(dither))
-    #
-    #             plt.imshow(img)
-    #
-    #             labels = [item.get_text() for item in ax_1.get_xticklabels()]
-    #
-    #             empty_string_labels = [''] * len(labels)
-    #             ax_1.set_xticklabels(empty_string_labels)
-    #
-    #             labels = [item.get_text() for item in ax_1.get_yticklabels()]
-    #
-    #             empty_string_labels = [''] * len(labels)
-    #             ax_1.set_yticklabels(empty_string_labels)
-    #
-    #             ax_1.set_xlabel('right ascension')
-    #             ax_1.set_ylabel('declination')
-    #
-    #             pdf.savefig()
-    #             plt.close(fig)
-    #
-    #             # Wide image
-    #             zoom = False
-    #             img = image(i_regs, self.fits_files[idx], regions_file,
-    #                         alpha_center, delta_center, idx,
-    #                         float(self.err_d['i_pm'][0]), p_alpha, p_delta,
-    #                         zoom)
-    #
-    #             img = img[1:-50, :]  # Removes ds9's legend
-    #
-    #             fig = plt.figure(figsize=self.plot_size, dpi=self.plot_dpi)
-    #             ax_1 = fig.add_subplot(1, 1, 1)
-    #             ax_1.set_title('Dither {} - Wide view '.format(dither))
-    #
-    #             plt.imshow(img)
-    #
-    #             labels = [item.get_text() for item in ax_1.get_xticklabels()]
-    #
-    #             empty_string_labels = [''] * len(labels)
-    #             ax_1.set_xticklabels(empty_string_labels)
-    #
-    #             labels = [item.get_text() for item in ax_1.get_yticklabels()]
-    #
-    #             empty_string_labels = [''] * len(labels)
-    #             ax_1.set_yticklabels(empty_string_labels)
-    #
-    #             ax_1.set_xlabel('right ascension')
-    #             ax_1.set_ylabel('declination')
-    #
-    #             pdf.savefig()
-    #             plt.close(fig)
-    #
-    #

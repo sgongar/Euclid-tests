@@ -25,6 +25,47 @@ from plot_fitting import PlotFitting
 from regions import Create_regions
 
 
+def compute_factors(stats_d):
+    """
+    N_meas: number of all detected sources(including false detections)
+    N_se: number of simulated sources recovered by source extraction
+    N_true: number of simulated input sources
+    f_dr: detection rate f_pur: purity
+    f_com: completeness
+
+    f_dr = N_meas / N_true = (N_se + N_false) / N_true
+    f_pur = N_se / N_meas = N_se / (N_se + N_false)
+    f_com = f_dr * f_pur = N_se / N_true
+
+    :param stats_d:
+    :return:
+    """
+    for idx in range(0, len(stats_d['f_dr']), 1):
+        n_meas = stats_d['N_meas'][idx]
+        n_se = stats_d['N_se'][idx]
+        n_true = stats_d['N_true'][idx]
+        try:
+            f_dr = n_meas / n_true
+            f_dr = float("{0:.2f}".format(f_dr))
+            stats_d['f_dr'][idx] = f_dr
+        except ZeroDivisionError:
+            stats_d['f_dr'][idx] = 'nan'
+        try:
+            f_pur = n_se / n_meas
+            f_pur = float("{0:.2f}".format(f_pur))
+            stats_d['f_pur'][idx] = f_pur
+        except ZeroDivisionError:
+            stats_d['f_pur'][idx] = 'nan'
+        try:
+            f_com = n_se / n_true
+            f_com = float("{0:.2f}".format(f_com))
+            stats_d['f_com'][idx] = f_com
+        except ZeroDivisionError:
+            stats_d['f_com'][idx] = 'nan'
+
+    return stats_d
+
+
 def f(b, x):
     """
 
@@ -42,9 +83,9 @@ def redo_stats_d():
 
     :return: tmp_d
     """
-    stats_d = {'sex_cf': [], 'scmp_cf': [], 'i_pm': [], 'total_number': [],
-               'non-SSOs': [], 'SSOs': [], 'f_dr': [], 'f_pur': [],
-               'f_com': []}
+    stats_d = {'sex_cf': [], 'scmp_cf': [], 'i_pm': [], 'N_meas': [],
+               'N_false': [], 'N_se': [], 'N_true': [], 'f_dr': [],
+               'f_pur': [], 'f_com': []}
 
     return stats_d
 
@@ -64,20 +105,24 @@ def populate_stats_d(stats_d, sex_cf, scmp_cf):
     stats_d['sex_cf'].append(sex_cf)
     stats_d['scmp_cf'].append(scmp_cf)
     stats_d['i_pm'].append(initial_int)
-    stats_d['total_number'].append(initial_int)
-    stats_d['non-SSOs'].append(initial_int)
-    stats_d['SSOs'].append(initial_float)
+    stats_d['N_meas'].append(initial_int)
+    stats_d['N_false'].append(initial_int)
+    stats_d['N_se'].append(initial_float)
+    stats_d['N_true'].append('nan')
     stats_d['f_dr'].append(initial_float)
     stats_d['f_pur'].append(initial_float)
     stats_d['f_com'].append(initial_float)
 
-    for pm_ in prfs_d['pms']:
+    true_sources = [21, 22, 14, 17, 19, 22, 23, 19, 18, 21]
+
+    for idx, pm_ in enumerate(prfs_d['pms']):
         stats_d['sex_cf'].append(sex_cf)
         stats_d['scmp_cf'].append(scmp_cf)
         stats_d['i_pm'].append(pm_)
-        stats_d['total_number'].append(initial_int)
-        stats_d['non-SSOs'].append(initial_int)
-        stats_d['SSOs'].append(initial_float)
+        stats_d['N_meas'].append(initial_int)
+        stats_d['N_false'].append(initial_int)
+        stats_d['N_se'].append(initial_float)
+        stats_d['N_true'].append(true_sources[idx])
         stats_d['f_dr'].append(initial_float)
         stats_d['f_pur'].append(initial_float)
         stats_d['f_com'].append(initial_float)
@@ -132,6 +177,29 @@ def check_star(catalog_n, i_df, o_alpha, o_delta):
     i_df = i_df[o_delta > i_df['delta_j2000'] - tolerance]
 
     return i_df
+
+
+def check_mag(i_df, o_alpha, o_delta):
+    """
+
+    :param i_df:
+    :param o_alpha:
+    :param o_delta:
+    :return:
+    """
+    tolerance = 0.0005  # 1.8 arcsecond
+
+    i_df = i_df[i_df['alpha_j2000'] + tolerance > o_alpha]
+    i_df = i_df[o_alpha > i_df['alpha_j2000'] - tolerance]
+    i_df = i_df[i_df['delta_j2000'] + tolerance > o_delta]
+    i_df = i_df[o_delta > i_df['delta_j2000'] - tolerance]
+
+    if i_df.empty:
+        flag_mag = False
+    else:
+        flag_mag = True
+
+    return flag_mag
 
 
 def cut_catalog(o_cat, margin, limits):
@@ -830,6 +898,8 @@ class ScampPerformanceSSOs:
         :param cat_df:
         :param err_d:
         :param scmp_source:
+        :param o_alpha:
+        :param o_delta:
         :return:
         """
         err_d['sex_cf'].append(self.sex_cf)
@@ -946,7 +1016,7 @@ class ScampPerformanceStars:
 
         ra = db.loc[db['SOURCE_NUMBER'] == source, 'ALPHA_J2000'].tolist()
         dec = db.loc[db['SOURCE_NUMBER'] == source, 'DELTA_J2000'].tolist()
-        epoch = db.loc[db['SOURCE_NUMBER'] == source, 'EPOCH'].tolist()
+        # epoch = db.loc[db['SOURCE_NUMBER'] == source, 'EPOCH'].tolist()
 
         x = array(ra)
         y = array(dec)
@@ -977,8 +1047,7 @@ class ScampPerformanceStars:
         x = array(ra)
         dec = db.loc[db['SOURCE_NUMBER'] == source, 'DELTA_J2000'].tolist()
         y = array(dec)
-
-        epoch = db.loc[db['SOURCE_NUMBER'] == source, 'EPOCH'].tolist()
+        # epoch = db.loc[db['SOURCE_NUMBER'] == source, 'EPOCH'].tolist()
 
         err_ra = db.loc[db['SOURCE_NUMBER'] == source, 'ERRA_WORLD'].tolist()
         sx = array([1 / var for var in err_ra])
@@ -1027,13 +1096,13 @@ class ScampPerformanceStars:
         fit_odr = float(cov_radec / (std_ra * std_dec))
 
         res_var = myoutput.res_var
-        print('res_var {}'.format(res_var))
-        print('std_dec {}'.format(std_dec))
+        # print('res_var {}'.format(res_var))
+        # print('std_dec {}'.format(std_dec))
         r_2 = 1 - (res_var / std_dec)
-        print('r_2 {}'.format(r_2))
+        # print('r_2 {}'.format(r_2))
         r_2 = sqrt(r_2)
 
-        print('r_2 {}'.format(r_2))
+        # print('r_2 {}'.format(r_2))
 
         # import matplotlib.pyplot as plt
         # from numpy import linspace
@@ -1061,10 +1130,18 @@ class ScampPerformanceStars:
 
         fits_d = {'x_odr': xp, 'y_odr': yp, 'fit_odr': fit_odr}
         plots_dir = self.prfs_d['plots_dir']
-        output_path = '{}/fit/{}/{}/{}'.format(plots_dir, self.scmp_cf,
-                                               self.sex_cf,
-                                               tmp_d['i_pm'][0])
-        create_folder(self.logger, output_path)
+        if len(tmp_d['i_pm']) == 0:
+            output_path = '{}/fit/{}/{}/star/{}'.format(plots_dir, self.scmp_cf,
+                                                        self.sex_cf,
+                                                        tmp_d['o_pm_norm'][0])
+            create_folder(self.logger, output_path)
+        elif len(tmp_d['i_pm']) != 0:
+            output_path = '{}/fit/{}/{}/SSO/{}'.format(plots_dir, self.scmp_cf,
+                                                       self.sex_cf,
+                                                       tmp_d['i_pm'][0])
+            create_folder(self.logger, output_path)
+        else:
+            raise Exception
 
         plot = PlotFitting(star, tmp_d, output_path, fits_d)
         """
@@ -1083,14 +1160,10 @@ class ScampPerformanceStars:
         :return:
         """
         # Creates an input dictionary with all input sources
-        self.logger.debug('checking performance for {} and {}'.format(self.scmp_cf,
-                                                                      self.sex_cf))
+        self.logger.debug('scamp {} and sextractor {}'.format(self.scmp_cf,
+                                                              self.sex_cf))
 
-        """
-        stats_d = {'sex_cf': [], 'scmp_cf': [],
-                   'i_pm': [], 'total_number': [], 'non-SSOs': [], 'SSOs': [],
-                   'f_dr': [], 'f_pur': [], 'f_com': []}
-        """
+        # Creates a dictionary for statistics
         stats_d = redo_stats_d()
         stats_d = populate_stats_d(stats_d, self.sex_cf, self.scmp_cf)
 
@@ -1107,31 +1180,40 @@ class ScampPerformanceStars:
         for key_ in input_d.keys():
             input_l.append(input_d[key_])
 
+        # Concatenates
         i_df = concat(input_l, axis=0)
+        # Needed?
         # Look for < 3 coincidences
         # i_df = concat(g for _, g in i_df.groupby('source')
         #               if len(g) >= 3)
         i_df = i_df.reset_index(drop=True)
 
-        # Open particular file!
-        filt_n = 'filt_{}_{}_2.csv'.format(self.scmp_cf, self.mag)
+        # Gets the name of filtered file
+        filter_n = 'filt_{}_{}_2.csv'.format(self.scmp_cf, self.mag)
         filter_o_n = '{}/{}/{}/{}/{}'.format(self.prfs_d['filter_dir'],
                                              self.mag, self.sex_cf,
-                                             self.scmp_cf, filt_n)
-
-        # Cross with filtered data - Opens datafile
+                                             self.scmp_cf, filter_n)
+        # Opens filtered file
         o_cat = read_csv('{}'.format(filter_o_n), index_col=0)
-
-        # Gets unique sources from input data
+        # Gets unique sources from filtered file
         o_unique_sources = list(set(o_cat['SOURCE_NUMBER'].tolist()))
 
-        print('unique_sources number {}'.format(len(o_unique_sources)))
-        for source_ in o_unique_sources:
+        # A catalogue populated by stars
+        cat_loc = '{}/{}/Catalogs'.format(self.prfs_d['fits_dir'], self.mag)
+        cat_name = '{}/Cat_20-21_d1.dat'.format(cat_loc)
+        input_stars = Create_regions(cat_name).get_stars(self.mag)
+
+        print('total {}'.format(len(o_unique_sources)))
+        # Loops over unique sources of filtered file
+        for idx, source_ in enumerate(o_unique_sources):
+            print(idx, source_)
             tmp_d = {'flag': [], 'source': [], 'i_alpha': [], 'i_delta': [],
                      'o_alpha': [], 'o_delta': [], 'i_pm': [], 'i_pm_alpha': [],
                      'i_pm_delta': [], 'o_pm': [], 'o_pm_alpha': [],
                      'o_pm_delta': [], 'o_pm_norm': []}
 
+            # Check if actual source lies in 20-21 magnitude gap
+            # flag_mag = False
             o_df = o_cat[o_cat['SOURCE_NUMBER'].isin([source_])]
             for i, row in enumerate(o_df.itertuples(), 1):
                 source = row.SOURCE_NUMBER
@@ -1142,15 +1224,21 @@ class ScampPerformanceStars:
                 o_pm_alpha = row.PMALPHA
                 o_pm_delta = row.PMDELTA
 
+                flag_mag = check_mag(input_stars, o_alpha, o_delta)
                 out_df = check_star(catalog_n, i_df, o_alpha, o_delta)
 
-                if out_df.empty:
+                if out_df.empty and flag_mag:
                     # it's a star
                     tmp_d['flag'].append('True')
                     tmp_d['source'].append(source)
+                    tmp_d['o_alpha'].append(o_alpha)
+                    tmp_d['o_delta'].append(o_delta)
                     tmp_d['o_pm'].append(o_pm)
-                else:
+                    tmp_d['o_pm_alpha'].append(o_pm_alpha)
+                    tmp_d['o_pm_delta'].append(o_pm_delta)
+                elif out_df.empty is not True:
                     # it's a SSO
+                    flag_mag = True
                     tmp_d['flag'].append('False')
                     tmp_d['source'].append(source)
                     i_alpha = out_df['alpha_j2000'].iloc[0]
@@ -1168,70 +1256,77 @@ class ScampPerformanceStars:
                     tmp_d['o_pm'].append(o_pm)
                     tmp_d['o_pm_alpha'].append(o_pm_alpha)
                     tmp_d['o_pm_delta'].append(o_pm_delta)
+                else:
+                    pass
 
-            flag_boolean, len_boolean = all_same(tmp_d['flag'])
-            flag_pm, len_pm = all_same(tmp_d['o_pm'])
+            if flag_mag:
+                flag_boolean, len_boolean = all_same(tmp_d['flag'])
+                flag_pm, len_pm = all_same(tmp_d['o_pm'])
 
-            # stats for non-SSOs
-            if flag_boolean and flag_pm:
-                o_pm_norm = self.get_norm_speed(tmp_d['o_pm'][0])
-                for idx in range(0, len(tmp_d['o_pm']), 1):
-                    tmp_d['o_pm_norm'].append(o_pm_norm)
+                # stats for non-SSOs
+                if flag_boolean and flag_pm:
+                    o_pm_norm = self.get_norm_speed(tmp_d['o_pm'][0])
+                    for idx in range(0, len(tmp_d['o_pm']), 1):
+                        tmp_d['o_pm_norm'].append(o_pm_norm)
 
-                idx = stats_d['i_pm'].index(o_pm_norm)
+                    idx = stats_d['i_pm'].index(o_pm_norm)
 
-                stats_d['total_number'][idx] += 1
-                stats_d['non-SSOs'][idx] += 1
+                    stats_d['N_meas'][idx] += 1
+                    stats_d['N_false'][idx] += 1
 
-                # wls_fit = self.wls_confidence(tmp_d['source'][0])
-                star = True
-                odr_fit = self.odr_confidence(star, tmp_d['source'][0], tmp_d)
+                    # wls_fit = self.wls_confidence(tmp_d['source'][0])
+                    star = True
+                    # print('tmp_d {}'.format(tmp_d))
+                    # odr_fit = self.odr_confidence(star, tmp_d['source'][0],
+                    #                               tmp_d)
 
-            # stats for SSOs
-            elif flag_boolean is False and flag_pm:
-                o_pm_norm = self.get_norm_speed(tmp_d['o_pm'][0])
-                for idx in range(0, len(tmp_d['o_pm']), 1):
-                    tmp_d['o_pm_norm'].append(o_pm_norm)
+                # stats for SSOs
+                elif flag_boolean is False and flag_pm:
+                    o_pm_norm = self.get_norm_speed(tmp_d['o_pm'][0])
+                    for idx in range(0, len(tmp_d['o_pm']), 1):
+                        tmp_d['o_pm_norm'].append(o_pm_norm)
 
-                idx = stats_d['i_pm'].index(o_pm_norm)
+                    idx = stats_d['i_pm'].index(o_pm_norm)
 
-                stats_d['total_number'][idx] += 1
-                stats_d['SSOs'][idx] += 1
+                    stats_d['N_meas'][idx] += 1
+                    stats_d['N_se'][idx] += 1
 
-                # wls_fit = self.wls_confidence(tmp_d['source'][0])
-                star = False
-                odr_fit = self.odr_confidence(star, tmp_d['source'][0], tmp_d)
+                    # wls_fit = self.wls_confidence(tmp_d['source'][0])
+                    star = False
+                    # odr_fit = self.odr_confidence(star, tmp_d['source'][0],
+                    #                               tmp_d)
 
-                # order_mask = check_cat_order(tmp_d['catalog'])
-                # flag_detection, sources_number = all_same(tmp_d['source'])
-                # if ok < 0.99:
-                #     right_ones += 1
-                # else:
-                #     false_ones += 1
-                # if order_mask and sources_number >= 3:
-                #     for tmp_source_ in tmp_d['source']:
-                #         stats_d['source_l'].append(tmp_source_)
-                #     for catalog_ in tmp_d['catalog']:
-                #         stats_d['catalog_l'].append(catalog_)
-                #     for i_alpha_ in tmp_d['i_alpha']:
-                #         stats_d['alpha_l'].append(i_alpha_)
-                #     for i_delta_ in tmp_d['i_delta']:
-                #         stats_d['delta_l'].append(i_delta_)
-                #     for pm_ in tmp_d['i_pm']:
-                #         stats_d['pm_l'].append(pm_)
-                #     for mag_ in tmp_d['mag']:
-                #         stats_d['mag'].append(mag_)
-                #     for erra_ in tmp_d['error_a']:
-                #         stats_d['erra_world'].append(erra_)
-                #     for errb_ in tmp_d['error_b']:
-                #         stats_d['errb_world'].append(errb_)
+                    # order_mask = check_cat_order(tmp_d['catalog'])
+                    # flag_detection, sources_number = all_same(tmp_d['source'])
+                    # if ok < 0.99:
+                    #     right_ones += 1
+                    # else:
+                    #     false_ones += 1
+                    # if order_mask and sources_number >= 3:
+                    #     for tmp_source_ in tmp_d['source']:
+                    #         stats_d['source_l'].append(tmp_source_)
+                    #     for catalog_ in tmp_d['catalog']:
+                    #         stats_d['catalog_l'].append(catalog_)
+                    #     for i_alpha_ in tmp_d['i_alpha']:
+                    #         stats_d['alpha_l'].append(i_alpha_)
+                    #     for i_delta_ in tmp_d['i_delta']:
+                    #         stats_d['delta_l'].append(i_delta_)
+                    #     for pm_ in tmp_d['i_pm']:
+                    #         stats_d['pm_l'].append(pm_)
+                    #     for mag_ in tmp_d['mag']:
+                    #         stats_d['mag'].append(mag_)
+                    #     for erra_ in tmp_d['error_a']:
+                    #         stats_d['erra_world'].append(erra_)
+                    #     for errb_ in tmp_d['error_b']:
+                    #         stats_d['errb_world'].append(errb_)
 
+        stats_d = compute_factors(stats_d)
         stats_df = DataFrame(stats_d)
         stats_df.to_csv('test.csv')
 
-        print('i_pm {}'.format(stats_d['i_pm']))
-        print('total {}'.format(stats_d['total_number']))
-        print('no {}'.format(stats_d['non-SSOs']))
-        print('yes {}'.format(stats_d['SSOs']))
+        print('Input_PM {}'.format(stats_d['i_pm']))
+        print('Total {}'.format(stats_d['N_meas']))
+        print('non-SSOs {}'.format(stats_d['N_false']))
+        print('SSOs {}'.format(stats_d['N_se']))
 
         return stats_d

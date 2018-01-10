@@ -385,7 +385,7 @@ class Create_regions:
                 if flag:
                     cats_list.append(False)
 
-            # Creates a serie of Pandas Series
+            # Creates a series of Pandas Series
             source = Series(source_list, name='source')
 
             alpha_j2000 = Series(alpha_list, name='alpha_j2000')
@@ -413,6 +413,58 @@ class Create_regions:
             input_d[dither_] = sources_df
 
         return input_d
+
+    def get_stars(self, mag_):
+        """
+
+        :param mag_:
+        :return:
+        """
+        input_stars = self.input_catalogue
+
+        catalog = genfromtxt(input_stars)
+        list_x = catalog[:, 0]
+        list_y = catalog[:, 1]
+        list_mag = catalog[:, 2]
+
+        stars = range(0, 137378, 1)
+
+        s1 = Series(list_x, name='X_IMAGE', dtype=float64)
+        s2 = Series(list_y, name='Y_IMAGE', dtype=float64)
+        s3 = Series(list_mag, name='MAG_VALUES', dtype=float64)
+
+        sources_df = concat([s1, s2, s3], axis=1)
+        sources_df = sources_df.iloc[stars, :]
+
+        ccd_loc = 'mag_{}_CCD_x0_y0_d1.fits'.format(mag_)
+        fits_loc = '{}/{}/CCDs/{}'.format(self.prfs_d['fits_dir'], mag_,
+                                          ccd_loc)
+        hdu = fits.open(fits_loc)
+        w = WCS(hdu[0].header)
+
+        regions_list = []
+        for source_num in range(sources_df['X_IMAGE'].as_matrix().size):
+            x_value = sources_df['X_IMAGE'].as_matrix()[source_num]
+            y_value = sources_df['Y_IMAGE'].as_matrix()[source_num]
+            regions_list.append([x_value, y_value])
+
+        input_regions = w.all_pix2world(regions_list, 1)
+
+        alpha_list = []
+        delta_list = []
+        for idx, regions in enumerate(input_regions):
+            alpha_list.append(regions[0])
+            delta_list.append(regions[1])
+
+        alpha_j2000 = Series(alpha_list, name='alpha_j2000')
+        delta_j2000 = Series(delta_list, name='delta_j2000')
+        mag = Series(sources_df['MAG_VALUES'].tolist(), name='mag')
+
+        df_stars = concat([alpha_j2000, delta_j2000, mag], axis=1)
+        df_stars = df_stars[df_stars['mag'] > 20.0]
+        df_stars = df_stars[21.0 > df_stars['mag']]
+
+        return df_stars
 
     def check_luca(self, mag_, save, complete):
         """
