@@ -28,7 +28,8 @@ from misc import create_configurations, pipeline_help
 from misc import create_sextractor_dict, create_scamp_dict
 from pandas import DataFrame
 from sextractor_performance import SextractorPerformance
-from scamp_performance import ScampPerformanceSSOs, ScampPerformanceStars
+from scamp_performance import ScampPerformanceStars
+from scamp_performance_ssos import ScampPerformanceSSOs
 from performance import PMPerformance, StatsPerformance
 from sextractor_aux import Sextractor, CatalogCreation
 from scamp_aux import Scamp, ScampFilter

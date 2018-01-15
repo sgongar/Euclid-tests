@@ -427,7 +427,9 @@ class Create_regions:
         list_y = catalog[:, 1]
         list_mag = catalog[:, 2]
 
-        stars = range(0, 137378, 1)
+        # stars = range(0, 137378, 1)  # stars+galaxies
+        # stars = range(0, 12470, 1)  # stars
+        stars = range(12470, 137378, 1)  # galaxies
 
         s1 = Series(list_x, name='X_IMAGE', dtype=float64)
         s2 = Series(list_y, name='Y_IMAGE', dtype=float64)
@@ -461,8 +463,11 @@ class Create_regions:
         mag = Series(sources_df['MAG_VALUES'].tolist(), name='mag')
 
         df_stars = concat([alpha_j2000, delta_j2000, mag], axis=1)
+        print('1 {}'.format(df_stars.size))
         df_stars = df_stars[df_stars['mag'] > 20.0]
+        print('2 {}'.format(df_stars.size))
         df_stars = df_stars[21.0 > df_stars['mag']]
+        print('3 {}'.format(df_stars.size))
 
         return df_stars
 
