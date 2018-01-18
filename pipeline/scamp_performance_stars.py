@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """Python script for performance
+Mide las detecciones de cada tipo
 
 Versions:
 - 0.1
