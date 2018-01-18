@@ -11,6 +11,7 @@ Todo:
 
 """
 from pandas import concat, read_csv, DataFrame
+from numpy import std
 
 from misc import all_same, extract_settings
 from misc import speeds_range
@@ -64,7 +65,8 @@ def redo_stats_d():
     :return: tmp_d
     """
     stats_d = {'i_pm': [], 'N_meas': [], 'N_false': [], 'N_se': [],
-               'N_true': [], 'f_dr': [], 'f_pur': [], 'f_com': []}
+               'N_true': [], 'f_dr': [], 'f_pur': [], 'f_com': [],
+               'alpha_std': [], 'delta_std': []}
 
     return stats_d
 
@@ -87,6 +89,8 @@ def populate_stats_d(stats_d):
     stats_d['f_dr'].append(initial_float)
     stats_d['f_pur'].append(initial_float)
     stats_d['f_com'].append(initial_float)
+    stats_d['alpha_std'].append(initial_float)
+    stats_d['delta_std'].append(initial_float)
 
     true_sources = [21, 22, 14, 17, 19, 22, 23, 19, 18, 21]
 
@@ -99,6 +103,8 @@ def populate_stats_d(stats_d):
         stats_d['f_dr'].append(initial_float)
         stats_d['f_pur'].append(initial_float)
         stats_d['f_com'].append(initial_float)
+        stats_d['alpha_std'].append(initial_float)
+        stats_d['delta_std'].append(initial_float)
 
     return stats_d
 
@@ -311,6 +317,12 @@ class ScampPerformanceStars:
         stats_d = redo_stats_d()
         stats_d = populate_stats_d(stats_d)
 
+        # Creates a dictionary for standard deviation and populated with lists
+        std_d = {'alpha_std': [], 'delta_std': []}
+        for idx in range(0, len(self.prfs_d['pms']) + 1, 1):
+            std_d['alpha_std'].append([])
+            std_d['delta_std'].append([])
+
         input_d = {}
         for d in range(1, 5, 1):
             cat_loc = '{}/{}/Catalogs'.format(self.prfs_d['fits_dir'],
@@ -420,6 +432,10 @@ class ScampPerformanceStars:
 
                     stats_d['N_meas'][idx] += 1
                     stats_d['N_false'][idx] += 1
+                    std_alpha = std(tmp_d['o_alpha'])
+                    std_delta = std(tmp_d['o_delta'])
+                    std_d['alpha_std'][idx].append(std_alpha)
+                    std_d['delta_std'][idx].append(std_delta)
 
                     # wls_fit = self.wls_confidence(tmp_d['source'][0])
                     # star = True

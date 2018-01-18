@@ -604,48 +604,6 @@ def motion_filter(db, r):
     return db
 
 
-def confidence_filter(db, r):
-    """
-
-    :param db:
-    :param r:
-    :return:
-    """
-    passed = []
-    for i, source in enumerate(set(db['SOURCE_NUMBER'])):
-        ra = db.loc[db['SOURCE_NUMBER'] == source, 'X_IMAGE'].tolist()
-        dec = db.loc[db['SOURCE_NUMBER'] == source, 'Y_IMAGE'].tolist()
-        epoch = db.loc[db['SOURCE_NUMBER'] == source, 'EPOCH'].tolist()
-        # Calculate WLS fit and confidence interval
-        for dimension in [ra, dec]:
-            # We want to fit all detections
-            x = np.array(epoch)
-            y = np.array(dimension)
-            if dimension == ra:
-                # Mira el error en ra
-                sigma = db.loc[db['SOURCE_NUMBER'] == source,
-                               'ERRA_IMAGE'].tolist()
-            if dimension == dec:
-                # Mira el error en dec
-                sigma = db.loc[db['SOURCE_NUMBER'] == source,
-                               'ERRB_IMAGE'].tolist()
-            edim = np.array([1 / var for var in sigma])
-            # Model: y~c
-            x = sm.add_constant(x)
-            model = sm.WLS(y, x, weigths=edim)
-            fitted = model.fit()
-            # Check rsquared of Fit to determine whether motion
-            # fits asteroid behaviour
-            if fitted.rsquared >= float(r):
-                passed.append(source)
-    # Passed if both dimension have required rsquared
-    passed = [p for p in passed if passed.count(p) == 2]
-    passed = list(set(passed))
-    db = db[db['SOURCE_NUMBER'].isin(passed)]
-
-    return db
-
-
 def setting_logger():
     """ sets-up a logger object ready to be used
 
