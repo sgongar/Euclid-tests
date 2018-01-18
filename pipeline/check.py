@@ -8,6 +8,7 @@ Versions:
 - 0.1: Initial release.
 - 0.2: Plot functions were removed.
 - 0.3:
+- 0.4: SextractorSizes added.
 
 Todo:
     *
@@ -15,12 +16,10 @@ Todo:
 """
 from itertools import product
 from multiprocessing import Process
-from os import path
 from sys import argv
 
 from cats_management import look_for_ssos
 from cats_management import merge_sso_cat, merge_ssos
-from stats_management import merge_stats
 from errors import BadSettings
 from errors import CatalogueError
 from misc import setting_logger, extract_settings
@@ -28,7 +27,8 @@ from misc import create_configurations, pipeline_help
 from misc import create_sextractor_dict, create_scamp_dict
 from pandas import DataFrame
 from sextractor_performance import SextractorPerformance
-from scamp_performance import ScampPerformanceStars
+from sextractor_sizes import SextractorSizes
+from scamp_performance_stars import ScampPerformanceStars
 from scamp_performance_ssos import ScampPerformanceSSOs
 from performance import PMPerformance, StatsPerformance
 from sextractor_aux import Sextractor, CatalogCreation
@@ -38,7 +38,7 @@ from stats_management import ExtractStats
 __author__ = "Samuel Góngora García"
 __copyright__ = "Copyright 2017"
 __credits__ = ["Samuel Góngora García"]
-__version__ = "0.3"
+__version__ = "0.4"
 __maintainer__ = "Samuel Góngora García"
 __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
@@ -102,6 +102,8 @@ class Check:
             self.scamp_performance_stars()
         elif argv[1] == '-scamp_performance_fitting':
             self.scamp_performance_fitting()
+        elif argv[1] == '-sextractor_size':
+            self.sextractor_size()
         elif argv[1] == '-pm_performance':
             self.pm_performance()
         elif argv[1] == '-stats_performance':
@@ -419,6 +421,33 @@ class Check:
                     stats_d[idx] = ScampPerformanceStars(self.logger, mag,
                                                          sex_cf, scmp_cf)
                     idx += 1
+
+        return True
+
+    def sextractor_sizes(self):
+        """ plotea el tamaño de los objetos atendiendo a su naturaleza
+
+        todo - improve docstring
+        todo - improve return - save an entire file with all valuable data
+
+        :return:
+        """
+        # Sextractor configurations.
+        mode = {'type': 'sextractor'}
+        sex_confs, sex_confs_n = create_configurations(mode)
+
+        for mag in self.prfs_d['mags']:
+            for idx_sex, sex_conf in enumerate(sex_confs):
+                # Set an index.
+                # Sextractor configuration.
+                conf = [sex_conf[0], sex_conf[2], sex_conf[2],
+                        sex_conf[1], sex_conf[3]]
+                sex_cf = '{}_{}_{}_{}_{}'.format(conf[0], conf[1],
+                                                 conf[2], conf[3],
+                                                 conf[4])
+
+                # Runs performance analysis.
+                SextractorSizes(self.logger, mag, sex_cf)
 
         return True
 

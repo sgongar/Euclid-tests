@@ -53,26 +53,33 @@ class WLSConfidence:
                                              configuration_dir, cat_name))
         db = Table(hdu_list[2].data).to_pandas()
 
-        ra = db.loc[db['SOURCE_NUMBER'] == self.source, 'ALPHA_J2000'].tolist()
-        dec = db.loc[db['SOURCE_NUMBER'] == self.source, 'DELTA_J2000'].tolist()
-        # epoch = db.loc[db['SOURCE_NUMBER'] == source, 'EPOCH'].tolist()
+        ra = db.loc[db['SOURCE_NUMBER'] == self.source,
+                    'ALPHA_J2000'].tolist()
+        dec = db.loc[db['SOURCE_NUMBER'] == self.source,
+                     'DELTA_J2000'].tolist()
+        epoch = db.loc[db['SOURCE_NUMBER'] == self.source,
+                       'EPOCH'].tolist()
+
+        return ra, dec, epoch, db
 
     def compute(self):
         """
 
         :return:
         """
-
+        ra, dec, epoc, db = self.get_source_data()
 
         x = array(ra)
         y = array(dec)
-        sigma = db.loc[db['SOURCE_NUMBER'] == source, 'ERRA_WORLD'].tolist()
+        sigma = db.loc[db['SOURCE_NUMBER'] == self.source,
+                       'ERRA_WORLD'].tolist()
         x = sm.add_constant(x)
         edim = array([1 / var for var in sigma])
         model = sm.WLS(y, x, weigths=edim)
         fitted = model.fit()
+        chi_squared = fitted.rsquared
 
-    return fitted.rsquared
+        return chi_squared
 
 
 def odr_confidence(self, star, source, tmp_d):
