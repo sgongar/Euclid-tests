@@ -39,7 +39,7 @@ from astropy.table import Table
 from astropy.wcs import WCS
 from images_management import get_fits_limits
 import itertools
-from misc import check_distance, get_fits, all_same, speeds_range
+from misc import check_distance, get_fits, extract_settings
 from numpy import genfromtxt, mean, float64
 from numpy import asarray, sqrt, isclose, logical_and
 from regions import Create_regions
@@ -1556,6 +1556,7 @@ def merge_ssos(logger, prfs_d, conf, mag):
 
     logger.debug('output catalog {} created'.format(output_file_name))
 
+
 def merge_catalog(prfs_d, folder_sex):
     """
 
@@ -1750,3 +1751,81 @@ def rewrite_catalog(cat_df, prfs_d, folder_sex):
     cat_loc = '{}/{}/catalog.cat'.format(prfs_d['fits_dir'], folder_sex)
     catalog.writeto(cat_loc, overwrite=True)
 
+
+def check_source(catalog_n, i_df, o_alpha, o_delta):
+    """
+
+    :param catalog_n:
+    :param i_df:0
+    :param o_alpha:
+    :param o_delta:
+    :return:
+    """
+    tolerance = 0.0000833  # 0.3 arcsecond
+
+    i_df = i_df[i_df['catalog'].isin([catalog_n])]
+    i_df = i_df[i_df['alpha_j2000'] + tolerance > o_alpha]
+    i_df = i_df[o_alpha > i_df['alpha_j2000'] - tolerance]
+    i_df = i_df[i_df['delta_j2000'] + tolerance > o_delta]
+    i_df = i_df[o_delta > i_df['delta_j2000'] - tolerance]
+
+    return i_df
+
+
+def get_input_dicts(mag):
+    """ FIXME bug! why should I set each time catalog name?
+
+    :param mag:
+    :return: i_df
+    """
+    prfs_d = extract_settings()
+
+    # Input sources
+    input_cat_d = {}
+    for d in range(1, 5, 1):
+        cat_loc = '{}/{}/Catalogs'.format(prfs_d['fits_dir'], mag)
+        cat_name = '{}/Cat_20-21_d{}'.format(cat_loc, d)
+        input_cat_d[d] = '{}.dat'.format(cat_name)
+    input_stars_d = Create_regions(input_cat_d).check_stars(mag, True)
+
+    input_cat_d = {}
+    for d in range(1, 5, 1):
+        cat_loc = '{}/{}/Catalogs'.format(prfs_d['fits_dir'], mag)
+        cat_name = '{}/Cat_20-21_d{}'.format(cat_loc, d)
+        input_cat_d[d] = '{}.dat'.format(cat_name)
+    input_galaxies_d = Create_regions(input_cat_d).check_galaxies(mag, True)
+
+    input_cat_d = {}
+    for d in range(1, 5, 1):
+        cat_loc = '{}/{}/Catalogs'.format(prfs_d['fits_dir'], mag)
+        cat_name = '{}/Cat_20-21_d{}'.format(cat_loc, d)
+        input_cat_d[d] = '{}.dat'.format(cat_name)
+    input_ssos_d = Create_regions(input_cat_d).check_ssos(mag, True)
+
+    # Creates a DataFrame from an input dictionary
+    input_stars_l = []
+    for key_ in input_stars_d.keys():
+        input_stars_l.append(input_stars_d[key_])
+
+    i_stars_df = concat(input_stars_l, axis=0)
+    i_stars_df = i_stars_df.reset_index(drop=True)
+
+    # Creates a DataFrame from an input dictionary
+    input_galaxies_l = []
+    for key_ in input_galaxies_d.keys():
+        input_galaxies_l.append(input_galaxies_d[key_])
+
+    i_galaxies_df = concat(input_galaxies_l, axis=0)
+    i_galaxies_df = i_galaxies_df.reset_index(drop=True)
+
+    # Creates a DataFrame from an input dictionary
+    input_ssos_l = []
+    for key_ in input_ssos_d.keys():
+        input_ssos_l.append(input_ssos_d[key_])
+
+    i_ssos_df = concat(input_ssos_l, axis=0)
+    i_ssos_df = i_ssos_df.reset_index(drop=True)
+
+    i_df = {'stars': i_stars_df, 'galaxies': i_galaxies_df, 'ssos': i_ssos_df}
+
+    return i_df

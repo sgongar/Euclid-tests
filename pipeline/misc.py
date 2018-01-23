@@ -842,3 +842,49 @@ def create_folder(logger, folder):
         return True
     except Exception as e:
         print('Unexpected error: {}'.format(e))
+
+
+def get_dither(catalog_n):
+    """
+
+    :param catalog_n:
+    :return: dither_n
+    """
+    cats = [['x0_y0', 1, 1], ['x0_y0', 2, 2], ['x0_y0', 3, 3],
+            ['x0_y0', 4, 4], ['x0_y1', 1, 5], ['x0_y1', 2, 6],
+            ['x0_y1', 3, 7], ['x0_y1', 4, 8], ['x0_y2', 1, 9],
+            ['x0_y2', 2, 10], ['x0_y2', 3, 11], ['x0_y2', 4, 12],
+            ['x1_y0', 1, 13], ['x1_y0', 2, 14], ['x1_y0', 3, 15],
+            ['x1_y0', 4, 16], ['x1_y1', 1, 17], ['x1_y1', 2, 18],
+            ['x1_y1', 3, 19], ['x1_y1', 4, 20], ['x1_y2', 1, 21],
+            ['x1_y2', 2, 22], ['x1_y2', 3, 23], ['x1_y2', 4, 24],
+            ['x2_y0', 1, 25], ['x2_y0', 2, 26], ['x2_y0', 3, 27],
+            ['x2_y0', 4, 28], ['x2_y1', 1, 29], ['x2_y1', 2, 30],
+            ['x2_y1', 3, 31], ['x2_y1', 4, 32], ['x2_y2', 1, 33],
+            ['x2_y2', 2, 34], ['x2_y2', 3, 35], ['x2_y2', 4, 36]]
+
+    dither = ''
+    for cat_ in cats:
+        if cat_[2] == catalog_n:
+            dither = cat_[1]
+
+    return int(dither)
+
+
+def get_norm_speed(o_pm):
+    """
+
+    :param o_pm:
+    :return: pm_norm
+    """
+    prfs_d = extract_settings()
+    speeds_d = speeds_range(prfs_d, 50)
+
+    pm_norm = 0
+    for key_ in speeds_d.keys():
+        low = speeds_d[key_][0]
+        high = speeds_d[key_][1]
+        if low < o_pm < high:
+            pm_norm = key_
+
+    return pm_norm

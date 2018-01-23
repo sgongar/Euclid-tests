@@ -1264,7 +1264,6 @@ class PlotError:
             ax_1.set_ylabel('{}{}{}'.format(y_label_ra, y_label_major_step,
                                             y_label_minor_step))
 
-
             # Plots a legend
             plt.legend(loc=0, ncol=2, borderaxespad=0.)
             plt.setp(ax_1.get_xticklabels(), visible=True)

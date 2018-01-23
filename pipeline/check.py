@@ -22,6 +22,7 @@ from cats_management import look_for_ssos
 from cats_management import merge_sso_cat, merge_ssos
 from errors import BadSettings
 from errors import CatalogueError
+from fitting_pm_mag import FitPMMagAgainstSizes
 from misc import setting_logger, extract_settings
 from misc import create_configurations, pipeline_help
 from misc import create_sextractor_dict, create_scamp_dict
@@ -100,6 +101,8 @@ class Check:
             self.scamp_performance()
         elif argv[1] == '-scamp_performance_stars':
             self.scamp_performance_stars()
+        elif argv[1] == '-fit_pm_mag':
+            self.fit_pm_mag()
         elif argv[1] == '-scamp_performance_fitting':
             self.scamp_performance_fitting()
         elif argv[1] == '-sextractor_size':
@@ -111,6 +114,7 @@ class Check:
         elif argv[1] == '-help':
             pipeline_help(self.logger)
         else:
+            print('to-do options available')
             raise BadSettings('not analysis option choosen')
 
     def full_pipeline(self):
@@ -391,6 +395,39 @@ class Check:
 
         return True
 
+    def fit_pm_mag(self):
+        """ Performs a complete pipeline to scamp output only related to stars.
+        No dictionary for statistics will be created.
+
+        todo - improve docstring
+        todo - improve return
+
+        @return True if everything goes alright.
+        """
+        idx = 0
+        stats_d = {}
+        for mag in self.prfs_d['mags']:
+            for idx_scmp, scmp_conf in enumerate(self.scamp_confs):
+                for idx_sex, sex_conf in enumerate(self.sex_confs):
+                    # Set an index.
+                    # Scamp configuration.
+                    # Creates a dict from a particular configuration.
+                    scmp_d, scmp_cf = scamp_f_name(idx_scmp)
+
+                    # Sextractor configuration.
+                    conf = [sex_conf[0], sex_conf[2], sex_conf[2],
+                            sex_conf[1], sex_conf[3]]
+                    sex_cf = '{}_{}_{}_{}_{}'.format(conf[0], conf[1],
+                                                     conf[2], conf[3],
+                                                     conf[4])
+
+                    # Runs performance analysis.
+                    stats_d[idx] = FitPMMagAgainstSizes(self.logger, mag,
+                                                        sex_cf, scmp_cf)
+                    idx += 1
+
+        return True
+
     def scamp_performance_fitting(self):
         """ Performs a complete pipeline to scamp output only related to stars.
         No dictionary for statistics will be created.
@@ -424,7 +461,7 @@ class Check:
 
         return True
 
-    def sextractor_sizes(self):
+    def sextractor_size(self):
         """ plotea el tamaño de los objetos atendiendo a su naturaleza
 
         todo - improve docstring

@@ -61,26 +61,31 @@ class SextractorSizes:
         """
 
         # Input sources
-        # input_ssos_d = {}
-        # for d in range(1, 5, 1):
-        #     cat_name = '{}/Cat_20-21_d{}'.format(self.prfs_d['input_ref'], d)
-        #     input_ssos_d[d] = '{}.dat'.format(cat_name)
-        # input_ssos_d = Create_regions(input_ssos_d).check_luca(True, True)
-        #
-        # # Creates a DataFrame from an input dictionary
-        # input_ssos_l = []
-        # for key_ in input_ssos_d.keys():
-        #     input_ssos_l.append(input_ssos_d[key_])
-        #
-        # i_ssos_df = concat(input_ssos_l, axis=0)
-        # i_ssos_df = i_ssos_df.reset_index(drop=True)
+        input_ssos_d = {}
+        for d in range(1, 2, 1):
+            cat_loc = '{}/{}/Catalogs'.format(self.prfs_d['fits_dir'],
+                                              self.mag)
+            cat_name = '{}/Cat_20-21_d{}'.format(cat_loc, d)
+            input_ssos_d[d] = '{}.dat'.format(cat_name)
+        input_ssos_d = Create_regions(input_ssos_d).check_luca(self.mag,
+                                                               True, True)
+
+        # Creates a DataFrame from an input dictionary
+        input_ssos_l = []
+        for key_ in input_ssos_d.keys():
+            input_ssos_l.append(input_ssos_d[key_])
+
+        i_ssos_df = concat(input_ssos_l, axis=0)
+        i_ssos_df = i_ssos_df.reset_index(drop=True)
 
         # Stars
         input_stars_d = {}
         for d in range(1, 2, 1):  # Only first dither
-            cat_name = '{}/Cat_20-21_d{}'.format(self.prfs_d['input_ref'], d)
+            cat_loc = '{}/{}/Catalogs'.format(self.prfs_d['fits_dir'],
+                                              self.mag)
+            cat_name = '{}/Cat_20-21_d{}'.format(cat_loc, d)
             input_stars_d[d] = '{}.dat'.format(cat_name)
-        input_stars_d = Create_regions(input_stars_d).check_stars(True, True)
+        input_stars_d = Create_regions(input_stars_d).check_stars(self.mag, True)
 
         # Creates a DataFrame from an input dictionary
         input_stars_l = []
@@ -93,11 +98,12 @@ class SextractorSizes:
         # Galaxies
         input_galaxies_d = {}
         for d in range(1, 2, 1):  # Only first dither
-            cat_name = '{}/Cat_20-21_d{}'.format(self.prfs_d['input_ref'], d)
+            cat_loc = '{}/{}/Catalogs'.format(self.prfs_d['fits_dir'],
+                                              self.mag)
+            cat_name = '{}/Cat_20-21_d{}'.format(cat_loc, d)
             input_galaxies_d[d] = '{}.dat'.format(cat_name)
-        input_galaxies_d = Create_regions(input_galaxies_d).check_galaxies(True,
+        input_galaxies_d = Create_regions(input_galaxies_d).check_galaxies(self.mag,
                                                                            True)
-
         # Creates a DataFrame from an input dictionary
         input_galaxies_l = []
         for key_ in input_galaxies_d.keys():
@@ -115,19 +121,20 @@ class SextractorSizes:
             for dither in range(1, 2, 1):  # Only first dither
                 # Lists definition
                 mags_stars = []
-                errors_a_stars = []
-                errors_b_stars = []
+                a_stars = []
+                b_stars = []
                 mags_galaxies = []
-                errors_a_galaxies = []
-                errors_b_galaxies = []
-                # mags_ssos = []
-                # errors_a_ssos = []
-                # errors_b_ssos = []
+                a_galaxies = []
+                b_galaxies = []
+                mags_ssos = []
+                a_ssos = []
+                b_ssos = []
 
                 cat_n = 'mag_{}_CCD_x{}_y{}_d{}.cat'.format(self.mag, opt[0],
                                                             opt[1], dither)
-                cat_o_n = '{}/{}/{}'.format(self.prfs_d['fits_dir'],
-                                            self.sex_cf, cat_n)
+                cat_o_n = '{}/{}/CCDs/{}/{}'.format(self.prfs_d['fits_dir'],
+                                                    self.mag, self.sex_cf,
+                                                    cat_n)
 
                 hdu_list = fits.open(cat_o_n)
                 o_cat = Table(hdu_list[2].data).to_pandas()
@@ -136,8 +143,8 @@ class SextractorSizes:
                     i_stars_df['dither_values'].isin([dither])]
                 i_galaxies_d_df = i_galaxies_df[
                     i_galaxies_df['dither_values'].isin([dither])]
-                # i_ssos_d_df = i_ssos_df[
-                #     i_ssos_df['dither_values'].isin([dither])]
+                i_ssos_d_df = i_ssos_df[
+                    i_ssos_df['dither_values'].isin([dither])]
 
                 # Busca objeto tras objeto en cada CCD
                 for idx, row in o_cat.iterrows():
@@ -148,21 +155,21 @@ class SextractorSizes:
                     o_df = search(i_stars_d_df, i_alpha, i_delta)
                     if o_df.empty is not True:
                         mags_stars.append(row['MAG_AUTO'])
-                        errors_a_stars.append(row['ERRA_IMAGE'])
-                        errors_b_stars.append(row['ERRB_IMAGE'])
+                        a_stars.append(row['A_IMAGE'])
+                        b_stars.append(row['B_IMAGE'])
                         tmp_count += 1
                     o_df = search(i_galaxies_d_df, i_alpha, i_delta)
                     if o_df.empty is not True:
                         mags_galaxies.append(row['MAG_AUTO'])
-                        errors_a_galaxies.append(row['ERRA_IMAGE'])
-                        errors_b_galaxies.append(row['ERRB_IMAGE'])
+                        a_galaxies.append(row['A_IMAGE'])
+                        b_galaxies.append(row['B_IMAGE'])
                         tmp_count += 1
-                    # o_df = search(i_ssos_d_df, i_alpha, i_delta)
-                    # if o_df.empty is not True:
-                    #     mags_ssos.append(row['MAG_AUTO'])
-                    #     errors_a_ssos.append(row['ERRA_IMAGE'])
-                    #     errors_b_ssos.append(row['ERRB_IMAGE'])
-                    #     tmp_count += 1
+                    o_df = search(i_ssos_d_df, i_alpha, i_delta)
+                    if o_df.empty is not True:
+                        mags_ssos.append(row['MAG_AUTO'])
+                        a_ssos.append(row['A_IMAGE'])
+                        b_ssos.append(row['B_IMAGE'])
+                        tmp_count += 1
 
                 sextractor_folder = '{}/{}'.format(self.prfs_d['plots_dir'],
                                                    self.sex_cf)
@@ -170,17 +177,19 @@ class SextractorSizes:
                 if not path.exists(sextractor_folder):
                     makedirs(sextractor_folder)
 
-                with PdfPages('{}/{}_log.pdf'.format(sextractor_folder,
-                                                     cat_n[:-4])) as pdf:
+                pdf_name = '{}/{}_size.pdf'.format(sextractor_folder,
+                                                   cat_n[:-4])
+                self.logger.debug('creating pdf file {}'.format(pdf_name))
+                with PdfPages(pdf_name) as pdf:
                     fig = plt.figure(figsize=(16.53, 11.69), dpi=100)
                     ax = fig.add_subplot(1, 1, 1)
 
-                    ax.semilogy(mags_stars, errors_a_stars, 'bs', ms=1)
-                    ax.semilogy(mags_galaxies, errors_a_galaxies, 'gs', ms=1)
-                    # ax.semilogy(mags_ssos, errors_a_ssos, 'rs', ms=1)
+                    ax.semilogy(mags_stars, a_stars, 'bs', ms=1)
+                    ax.semilogy(mags_galaxies, a_galaxies, 'gs', ms=1)
+                    ax.semilogy(mags_ssos, a_ssos, 'rs', ms=1)
 
                     ax.set_xlabel('mag')
-                    ax.set_ylabel('error a')
+                    ax.set_ylabel('a - size')
                     ax.set_xlim([14, 28])
 
                     # x-scale
@@ -198,12 +207,12 @@ class SextractorSizes:
                     fig = plt.figure(figsize=(16.53, 11.69), dpi=100)
                     ax = fig.add_subplot(1, 1, 1)
 
-                    ax.semilogy(mags_stars, errors_b_stars, 'bs', ms=1)
-                    ax.semilogy(mags_galaxies, errors_b_galaxies, 'gs', ms=1)
-                    # ax.semilogy(mags_ssos, errors_b_ssos, 'rs', ms=1)
+                    ax.semilogy(mags_stars, b_stars, 'bs', ms=1)
+                    ax.semilogy(mags_galaxies, b_galaxies, 'gs', ms=1)
+                    ax.semilogy(mags_ssos, b_ssos, 'rs', ms=1)
 
                     ax.set_xlabel('mag')
-                    ax.set_ylabel('error b')
+                    ax.set_ylabel('b - sizes')
                     ax.set_xlim([14, 28])
 
                     # x-scale

@@ -69,8 +69,6 @@ class Create_regions:
                                  name='DELTA_J2000')
 
                 full_t = concat([source_l, alpha_l, delta_l], axis=1)
-                print('out to {}_d{}.csv'.format(self.input_catalogue[:-6],
-                                                 dithers.index(d) + 1))
                 full_t.to_csv('{}_d{}.csv'.format(self.input_catalogue[:-6],
                                                   dithers.index(d) + 1))
         else:
@@ -104,8 +102,6 @@ class Create_regions:
 
             # TODO Fix name to something readable!
             positions_table = concat([alpha_list, delta_list], axis=1)
-            print('writing to {}_d{}.reg'.format(self.input_catalogue,
-                                                 dithers.index(d) + 1))
             positions_table.to_csv('{}_d{}.reg'.format(self.input_catalogue,
                                                        dithers.index(d) + 1),
                                    index=False, header=False, sep=" ")
@@ -139,10 +135,10 @@ class Create_regions:
         positions_table.to_csv('{}.reg'.format(self.input_catalogue),
                                index=False, header=False, sep=" ")
 
-    def check_stars(self, save, complete):
+    def check_stars(self, mag, complete):
         """
 
-        :param save:
+        :param mag:
         :param complete:
         :return:
         """
@@ -170,8 +166,9 @@ class Create_regions:
             sources_df = concat([s1, s2, s3, s4], axis=1)
             sources_df = sources_df.iloc[indexes, :]
 
-            ccd_loc = 'mag_20-21_CCD_x0_y0_d1.fits'
-            fits_loc = '{}/{}'.format(self.prfs_d['fits_dir'], ccd_loc)
+            ccd_loc = 'mag_{}_CCD_x0_y0_d1.fits'.format(mag)
+            fits_loc = '{}/{}/CCDs/{}'.format(self.prfs_d['fits_dir'], mag,
+                                              ccd_loc)
             hdulist = fits.open(fits_loc)
             w = WCS(hdulist[0].header)
 
@@ -191,16 +188,17 @@ class Create_regions:
                 x_values.append(regions_list[idx][0])
                 y_values.append(regions_list[idx][1])
 
-            fits_files_all = get_fits_d(dither=dither_)
+            fits_files_all = get_fits_d(mag_=mag, dither=dither_)
 
             fits_dict = {}
             for fits_ in fits_files_all:
-                CCD = fits_[-13:-8]
-                fits_file = self.prfs_d['fits_dir'] + '/' + fits_
-                fits_dict[CCD] = get_fits_limits(fits_file)
+                fits_loc = '{}/{}/CCDs'.format(self.prfs_d['fits_dir'], mag)
+                fits_file = '{}/{}'.format(fits_loc, fits_)
+                ccd = fits_[-13:-8]
+                fits_dict[ccd] = get_fits_limits(fits_file)
 
             i = 0
-            CCD_list = []
+            ccd_list = []
             for alpha_, delta_ in zip(alpha_list, delta_list):
                 i += 1
                 flag = True
@@ -212,10 +210,10 @@ class Create_regions:
                     alpha_comp = below_ra < alpha_ < above_ra
                     delta_comp = below_dec < delta_ < above_dec
                     if alpha_comp and delta_comp:
-                        CCD_list.append(key_)
+                        ccd_list.append(key_)
                         flag = False
                 if flag:
-                    CCD_list.append('False')
+                    ccd_list.append('False')
 
             # Creates a list for all sources
             source_list = range(0, len(alpha_list), 1)
@@ -238,7 +236,7 @@ class Create_regions:
                     ['x2_y2', 2, 34], ['x2_y2', 3, 35], ['x2_y2', 4, 36]]
 
             cats_list = []
-            for dither_, CCD_ in zip(dither_list, CCD_list):
+            for dither_, CCD_ in zip(dither_list, ccd_list):
                 flag = True
                 for cat_ in cats:
                     if cat_[1] == dither_ and cat_[0] == CCD_:
@@ -249,37 +247,35 @@ class Create_regions:
                     cats_list.append(False)
 
             # Creates a serie of Pandas Series
-            source = Series(source_list, name='source')
-
-            alpha_j2000 = Series(alpha_list, name='alpha_j2000')
-            delta_j2000 = Series(delta_list, name='delta_j2000')
-            mag = Series(sources_df['MAG_VALUES'].tolist(), name='mag_values')
-            pm = Series(sources_df['PM_INPUT'].tolist(), name='pm_values')
-            dither = Series(dither_list, name='dither_values')
-            CCD = Series(CCD_list, name='CCD')
-            cat = Series(cats_list, name='catalog')
+            series_source = Series(source_list, name='source')
+            series_alpha_j2000 = Series(alpha_list, name='alpha_j2000')
+            series_delta_j2000 = Series(delta_list, name='delta_j2000')
+            series_mag = Series(sources_df['MAG_VALUES'].tolist(),
+                                name='mag_values')
+            series_pm = Series(sources_df['PM_INPUT'].tolist(),
+                               name='pm_values')
+            series_dither = Series(dither_list, name='dither_values')
+            series_ccd = Series(ccd_list, name='CCD')
+            series_cat = Series(cats_list, name='catalog')
 
             if complete:
-                sources_df = concat([source, cat, alpha_j2000, delta_j2000,
-                                     mag, pm, dither, CCD], axis=1)
+                sources_df = concat([series_source, series_cat,
+                                     series_alpha_j2000, series_delta_j2000,
+                                     series_mag, series_pm, series_dither,
+                                     series_ccd], axis=1)
                 sources_df = sources_df[~sources_df['CCD'].isin(['False'])]
             else:
-                sources_df = concat([alpha_j2000, delta_j2000], axis=1)
-
-            dither_output = '{}/dither_{}'.format(self.prfs_d['dithers_out'],
-                                                  dither_)
-
-            if save and not path.isfile(dither_output):
-                sources_df.to_csv(dither_output)
+                sources_df = concat([series_alpha_j2000,
+                                     series_delta_j2000], axis=1)
 
             input_d[dither_] = sources_df
 
         return input_d
 
-    def check_galaxies(self, save, complete):
+    def check_galaxies(self, mag, complete):
         """
 
-        :param save:
+        :param mag:
         :param complete:
         :return:
         """
@@ -307,8 +303,9 @@ class Create_regions:
             sources_df = concat([s1, s2, s3, s4], axis=1)
             sources_df = sources_df.iloc[indexes, :]
 
-            ccd_loc = 'mag_20-21_CCD_x0_y0_d1.fits'
-            fits_loc = '{}/{}'.format(self.prfs_d['fits_dir'], ccd_loc)
+            ccd_loc = 'mag_{}_CCD_x0_y0_d1.fits'.format(mag)
+            fits_loc = '{}/{}/CCDs/{}'.format(self.prfs_d['fits_dir'], mag,
+                                              ccd_loc)
             hdulist = fits.open(fits_loc)
             w = WCS(hdulist[0].header)
 
@@ -328,13 +325,14 @@ class Create_regions:
                 x_values.append(regions_list[idx][0])
                 y_values.append(regions_list[idx][1])
 
-            fits_files_all = get_fits_d(dither=dither_)
+            fits_files_all = get_fits_d(mag_=mag, dither=dither_)
 
             fits_dict = {}
             for fits_ in fits_files_all:
-                CCD = fits_[-13:-8]
-                fits_file = self.prfs_d['fits_dir'] + '/' + fits_
-                fits_dict[CCD] = get_fits_limits(fits_file)
+                fits_loc = '{}/{}/CCDs'.format(self.prfs_d['fits_dir'], mag)
+                fits_file = '{}/{}'.format(fits_loc, fits_)
+                ccd = fits_[-13:-8]
+                fits_dict[ccd] = get_fits_limits(fits_file)
 
             i = 0
             CCD_list = []
@@ -386,29 +384,26 @@ class Create_regions:
                     cats_list.append(False)
 
             # Creates a series of Pandas Series
-            source = Series(source_list, name='source')
-
-            alpha_j2000 = Series(alpha_list, name='alpha_j2000')
-            delta_j2000 = Series(delta_list, name='delta_j2000')
-            mag = Series(sources_df['MAG_VALUES'].tolist(), name='mag_values')
-            pm = Series(sources_df['PM_INPUT'].tolist(), name='pm_values')
-            dither = Series(dither_list, name='dither_values')
-            CCD = Series(CCD_list, name='CCD')
-            cat = Series(cats_list, name='catalog')
+            series_source = Series(source_list, name='source')
+            series_alpha_j2000 = Series(alpha_list, name='alpha_j2000')
+            series_delta_j2000 = Series(delta_list, name='delta_j2000')
+            series_mag = Series(sources_df['MAG_VALUES'].tolist(),
+                                name='mag_values')
+            series_pm = Series(sources_df['PM_INPUT'].tolist(),
+                               name='pm_values')
+            series_dither = Series(dither_list, name='dither_values')
+            series_ccd = Series(CCD_list, name='CCD')
+            series_cat = Series(cats_list, name='catalog')
 
             if complete:
-                sources_df = concat([source, cat, alpha_j2000, delta_j2000,
-                                     mag, pm, dither, CCD], axis=1)
+                sources_df = concat([series_source, series_cat,
+                                     series_alpha_j2000, series_delta_j2000,
+                                     series_mag, series_pm, series_dither,
+                                     series_ccd], axis=1)
                 sources_df = sources_df[~sources_df['CCD'].isin(['False'])]
-
             else:
-                sources_df = concat([alpha_j2000, delta_j2000], axis=1)
-
-            dither_output = '{}/dither_{}'.format(self.prfs_d['dithers_out'],
-                                                  dither_)
-
-            if save and not path.isfile(dither_output):
-                sources_df.to_csv(dither_output)
+                sources_df = concat([series_alpha_j2000,
+                                     series_delta_j2000], axis=1)
 
             input_d[dither_] = sources_df
 
@@ -427,9 +422,9 @@ class Create_regions:
         list_y = catalog[:, 1]
         list_mag = catalog[:, 2]
 
-        # stars = range(0, 137378, 1)  # stars+galaxies
+        stars = range(0, 137378, 1)  # stars+galaxies
         # stars = range(0, 12470, 1)  # stars
-        stars = range(12470, 137378, 1)  # galaxies
+        # stars = range(12470, 137378, 1)  # galaxies
 
         s1 = Series(list_x, name='X_IMAGE', dtype=float64)
         s2 = Series(list_y, name='Y_IMAGE', dtype=float64)
@@ -463,19 +458,15 @@ class Create_regions:
         mag = Series(sources_df['MAG_VALUES'].tolist(), name='mag')
 
         df_stars = concat([alpha_j2000, delta_j2000, mag], axis=1)
-        print('1 {}'.format(df_stars.size))
         df_stars = df_stars[df_stars['mag'] > 20.0]
-        print('2 {}'.format(df_stars.size))
         df_stars = df_stars[21.0 > df_stars['mag']]
-        print('3 {}'.format(df_stars.size))
 
         return df_stars
 
-    def check_luca(self, mag_, save, complete):
+    def check_ssos(self, mag_, complete):
         """
 
         :param mag_:
-        :param save:
         :param complete:
         :return:
         """
@@ -656,34 +647,30 @@ class Create_regions:
                     cats_list.append(False)
 
             # Creates a serie of Pandas Series
-            source = Series(source_list, name='source')
-
-            alpha_j2000 = Series(alpha_list, name='alpha_j2000')
-            delta_j2000 = Series(delta_list, name='delta_j2000')
-            mag = Series(sources_df['MAG_VALUES'].tolist(), name='mag_values')
-            pm = Series(sources_df['PM_INPUT'].tolist(), name='pm_values')
-            pm_alpha = Series(sources_df['PM_ALPHA'].tolist(), name='pm_alpha')
-            pm_delta = Series(sources_df['PM_DELTA'].tolist(), name='pm_delta')
-            angle = Series(sources_df['ANGLE_INPUT'].tolist(),
+            series_source = Series(source_list, name='source')
+            series_alpha_j2000 = Series(alpha_list, name='alpha_j2000')
+            series_delta_j2000 = Series(delta_list, name='delta_j2000')
+            series_mag = Series(sources_df['MAG_VALUES'].tolist(), name='mag_values')
+            series_pm = Series(sources_df['PM_INPUT'].tolist(), name='pm_values')
+            series_pm_alpha = Series(sources_df['PM_ALPHA'].tolist(), name='pm_alpha')
+            series_pm_delta = Series(sources_df['PM_DELTA'].tolist(), name='pm_delta')
+            series_angle = Series(sources_df['ANGLE_INPUT'].tolist(),
                            name='angle_values')
-            dither = Series(dither_list, name='dither_values')
-            CCD = Series(CCD_list, name='CCD')
-            cat = Series(cats_list, name='catalog')
+            series_dither = Series(dither_list, name='dither_values')
+            series_ccd = Series(CCD_list, name='CCD')
+            series_cat = Series(cats_list, name='catalog')
 
             if complete:
-                sources_df = concat([source, cat, alpha_j2000, delta_j2000,
-                                     mag, pm, pm_alpha, pm_delta,
-                                     angle, dither, CCD], axis=1)
+                sources_df = concat([series_source, series_cat,
+                                     series_alpha_j2000, series_delta_j2000,
+                                     series_mag, series_pm, series_pm_alpha,
+                                     series_pm_delta, series_angle,
+                                     series_dither, series_ccd], axis=1)
                 sources_df.to_csv('test_{}.csv'.format(dither_))
                 sources_df = sources_df[~sources_df['CCD'].isin(['False'])]
             else:
-                sources_df = concat([alpha_j2000, delta_j2000], axis=1)
-
-            dither_output = '{}/dither_{}'.format(self.prfs_d['dithers_out'],
-                                                  dither_)
-
-            if save and not path.isfile(dither_output):
-                sources_df.to_csv(dither_output)
+                sources_df = concat([series_alpha_j2000,
+                                     series_delta_j2000], axis=1)
 
             input_d[dither_] = sources_df
 

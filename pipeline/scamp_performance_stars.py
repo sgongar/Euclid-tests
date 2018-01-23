@@ -346,7 +346,7 @@ class ScampPerformanceStars:
         i_df = i_df.reset_index(drop=True)
 
         # Gets the name of filtered file
-        filter_n = 'filt_{}_{}_2.csv'.format(self.scmp_cf, self.mag)
+        filter_n = 'filt_{}_{}_3.csv'.format(self.scmp_cf, self.mag)
         filter_o_n = '{}/{}/{}/{}/{}'.format(self.prfs_d['filter_dir'],
                                              self.mag, self.sex_cf,
                                              self.scmp_cf, filter_n)
@@ -372,6 +372,7 @@ class ScampPerformanceStars:
             # Check if actual source lies in 20-21 magnitude gap
             # flag_mag = False
             o_df = o_cat[o_cat['SOURCE_NUMBER'].isin([source_])]
+            print(o_df.columns)
             for i, row in enumerate(o_df.itertuples(), 1):
                 source = row.SOURCE_NUMBER
                 catalog_n = row.CATALOG_NUMBER
@@ -385,10 +386,6 @@ class ScampPerformanceStars:
                 out_df = check_star(catalog_n, i_df, o_alpha, o_delta)
 
                 if out_df.empty and flag_mag:
-                    # it's a star
-                    # if o_pm > 0.1:
-                    #     print(o_pm)
-                    #     print(o_df)
                     tmp_d['flag'].append('True')
                     tmp_d['source'].append(source)
                     tmp_d['o_alpha'].append(o_alpha)
