@@ -371,8 +371,8 @@ def extract_settings():
     prfs_d['time_3'] = confmap(cf, "ImagesTime")['time_3']
     prfs_d['time_4'] = confmap(cf, "ImagesTime")['time_4']
 
-    outputdirs_list = ['conf_scamp', 'conf_sex', 'params_sex', 'params_cat',
-                       'logger_config']
+    outputdirs_list = ['conf_scamp', 'conf_sex', 'params_sex', 'neural_sex',
+                       'params_cat', 'logger_config']
     for conf_ in outputdirs_list:
         prfs_d[conf_] = confmap(cf, "ConfigDirs")[conf_]
         prfs_d[conf_] = prfs_d['home'] + prfs_d[conf_]

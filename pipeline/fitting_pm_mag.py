@@ -34,7 +34,8 @@ def redo_stars_d():
 
     :return: tmp_d
     """
-    stars_d = {'stars_mag': [], 'stars_mag_err': [], 'stars_pm': [],
+    stars_d = {'catalog_n': [], 'alpha_j2000': [], 'delta_j2000': [],
+               'stars_mag': [], 'stars_mag_err': [], 'stars_pm': [],
                'stars_pm_err': [], 'stars_a': [], 'stars_err_a': [],
                'stars_b': [], 'stars_err_b': [], 'stars_elongation': [],
                'stars_ellipticity': []}
@@ -47,7 +48,8 @@ def redo_galaxies_d():
 
     :return: galaxies_d
     """
-    galaxies_d = {'galaxies_mag': [], 'galaxies_mag_err': [],
+    galaxies_d = {'catalog_n': [], 'alpha_j2000': [], 'delta_j2000': [],
+                  'galaxies_mag': [], 'galaxies_mag_err': [],
                   'galaxies_pm': [], 'galaxies_pm_err': [], 'galaxies_a': [],
                   'galaxies_err_a': [], 'galaxies_b': [], 'galaxies_err_b': [],
                   'galaxies_elongation': [], 'galaxies_ellipticity': []}
@@ -60,7 +62,8 @@ def redo_ssos_d():
 
     :return: ssos_d
     """
-    ssos_d = {'ssos_mag': [], 'ssos_mag_err': [], 'ssos_pm': [],
+    ssos_d = {'catalog_n': [], 'alpha_j2000': [], 'delta_j2000': [],
+              'ssos_mag': [], 'ssos_mag_err': [], 'ssos_pm': [],
               'ssos_pm_err': [], 'ssos_a': [], 'ssos_err_a': [], 'ssos_b': [],
               'ssos_err_b': [], 'ssos_elongation': [], 'ssos_ellipticity': []}
 
@@ -215,6 +218,9 @@ class FitPMMagAgainstSizes:
 
             if len(set(flags)) == 1:
                 if flags[0] == 'star':
+                    self.stars_d['catalog_n'].append(catalog_n)
+                    self.stars_d['alpha_j2000'].append(o_alpha)
+                    self.stars_d['delta_j2000'].append(o_delta)
                     self.stars_d['stars_mag'].append(mag)
                     self.stars_d['stars_mag_err'].append(mag_err)
                     # o_pm_norm = get_norm_speed(o_pm)
@@ -228,6 +234,9 @@ class FitPMMagAgainstSizes:
                     self.stars_d['stars_elongation'].append(elongation)
                     self.stars_d['stars_ellipticity'].append(ellipticity)
                 elif flags[0] == 'galaxy':
+                    self.galaxies_d['catalog_n'].append(catalog_n)
+                    self.galaxies_d['alpha_j2000'].append(o_alpha)
+                    self.galaxies_d['delta_j2000'].append(o_delta)
                     self.galaxies_d['galaxies_mag'].append(mag)
                     self.galaxies_d['galaxies_mag_err'].append(mag_err)
                     # o_pm_norm = get_norm_speed(o_pm)
@@ -241,6 +250,9 @@ class FitPMMagAgainstSizes:
                     self.galaxies_d['galaxies_elongation'].append(elongation)
                     self.galaxies_d['galaxies_ellipticity'].append(ellipticity)
                 elif flags[0] == 'sso':
+                    self.ssos_d['catalog_n'].append(catalog_n)
+                    self.ssos_d['alpha_j2000'].append(o_alpha)
+                    self.ssos_d['delta_j2000'].append(o_delta)
                     self.ssos_d['ssos_mag'].append(mag)
                     self.ssos_d['ssos_mag_err'].append(mag_err)
                     # o_pm_norm = get_norm_speed(o_pm)

@@ -272,6 +272,7 @@ class ScampFilter:  # TODO Split scamp_filter method into single methodss
         flux_radius_l = []
         elongation_l = []
         ellipticity_l = []
+        mag_iso_l = []
         # Loops over unique sources of filtered file
         for idx, source_ in enumerate(unique_sources):
             print(idx)
@@ -312,6 +313,8 @@ class ScampFilter:  # TODO Split scamp_filter method into single methodss
                     elongation_l.append(elongation)
                     ellipticity = cat_df['ELLIPTICITY'].iloc[0]
                     ellipticity_l.append(ellipticity)
+                    mag_iso = cat_df['MAG_ISO'].iloc[0]
+                    mag_iso_l.append(mag_iso)
 
         # print(isoarea_l)
         isoarea_s = Series(isoarea_l)
@@ -324,6 +327,7 @@ class ScampFilter:  # TODO Split scamp_filter method into single methodss
         flux_radius_s = Series(flux_radius_l)
         elongation_s = Series(elongation_l)
         ellipticity_s = Series(ellipticity_l)
+        mag_iso_s = Series(mag_iso_l)
 
         for i in set(full_db['SOURCE_NUMBER']):
             full_db.loc[full_db['SOURCE_NUMBER'] == i,
@@ -346,6 +350,8 @@ class ScampFilter:  # TODO Split scamp_filter method into single methodss
                         'ELONGATION'] = elongation_s.loc[i - 1]
             full_db.loc[full_db['SOURCE_NUMBER'] == i,
                         'ELLIPTICITY'] = ellipticity_s.loc[i - 1]
+            full_db.loc[full_db['SOURCE_NUMBER'] == i,
+                        'MAG_ISO'] = mag_iso_s.loc[i - 1]
 
         if self.save:
             self.logger.debug('saving output to {}_3.csv'.format(filter_o_n))

@@ -60,6 +60,10 @@ class Sextractor:
                                            analysis_d['deblend_mincount'],
                                            analysis_d['detect_minarea'])
 
+        logger.info('sextractor configuration {}'.format(folder_n))
+
+        self.prfs_d['mags'] = ['22-23']
+
         for mag_ in self.prfs_d['mags']:
             fits_files = get_fits(unique=False, mag=mag_)
             for image_idx in range(0, len(fits_files),
@@ -74,6 +78,8 @@ class Sextractor:
                                                             folder_n)
                         create_folder(logger, folder_loc)
                         cat_name = '{}.cat'.format(fits_files[idx][:-5])
+
+                        print(mag_, cat_name)
 
                         # sextractor input and output
                         sex_input = '{}/{}/CCDs/{}'.format(analysis_dir, mag_,
@@ -111,14 +117,17 @@ class Sextractor:
         s_1 = 'sex -c {} {}'.format(self.prfs_d['conf_sex'], sextractor_file)
         s_2 = ' -CATALOG_NAME {}'.format(sextractor_output)
         s_3 = ' -PARAMETERS_NAME {}'.format(self.prfs_d['params_sex'])
-        s_4 = ' -DETECT_MINAREA {}'.format(analysis_d['detect_minarea'])
-        s_5 = ' -DETECT_THRESH {}'.format(analysis_d['detect_thresh'])
-        s_6 = ' -ANALYSIS_THRESH {}'.format(analysis_d['analysis_thresh'])
-        s_7 = ' -DEBLEND_NTHRESH {}'.format(analysis_d['deblend_nthresh'])
-        s_8 = ' -DEBLEND_MINCONT {}'.format(analysis_d['deblend_mincount'])
-        s_9 = ' -FILTER_NAME {}'.format(analysis_d['filter'])
+        s_4 = ' -STARNNW_NAME {}'.format(self.prfs_d['neural_sex'])
+        s_5 = ' -DETECT_MINAREA {}'.format(analysis_d['detect_minarea'])
+        s_6 = ' -DETECT_THRESH {}'.format(analysis_d['detect_thresh'])
+        s_7 = ' -ANALYSIS_THRESH {}'.format(analysis_d['analysis_thresh'])
+        s_8 = ' -DEBLEND_NTHRESH {}'.format(analysis_d['deblend_nthresh'])
+        s_9 = ' -DEBLEND_MINCONT {}'.format(analysis_d['deblend_mincount'])
+        s_10 = ' -FILTER_NAME {}'.format(analysis_d['filter'])
 
-        cmd_3 = s_1 + s_2 + s_3 + s_4 + s_5 + s_6 + s_7 + s_8 + s_9
+        cmd_3 = s_1 + s_2 + s_3 + s_4 + s_5 + s_6 + s_7 + s_8 + s_9 + s_10
+
+        # print(cmd_3)
 
         sextractor_p = Popen(cmd_3, shell=True)
         sextractor_p.wait()
