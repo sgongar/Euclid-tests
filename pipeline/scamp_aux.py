@@ -8,7 +8,12 @@ Versions:
 - 0.2: Functions reorganised to two different classes.
 - 0.3: New organization for filter Class
 - 0.4: Filter now gets areas
+- 0.5: check_source moved to another file
 
+Todo:
+    * Improve documentation
+    * Speed-up areas process
+    * sex_cf and scmp_cf should come from main file
 """
 
 from subprocess import Popen
@@ -17,13 +22,13 @@ from astropy.io import fits
 from astropy.table import Table
 from pandas import concat, read_csv, Series
 
-from misc import pm_compute, pm_filter, extract_settings
-from misc import motion_filter, create_folder, sn_filter
+from misc import pm_compute, pm_filter, extract_settings, check_source
+from misc import confidence_filter, create_folder, sn_filter, get_dither
 
 __author__ = "Samuel Góngora García"
 __copyright__ = "Copyright 2018"
 __credits__ = ["Samuel Góngora García"]
-__version__ = "0.4"
+__version__ = "0.5"
 __maintainer__ = "Samuel Góngora García"
 __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
@@ -42,66 +47,68 @@ class Scamp:
         """
         self.prfs_d = extract_settings()
 
-        self.scamp_process(logger, mag, scmp_d, scmp_cf, sex_d)
+        self.logger = logger
+        self.mag = mag
+        self.scmp_d = scmp_d
+        self.scmp_cf = scmp_cf
+        self.sex_d = sex_d  # TODO
 
-    def scamp_process(self, logger, mag, scmp_d, scmp_cf, sex_d):
+        self.scamp_process()
+
+    def scamp_process(self):
         """
 
-        :param logger:
-        :param mag:
-        :param scmp_d:
-        :param scmp_cf:
-        :param sex_d:
         :return:
         """
-        sex_cf = '{}_{}_{}_{}_{}'.format(sex_d['deblend_nthresh'],
-                                         sex_d['analysis_thresh'],
-                                         sex_d['detect_thresh'],
-                                         sex_d['deblend_mincount'],
-                                         sex_d['detect_minarea'])
+        sex_cf = '{}_{}_{}_{}_{}'.format(self.sex_d['deblend_nthresh'],
+                                         self.sex_d['analysis_thresh'],
+                                         self.sex_d['detect_thresh'],
+                                         self.sex_d['deblend_mincount'],
+                                         self.sex_d['detect_minarea'])
 
-        logger.info('scamp process for magnitude {}'.format(mag))
-        logger.info('sextractor configuration {}'.format(sex_cf))
-        logger.info('scamp configuration {}'.format(scmp_cf))
+        self.logger.info('scamp process for magnitude {}'.format(self.mag))
+        self.logger.info('sextractor configuration {}'.format(sex_cf))
+        self.logger.info('scamp configuration {}'.format(self.scmp_cf))
 
-        scmp_p_1 = 'scamp -c {}'.format(self.prfs_d['conf_scamp'])
-        sex_loc = '{}/{}/CCDs/{}'.format(self.prfs_d['fits_dir'], mag,
+        scmp_1 = 'scamp -c {}'.format(self.prfs_d['conf_scamp'])
+        sex_loc = '{}/{}/CCDs/{}'.format(self.prfs_d['fits_dir'], self.mag,
                                          sex_cf)
-        sex_output = 'mag_{}_CCD_x?_y?_d?.cat'.format(mag)
-        scmp_p_2 = ' {}/{}'.format(sex_loc, sex_output)
-        scmp_p_3 = ' -ASTREFCAT_NAME'
-        cat_loc = '{}/{}/CCDs/{}'.format(self.prfs_d['fits_dir'], mag,
+        sex_output = 'mag_{}_CCD_x?_y?_d?.cat'.format(self.mag)
+        scmp_2 = ' {}/{}'.format(sex_loc, sex_output)
+        scmp_3 = ' -ASTREFCAT_NAME'
+        cat_loc = '{}/{}/CCDs/{}'.format(self.prfs_d['fits_dir'], self.mag,
                                          sex_cf)
-        cat_input = 'catalog_{}.cat'.format(mag)
-        scmp_p_4 = ' {}/{}'.format(cat_loc, cat_input)
-        scmp_p_5 = ' -PIXSCALE_MAXERR {}'.format(scmp_d['pixscale_maxerr'])
-        scmp_p_6 = ' -POSANGLE_MAXERR {}'.format(scmp_d['posangle_maxerr'])
-        scmp_p_7 = ' -POSITION_MAXERR {}'.format(scmp_d['position_maxerr'])
-        scmp_p_8 = ' -CROSSID_RADIUS {}'.format(scmp_d['crossid_radius'])
+        cat_input = 'catalog_{}.cat'.format(self.mag)
+        scmp_4 = ' {}/{}'.format(cat_loc, cat_input)
+        scmp_5 = ' -PIXSCALE_MAXERR {}'.format(self.scmp_d['pixscale_maxerr'])
+        scmp_6 = ' -POSANGLE_MAXERR {}'.format(self.scmp_d['posangle_maxerr'])
+        scmp_7 = ' -POSITION_MAXERR {}'.format(self.scmp_d['position_maxerr'])
+        scmp_8 = ' -CROSSID_RADIUS {}'.format(self.scmp_d['crossid_radius'])
         # Output catalogs location
-        cats_dir = '{}/{}/{}/{}'.format(self.prfs_d['catalogs_dir'], mag,
-                                        sex_cf, scmp_cf)
-        merged_cat = '{}/merged_{}_{}.cat'.format(cats_dir, scmp_cf, mag)
-        scmp_p_9 = ' -MERGEDOUTCAT_NAME {}'.format(merged_cat)
-        full_cat = '{}/full_{}_{}.cat'.format(cats_dir, scmp_cf, mag)
-        scmp_p_10 = ' -FULLOUTCAT_NAME {}'.format(full_cat)
-        scmp_p = scmp_p_1 + scmp_p_2 + scmp_p_3 + scmp_p_4 + scmp_p_5
-        scmp_p = scmp_p + scmp_p_6 + scmp_p_7 + scmp_p_8 + scmp_p_9
-        scmp_p = scmp_p + scmp_p_10
+        cats_dir = '{}/{}/{}/{}'.format(self.prfs_d['catalogs_dir'], self.mag,
+                                        sex_cf, self.scmp_cf)
+        merged_cat = '{}/merged_{}_{}.cat'.format(cats_dir, self.scmp_cf,
+                                                  self.mag)
+        scmp_9 = ' -MERGEDOUTCAT_NAME {}'.format(merged_cat)
+        full_cat = '{}/full_{}_{}.cat'.format(cats_dir, self.scmp_cf, self.mag)
+        scmp_10 = ' -FULLOUTCAT_NAME {}'.format(full_cat)
+        scmp_p = scmp_1 + scmp_2 + scmp_3 + scmp_4 + scmp_5
+        scmp_p = scmp_p + scmp_6 + scmp_7 + scmp_8 + scmp_9
+        scmp_p = scmp_p + scmp_10
 
-        # print('scmp_p {}'.format(scmp_p))
+        print('scmp_p {}'.format(scmp_p))
 
-        create_folder(logger, cats_dir)
+        # create_folder(self.logger, cats_dir)
 
-        process_scamp = Popen(scmp_p, shell=True)
-        process_scamp.wait()
+        # process_scamp = Popen(scmp_p, shell=True)
+        # process_scamp.wait()
 
-        logger.info('Scamp process finished. Data is ready to be analysed.')
+        self.logger.info('Scamp process finished.')
 
         return True
 
 
-class ScampFilter:  # TODO Split scamp_filter method into single methodss
+class ScampFilter:  # TODO Split scamp_filter method into single methods
 
     def __init__(self, logger, mag, scmp_cf, sex_d):
         """
@@ -122,27 +129,14 @@ class ScampFilter:  # TODO Split scamp_filter method into single methodss
                                               sex_d['detect_minarea'])
 
         self.save = True
+        # Saves _1.csv
         (merged_db, full_db, filter_o_n) = self.scamp_filter()
+        # Saves _2.csv
         full_db = self.compute_pm(merged_db, full_db, filter_o_n)
         full_db = self.get_areas(full_db, filter_o_n)
-        # self.filter_pm(full_db, filter_o_n)
-
-    def check_source(self, o_df, o_alpha, o_delta):
-        """
-
-        :param o_df:
-        :param o_alpha:
-        :param o_delta:
-        :return:
-        """
-        tolerance = 0.0001389  # 0.5 arcsecond
-
-        o_df = o_df[o_df['ALPHA_J2000'] + tolerance > o_alpha]
-        o_df = o_df[o_alpha > o_df['ALPHA_J2000'] - tolerance]
-        o_df = o_df[o_df['DELTA_J2000'] + tolerance > o_delta]
-        o_df = o_df[o_delta > o_df['DELTA_J2000'] - tolerance]
-
-        return o_df
+        full_db = self.filter_pm(full_db, filter_o_n)
+        full_db = self.filter_sn(full_db, filter_o_n)
+        self.filter_coherence(full_db, filter_o_n)
 
     def get_cat(self, catalog_n):
         """
@@ -150,25 +144,7 @@ class ScampFilter:  # TODO Split scamp_filter method into single methodss
         :param catalog_n:
         :return: cat_file
         """
-        cats = [['x0_y0', 1, 1], ['x0_y0', 2, 2], ['x0_y0', 3, 3],
-                ['x0_y0', 4, 4], ['x0_y1', 1, 5], ['x0_y1', 2, 6],
-                ['x0_y1', 3, 7], ['x0_y1', 4, 8], ['x0_y2', 1, 9],
-                ['x0_y2', 2, 10], ['x0_y2', 3, 11], ['x0_y2', 4, 12],
-                ['x1_y0', 1, 13], ['x1_y0', 2, 14], ['x1_y0', 3, 15],
-                ['x1_y0', 4, 16], ['x1_y1', 1, 17], ['x1_y1', 2, 18],
-                ['x1_y1', 3, 19], ['x1_y1', 4, 20], ['x1_y2', 1, 21],
-                ['x1_y2', 2, 22], ['x1_y2', 3, 23], ['x1_y2', 4, 24],
-                ['x2_y0', 1, 25], ['x2_y0', 2, 26], ['x2_y0', 3, 27],
-                ['x2_y0', 4, 28], ['x2_y1', 1, 29], ['x2_y1', 2, 30],
-                ['x2_y1', 3, 31], ['x2_y1', 4, 32], ['x2_y2', 1, 33],
-                ['x2_y2', 2, 34], ['x2_y2', 3, 35], ['x2_y2', 4, 36]]
-
-        ccd = ''
-        dither = ''
-        for cat_ in cats:
-            if cat_[2] == catalog_n:
-                ccd = cat_[0]
-                dither = cat_[1]
+        ccd, dither = get_dither(catalog_n)
 
         cat_loc = '{}/{}/CCDs/{}/'.format(self.prfs_d['fits_dir'], self.mag,
                                           self.sex_cf)
@@ -199,7 +175,7 @@ class ScampFilter:  # TODO Split scamp_filter method into single methodss
         # Filtered catalog name
         filt_n = 'filt_{}_{}'.format(self.scmp_cf, self.mag)
 
-        self.logger.debug('opening full catalog {}'.format(full_n))
+        self.logger.debug('opens full catalog {}'.format(full_n))
         full_cat = fits.open(full_n)
         full_db = Table(full_cat[2].data)
         self.logger.debug('converting full catalog to Pandas format')
@@ -211,7 +187,7 @@ class ScampFilter:  # TODO Split scamp_filter method into single methodss
         mrgd_n_cat = 'merged_{}_{}_1.cat'.format(self.scmp_cf, self.mag)
         mrgd_n = '{}{}'.format(mrgd_n_dir, mrgd_n_cat)
 
-        self.logger.debug('opening merged catalog {}'.format(mrgd_n))
+        self.logger.debug('opens merged catalog {}'.format(mrgd_n))
         merged_cat = fits.open(mrgd_n)
         self.logger.debug('converting merged catalog to Pandas format')
         merged_db = Table(merged_cat[2].data)
@@ -219,13 +195,14 @@ class ScampFilter:  # TODO Split scamp_filter method into single methodss
         filter_o_n = '{}/{}'.format(filter_dir, filt_n)
 
         # Removing 0 catalog detections
-        self.logger.debug('removing 0 catalog detections')
+        self.logger.debug('removes 0 catalog detections')
         full_db = full_db.loc[~full_db['CATALOG_NUMBER'].isin([0])]
 
         full_db = concat(g for _, g in full_db.groupby("SOURCE_NUMBER")
                          if len(g) >= int(self.prfs_d['detections']))
 
         if self.save:
+            self.logger.debug('saves output to {}_1.csv'.format(filter_o_n))
             full_db.to_csv('{}_1.csv'.format(filter_o_n))
 
         return merged_db, full_db, filter_o_n
@@ -236,13 +213,13 @@ class ScampFilter:  # TODO Split scamp_filter method into single methodss
         :param merged_db:
         :param full_db:
         :param filter_o_n:
-        :return:
+        :return: full_db
         """
         # Computing pm
         self.logger.debug('computing proper motion')
         full_db = pm_compute(self.logger, merged_db, full_db)
         if self.save:
-            self.logger.debug('saving output to {}_2.csv'.format(filter_o_n))
+            self.logger.debug('saves output to {}_2.csv'.format(filter_o_n))
             full_db.to_csv('{}_2.csv'.format(filter_o_n))
 
         return full_db
@@ -252,9 +229,9 @@ class ScampFilter:  # TODO Split scamp_filter method into single methodss
 
         :param full_db:
         :param filter_o_n:
-        :return:
+        :return: full_db
         """
-        self.logger.debug('getting areas')
+        self.logger.debug('runs areas filter')
 
         # Opens filtered file
         filter_cat = read_csv('{}_2.csv'.format(filter_o_n), index_col=0)
@@ -289,7 +266,7 @@ class ScampFilter:  # TODO Split scamp_filter method into single methodss
                 # self.logger.debug('converting CCD catalog to Pandas format')
                 ccd_df = ccd_df.to_pandas()
 
-                cat_df = self.check_source(ccd_df, o_alpha, o_delta)
+                cat_df = check_source(ccd_df, o_alpha, o_delta)
                 if cat_df.empty:
                     isoarea_l.append('nan')
                 else:
@@ -316,7 +293,6 @@ class ScampFilter:  # TODO Split scamp_filter method into single methodss
                     mag_iso = cat_df['MAG_ISO'].iloc[0]
                     mag_iso_l.append(mag_iso)
 
-        # print(isoarea_l)
         isoarea_s = Series(isoarea_l)
         a_image_s = Series(a_image_l)
         b_image_s = Series(b_image_l)
@@ -354,7 +330,7 @@ class ScampFilter:  # TODO Split scamp_filter method into single methodss
                         'MAG_ISO'] = mag_iso_s.loc[i - 1]
 
         if self.save:
-            self.logger.debug('saving output to {}_3.csv'.format(filter_o_n))
+            self.logger.debug('saves output to {}_3.csv'.format(filter_o_n))
             full_db.to_csv('{}_3.csv'.format(filter_o_n))
 
         return full_db
@@ -364,23 +340,42 @@ class ScampFilter:  # TODO Split scamp_filter method into single methodss
 
         :param full_db:
         :param filter_o_n:
-        :return:
+        :return: full_db
         """
-        self.logger.debug('after filtering detections')
+        self.logger.debug('runs proper motion filter')
         full_db = pm_filter(full_db, self.prfs_d['pm_low'],
                             self.prfs_d['pm_up'])
 
         if self.save:
-            self.logger.debug('saving output to {}_4.csv'.format(filter_o_n))
+            self.logger.debug('saves output to {}_4.csv'.format(filter_o_n))
             full_db.to_csv('{}_4.csv'.format(filter_o_n))
 
+        return full_db
+
+    def filter_sn(self, full_db, filter_o_n):
+        """
+
+        :param full_db:
+        :param filter_o_n:
+        :return: full_db
+        """
+        self.logger.debug('runs signal-noise filter')
         full_db = sn_filter(full_db, self.prfs_d['pm_sn'])
         if self.save:
-            self.logger.debug('saving output to {}_5.csv'.format(filter_o_n))
+            self.logger.debug('saves output to {}_5.csv'.format(filter_o_n))
             full_db.to_csv('{}_5.csv'.format(filter_o_n))
 
-        self.logger.debug('after proper motion')
-        full_db = motion_filter(full_db, self.prfs_d['r_fit'])
+        return full_db
+
+    def filter_coherence(self, full_db, filter_o_n):
+        """
+
+        :param full_db:
+        :param filter_o_n:
+        :return: full_db
+        """
+        self.logger.debug('runs coherence motion filter')
+        full_db = confidence_filter(full_db, self.prfs_d['r_fit'])
         if self.save:
-            self.logger.debug('saving output to {}_6.csv'.format(filter_o_n))
+            self.logger.debug('saves output to {}_6.csv'.format(filter_o_n))
             full_db.to_csv('{}_6.csv'.format(filter_o_n))

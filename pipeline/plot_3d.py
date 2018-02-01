@@ -1,6 +1,16 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+"""Plots pm and magnitude against A/B/elongation
+
+Versions:
+- 0.1 Initial release
+
+Todo:
+    * Improve usability
+
+"""
+
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 import numpy as np

@@ -94,7 +94,6 @@ class Create_regions:
 
         for d in dithers:
             hdu_d = hdu[hdu['CATALOG_NUMBER'].isin(d)]
-
             alpha_list = Series(hdu_d['ALPHA_J2000'].tolist(),
                                 name='ALPHA_J2000')
             delta_list = Series(hdu_d['DELTA_J2000'].tolist(),

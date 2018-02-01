@@ -6,9 +6,8 @@
 
 Todo:
     * Improve log messages
-
+    * Improve usability
 """
-
 
 from collections import Counter
 from decimal import Decimal
@@ -256,10 +255,8 @@ def create_configurations(mode):
     """
     if mode['type'] == 'sextractor':
         l_deblending = [30]
-        # l_deblending = [30]
         l_mincount = [0.01]
         l_threshold = [1.5]
-        # l_threshold = [1.5, 3]
 
         l_area = [4]
         l_filter_name = ['models/gauss_2.0_5x5.conv']
@@ -278,9 +275,7 @@ def create_configurations(mode):
     elif mode['type'] == 'scamp':
         l_crossid_radius = [10]  # [10] seconds
         l_pixscale_maxerr = [1.1]  # [1.2] scale-factor
-        # l_posangle_maxerr = [0.5, 2.5]
         l_posangle_maxerr = [0.5]  # [0.5, 2.5] degrees
-        # l_position_maxerr = [0.04, 0.08]
         l_position_maxerr = [0.04]
 
         configurations = []
@@ -561,7 +556,7 @@ def sn_filter(full_db, sn):
     return full_db
 
 
-def motion_filter(db, r):
+def confidence_filter(db, r):
     """ filter objects with a non-coherence movement
 
     :param db:
@@ -838,7 +833,7 @@ def create_folder(logger, folder):
             makedirs(folder)
         return True
     except OSError:
-        # logger.debug('Folder {} already created'.format(folder))
+        logger.debug('Folder {} already created'.format(folder))
         return True
     except Exception as e:
         print('Unexpected error: {}'.format(e))
@@ -863,12 +858,14 @@ def get_dither(catalog_n):
             ['x2_y1', 3, 31], ['x2_y1', 4, 32], ['x2_y2', 1, 33],
             ['x2_y2', 2, 34], ['x2_y2', 3, 35], ['x2_y2', 4, 36]]
 
-    dither = ''
+    ccd = ''
+    dither = 0
     for cat_ in cats:
         if cat_[2] == catalog_n:
+            ccd = cat_[0]
             dither = cat_[1]
 
-    return int(dither)
+    return ccd, int(dither)
 
 
 def get_norm_speed(o_pm):
@@ -888,3 +885,21 @@ def get_norm_speed(o_pm):
             pm_norm = key_
 
     return pm_norm
+
+
+def check_source(o_df, o_alpha, o_delta):
+    """
+
+    :param o_df:
+    :param o_alpha:
+    :param o_delta:
+    :return:
+    """
+    prfs_d = extract_settings()
+
+    o_df = o_df[o_df['ALPHA_J2000'] + prfs_d['tolerance'] > o_alpha]
+    o_df = o_df[o_alpha > o_df['ALPHA_J2000'] - prfs_d['tolerance']]
+    o_df = o_df[o_df['DELTA_J2000'] + prfs_d['tolerance'] > o_delta]
+    o_df = o_df[o_delta > o_df['DELTA_J2000'] - prfs_d['tolerance']]
+
+    return o_df

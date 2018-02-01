@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 from pandas import DataFrame, read_csv
 
 from cats_management import check_source, get_input_dicts
-from misc import extract_settings, get_dither, get_norm_speed
+from misc import extract_settings, get_dither
 from scipy.odr import *
 
 
@@ -39,7 +39,6 @@ def redo_stars_d():
                'stars_pm_err': [], 'stars_a': [], 'stars_err_a': [],
                'stars_b': [], 'stars_err_b': [], 'stars_elongation': [],
                'stars_ellipticity': []}
-
     return stars_d
 
 
@@ -163,7 +162,7 @@ class FitPMMagAgainstSizes:
         b_image = 0.0
         err_a_image = 0.0
         err_b_image = 0.0
-        mag = 0.0
+        mag_iso = 0.0
         mag_err = 0.0
         o_pm = 0.0
         o_pm_err = 0.0
@@ -176,7 +175,7 @@ class FitPMMagAgainstSizes:
                 b_image = row.B_IMAGE
                 err_a_image = row.ERRA_IMAGE
                 err_b_image = row.ERRB_IMAGE
-                mag = row.MAG
+                mag_iso = row.MAG_ISO
                 mag_err = row.MAGERR
                 catalog_n = row.CATALOG_NUMBER
                 o_alpha = row.ALPHA_J2000
@@ -187,7 +186,7 @@ class FitPMMagAgainstSizes:
                 ellipticity = row.ELLIPTICITY
 
                 # look for object type!
-                dither = get_dither(catalog_n)
+                ccd, dither = get_dither(catalog_n)
 
                 i_stars_df = i_df['stars']
                 i_stars_d_df = i_stars_df[
@@ -221,7 +220,7 @@ class FitPMMagAgainstSizes:
                     self.stars_d['catalog_n'].append(catalog_n)
                     self.stars_d['alpha_j2000'].append(o_alpha)
                     self.stars_d['delta_j2000'].append(o_delta)
-                    self.stars_d['stars_mag'].append(mag)
+                    self.stars_d['stars_mag'].append(mag_iso)
                     self.stars_d['stars_mag_err'].append(mag_err)
                     # o_pm_norm = get_norm_speed(o_pm)
                     # self.stars_d['stars_pm'].append(o_pm_norm)
@@ -237,7 +236,7 @@ class FitPMMagAgainstSizes:
                     self.galaxies_d['catalog_n'].append(catalog_n)
                     self.galaxies_d['alpha_j2000'].append(o_alpha)
                     self.galaxies_d['delta_j2000'].append(o_delta)
-                    self.galaxies_d['galaxies_mag'].append(mag)
+                    self.galaxies_d['galaxies_mag'].append(mag_iso)
                     self.galaxies_d['galaxies_mag_err'].append(mag_err)
                     # o_pm_norm = get_norm_speed(o_pm)
                     # self.galaxies_d['galaxies_pm'].append(o_pm_norm)
@@ -253,7 +252,7 @@ class FitPMMagAgainstSizes:
                     self.ssos_d['catalog_n'].append(catalog_n)
                     self.ssos_d['alpha_j2000'].append(o_alpha)
                     self.ssos_d['delta_j2000'].append(o_delta)
-                    self.ssos_d['ssos_mag'].append(mag)
+                    self.ssos_d['ssos_mag'].append(mag_iso)
                     self.ssos_d['ssos_mag_err'].append(mag_err)
                     # o_pm_norm = get_norm_speed(o_pm)
                     # self.ssos_d['ssos_pm'].append(o_pm_norm)
