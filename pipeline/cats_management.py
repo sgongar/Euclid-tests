@@ -1763,7 +1763,9 @@ def check_source(catalog_n, i_df, o_alpha, o_delta):
     """
     tolerance = 0.0000833  # 0.3 arcsecond
 
-    i_df = i_df[i_df['catalog'].isin([catalog_n])]
+    if catalog_n != 0:
+        i_df = i_df[i_df['catalog'].isin([catalog_n])]
+
     i_df = i_df[i_df['alpha_j2000'] + tolerance > o_alpha]
     i_df = i_df[o_alpha > i_df['alpha_j2000'] - tolerance]
     i_df = i_df[i_df['delta_j2000'] + tolerance > o_delta]
