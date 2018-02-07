@@ -457,8 +457,8 @@ class Create_regions:
         mag = Series(sources_df['MAG_VALUES'].tolist(), name='mag')
 
         df_stars = concat([alpha_j2000, delta_j2000, mag], axis=1)
-        df_stars = df_stars[df_stars['mag'] > 20.0]
-        df_stars = df_stars[21.0 > df_stars['mag']]
+        # df_stars = df_stars[df_stars['mag'] > 20.0]
+        # df_stars = df_stars[21.0 > df_stars['mag']]
 
         return df_stars
 

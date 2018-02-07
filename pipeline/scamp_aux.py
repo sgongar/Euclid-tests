@@ -130,13 +130,22 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
 
         self.save = True
         # Saves _1.csv
-        (merged_db, full_db, filter_o_n) = self.scamp_filter()
+        # (merged_db, full_db, filter_o_n) = self.scamp_filter()
         # Saves _2.csv
-        full_db = self.compute_pm(merged_db, full_db, filter_o_n)
-        full_db = self.get_areas(full_db, filter_o_n)
+        # full_db = self.compute_pm(merged_db, full_db, filter_o_n)
+        # full_db = self.get_areas(full_db, filter_o_n)
+
+        filter_dir = '{}/{}/{}/{}'.format(self.prfs_d['filter_dir'], self.mag,
+                                          self.sex_cf, self.scmp_cf)
+        filt_n = 'filt_{}_{}'.format(self.scmp_cf, self.mag)
+        filter_o_n = '{}/{}'.format(filter_dir, filt_n)
+
+        full_db = read_csv('{}_3.csv'.format(filter_o_n), index_col=0)
+
         full_db = self.filter_pm(full_db, filter_o_n)
-        full_db = self.filter_sn(full_db, filter_o_n)
-        self.filter_coherence(full_db, filter_o_n)
+        full_db = self.filter_class(full_db, filter_o_n)
+        # full_db = self.filter_sn(full_db, filter_o_n)
+        # self.filter_coherence(full_db, filter_o_n)
 
     def get_cat(self, catalog_n):
         """
@@ -250,6 +259,7 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
         elongation_l = []
         ellipticity_l = []
         mag_iso_l = []
+        class_star_l = []
         # Loops over unique sources of filtered file
         for idx, source_ in enumerate(unique_sources):
             print(idx)
@@ -292,6 +302,8 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
                     ellipticity_l.append(ellipticity)
                     mag_iso = cat_df['MAG_ISO'].iloc[0]
                     mag_iso_l.append(mag_iso)
+                    class_star = cat_df['CLASS_STAR'].iloc[0]
+                    class_star_l.append(class_star)
 
         isoarea_s = Series(isoarea_l)
         a_image_s = Series(a_image_l)
@@ -304,6 +316,7 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
         elongation_s = Series(elongation_l)
         ellipticity_s = Series(ellipticity_l)
         mag_iso_s = Series(mag_iso_l)
+        class_star_s = Series(class_star_l)
 
         for i in set(full_db['SOURCE_NUMBER']):
             full_db.loc[full_db['SOURCE_NUMBER'] == i,
@@ -328,6 +341,8 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
                         'ELLIPTICITY'] = ellipticity_s.loc[i - 1]
             full_db.loc[full_db['SOURCE_NUMBER'] == i,
                         'MAG_ISO'] = mag_iso_s.loc[i - 1]
+            full_db.loc[full_db['SOURCE_NUMBER'] == i,
+                        'CLASS_STAR'] = class_star_s.loc[i - 1]
 
         if self.save:
             self.logger.debug('saves output to {}_3.csv'.format(filter_o_n))
@@ -351,6 +366,22 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
             full_db.to_csv('{}_4.csv'.format(filter_o_n))
 
         return full_db
+    
+    def filter_class(self, full_db, filter_o_n):
+        """
+
+        :param full_db:
+        :param filter_o_n:
+        :return:
+        """
+        self.logger.debug('runs class star filter')
+        full_db = full_db[full_db['CLASS_STAR'] > 0.95]
+
+        if self.save:
+            self.logger.debug('saves output to {}_5.csv'.format(filter_o_n))
+            full_db.to_csv('{}_5.csv'.format(filter_o_n))
+
+        return full_db
 
     def filter_sn(self, full_db, filter_o_n):
         """
@@ -362,8 +393,8 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
         self.logger.debug('runs signal-noise filter')
         full_db = sn_filter(full_db, self.prfs_d['pm_sn'])
         if self.save:
-            self.logger.debug('saves output to {}_5.csv'.format(filter_o_n))
-            full_db.to_csv('{}_5.csv'.format(filter_o_n))
+            self.logger.debug('saves output to {}_6.csv'.format(filter_o_n))
+            full_db.to_csv('{}_6.csv'.format(filter_o_n))
 
         return full_db
 

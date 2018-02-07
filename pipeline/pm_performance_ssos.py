@@ -38,25 +38,15 @@ def check_source(catalog_n, o_cat, i_alpha, i_delta):
     tolerance = 0.0005  # 1.8 arcsecond
 
     o_df = o_cat[o_cat['CATALOG_NUMBER'].isin([catalog_n])]
-    # o_df.to_csv('1_{}.csv'.format(catalog_n))
-    # print('1 -- o_df {}'.format(o_df))
     o_df = o_df[o_df['ALPHA_J2000'] + tolerance > i_alpha]
-    # o_df.to_csv('2_{}.csv'.format(catalog_n))
-    # print('2 -- o_df {}'.format(o_df))
     o_df = o_df[i_alpha > o_df['ALPHA_J2000'] - tolerance]
-    # o_df.to_csv('3_{}.csv'.format(catalog_n))
-    # print('3 -- o_df {}'.format(o_df))
     o_df = o_df[o_df['DELTA_J2000'] + tolerance > i_delta]
-    # o_df.to_csv('4_{}.csv'.format(catalog_n))
-    # print('4 -- o_df {}'.format(o_df))
     o_df = o_df[i_delta > o_df['DELTA_J2000'] - tolerance]
-    # o_df.to_csv('5_{}.csv'.format(catalog_n))
-    # print('5 -- o_df {}'.format(o_df))
 
     return o_df
 
 
-class ScampPerformanceSSOs:
+class PMPerformanceSSOs:
 
     def __init__(self, logger, mag, scmp_cf, sex_cf, confidence_):
         """
@@ -74,7 +64,7 @@ class ScampPerformanceSSOs:
 
         self.save = False
 
-        self.check()
+        self.check_pm_distribution()
 
     def creates_input_dict(self):
         """ Creates an input dictionary. Each key contains SSOs' information
@@ -98,57 +88,55 @@ class ScampPerformanceSSOs:
 
         :return: input dataframe
         """
+        occurrences = 3
+
         input_list = []
         for key_ in input_dict.keys():
             input_list.append(input_dict[key_])
 
         input_df = concat(input_list, axis=0)
-        # Look for < 3 coincidences
+        # Look for >= 3 coincidences
         input_df = concat(g for _, g in input_df.groupby('source')
-                          if len(g) >= 3)
-        i_df = input_df.reset_index(drop=True)
+                          if len(g) >= occurrences)
+        input_df = input_df.reset_index(drop=True)
 
         if self.save:
             input_df.to_csv('inputs.csv')
 
         return input_df
 
-    def check(self):
+    def check_pm_distribution(self):
         """
 
         :return:
         """
-        # For now any file is saved
-        save = False
-
-        self.logger.debug('scamp configuration {}'.format(self.scmp_cf))
-        self.logger.debug('sextractor configuration {}'.format(self.sex_cf))
+        # Creates an input dictionary with all input sources
+        self.logger.debug('Scamp configuration: {}'.format(self.scmp_cf))
+        self.logger.debug('Sextractor configuration: {}'.format(self.sex_cf))
 
         input_dict = self.creates_input_dict()
-        # Creates a DataFrame from an input dictionary
         input_df = self.creates_input_df(input_dict)
 
         # Open particular file!
-        filt_n = 'filt_{}_{}_2.csv'.format(self.scmp_cf, self.mag)
+        filter_n = 'filt_{}_{}_2.csv'.format(self.scmp_cf, self.mag)
         filter_o_n = '{}/{}/{}/{}/{}'.format(self.prfs_d['filter_dir'],
                                              self.mag, self.sex_cf,
-                                             self.scmp_cf, filt_n)
-
+                                             self.scmp_cf, filter_n)
+        self.logger.debug('opens filtered catalog {}'.format(filter_n))
         # Cross with filtered data - Opens datafile
         o_cat = read_csv('{}'.format(filter_o_n), index_col=0)
 
-        stats_d, out_d = create_dict(self.scmp_cf, self.sex_cf,
-                                     self.confidence_)
+        # stats_d, out_d = create_dict(self.scmp_cf, self.sex_cf,
+        #                              self.confidence_)
 
         # Gets unique sources from input data
-        unique_sources = list(set(i_df['source'].tolist()))
+        unique_sources = list(set(input_df['source'].tolist()))
         """
         unique_sources = []
         for unique_source_ in unique_sources_:
             if int(unique_source_) > 170:
                 unique_sources.append(unique_source_)
         """
-        unique_sources = [17]
         # Loops over input data
         for idx_source, source_ in enumerate(unique_sources):
             # Gets associated data in input catalog

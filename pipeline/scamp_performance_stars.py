@@ -279,6 +279,8 @@ class ScampPerformanceStars:
         """
 
         """
+        self.norm_speed = False  # Detected SSOs are classified according
+        # their input pm
         self.logger = logger
         self.mag = mag
         self.sex_cf = sex_cf
@@ -310,9 +312,8 @@ class ScampPerformanceStars:
 
         :return:
         """
-        # Creates an input dictionary with all input sources
-        self.logger.debug('scamp {} and sextractor {}'.format(self.scmp_cf,
-                                                              self.sex_cf))
+        self.logger.debug('scamp configuration {}'.format(self.scmp_cf))
+        self.logger.debug('sextractor configuration {}'.format(self.sex_cf))
 
         # Creates a dictionary for statistics
         stats_d = redo_stats_d()
@@ -330,7 +331,7 @@ class ScampPerformanceStars:
                                               self.mag)
             cat_name = '{}/Cat_20-21_d{}'.format(cat_loc, d)
             input_d[d] = '{}.dat'.format(cat_name)
-        input_d = Create_regions(input_d).check_luca(self.mag, False, True)
+        input_d = Create_regions(input_d).check_ssos(self.mag, True)
 
         # Creates a DataFrame from an input dictionary
         input_l = []
@@ -346,10 +347,11 @@ class ScampPerformanceStars:
         i_df = i_df.reset_index(drop=True)
 
         # Gets the name of filtered file
-        filter_n = 'filt_{}_{}_3.csv'.format(self.scmp_cf, self.mag)
+        filter_n = 'filt_{}_{}_2.csv'.format(self.scmp_cf, self.mag)
         filter_o_n = '{}/{}/{}/{}/{}'.format(self.prfs_d['filter_dir'],
                                              self.mag, self.sex_cf,
                                              self.scmp_cf, filter_n)
+        self.logger.debug('opens filtered catalog {}'.format(filter_n))
         # Opens filtered file
         o_cat = read_csv('{}'.format(filter_o_n), index_col=0)
         # Gets unique sources from filtered file
@@ -360,10 +362,11 @@ class ScampPerformanceStars:
         cat_name = '{}/Cat_20-21_d1.dat'.format(cat_loc)
         input_stars = Create_regions(cat_name).get_stars(self.mag)
 
-        # print('total {}'.format(len(o_unique_sources)))
+        sources_n = len(o_unique_sources)
+        self.logger.debug('unique sources to be analysed {}'.format(sources_n))
         # Loops over unique sources of filtered file
         for idx, source_ in enumerate(o_unique_sources):
-            # print(idx, source_)
+            print(idx)
             tmp_d = {'flag': [], 'source': [], 'i_alpha': [], 'i_delta': [],
                      'o_alpha': [], 'o_delta': [], 'i_pm': [], 'i_pm_alpha': [],
                      'i_pm_delta': [], 'o_pm': [], 'o_pm_alpha': [],
@@ -372,7 +375,6 @@ class ScampPerformanceStars:
             # Check if actual source lies in 20-21 magnitude gap
             # flag_mag = False
             o_df = o_cat[o_cat['SOURCE_NUMBER'].isin([source_])]
-            print(o_df.columns)
             for i, row in enumerate(o_df.itertuples(), 1):
                 source = row.SOURCE_NUMBER
                 catalog_n = row.CATALOG_NUMBER
@@ -423,7 +425,7 @@ class ScampPerformanceStars:
                 # stats for non-SSOs
                 if flag_boolean and flag_pm:
                     o_pm_norm = self.get_norm_speed(tmp_d['o_pm'][0])
-                    for idx in range(0, len(tmp_d['o_pm']), 1):
+                    for idx_pm in range(0, len(tmp_d['o_pm']), 1):
                         tmp_d['o_pm_norm'].append(o_pm_norm)
 
                     idx = stats_d['i_pm'].index(o_pm_norm)
@@ -435,13 +437,7 @@ class ScampPerformanceStars:
                     std_d['alpha_std'][idx].append(std_alpha)
                     std_d['delta_std'][idx].append(std_delta)
 
-                    # wls_fit = self.wls_confidence(tmp_d['source'][0])
-                    # star = True
-                    # print('tmp_d {}'.format(tmp_d))
-                    # odr_fit = self.odr_confidence(star, tmp_d['source'][0],
-                    #                           tmp_d)
-
-                # stats for SSOs
+                # stats for SSOsls
                 elif flag_boolean is False and flag_pm:
                     o_pm_norm = self.get_norm_speed(tmp_d['o_pm'][0])
                     for idx in range(0, len(tmp_d['o_pm']), 1):
@@ -452,19 +448,11 @@ class ScampPerformanceStars:
                     stats_d['N_meas'][idx] += 1
                     stats_d['N_se'][idx] += 1
 
-                    # wls_fit = self.wls_confidence(tmp_d['source'][0])
-                    # star = False
-                    # odr_fit = self.odr_confidence(star, tmp_d['source'][0],
-                    #                           tmp_d)
-
-                    # order_mask = check_cat_order(tmp_d['catalog'])
-                    # flag_detection, sources_number = all_same(tmp_d['source'])
-
         stats_d = compute_factors(stats_d)
         stats_df = DataFrame(stats_d, columns=['i_pm', 'N_true', 'N_se',
                                                'N_false', 'N_meas', 'f_pur',
                                                'f_dr', 'f_com'])
-        stats_df.to_csv('test.csv')
+        stats_df.to_csv('test_stars.csv')
 
         print('Input_PM {}'.format(stats_d['i_pm']))
         print('Total {}'.format(stats_d['N_meas']))
