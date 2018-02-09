@@ -38,20 +38,10 @@ def check_source(catalog_n, o_cat, i_alpha, i_delta):
     tolerance = 0.0005  # 1.8 arcsecond
 
     o_df = o_cat[o_cat['CATALOG_NUMBER'].isin([catalog_n])]
-    # o_df.to_csv('1_{}.csv'.format(catalog_n))
-    # print('1 -- o_df {}'.format(o_df))
     o_df = o_df[o_df['ALPHA_J2000'] + tolerance > i_alpha]
-    # o_df.to_csv('2_{}.csv'.format(catalog_n))
-    # print('2 -- o_df {}'.format(o_df))
     o_df = o_df[i_alpha > o_df['ALPHA_J2000'] - tolerance]
-    # o_df.to_csv('3_{}.csv'.format(catalog_n))
-    # print('3 -- o_df {}'.format(o_df))
     o_df = o_df[o_df['DELTA_J2000'] + tolerance > i_delta]
-    # o_df.to_csv('4_{}.csv'.format(catalog_n))
-    # print('4 -- o_df {}'.format(o_df))
     o_df = o_df[i_delta > o_df['DELTA_J2000'] - tolerance]
-    # o_df.to_csv('5_{}.csv'.format(catalog_n))
-    # print('5 -- o_df {}'.format(o_df))
 
     return o_df
 

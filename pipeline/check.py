@@ -32,6 +32,7 @@ from sextractor_sizes import SextractorSizes
 from scamp_performance_stars import ScampPerformanceStars
 from scamp_performance_ssos import ScampPerformanceSSOs
 from performance import PMPerformance, StatsPerformance
+from pm_performance_ssos import SlowPMPerformanceSSOs
 from sextractor_aux import Sextractor, CatalogCreation
 from scamp_aux import Scamp, ScampFilter
 from stats_management import ExtractStats
@@ -105,6 +106,8 @@ class Check:
             self.fit_pm_mag()
         elif argv[1] == '-scamp_performance_fitting':
             self.scamp_performance_fitting()
+        elif argv[1] == '-pm_performance_ssos':
+            self.pm_performance_ssos()
         elif argv[1] == '-sextractor_size':
             self.sextractor_size()
         elif argv[1] == '-pm_performance':
@@ -390,6 +393,39 @@ class Check:
 
                     # Runs performance analysis.
                     stats_d[idx] = ScampPerformanceStars(self.logger, mag,
+                                                         sex_cf, scmp_cf)
+                    idx += 1
+
+        return True
+
+    def pm_performance_ssos(self):
+        """ Performs a complete pipeline to scamp output only related to ssos.
+        No dictionary for statistics will be created.
+
+        todo - improve docstring
+        todo - improve return
+
+        @return True if everything goes alright.
+        """
+        idx = 0
+        stats_d = {}
+        for mag in self.prfs_d['mags']:
+            for idx_scmp, scmp_conf in enumerate(self.scamp_confs):
+                for idx_sex, sex_conf in enumerate(self.sex_confs):
+                    # Set an index.
+                    # Scamp configuration.
+                    # Creates a dict from a particular configuration.
+                    scmp_d, scmp_cf = scamp_f_name(idx_scmp)
+
+                    # Sextractor configuration.
+                    conf = [sex_conf[0], sex_conf[2], sex_conf[2],
+                            sex_conf[1], sex_conf[3]]
+                    sex_cf = '{}_{}_{}_{}_{}'.format(conf[0], conf[1],
+                                                     conf[2], conf[3],
+                                                     conf[4])
+
+                    # Runs performance analysis.
+                    stats_d[idx] = SlowPMPerformanceSSOs(self.logger, mag,
                                                          sex_cf, scmp_cf)
                     idx += 1
 

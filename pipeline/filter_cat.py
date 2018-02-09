@@ -12,53 +12,12 @@ Todo:
     * Use same naming convention for all variables
 
 """
-from sys import argv
-
-from numpy import array
-from pandas import DataFrame, read_csv
+from astropy.io import fits
+from astropy.table import Table
+from pandas import concat, DataFrame, read_csv, Series
 
 from cats_management import check_source, get_input_dicts
-from misc import extract_settings, get_dither
-
-
-def create_catalog():
-    pass
-    # To get out!
-    # idx_cat = o_cat[o_cat['NUMBER'].isin([1])]
-    # idx_list = idx_cat['IDX'].tolist()
-    #
-    # dither_n = 1
-    # for i, idx_ in enumerate(idx_list):
-    #     if i != (len(idx_list) - 1):
-    #         lower_value = idx_
-    #         upper_value = idx_list[i + 1]
-    #         for dither_tmp in range(0, upper_value - lower_value, 1):
-    #             dither_list.append(dither_n)
-    #     else:
-    #         lower_value = idx_
-    #         upper_value = len(o_cat['NUMBER'].tolist())
-    #         for dither_tmp in range(0, upper_value - lower_value, 1):
-    #             dither_list.append(dither_n)
-    #     if dither_n == 4:
-    #         dither_n = 0
-    #     dither_n += 1
-    #
-    # print('len_1 test {}'.format(len(o_cat['NUMBER'].tolist())))
-    # print('len_2 test {}'.format(len(dither_list)))
-    #
-    # print(o_cat.columns)
-    # print(o_cat['NUMBER'].size)
-    #
-    # o_cat['DITHER'] = dither_list
-    # o_cat.to_csv('/media/sf_CarpetaCompartida/catalog_n.csv')
-
-
-def function_returner(p, input_data):
-    input_data = array(input_data)
-    x = input_data[0]
-    z = input_data[1]
-
-    return p[0] * x + p[1] * z + p[2]
+from misc import extract_settings, get_dither, get_cats
 
 
 def redo_dict_keys():
@@ -96,8 +55,8 @@ def redo_dict_keys_scamp():
 
     :return: dict_
     """
-    dict_ = {'SOURCE_NUMBER': [], 'CATALOG_NUMBER': [], 'EXTENSION':[],
-             'ASTR_INSTRUM':[], 'PHOT_INSTRUM': [], 'X_IMAGE': [],
+    dict_ = {'SOURCE_NUMBER': [], 'CATALOG_NUMBER': [], 'EXTENSION': [],
+             'ASTR_INSTRUM': [], 'PHOT_INSTRUM': [], 'X_IMAGE': [],
              'Y_IMAGE': [], 'ERRA_IMAGE': [], 'ERRB_IMAGE': [],
              'ERRTHETA_IMAGE': [], 'ALPHA_J2000': [], 'DELTA_J2000': [],
              'ERRA_WORLD': [], 'ERRB_WORLD': [], 'ERRTHETA_WORLD': [],
@@ -110,7 +69,6 @@ def redo_dict_keys_scamp():
              'CLASS_STAR': []}
 
     return dict_
-
 
 
 class FilterByPM:
@@ -164,25 +122,82 @@ class SlipFullSextractorCatalog:
         """
 
         """
+        self.dir_ = '/media/sf_CarpetaCompartida'
         self.prfs_d = extract_settings()
 
         self.data_d = redo_dict_keys()  # Creates a dictionary for statistics
         self.data_d['object'] = []
         self.data_d['input_pm'] = []
 
+        self.full_catalog = self.merge_ccd_catalogs()
         self.get()  # Gets data from catalogs
         self.save_df()
+
+    def merge_ccd_catalogs(self):
+        """
+
+        :return:
+        """
+        d = '{}/luca_data/v18/20-21/CCDs/30_1.5_1.5_0.01_4/'.format(self.dir_)
+        data_list = []
+        cats = get_cats()
+        for key_ in cats.keys():
+            for cat_ in cats[key_]:
+                # Creates CCD and dither column
+                cat_location = '{}{}'.format(d, cat_)
+                hdu_list = fits.open(cat_location)
+                data = Table(hdu_list[2].data).to_pandas()
+
+                # Number of rows
+                l_length = int(data['NUMBER'].size)
+                ccd = cat_[-12:-7]
+                ccd_l = [ccd] * l_length
+                dither = cat_[-5:-4]
+                dither_l = [dither] * l_length
+
+                # Creates Series
+                ccd_s = Series(ccd_l, name='CCD')
+                data['CCD'] = ccd_s
+                dither_s = Series(dither_l, name='DITHER')
+                data['DITHER'] = dither_s
+
+                # Appends to list
+                data_list.append(data)
+
+        data_df = concat(data_list, axis=0)
+        data_df = data_df.reset_index(drop=True)
+
+        return data_df
+
+    def check_source(self, catalog_n, i_df, o_alpha, o_delta):
+        """
+
+        :param catalog_n:
+        :param i_df:0
+        :param o_alpha:
+        :param o_delta:
+        :return:
+        """
+
+        if catalog_n != 0:
+            i_df = i_df[i_df['catalog'].isin([catalog_n])]
+
+        i_df = i_df[i_df['alpha_j2000'] + self.prfs_d['tolerance'] > o_alpha]
+        i_df = i_df[o_alpha > i_df['alpha_j2000'] - self.prfs_d['tolerance']]
+        i_df = i_df[i_df['delta_j2000'] + self.prfs_d['tolerance'] > o_delta]
+        i_df = i_df[o_delta > i_df['delta_j2000'] - self.prfs_d['tolerance']]
+
+        return i_df
 
     def save_df(self):
         """
 
         :return: True
         """
-        dir_ = '/media/sf_CarpetaCompartida/'
         for object_ in ['star', 'galaxy', 'sso', 'empty']:
             object_df = DataFrame(self.data_d)
             object_df = object_df[object_df['object'].isin([object_])]
-            object_df.to_csv('{}{}.csv'.format(dir_, object_))
+            object_df.to_csv('{}/full_{}.csv'.format(self.dir_, object_))
 
         return True
 
@@ -195,16 +210,11 @@ class SlipFullSextractorCatalog:
         # Gets dataframes for each type of source
         i_df = get_input_dicts(mag)
 
-        # Gets the name of filtered file
-        filter_o_n = '/media/sf_CarpetaCompartida/catalog_n.csv'
-        # Opens filtered file
-        o_cat = read_csv('{}'.format(filter_o_n), index_col=0)
-
-        keys_l = o_cat.columns.tolist()
+        keys_l = self.full_catalog.columns.tolist()
 
         idx_test = 0
         # Loops over unique sources of filtered file
-        for idx_, row in enumerate(o_cat.itertuples(), 1):
+        for idx_, row in enumerate(self.full_catalog.itertuples(), 1):
             tmp_d = {'object': 'empty'}
             catalog_n = 0
 
@@ -229,20 +239,23 @@ class SlipFullSextractorCatalog:
             i_ssos_d_df = i_ssos_df[
                 i_ssos_df['dither_values'].isin([dither])]
 
-            out_df = check_source(catalog_n, i_stars_d_df,
-                                  tmp_d['ALPHA_J2000'], tmp_d['DELTA_J2000'])
+            out_df = self.check_source(catalog_n, i_stars_d_df,
+                                       tmp_d['ALPHA_J2000'],
+                                       tmp_d['DELTA_J2000'])
             if out_df.empty is not True:
                 # Gets proper motion
                 tmp_d['object'] = 'star'
 
-            out_df = check_source(catalog_n, i_galaxies_d_df,
-                                  tmp_d['ALPHA_J2000'], tmp_d['DELTA_J2000'])
+            out_df = self.check_source(catalog_n, i_galaxies_d_df,
+                                       tmp_d['ALPHA_J2000'],
+                                       tmp_d['DELTA_J2000'])
             if out_df.empty is not True:
                 # Gets proper motion
                 tmp_d['object'] = 'galaxy'
 
-            out_df = check_source(catalog_n, i_ssos_d_df,
-                                  tmp_d['ALPHA_J2000'], tmp_d['DELTA_J2000'])
+            out_df = self.check_source(catalog_n, i_ssos_d_df,
+                                       tmp_d['ALPHA_J2000'],
+                                       tmp_d['DELTA_J2000'])
             if out_df.empty is not True:
                 # Gets proper motion
                 tmp_d['object'] = 'sso'
@@ -364,7 +377,7 @@ class SlipFilteredScampCatalog:
 
 if __name__ == "__main__":
     # Comment as necessary
-    SlipFilteredScampCatalog()
-    # SlipFullSextractorCatalog()
+    # SlipFilteredScampCatalog()
+    SlipFullSextractorCatalog()
     # pm = argv[1]
     # FilterByPM(pm)

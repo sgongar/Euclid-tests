@@ -279,7 +279,9 @@ class ScampPerformanceStars:
         """
 
         """
+        self.save = False
         self.norm_speed = False  # Detected SSOs are classified according
+        self.filter_p_number = 3
         # their input pm
         self.logger = logger
         self.mag = mag
@@ -307,6 +309,43 @@ class ScampPerformanceStars:
 
         return pm_norm
 
+    def creates_input_dict(self):
+        """ Creates an input dictionary. Each key contains SSOs' information
+        for each dither.
+
+        :return: input_dict
+        """
+        input_dict = {}
+        # Loops over the four dithers
+        for dither in range(1, 5, 1):
+            cat_location = '{}/{}/Catalogs'.format(self.prfs_d['fits_dir'],
+                                                   self.mag)
+            cat_name = '{}/Cat_20-21_d{}'.format(cat_location, dither)
+            input_dict[dither] = '{}.dat'.format(cat_name)
+        input_dict = Create_regions(input_dict).check_ssos(self.mag, True)
+
+        return input_dict
+
+    def creates_input_df(self, input_dict):
+        """ Creates an input dataframe from an input dictionary.
+
+        :return: input dataframe
+        """
+        input_list = []
+        for key_ in input_dict.keys():
+            input_list.append(input_dict[key_])
+
+        input_df = concat(input_list, axis=0)
+        # Look for < 3 coincidences
+        input_df = concat(g for _, g in input_df.groupby('source')
+                          if len(g) >= 3)
+        input_df = input_df.reset_index(drop=True)
+
+        if self.save:
+            input_df.to_csv('inputs.csv')
+
+        return input_df
+
     def check(self):
         """
 
@@ -325,29 +364,12 @@ class ScampPerformanceStars:
             std_d['alpha_std'].append([])
             std_d['delta_std'].append([])
 
-        input_d = {}
-        for d in range(1, 5, 1):
-            cat_loc = '{}/{}/Catalogs'.format(self.prfs_d['fits_dir'],
-                                              self.mag)
-            cat_name = '{}/Cat_20-21_d{}'.format(cat_loc, d)
-            input_d[d] = '{}.dat'.format(cat_name)
-        input_d = Create_regions(input_d).check_ssos(self.mag, True)
-
-        # Creates a DataFrame from an input dictionary
-        input_l = []
-        for key_ in input_d.keys():
-            input_l.append(input_d[key_])
-
-        # Concatenates
-        i_df = concat(input_l, axis=0)
-        # Needed?
-        # Look for < 3 coincidences
-        # i_df = concat(g for _, g in i_df.groupby('source')
-        #               if len(g) >= 3)
-        i_df = i_df.reset_index(drop=True)
+        input_dict = self.creates_input_dict()
+        input_df = self.creates_input_df(input_dict)
 
         # Gets the name of filtered file
-        filter_n = 'filt_{}_{}_2.csv'.format(self.scmp_cf, self.mag)
+        filter_n = 'filt_{}_{}_{}.csv'.format(self.scmp_cf, self.mag,
+                                              self.filter_p_number)
         filter_o_n = '{}/{}/{}/{}/{}'.format(self.prfs_d['filter_dir'],
                                              self.mag, self.sex_cf,
                                              self.scmp_cf, filter_n)
@@ -366,7 +388,9 @@ class ScampPerformanceStars:
         self.logger.debug('unique sources to be analysed {}'.format(sources_n))
         # Loops over unique sources of filtered file
         for idx, source_ in enumerate(o_unique_sources):
-            print(idx)
+            self.logger.debug('idx position {}'.format(idx))
+            # Initiate some values
+            flag_mag = False
             tmp_d = {'flag': [], 'source': [], 'i_alpha': [], 'i_delta': [],
                      'o_alpha': [], 'o_delta': [], 'i_pm': [], 'i_pm_alpha': [],
                      'i_pm_delta': [], 'o_pm': [], 'o_pm_alpha': [],
@@ -385,7 +409,7 @@ class ScampPerformanceStars:
                 o_pm_delta = row.PMDELTA
 
                 flag_mag = check_mag(input_stars, o_alpha, o_delta)
-                out_df = check_star(catalog_n, i_df, o_alpha, o_delta)
+                out_df = check_star(catalog_n, input_df, o_alpha, o_delta)
 
                 if out_df.empty and flag_mag:
                     tmp_d['flag'].append('True')
@@ -440,7 +464,7 @@ class ScampPerformanceStars:
                 # stats for SSOsls
                 elif flag_boolean is False and flag_pm:
                     o_pm_norm = self.get_norm_speed(tmp_d['o_pm'][0])
-                    for idx in range(0, len(tmp_d['o_pm']), 1):
+                    for idx_ssos in range(0, len(tmp_d['o_pm']), 1):
                         tmp_d['o_pm_norm'].append(o_pm_norm)
 
                     idx = stats_d['i_pm'].index(o_pm_norm)
@@ -452,11 +476,7 @@ class ScampPerformanceStars:
         stats_df = DataFrame(stats_d, columns=['i_pm', 'N_true', 'N_se',
                                                'N_false', 'N_meas', 'f_pur',
                                                'f_dr', 'f_com'])
-        stats_df.to_csv('test_stars.csv')
-
-        print('Input_PM {}'.format(stats_d['i_pm']))
-        print('Total {}'.format(stats_d['N_meas']))
-        print('non-SSOs {}'.format(stats_d['N_false']))
-        print('SSOs {}'.format(stats_d['N_se']))
+        # Saves dataframe to csv file
+        stats_df.to_csv('scamp_test_{}.csv'.format(self.filter_p_number))
 
         return stats_d

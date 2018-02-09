@@ -23,7 +23,7 @@ from astropy.table import Table
 from pandas import concat, read_csv, Series
 
 from misc import pm_compute, pm_filter, extract_settings, check_source
-from misc import confidence_filter, create_folder, sn_filter, get_dither
+from misc import confidence_filter, create_folder, get_dither
 
 __author__ = "Samuel Góngora García"
 __copyright__ = "Copyright 2018"
@@ -96,12 +96,10 @@ class Scamp:
         scmp_p = scmp_p + scmp_6 + scmp_7 + scmp_8 + scmp_9
         scmp_p = scmp_p + scmp_10
 
-        print('scmp_p {}'.format(scmp_p))
+        create_folder(self.logger, cats_dir)
 
-        # create_folder(self.logger, cats_dir)
-
-        # process_scamp = Popen(scmp_p, shell=True)
-        # process_scamp.wait()
+        process_scamp = Popen(scmp_p, shell=True)
+        process_scamp.wait()
 
         self.logger.info('Scamp process finished.')
 
@@ -129,22 +127,14 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
                                               sex_d['detect_minarea'])
 
         self.save = True
+
         # Saves _1.csv
-        # (merged_db, full_db, filter_o_n) = self.scamp_filter()
+        (merged_db, full_db, filter_o_n) = self.scamp_filter()
         # Saves _2.csv
-        # full_db = self.compute_pm(merged_db, full_db, filter_o_n)
-        # full_db = self.get_areas(full_db, filter_o_n)
-
-        filter_dir = '{}/{}/{}/{}'.format(self.prfs_d['filter_dir'], self.mag,
-                                          self.sex_cf, self.scmp_cf)
-        filt_n = 'filt_{}_{}'.format(self.scmp_cf, self.mag)
-        filter_o_n = '{}/{}'.format(filter_dir, filt_n)
-
-        full_db = read_csv('{}_3.csv'.format(filter_o_n), index_col=0)
-
+        full_db = self.compute_pm(merged_db, full_db, filter_o_n)
+        full_db = self.get_areas(full_db, filter_o_n)
         full_db = self.filter_pm(full_db, filter_o_n)
         full_db = self.filter_class(full_db, filter_o_n)
-        # full_db = self.filter_sn(full_db, filter_o_n)
         # self.filter_coherence(full_db, filter_o_n)
 
     def get_cat(self, catalog_n):
@@ -184,10 +174,12 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
         # Filtered catalog name
         filt_n = 'filt_{}_{}'.format(self.scmp_cf, self.mag)
 
-        self.logger.debug('opens full catalog {}'.format(full_n))
+        self.logger.debug('Opens full catalog')
+        self.logger.debug('Dir: {}'.format(full_n_dir))
+        self.logger.debug('Name: {}'.format(full_n_cat))
         full_cat = fits.open(full_n)
         full_db = Table(full_cat[2].data)
-        self.logger.debug('converting full catalog to Pandas format')
+        self.logger.debug('Converts full Astropy catalog to Pandas format')
         full_db = full_db.to_pandas()
 
         # Getting merge catalog
@@ -196,9 +188,11 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
         mrgd_n_cat = 'merged_{}_{}_1.cat'.format(self.scmp_cf, self.mag)
         mrgd_n = '{}{}'.format(mrgd_n_dir, mrgd_n_cat)
 
-        self.logger.debug('opens merged catalog {}'.format(mrgd_n))
+        self.logger.debug('Opens merged catalog')
+        self.logger.debug('Dir: {}'.format(mrgd_n_dir))
+        self.logger.debug('Name: {}'.format(mrgd_n_cat))
         merged_cat = fits.open(mrgd_n)
-        self.logger.debug('converting merged catalog to Pandas format')
+        self.logger.debug('Converts merged Astropy catalog to Pandas format')
         merged_db = Table(merged_cat[2].data)
 
         filter_o_n = '{}/{}'.format(filter_dir, filt_n)
@@ -246,7 +240,6 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
         filter_cat = read_csv('{}_2.csv'.format(filter_o_n), index_col=0)
         # Gets unique sources from filtered file
         unique_sources = list(set(filter_cat['SOURCE_NUMBER'].tolist()))
-        print(len(unique_sources))
 
         isoarea_l = []
         a_image_l = []
@@ -380,21 +373,6 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
         if self.save:
             self.logger.debug('saves output to {}_5.csv'.format(filter_o_n))
             full_db.to_csv('{}_5.csv'.format(filter_o_n))
-
-        return full_db
-
-    def filter_sn(self, full_db, filter_o_n):
-        """
-
-        :param full_db:
-        :param filter_o_n:
-        :return: full_db
-        """
-        self.logger.debug('runs signal-noise filter')
-        full_db = sn_filter(full_db, self.prfs_d['pm_sn'])
-        if self.save:
-            self.logger.debug('saves output to {}_6.csv'.format(filter_o_n))
-            full_db.to_csv('{}_6.csv'.format(filter_o_n))
 
         return full_db
 

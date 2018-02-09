@@ -665,7 +665,6 @@ class Create_regions:
                                      series_mag, series_pm, series_pm_alpha,
                                      series_pm_delta, series_angle,
                                      series_dither, series_ccd], axis=1)
-                sources_df.to_csv('test_{}.csv'.format(dither_))
                 sources_df = sources_df[~sources_df['CCD'].isin(['False'])]
             else:
                 sources_df = concat([series_alpha_j2000,

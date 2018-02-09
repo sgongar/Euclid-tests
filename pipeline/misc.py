@@ -109,10 +109,10 @@ def get_cats():
         folders.append(folder_n)
 
     cat_dict = {}
-
+    # FIXME Magnitude it's harcoded...change it!
     for folder_ in folders:
         cat_dict[folder_] = []
-        files = listdir('{}/{}'.format(prfs_d['output_cats'], folder_))
+        files = listdir('{}/20-21/CCDs/{}'.format(prfs_d['fits_dir'], folder_))
         for file_ in files:
             if file_[:1] == 'm' and file_[-4:] == '.cat':
                 cat_dict[folder_].append(file_)
@@ -238,7 +238,6 @@ def create_scamp_dict(conf_num):
     for conf in configurations:
         temp_list = [conf[0], conf[1], conf[2], conf[3]]
         scamp_list.append(temp_list)
-    print('scamp_list {}'.format(scamp_list))
     scamp_dict = {'crossid_radius': scamp_list[conf_num][0],
                   'pixscale_maxerr': scamp_list[conf_num][1],
                   'posangle_maxerr': scamp_list[conf_num][2],
@@ -542,20 +541,6 @@ def pm_filter(full_db, pm_low, pm_up):
     return full_db
 
 
-def sn_filter(full_db, sn):
-    """
-
-    :param full_db:
-    :param sn:
-    :return: full_db
-    """
-    # mask for SN
-    mask = full_db['PM'] / full_db['PMERR'] > float(sn)
-    full_db = full_db[mask]
-
-    return full_db
-
-
 def confidence_filter(db, r):
     """ filter objects with a non-coherence movement
 
@@ -618,7 +603,7 @@ def setting_logger():
         raise Exception
     """
     logger = getLogger("main_process")
-    logger.info("pipeline started")
+    logger.info("Pipeline started")
     # logger.FileHandler('spam.log')
 
     return logger
