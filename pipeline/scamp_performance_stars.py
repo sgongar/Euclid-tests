@@ -281,7 +281,7 @@ class ScampPerformanceStars:
         """
         self.save = False
         self.norm_speed = False  # Detected SSOs are classified according
-        self.filter_p_number = 3
+        self.filter_p_number = 5
         # their input pm
         self.logger = logger
         self.mag = mag

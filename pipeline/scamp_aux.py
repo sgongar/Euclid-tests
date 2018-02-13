@@ -67,8 +67,8 @@ class Scamp:
                                          self.sex_d['detect_minarea'])
 
         self.logger.info('scamp process for magnitude {}'.format(self.mag))
-        self.logger.info('sextractor configuration {}'.format(sex_cf))
-        self.logger.info('scamp configuration {}'.format(self.scmp_cf))
+        self.logger.info('Sextractor configuration: {}'.format(sex_cf))
+        self.logger.info('Scamp configuration: {}'.format(self.scmp_cf))
 
         scmp_1 = 'scamp -c {}'.format(self.prfs_d['conf_scamp'])
         sex_loc = '{}/{}/CCDs/{}'.format(self.prfs_d['fits_dir'], self.mag,
@@ -129,12 +129,22 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
         self.save = True
 
         # Saves _1.csv
-        (merged_db, full_db, filter_o_n) = self.scamp_filter()
+        # (merged_db, full_db, filter_o_n) = self.scamp_filter()
         # Saves _2.csv
-        full_db = self.compute_pm(merged_db, full_db, filter_o_n)
+        # full_db = self.compute_pm(merged_db, full_db, filter_o_n)
+
+        # Filtered catalog dir
+        filter_dir = '{}/{}/{}/{}'.format(self.prfs_d['filter_dir'], self.mag,
+                                          self.sex_cf, self.scmp_cf)
+        # Filtered catalog name
+        filt_n = 'filt_{}_{}'.format(self.scmp_cf, self.mag)
+
+        filter_o_n = '{}/{}'.format(filter_dir, filt_n)
+        full_db = read_csv(('{}_2.csv'.format(filter_o_n)), index_col=0)
+
         full_db = self.get_areas(full_db, filter_o_n)
-        full_db = self.filter_pm(full_db, filter_o_n)
-        full_db = self.filter_class(full_db, filter_o_n)
+        # full_db = self.filter_pm(full_db, filter_o_n)
+        # full_db = self.filter_class(full_db, filter_o_n)
         # self.filter_coherence(full_db, filter_o_n)
 
     def get_cat(self, catalog_n):
@@ -163,8 +173,8 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
                                           self.sex_cf, self.scmp_cf)
         create_folder(self.logger, filter_dir)
 
-        self.logger.debug('Scamp configuration {}'.format(self.scmp_cf))
-        self.logger.debug('Sextractor configuration {}'.format(self.sex_cf))
+        self.logger.debug('Scamp configuration: {}'.format(self.scmp_cf))
+        self.logger.debug('Sextractor configuration: {}'.format(self.sex_cf))
 
         # Full catalog name
         full_n_dir = '{}/{}/{}/{}/'.format(self.prfs_d['catalogs_dir'],
@@ -241,27 +251,72 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
         # Gets unique sources from filtered file
         unique_sources = list(set(filter_cat['SOURCE_NUMBER'].tolist()))
 
-        isoarea_l = []
-        a_image_l = []
-        b_image_l = []
-        thetha_image_l = []
-        erra_image_l = []
-        errb_image_l = []
-        fwhm_image_l = []
-        flux_radius_l = []
-        elongation_l = []
-        ellipticity_l = []
-        mag_iso_l = []
-        class_star_l = []
+        o_source_number_l = []
+        o_catalog_number_l = []
+        o_x_image_l = []
+        o_y_image_l = []
+        o_a_image_l = []
+        o_erra_image_l = []
+        o_b_image_l = []
+        o_errb_image_l = []
+        o_theta_image_l = []
+        o_errtheta_image_l = []
+        o_isoarea_l = []
+        o_fwhm_image_l = []
+        o_flux_radius_l = []
+        o_mag_iso_l = []
+        o_elongation_l = []
+        o_ellipticity_l = []
+        o_class_star_l = []
+        o_alpha_j2000_l = []
+        o_delta_j2000_l = []
+        o_erra_world_l = []
+        o_errb_world_l = []
+        o_errtheta_world_l = []
+        o_epoch_l = []
+        o_mag_l = []
+        o_magerr_l = []
+        o_flags_extraction_l = []
+        o_flags_scamp_l = []
+        o_flags_ima_l = []
+        o_pm_l = []
+        o_pmerr_l = []
+        o_pmalpha_l = []
+        o_pmdelta_l = []
+        o_pmalphaerr_l = []
+        o_pmdeltaerr_l = []
+
         # Loops over unique sources of filtered file
+        print(len(unique_sources))
         for idx, source_ in enumerate(unique_sources):
             print(idx)
             o_df = filter_cat[filter_cat['SOURCE_NUMBER'].isin([source_])]
             for i, row in enumerate(o_df.itertuples(), 1):
+                source_number = row.SOURCE_NUMBER
                 catalog_n = row.CATALOG_NUMBER
                 cat_file = self.get_cat(catalog_n)
+                x_image = row.X_IMAGE
+                y_image = row.Y_IMAGE
+                erra_image = row.ERRA_IMAGE
+                errb_image = row.ERRB_IMAGE
+                errtheta_image = row.ERRTHETA_IMAGE
                 o_alpha = row.ALPHA_J2000
                 o_delta = row.DELTA_J2000
+                erra_world = row.ERRA_WORLD
+                errb_world = row.ERRB_WORLD
+                errtheta_world = row.ERRTHETA_WORLD
+                epoch = row.EPOCH
+                mag = row.MAG
+                magerr = row.MAGERR
+                flags_extraction = row.FLAGS_EXTRACTION
+                flags_scamp = row.FLAGS_SCAMP
+                flags_ima = row.FLAGS_IMA
+                pm = row.PM
+                pmerr = row.PMERR
+                pmalpha = row.PMALPHA
+                pmdelta = row.PMDELTA
+                pmalphaerr = row.PMALPHAERR
+                pmdeltaerr = row.PMDELTAERR
 
                 # self.logger.debug('opening CCD catalog {}'.format(cat_file))
                 ccd_cat = fits.open(cat_file)
@@ -271,71 +326,136 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
 
                 cat_df = check_source(ccd_df, o_alpha, o_delta)
                 if cat_df.empty:
-                    isoarea_l.append('nan')
+                    # FIXME problemas entre sextractor y scamp
+                    # Como el objeto no esta en las imagenes originales de
+                    # sextractor lo borro del catalogo de scamp
+                    o_source_number_l.append('nan')
+                    o_catalog_number_l.append('nan')
+                    o_x_image_l.append('nan')
+                    o_y_image_l.append('nan')
+                    o_a_image_l.append('nan')
+                    o_erra_image_l.append('nan')
+                    o_b_image_l.append('nan')
+                    o_errb_image_l.append('nan')
+                    o_theta_image_l.append('nan')
+                    o_errtheta_image_l.append('nan')
+                    o_alpha_j2000_l.append('nan')
+                    o_delta_j2000_l.append('nan')
+                    o_isoarea_l.append('nan')
+                    o_fwhm_image_l.append('nan')
+                    o_flux_radius_l.append('nan')
+                    o_mag_iso_l.append('nan')
+                    o_elongation_l.append('nan')
+                    o_ellipticity_l.append('nan')
+                    o_class_star_l.append('nan')
+                    o_erra_world_l.append('nan')
+                    o_errb_world_l.append('nan')
+                    o_errtheta_world_l.append('nan')
+                    o_epoch_l.append('nan')
+                    o_mag_l.append('nan')
+                    o_magerr_l.append('nan')
+                    o_flags_extraction_l.append('nan')
+                    o_flags_scamp_l.append('nan')
+                    o_flags_ima_l.append('nan')
+                    o_pm_l.append('nan')
+                    o_pmerr_l.append('nan')
+                    o_pmalpha_l.append('nan')
+                    o_pmdelta_l.append('nan')
+                    o_pmalphaerr_l.append('nan')
+                    o_pmdeltaerr_l.append('nan')
                 else:
-                    isoarea = cat_df['ISOAREA_IMAGE'].iloc[0]
-                    isoarea_l.append(isoarea)
+                    o_source_number_l.append(source_number)
+                    o_catalog_number_l.append(catalog_n)
+                    o_x_image_l.append(x_image)
+                    o_y_image_l.append(y_image)
                     a_image = cat_df['A_IMAGE'].iloc[0]
-                    a_image_l.append(a_image)
+                    o_a_image_l.append(a_image)
+                    o_erra_image_l.append(erra_image)
                     b_image = cat_df['B_IMAGE'].iloc[0]
-                    b_image_l.append(b_image)
-                    thetha_image = cat_df['THETA_IMAGE'].iloc[0]
-                    thetha_image_l.append(thetha_image)
-                    erra_image = cat_df['ERRA_IMAGE'].iloc[0]
-                    erra_image_l.append(erra_image)
-                    errb_image = cat_df['ERRB_IMAGE'].iloc[0]
-                    errb_image_l.append(errb_image)
+                    o_b_image_l.append(b_image)
+                    o_errb_image_l.append(errb_image)
+                    theta_image = cat_df['THETA_IMAGE'].iloc[0]
+                    o_theta_image_l.append(theta_image)
+                    o_errtheta_image_l.append(errtheta_image)
+                    o_alpha_j2000_l.append(o_alpha)
+                    o_delta_j2000_l.append(o_delta)
+                    isoarea_image = cat_df['ISOAREA_IMAGE'].iloc[0]
+                    o_isoarea_l.append(isoarea_image)
                     fwhm_image = cat_df['FWHM_IMAGE'].iloc[0]
-                    fwhm_image_l.append(fwhm_image)
+                    o_fwhm_image_l.append(fwhm_image)
                     flux_radius = cat_df['FLUX_RADIUS'].iloc[0]
-                    flux_radius_l.append(flux_radius)
-                    elongation = cat_df['ELONGATION'].iloc[0]
-                    elongation_l.append(elongation)
-                    ellipticity = cat_df['ELLIPTICITY'].iloc[0]
-                    ellipticity_l.append(ellipticity)
+                    o_flux_radius_l.append(flux_radius)
                     mag_iso = cat_df['MAG_ISO'].iloc[0]
-                    mag_iso_l.append(mag_iso)
+                    o_mag_iso_l.append(mag_iso)
+                    elongation = cat_df['ELONGATION'].iloc[0]
+                    o_elongation_l.append(elongation)
+                    ellipticity = cat_df['ELLIPTICITY'].iloc[0]
+                    o_ellipticity_l.append(ellipticity)
                     class_star = cat_df['CLASS_STAR'].iloc[0]
-                    class_star_l.append(class_star)
+                    o_class_star_l.append(class_star)
+                    o_erra_world_l.append(erra_world)
+                    o_errb_world_l.append(errb_world)
+                    o_errtheta_world_l.append(errtheta_world)
+                    o_epoch_l.append(epoch)
+                    o_mag_l.append(mag)
+                    o_magerr_l.append(magerr)
+                    o_flags_extraction_l.append(flags_extraction)
+                    o_flags_scamp_l.append(flags_scamp)
+                    o_flags_ima_l.append(flags_ima)
+                    o_pm_l.append(pm)
+                    o_pmerr_l.append(pmerr)
+                    o_pmalpha_l.append(pmalpha)
+                    o_pmdelta_l.append(pmdelta)
+                    o_pmalphaerr_l.append(pmalphaerr)
+                    o_pmdeltaerr_l.append(pmdeltaerr)
 
-        isoarea_s = Series(isoarea_l)
-        a_image_s = Series(a_image_l)
-        b_image_s = Series(b_image_l)
-        theta_image_s = Series(thetha_image_l)
-        erra_image_s = Series(erra_image_l)
-        errb_image_s = Series(errb_image_l)
-        fwhm_image_s = Series(fwhm_image_l)
-        flux_radius_s = Series(flux_radius_l)
-        elongation_s = Series(elongation_l)
-        ellipticity_s = Series(ellipticity_l)
-        mag_iso_s = Series(mag_iso_l)
-        class_star_s = Series(class_star_l)
+        o_source_number_s = Series(o_source_number_l, name='SOURCE_NUMBER')
+        o_catalog_number_s = Series(o_catalog_number_l, name='CATALOG_NUMBER')
+        o_x_image_s = Series(o_x_image_l, name='X_IMAGE')
+        o_y_image_s = Series(o_y_image_l, name='Y_IMAGE')
+        o_a_image_s = Series(o_a_image_l, name='A_IMAGE')
+        o_erra_image_s = Series(o_erra_image_l, name='ERRA_IMAGE')
+        o_b_image_s = Series(o_b_image_l, name='B_IMAGE')
+        o_errb_image_s = Series(o_errb_image_l, name='ERRB_IMAGE')
+        o_theta_image_s = Series(o_theta_image_l, name='THETA_IMAGE')
+        o_errtheta_image_s = Series(o_errtheta_image_l, name='ERRTHETA_IMAGE')
+        o_alpha_j2000_s = Series(o_alpha_j2000_l, name='ALPHA_J2000')
+        o_delta_j2000_s = Series(o_delta_j2000_l, name='DELTA_J2000')
+        o_isoarea_s = Series(o_isoarea_l, name='ISOAREA_IMAGE')
+        o_fwhm_image_s = Series(o_fwhm_image_l, name='FWHM_IMAGE')
+        o_flux_radius_s = Series(o_flux_radius_l, name='FLUX_RADIUS')
+        o_mag_iso_s = Series(o_mag_iso_l, name='MAG_ISO')
+        o_elongation_s = Series(o_elongation_l, name='ELONGATION')
+        o_ellipticity_s = Series(o_ellipticity_l, name='ELLIPTICITY')
+        o_class_star_s = Series(o_class_star_l, name='CLASS_STAR')
+        o_erra_world_s = Series(o_erra_world_l, name='ERRA_WORLD')
+        o_errb_world_s = Series(o_errb_world_l, name='ERRB_WORLD')
+        o_errtheta_world_s = Series(o_errtheta_world_l, name='ERRTHETA_WORLD')
+        o_epoch_s = Series(o_epoch_l, name='EPOCH')
+        o_mag_s = Series(o_mag_l, name='MAG')
+        o_magerr_s = Series(o_magerr_l, name='MAGERR')
+        o_flags_extraction_s = Series(o_flags_extraction_l,
+                                      name='FLAGS_EXTRACTION')
+        o_flags_scamp_s = Series(o_flags_scamp_l, name='FLAGS_SCAMP')
+        o_flags_ima_s = Series(o_flags_ima_l, name='FLAGS_IMA')
+        o_pm_s = Series(o_pm_l, name='PM')
+        o_pmerr_s = Series(o_pmerr_l, name='PMERR')
+        o_pmalpha_s = Series(o_pmalpha_l, name='PMALPHA')
+        o_pmdelta_s = Series(o_pmdelta_l, name='PMDELTA')
+        o_pmalphaerr_s = Series(o_pmalphaerr_l, name='PMALPHAERR')
+        o_pmdeltaerr_s = Series(o_pmdeltaerr_l, name='PMDELTAERR')
 
-        for i in set(full_db['SOURCE_NUMBER']):
-            full_db.loc[full_db['SOURCE_NUMBER'] == i,
-                        'ISOAREA_IMAGE'] = isoarea_s.loc[i - 1]
-            full_db.loc[full_db['SOURCE_NUMBER'] == i,
-                        'A_IMAGE'] = a_image_s.loc[i - 1]
-            full_db.loc[full_db['SOURCE_NUMBER'] == i,
-                        'B_IMAGE'] = b_image_s.loc[i - 1]
-            full_db.loc[full_db['SOURCE_NUMBER'] == i,
-                        'THETA_IMAGE'] = theta_image_s.loc[i - 1]
-            full_db.loc[full_db['SOURCE_NUMBER'] == i,
-                        'ERRA_IMAGE'] = erra_image_s.loc[i - 1]
-            full_db.loc[full_db['SOURCE_NUMBER'] == i,
-                        'ERRB_IMAGE'] = errb_image_s.loc[i - 1]
-            full_db.loc[full_db['SOURCE_NUMBER'] == i,
-                        'FWHM_IMAGE'] = fwhm_image_s.loc[i - 1]
-            full_db.loc[full_db['SOURCE_NUMBER'] == i,
-                        'FLUX_RADIUS'] = flux_radius_s.loc[i - 1]
-            full_db.loc[full_db['SOURCE_NUMBER'] == i,
-                        'ELONGATION'] = elongation_s.loc[i - 1]
-            full_db.loc[full_db['SOURCE_NUMBER'] == i,
-                        'ELLIPTICITY'] = ellipticity_s.loc[i - 1]
-            full_db.loc[full_db['SOURCE_NUMBER'] == i,
-                        'MAG_ISO'] = mag_iso_s.loc[i - 1]
-            full_db.loc[full_db['SOURCE_NUMBER'] == i,
-                        'CLASS_STAR'] = class_star_s.loc[i - 1]
+        full_db = concat([o_source_number_s, o_catalog_number_s, o_x_image_s,
+                          o_y_image_s, o_a_image_s, o_erra_image_s,
+                          o_b_image_s, o_errb_image_s, o_theta_image_s,
+                          o_errtheta_image_s, o_alpha_j2000_s, o_delta_j2000_s,
+                          o_isoarea_s, o_fwhm_image_s, o_flux_radius_s,
+                          o_mag_iso_s, o_elongation_s, o_ellipticity_s,
+                          o_class_star_s, o_erra_world_s, o_errb_world_s,
+                          o_errtheta_world_s, o_epoch_s, o_mag_s, o_magerr_s,
+                          o_flags_extraction_s, o_flags_scamp_s, o_flags_ima_s,
+                          o_pm_s, o_pmerr_s, o_pmalpha_s, o_pmdelta_s,
+                          o_pmalphaerr_s, o_pmdeltaerr_s], axis=1)
 
         if self.save:
             self.logger.debug('saves output to {}_3.csv'.format(filter_o_n))

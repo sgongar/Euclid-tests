@@ -641,8 +641,6 @@ def change_times(logger, prfs_d, mag):
         except IndexError:
             logger.debug('extraction finished')
 
-    logger.info('Sextraction process of fits images finished')
-
     return True
 
 
@@ -757,6 +755,7 @@ if __name__ == '__main__':
             logger.debug('opening catalog file {}'.format(i_c))
             Create_regions(i_c).full_cats()
         elif argv[1] == '-full_regions':
+
             i_c1 = '/mnt/c/CCDs'
             i_c2 = '/full_10_1.2_5_1_20-21_1.cat'
             i_c = i_c1 + i_c2

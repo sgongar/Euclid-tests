@@ -200,7 +200,7 @@ class SlowPMPerformanceSSOs:
 
         """
         self.logger = logger
-        self.filter_p_number = 3
+        self.filter_p_number = 4
         self.prfs_d = extract_settings()
 
         self.mag = mag
@@ -318,6 +318,10 @@ class SlowPMPerformanceSSOs:
         unique_sources = list(set(input_df['source'].tolist()))
         sources_n = len(unique_sources)
         self.logger.debug('input sources to be analysed {}'.format(sources_n))
+
+        pm_dict = {'SOURCE': [], 'CATALOG_N': [], 'ALPHA_J2000': [],
+                   'DELTA_J2000': [], 'CLASS_STAR': []}
+
         # Loops over input data (Luca's catalog)
         for idx_source, source_ in enumerate(unique_sources):
             tmp_dict = {'SOURCE_NUMBER': [], 'DF': []}
@@ -356,6 +360,24 @@ class SlowPMPerformanceSSOs:
                 self.class_star_d[i_pm].append(class_star)
                 o_pm = df['PM'].iloc[0]
                 self.data_d[i_pm].append(o_pm)
+
+                if i_pm == 0.001:
+                    full_df = tmp_dict['DF']
+                    for df_ in full_df:
+                        source = df_['SOURCE_NUMBER'].iloc[0]
+                        pm_dict['SOURCE'].append(source)
+                        catalog_n = df_['CATALOG_NUMBER'].iloc[0]
+                        pm_dict['CATALOG_N'].append(catalog_n)
+                        alpha = df_['ALPHA_J2000'].iloc[0]
+                        pm_dict['ALPHA_J2000'].append(alpha)
+                        delta = df_['DELTA_J2000'].iloc[0]
+                        pm_dict['DELTA_J2000'].append(delta)
+                        class_star = df_['CLASS_STAR'].iloc[0]
+                        pm_dict['CLASS_STAR'].append(class_star)
+
+        from pandas import DataFrame
+        pm_df = DataFrame(pm_dict)
+        pm_df.to_csv('pm_regions.csv')
 
         mean_l = []
         std_l = []
@@ -407,4 +429,4 @@ class SlowPMPerformanceSSOs:
         stats_df = concat([pm_s, mean_s, std_s, mean_a_image_s, std_a_image_s,
                            mean_b_image_s, std_b_image_s, mean_class_star_s,
                            std_class_star_s, detected_s], axis=1)
-        stats_df.to_csv('slow_pm_distribution.csv')
+        stats_df.to_csv('slow_pm_distribution_{}.csv'.format(self.filter_p_number))
