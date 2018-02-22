@@ -55,8 +55,7 @@ def redo_dict_keys_scamp():
 
     :return: dict_
     """
-    dict_ = {'SOURCE_NUMBER': [], 'CATALOG_NUMBER': [], 'EXTENSION': [],
-             'ASTR_INSTRUM': [], 'PHOT_INSTRUM': [], 'X_IMAGE': [],
+    dict_ = {'SOURCE_NUMBER': [], 'CATALOG_NUMBER': [], 'X_IMAGE': [],
              'Y_IMAGE': [], 'ERRA_IMAGE': [], 'ERRB_IMAGE': [],
              'ERRTHETA_IMAGE': [], 'ALPHA_J2000': [], 'DELTA_J2000': [],
              'ERRA_WORLD': [], 'ERRB_WORLD': [], 'ERRTHETA_WORLD': [],
@@ -297,7 +296,7 @@ class SlipFilteredScampCatalog:
         for object_ in ['star', 'galaxy', 'sso', 'empty']:
             object_df = DataFrame(self.data_d)
             object_df = object_df[object_df['object'].isin([object_])]
-            object_df.to_csv('{}{}_scamp.csv'.format(self.dir_, object_))
+            object_df.to_csv('{}{}_filt_6.csv'.format(self.dir_, object_))
 
         return True
 
@@ -311,13 +310,13 @@ class SlipFilteredScampCatalog:
         i_df = get_input_dicts(mag)
 
         # Gets the name of filtered file
-        filter_o_n = 'filt_10_1.1_0.5_0.04_20-21_3.csv'
+        filter_o_n = 'filt_10_1.1_0.5_0.04_20-21_6.csv'
         # Opens filtered file
         o_cat = read_csv('{}{}'.format(self.dir_, filter_o_n), index_col=0)
 
         keys_l = o_cat.columns.tolist()
 
-        print(len(o_cat['SOURCE_NUMBER'].tolist()))
+        print('SOURCE {}'.format(len(o_cat['SOURCE_NUMBER'].tolist())))
         idx_test = 0
         # Loops over unique sources of filtered file
         for idx_, row in enumerate(o_cat.itertuples(), 1):
@@ -377,7 +376,7 @@ class SlipFilteredScampCatalog:
 
 if __name__ == "__main__":
     # Comment as necessary
-    # SlipFilteredScampCatalog()
-    SlipFullSextractorCatalog()
+    SlipFilteredScampCatalog()
+    # SlipFullSextractorCatalog()
     # pm = argv[1]
     # FilterByPM(pm)

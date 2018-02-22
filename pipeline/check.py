@@ -9,6 +9,7 @@ Versions:
 - 0.2: Plot functions were removed.
 - 0.3:
 - 0.4: SextractorSizes added.
+- 0.5: Changed reference to ScampFilter
 
 Todo:
     *
@@ -34,7 +35,8 @@ from scamp_performance_ssos import ScampPerformanceSSOs
 from performance import PMPerformance, StatsPerformance
 from pm_performance_ssos import SlowPMPerformanceSSOs
 from sextractor_aux import Sextractor, CatalogCreation
-from scamp_aux import Scamp, ScampFilter
+from scamp_aux import Scamp
+from scamp_filter import ScampFilter
 from stats_management import ExtractStats
 
 __author__ = "Samuel Góngora García"
@@ -98,8 +100,8 @@ class Check:
             self.stats(self.scamp_confs_n)
         # elif argv[1] == '-error_performance':
         #     self.error_performance()
-        elif argv[1] == '-scamp_performance':
-            self.scamp_performance()
+        elif argv[1] == '-scamp_performance_ssos':
+            self.scamp_performance_ssos()
         elif argv[1] == '-scamp_performance_stars':
             self.scamp_performance_stars()
         elif argv[1] == '-fit_pm_mag':
@@ -323,7 +325,7 @@ class Check:
 
         return True
 
-    def scamp_performance(self):
+    def scamp_performance_ssos(self):
         """ Performs a complete pipeline to scamp output.
 
         @return True if everything goes alright.
@@ -345,23 +347,7 @@ class Check:
                                                conf_[1][2], conf_[1][3])
 
                 stats_d[idx] = ScampPerformanceSSOs(self.logger, mag,
-                                                    scmp_cf, sex_cf,
-                                                    confidence_)
-
-        """
-        tmp_d = {'PM': [], 'total': [], 'right': [], 'false': [],
-                 'f_dr': [], 'f_pur': [], 'f_com': [], 'crossid': [],
-                 'pixscale': [], 'posangle': [], 'position': [],
-                 'deblending': [], 'threshold': [], 'mincount': [],
-                 'area': [], 'confidence': []}
-        for conf_key in stats_d.keys():
-            for value_key in stats_d[conf_key].keys():
-                for value in stats_d[conf_key][value_key]:
-                    tmp_d[value_key].append(value)
-
-        stats_df = DataFrame(tmp_d)
-        stats_df.to_csv('scamp_stats.csv')
-        """
+                                                    sex_cf, scmp_cf)
 
         return True
 

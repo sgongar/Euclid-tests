@@ -12,7 +12,7 @@ Todo:
 
 """
 from pandas import concat, read_csv, DataFrame
-from numpy import std
+from numpy import mean, std
 
 from misc import all_same, extract_settings
 from misc import speeds_range
@@ -219,69 +219,15 @@ def check_cat_order(cat_list):
         return False
 
 
-def create_dict(scmp_cf, sex_cf, confidence_):
-    """
-
-    :param scmp_cf:
-    :param sex_cf:
-    :param confidence_:
-    :return:
-    """
-    stats_keys = ['total', 'right', 'false', 'f_dr', 'f_pur', 'f_com']
-
-    stats_d = {'PM': [0.001, 0.003, 0.01, 0.03, 0.1, 0.3,
-                      1, 3, 10, 30]}
-
-    scamp_parameters = scmp_cf.split('_')
-    sex_parameters = sex_cf.split('_')
-
-    stats_d['crossid'] = []
-    stats_d['pixscale'] = []
-    stats_d['posangle'] = []
-    stats_d['position'] = []
-    stats_d['deblending'] = []
-    stats_d['threshold'] = []
-    stats_d['mincount'] = []
-    stats_d['area'] = []
-    stats_d['confidence'] = []
-
-    for value_ in range(len(stats_d['PM'])):
-        stats_d['crossid'].append(scamp_parameters[0])
-        stats_d['pixscale'].append(scamp_parameters[1])
-        stats_d['posangle'].append(scamp_parameters[2])
-        stats_d['position'].append(scamp_parameters[3])
-        stats_d['deblending'].append(sex_parameters[0])
-        stats_d['threshold'].append(sex_parameters[1])
-        stats_d['mincount'].append(sex_parameters[3])
-        stats_d['area'].append(sex_parameters[4])
-        # Confidence
-        stats_d['confidence'].append(confidence_)
-
-    for key_ in stats_keys:
-        stats_d[key_] = []
-        for value_ in range(len(stats_d['PM'])):
-            stats_d[key_].append(0)
-
-    # out dictionary
-    out_keys = ['alpha_j2000', 'delta_j2000',
-                'catalog', 'PM', 'source', 'CCD', 'dither']
-    out_d = {}
-
-    for key_ in out_keys:
-        out_d[key_] = []
-
-    return stats_d, out_d
-
-
 class ScampPerformanceStars:
 
     def __init__(self, logger, mag, sex_cf, scmp_cf):
         """
 
         """
-        self.save = False
+        self.save = True
         self.norm_speed = False  # Detected SSOs are classified according
-        self.filter_p_number = 5
+        self.filter_p_number = '3'
         # their input pm
         self.logger = logger
         self.mag = mag
@@ -351,18 +297,32 @@ class ScampPerformanceStars:
 
         :return:
         """
-        self.logger.debug('scamp configuration {}'.format(self.scmp_cf))
-        self.logger.debug('sextractor configuration {}'.format(self.sex_cf))
+        self.logger.debug('Scamp configuration {}'.format(self.scmp_cf))
+        self.logger.debug('Sextractor configuration {}'.format(self.sex_cf))
 
         # Creates a dictionary for statistics
         stats_d = redo_stats_d()
         stats_d = populate_stats_d(stats_d)
 
-        # Creates a dictionary for standard deviation and populated with lists
-        std_d = {'alpha_std': [], 'delta_std': []}
+        # Creates a dictionary for mean and populated with lists
+        nonsso_d = {'a_image': [], 'b_image': []}
         for idx in range(0, len(self.prfs_d['pms']) + 1, 1):
-            std_d['alpha_std'].append([])
-            std_d['delta_std'].append([])
+            nonsso_d['a_image'].append([])
+            nonsso_d['b_image'].append([])
+
+        # Creates a dictionary for standard deviation and populated with lists
+        sso_d = {'a_image': [], 'b_image': []}
+        for idx in range(0, len(self.prfs_d['pms']) + 1, 1):
+            sso_d['a_image'].append([])
+            sso_d['b_image'].append([])
+
+        """
+        # Creates a dictionary for standard deviation and populated with lists
+        sso_d = {'theta_image': []}
+        for idx in range(0, len(self.prfs_d['pms']) + 1, 1):
+            sso_d['a_image'].append([])
+            sso_d['b_image'].append([])
+        """
 
         input_dict = self.creates_input_dict()
         input_df = self.creates_input_df(input_dict)
@@ -383,18 +343,18 @@ class ScampPerformanceStars:
         cat_loc = '{}/{}/Catalogs'.format(self.prfs_d['fits_dir'], self.mag)
         cat_name = '{}/Cat_20-21_d1.dat'.format(cat_loc)
         input_stars = Create_regions(cat_name).get_stars(self.mag)
-
         sources_n = len(o_unique_sources)
+
         self.logger.debug('unique sources to be analysed {}'.format(sources_n))
         # Loops over unique sources of filtered file
         for idx, source_ in enumerate(o_unique_sources):
-            self.logger.debug('idx position {}'.format(idx))
+            # self.logger.debug('idx position {}'.format(idx))
             # Initiate some values
-            flag_mag = False
-            tmp_d = {'flag': [], 'source': [], 'i_alpha': [], 'i_delta': [],
-                     'o_alpha': [], 'o_delta': [], 'i_pm': [], 'i_pm_alpha': [],
-                     'i_pm_delta': [], 'o_pm': [], 'o_pm_alpha': [],
-                     'o_pm_delta': [], 'o_pm_norm': []}
+            tmp_d = {'flag_sso': [], 'source': [], 'theta_image': [],
+                     'a_image': [], 'b_image': [], 'i_alpha': [],
+                     'i_delta': [], 'o_alpha': [], 'o_delta': [], 'i_pm': [],
+                     'i_pm_alpha': [], 'i_pm_delta': [], 'o_pm': [],
+                     'o_pm_alpha': [], 'o_pm_delta': [], 'o_pm_norm': []}
 
             # Check if actual source lies in 20-21 magnitude gap
             # flag_mag = False
@@ -402,6 +362,9 @@ class ScampPerformanceStars:
             for i, row in enumerate(o_df.itertuples(), 1):
                 source = row.SOURCE_NUMBER
                 catalog_n = row.CATALOG_NUMBER
+                # a_image = row.A_IMAGE
+                # b_image = row.B_IMAGE
+                theta_image = row.THETA_IMAGE
                 o_alpha = row.ALPHA_J2000
                 o_delta = row.DELTA_J2000
                 o_pm = row.PM
@@ -412,8 +375,9 @@ class ScampPerformanceStars:
                 out_df = check_star(catalog_n, input_df, o_alpha, o_delta)
 
                 if out_df.empty and flag_mag:
-                    tmp_d['flag'].append('True')
+                    tmp_d['flag_sso'].append(False)
                     tmp_d['source'].append(source)
+                    tmp_d['theta_image'].append(theta_image)
                     tmp_d['o_alpha'].append(o_alpha)
                     tmp_d['o_delta'].append(o_delta)
                     tmp_d['o_pm'].append(o_pm)
@@ -421,9 +385,9 @@ class ScampPerformanceStars:
                     tmp_d['o_pm_delta'].append(o_pm_delta)
                 elif out_df.empty is not True:
                     # it's a SSO
-                    flag_mag = True
-                    tmp_d['flag'].append('False')
+                    tmp_d['flag_sso'].append(True)
                     tmp_d['source'].append(source)
+                    tmp_d['theta_image'].append(theta_image)
                     i_alpha = out_df['alpha_j2000'].iloc[0]
                     tmp_d['i_alpha'].append(i_alpha)
                     i_delta = out_df['delta_j2000'].iloc[0]
@@ -442,35 +406,69 @@ class ScampPerformanceStars:
                 else:
                     pass
 
-            if flag_mag:
-                flag_boolean, len_boolean = all_same(tmp_d['flag'])
-                flag_pm, len_pm = all_same(tmp_d['o_pm'])
+            if len(set(tmp_d['flag_sso'])) == 1 and tmp_d['flag_sso'][0] is True:
+                flag_sso = True
+            else:
+                flag_sso = False
+            if len(set(tmp_d['o_pm'])) == 1:
+                flag_pm = True
+            else:
+                flag_pm = False
 
-                # stats for non-SSOs
-                if flag_boolean and flag_pm:
-                    o_pm_norm = self.get_norm_speed(tmp_d['o_pm'][0])
-                    for idx_pm in range(0, len(tmp_d['o_pm']), 1):
-                        tmp_d['o_pm_norm'].append(o_pm_norm)
+            # stats for non-SSOs
+            if flag_sso is not True and flag_pm:
+                o_pm_norm = self.get_norm_speed(tmp_d['o_pm'][0])
+                for idx_pm in range(0, len(tmp_d['o_pm']), 1):
+                    tmp_d['o_pm_norm'].append(o_pm_norm)
 
-                    idx = stats_d['i_pm'].index(o_pm_norm)
+                idx = stats_d['i_pm'].index(o_pm_norm)
 
-                    stats_d['N_meas'][idx] += 1
-                    stats_d['N_false'][idx] += 1
-                    std_alpha = std(tmp_d['o_alpha'])
-                    std_delta = std(tmp_d['o_delta'])
-                    std_d['alpha_std'][idx].append(std_alpha)
-                    std_d['delta_std'][idx].append(std_delta)
+                """
+                if len(tmp_d['source']) >= 3:
+                    print('false {}'.format(len(tmp_d['source'])))
+                else:
+                    print('error')
 
-                # stats for SSOsls
-                elif flag_boolean is False and flag_pm:
-                    o_pm_norm = self.get_norm_speed(tmp_d['o_pm'][0])
-                    for idx_ssos in range(0, len(tmp_d['o_pm']), 1):
-                        tmp_d['o_pm_norm'].append(o_pm_norm)
+                # nonsso_d['a_image'][idx].append(a_image)
+                # nonsso_d['b_image'][idx].append(b_image)
+                """
+                stats_d['N_meas'][idx] += 1
+                stats_d['N_false'][idx] += 1
+            # stats for SSOsls
+            elif flag_sso and flag_pm:
+                """
+                o_pm_norm = self.get_norm_speed(tmp_d['o_pm'][0])
+                for idx_ssos in range(0, len(tmp_d['o_pm']), 1):
+                    tmp_d['o_pm_norm'].append(o_pm_norm)
 
-                    idx = stats_d['i_pm'].index(o_pm_norm)
+                idx = stats_d['i_pm'].index(o_pm_norm)
+                """
+                """
+                if tmp_d['i_pm'][0] == 10.0:
+                    print(tmp_d['source'])
+                    print(tmp_d['o_pm'])
+                    print(tmp_d['i_alpha'], tmp_d['i_delta'])
+                    print(tmp_d['o_alpha'], tmp_d['o_delta'])
+                    print(" ")
+                """
+                idx = stats_d['i_pm'].index(tmp_d['i_pm'][0])
 
-                    stats_d['N_meas'][idx] += 1
-                    stats_d['N_se'][idx] += 1
+                print('sso {}'.format(len(tmp_d['source'])))
+
+                # sso_d['a_image'][idx].append(a_image)
+                # sso_d['b_image'][idx].append(b_image)
+
+                stats_d['N_meas'][idx] += 1
+                stats_d['N_se'][idx] += 1
+
+        # for key_ in ['a_image', 'b_image']:
+        #     print(key_)
+        #     for idx_pm, pm_ in enumerate(stats_d['i_pm']):
+        #         print(idx_pm, pm_)
+        #         print('non-sso mean {}'.format(mean(nonsso_d[key_][idx_pm])))
+        #         print('non-sso std {}'.format(std(nonsso_d[key_][idx_pm])))
+        #         print('sso mean {}'.format(mean(sso_d[key_][idx_pm])))
+        #         print('sso std {}'.format(std(sso_d[key_][idx_pm])))
 
         stats_d = compute_factors(stats_d)
         stats_df = DataFrame(stats_d, columns=['i_pm', 'N_true', 'N_se',

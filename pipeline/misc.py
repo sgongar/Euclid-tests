@@ -541,6 +541,20 @@ def pm_filter(full_db, pm_low, pm_up):
     return full_db
 
 
+def b_filter(full_db, b_low, b_up):
+    """ filters proper motions values according to their values
+
+    :param full_db:
+    :param b_low:
+    :param b_up:
+    :return: full_db
+    """
+    mask = (full_db['B_IMAGE'] > float(b_low)) & (full_db['B_IMAGE'] < float(b_up))
+    full_db = full_db[mask]
+
+    return full_db
+
+
 def confidence_filter(db, r):
     """ filter objects with a non-coherence movement
 
@@ -577,7 +591,7 @@ def confidence_filter(db, r):
                 passed.append(source)
 
     # Passed if both dimension have required rsquared
-    passed = [p for p in passed if passed.count(p) >= 1]
+    passed = [p for p in passed if passed.count(p) == 2]
     passed = list(set(passed))
     db = db[db['SOURCE_NUMBER'].isin(passed)]
 
