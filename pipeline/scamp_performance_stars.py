@@ -227,7 +227,7 @@ class ScampPerformanceStars:
         """
         self.save = True
         self.norm_speed = False  # Detected SSOs are classified according
-        self.filter_p_number = '3'
+        self.filter_p_number = '7s'
         # their input pm
         self.logger = logger
         self.mag = mag
@@ -395,6 +395,8 @@ class ScampPerformanceStars:
                     tmp_d['o_alpha'].append(o_alpha)
                     tmp_d['o_delta'].append(o_delta)
                     i_pm = out_df['pm_values'].iloc[0]
+                    if i_pm == 0.001:
+                        print('source {}'.format(source))
                     tmp_d['i_pm'].append(i_pm)
                     i_pm_alpha = out_df['pm_alpha'].iloc[0]
                     tmp_d['i_pm_alpha'].append(i_pm_alpha)
@@ -452,8 +454,6 @@ class ScampPerformanceStars:
                     print(" ")
                 """
                 idx = stats_d['i_pm'].index(tmp_d['i_pm'][0])
-
-                print('sso {}'.format(len(tmp_d['source'])))
 
                 # sso_d['a_image'][idx].append(a_image)
                 # sso_d['b_image'][idx].append(b_image)

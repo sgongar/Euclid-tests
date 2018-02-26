@@ -12,52 +12,10 @@ Todo:
 
 """
 from pandas import concat, read_csv, DataFrame
-from numpy import mean, std
+from numpy import mean, median, std
 
-from misc import all_same, extract_settings
-from misc import speeds_range
+from misc import extract_settings
 from regions import Create_regions
-
-
-def compute_factors(stats_d):
-    """
-    N_meas: number of all detected sources(including false detections)
-    N_se: number of simulated sources recovered by source extraction
-    N_true: number of simulated input sources
-    f_dr: detection rate f_pur: purity
-    f_com: completeness
-
-    f_dr = N_meas / N_true = (N_se + N_false) / N_true
-    f_pur = N_se / N_meas = N_se / (N_se + N_false)
-    f_com = f_dr * f_pur = N_se / N_true
-
-    :param stats_d:
-    :return:
-    """
-    for idx in range(0, len(stats_d['f_dr']), 1):
-        n_meas = stats_d['N_meas'][idx]
-        n_se = stats_d['N_se'][idx]
-        n_true = stats_d['N_true'][idx]
-        try:
-            f_dr = n_meas / n_true
-            f_dr = float("{0:.2f}".format(f_dr))
-            stats_d['f_dr'][idx] = f_dr
-        except ZeroDivisionError:
-            stats_d['f_dr'][idx] = 'nan'
-        try:
-            f_pur = n_se / n_meas
-            f_pur = float("{0:.2f}".format(f_pur))
-            stats_d['f_pur'][idx] = f_pur
-        except ZeroDivisionError:
-            stats_d['f_pur'][idx] = 'nan'
-        try:
-            f_com = n_se / n_true
-            f_com = float("{0:.2f}".format(f_com))
-            stats_d['f_com'][idx] = f_com
-        except ZeroDivisionError:
-            stats_d['f_com'][idx] = 'nan'
-
-    return stats_d
 
 
 def redo_stats_d():
@@ -65,9 +23,7 @@ def redo_stats_d():
 
     :return: tmp_d
     """
-    stats_d = {'i_pm': [], 'N_meas': [], 'N_false': [], 'N_se': [],
-               'N_true': [], 'f_dr': [], 'f_pur': [], 'f_com': [],
-               'alpha_std': [], 'delta_std': []}
+    stats_d = {'i_pm': [], 'mean': [], 'std': [], 'min': [], 'max': []}
 
     return stats_d
 
@@ -79,64 +35,16 @@ def populate_stats_d(stats_d):
     :return:
     """
     prfs_d = extract_settings()
-    initial_int = 0
     initial_float = 0.0
 
-    stats_d['i_pm'].append(initial_int)
-    stats_d['N_meas'].append(initial_int)
-    stats_d['N_false'].append(initial_int)
-    stats_d['N_se'].append(initial_float)
-    stats_d['N_true'].append(initial_float)
-    stats_d['f_dr'].append(initial_float)
-    stats_d['f_pur'].append(initial_float)
-    stats_d['f_com'].append(initial_float)
-    stats_d['alpha_std'].append(initial_float)
-    stats_d['delta_std'].append(initial_float)
-
-    true_sources = [21, 22, 14, 17, 19, 22, 23, 19, 18, 21]
-
-    for idx, pm_ in enumerate(prfs_d['pms']):
+    for idx, pm_ in enumerate(prfs_d['pms'][:-1]):
         stats_d['i_pm'].append(pm_)
-        stats_d['N_meas'].append(initial_int)
-        stats_d['N_false'].append(initial_int)
-        stats_d['N_se'].append(initial_float)
-        stats_d['N_true'].append(true_sources[idx])
-        stats_d['f_dr'].append(initial_float)
-        stats_d['f_pur'].append(initial_float)
-        stats_d['f_com'].append(initial_float)
-        stats_d['alpha_std'].append(initial_float)
-        stats_d['delta_std'].append(initial_float)
+        stats_d['mean'].append(initial_float)
+        stats_d['std'].append(initial_float)
+        stats_d['min'].append(initial_float)
+        stats_d['max'].append(initial_float)
 
     return stats_d
-
-
-def redo_tmp_d():
-    """ Creates a dictionary
-
-    :return: tmp_d
-    """
-    tmp_d = {'sex_cf': [], 'scmp_cf': [], 'boolean_l': [], 'catalog': [],
-             'CCD': [], 'source': [], 'epoch': [], 'i_pm': [],
-             'i_pm_alpha': [], 'i_pm_delta': [], 'i_alpha': [],
-             'i_delta': [], 'o_pm_alpha': [], 'o_pm_delta': [],
-             'o_pm_alpha_err': [], 'o_pm_delta_err': [], 'o_alpha': [],
-             'o_delta': [], 'error_a': [], 'error_b': []}
-
-    return tmp_d
-
-
-def redo_err_d():
-    """ Creates a dictionary
-
-    :return: err_d
-    """
-    err_d = {'sex_cf': [], 'scmp_cf': [], 'catalog': [],
-             'CCD': [], 'source': [], 'scmp_source': [], 'i_pm': [],
-             'i_pm_alpha': [], 'i_pm_delta': [], 'o_pm': [], 'o_pm_alpha': [],
-             'o_pm_delta': [], 'i_alpha': [], 'i_delta': [], 'o_alpha': [],
-             'o_delta': []}
-
-    return err_d
 
 
 def check_star(catalog_n, i_df, o_alpha, o_delta):
@@ -182,47 +90,14 @@ def check_mag(i_df, o_alpha, o_delta):
     return flag_mag
 
 
-def cut_catalog(o_cat, margin, limits):
-    """
-
-    :param o_cat:
-    :param margin:
-    :param limits:
-    :return:
-    """
-    o_df = o_cat[o_cat['ALPHA_J2000'] + margin > limits['max_alpha']]
-    o_df = o_df[limits['min_alpha'] > o_df['ALPHA_J2000'] - margin]
-    o_df = o_df[o_df['DELTA_J2000'] + margin > limits['max_delta']]
-    o_df = o_df[limits['min_delta'] > o_df['DELTA_J2000'] - margin]
-
-    return o_df
-
-
-def check_cat_order(cat_list):
-    """
-
-    :param cat_list:
-    :return:
-    """
-    tmp_order = []
-
-    for idx_cat in range(0, len(cat_list), 1):
-        cat = cat_list[idx_cat]
-        dither = cat - (cat / 4) * 4
-        if dither == 0:
-            dither = 4
-        tmp_order.append(dither)
-
-    if sorted(tmp_order) == tmp_order:
-        return True
-    else:
-        return False
-
-
 class ScampPerformanceSSOs:
 
     def __init__(self, logger, mag, sex_cf, scmp_cf):
         """
+        Son estadisticas para las velocidades de entrada, no de salida.
+        Eso quiere decir que no conozco la dispersion de los valores.
+        Si no conozco la dispersion la mejora en los valores cuando ajuste b
+        y class star se repartira entre todas las velocidades.
 
         """
         self.save = True
@@ -284,10 +159,6 @@ class ScampPerformanceSSOs:
         self.logger.debug('Scamp configuration {}'.format(self.scmp_cf))
         self.logger.debug('Sextractor configuration {}'.format(self.sex_cf))
 
-        # Creates a dictionary for statistics
-        stats_d = redo_stats_d()
-        stats_d = populate_stats_d(stats_d)
-
         # Creates a dictionary for standard deviation and populated with lists
         sso_d = {'a_image': [], 'b_image': [], 'class_star': []}
         for idx in range(0, len(self.prfs_d['pms']) + 1, 1):
@@ -304,7 +175,7 @@ class ScampPerformanceSSOs:
         filter_o_n = '{}/{}/{}/{}/{}'.format(self.prfs_d['filter_dir'],
                                              self.mag, self.sex_cf,
                                              self.scmp_cf, filter_n)
-        self.logger.debug('opens filtered catalog {}'.format(filter_n))
+        self.logger.debug('Opens filtered catalog {}'.format(filter_n))
         # Opens filtered file
         o_cat = read_csv('{}'.format(filter_o_n), index_col=0)
         # Gets unique sources from filtered file
@@ -316,10 +187,10 @@ class ScampPerformanceSSOs:
         input_stars = Create_regions(cat_name).get_stars(self.mag)
         sources_n = len(o_unique_sources)
 
-        self.logger.debug('unique sources to be analysed {}'.format(sources_n))
+        self.logger.debug('Unique sources to be analysed {}'.format(sources_n))
         # Loops over unique sources of filtered file
         for idx, source_ in enumerate(o_unique_sources):
-            self.logger.debug('idx position {}'.format(idx))
+            # self.logger.debug('idx position {}'.format(idx))
             # Initiate some values
             tmp_d = {'flag_sso': [], 'source': [], 'theta_image': [],
                      'a_image': [], 'b_image': [], 'i_pm': [], 'o_pm': [],
@@ -343,7 +214,9 @@ class ScampPerformanceSSOs:
                 out_df = check_star(catalog_n, input_df, o_alpha, o_delta)
 
                 if out_df.empty and flag_mag:
-                    pass
+                    tmp_d['b_image'].append(b_image)
+                    tmp_d['class_star'].append(class_star)
+                    tmp_d['o_pm'].append(o_pm)
                 elif out_df.empty is not True:
                     # it's a SSO
                     tmp_d['flag_sso'].append(True)
@@ -363,16 +236,33 @@ class ScampPerformanceSSOs:
             else:
                 flag_sso = False
             if len(set(tmp_d['o_pm'])) == 1:
+                print('o_pm True')
                 flag_pm = True
             else:
+                print('o_pm False')
                 flag_pm = False
 
             # stats for non-SSOs
-            if flag_sso is not True and flag_pm:
-                pass
+            # if flag_sso is False and flag_pm is False:
+            if flag_sso is False:
+                print('star')
+                print(tmp_d['o_pm'])
+                print(tmp_d['b_image'])
+                print(mean(tmp_d['b_image']), median(tmp_d['b_image']))
+                print(tmp_d['class_star'])
+                print(mean(tmp_d['class_star']), median(tmp_d['class_star']))
+                print(' ')
             # stats for SSOs
             elif flag_sso and flag_pm:
-                idx = stats_d['i_pm'].index(tmp_d['i_pm'][0])
+                idx = self.prfs_d['pms'].index(tmp_d['i_pm'][0])
+                if tmp_d['i_pm'][0] == 0.001:
+                    print('SSO')
+                    print(tmp_d['i_pm'][0], idx)
+                    print(tmp_d['b_image'])
+                    print(mean(tmp_d['b_image']), median(tmp_d['b_image']))
+                    print(tmp_d['class_star'])
+                    print(mean(tmp_d['class_star']), median(tmp_d['class_star']))
+                    print(' ')
 
                 for a_image_ in tmp_d['a_image']:
                     sso_d['a_image'][idx].append(a_image_)
@@ -381,13 +271,38 @@ class ScampPerformanceSSOs:
                 for class_star_ in tmp_d['class_star']:
                     sso_d['class_star'][idx].append(class_star_)
 
-        for key_ in ['a_image', 'b_image', 'class_star']:
-            print(key_)
-            for idx_pm, pm_ in enumerate(stats_d['i_pm']):
-                print(idx_pm, pm_)
-                print('sso mean {}'.format(mean(sso_d[key_][idx_pm])))
-                print('sso std {}'.format(std(sso_d[key_][idx_pm])))
-                print('sso min {}'.format(min(sso_d[key_][idx_pm])))
-                print('sso max {}'.format(max(sso_d[key_][idx_pm])))
+        for sso_key in sso_d.keys():
+            # Creates a dictionary for statistics
+            stats_d = redo_stats_d()
+            stats_d = populate_stats_d(stats_d)
 
-        return stats_d
+            for stats_key in ['mean', 'std', 'min', 'max']:
+                for idx_pm in range(0, len(stats_d['i_pm']), 1):
+                    if stats_key == 'mean':
+                        element_mean = mean(sso_d[sso_key][idx_pm])
+                        stats_d[stats_key][idx_pm] = element_mean
+                    elif stats_key == 'std':
+                        element_std = std(sso_d[sso_key][idx_pm])
+                        stats_d[stats_key][idx_pm] = element_std
+                    elif stats_key == 'min':
+                        try:
+                            element_min = min(sso_d[sso_key][idx_pm])
+                        except ValueError:
+                            element_min = 'nan'
+                        stats_d[stats_key][idx_pm] = element_min
+                    elif stats_key == 'max':
+                        try:
+                            element_max = max(sso_d[sso_key][idx_pm])
+                        except ValueError:
+                            element_max = 'nan'
+                        stats_d[stats_key][idx_pm] = element_max
+
+            stats_df = DataFrame(stats_d, columns=['i_pm', 'mean', 'std',
+                                                   'min', 'max'])
+            # print(stats_df.describe())  # useful?
+            stats_df.to_csv('stats/{}_{}.csv'.format(sso_key,
+                                                     self.filter_p_number))
+
+            sso_df = DataFrame(sso_d[sso_key])
+            sso_df.to_csv('data/{}_{}.csv'.format(sso_key,
+                                                  self.filter_p_number))

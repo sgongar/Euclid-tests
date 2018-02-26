@@ -337,17 +337,13 @@ class Check:
         mag = '20-21'
 
         for conf_ in confs:
-            for confidence_ in self.prfs_d['confidences']:
-                idx += 1
+            sex_cf = '{}_{}_{}_{}_{}'.format(conf_[0][0], conf_[0][2],
+                                             conf_[0][2], conf_[0][1],
+                                             conf_[0][3])
+            scmp_cf = '{}_{}_{}_{}'.format(conf_[1][0], conf_[1][1],
+                                           conf_[1][2], conf_[1][3])
 
-                sex_cf = '{}_{}_{}_{}_{}'.format(conf_[0][0], conf_[0][2],
-                                                 conf_[0][2], conf_[0][1],
-                                                 conf_[0][3])
-                scmp_cf = '{}_{}_{}_{}'.format(conf_[1][0], conf_[1][1],
-                                               conf_[1][2], conf_[1][3])
-
-                stats_d[idx] = ScampPerformanceSSOs(self.logger, mag,
-                                                    sex_cf, scmp_cf)
+            ScampPerformanceSSOs(self.logger, mag, sex_cf, scmp_cf)
 
         return True
 

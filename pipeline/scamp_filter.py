@@ -6,6 +6,8 @@
 Versions:
 - 0.1: Initial release.
 - 0.2: Pipeline splitted.
+- 0.3: Mean and median values from sources.
+- 0.4: Multi-thread behavior.
 
 Todo:
     * Improve documentation
@@ -16,6 +18,7 @@ from multiprocessing import Process
 
 from astropy.io import fits
 from astropy.table import Table
+from numpy import mean, median
 from pandas import concat, read_csv, Series
 
 from misc import pm_compute, extract_settings, check_source
@@ -24,7 +27,7 @@ from misc import b_filter, create_folder, get_dither, confidence_filter
 __author__ = "Samuel Góngora García"
 __copyright__ = "Copyright 2018"
 __credits__ = ["Samuel Góngora García"]
-__version__ = "0.1"
+__version__ = "0.4"
 __maintainer__ = "Samuel Góngora García"
 __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
@@ -66,14 +69,15 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
         self.filt_n = 'filt_{}_{}'.format(self.scmp_cf, self.mag)
 
         self.filter_o_n = '{}/{}'.format(self.filter_dir, self.filt_n)
-        """
+
         # Saves _1.csv
         (merged_db, full_db) = self.scamp_filter()
         # Saves _2.csv
-        full_db = self.compute_pm(merged_db, full_db)
+        self.compute_pm(merged_db, full_db)
         self.get_areas()
-        """
+
         full_db = read_csv('{}_3.csv'.format(self.filter_o_n))
+
         self.slow_db, self.fast_db = self.filter_class(full_db)
         if self.save:
             self.save_message('4s')
@@ -192,7 +196,7 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
         self.logger.debug('Removes 0 catalog detections')
         full_db = full_db.loc[~full_db['CATALOG_NUMBER'].isin([0])]
 
-        full_db = self.filter_detections(full_db)
+        full_db = self.filter_detections(full_db, 3)
 
         if self.save:
             self.save_message('1')
@@ -213,8 +217,6 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
         if self.save:
             self.save_message('2')
             full_db.to_csv('{}_2.csv'.format(self.filter_o_n))
-
-        return full_db
 
     def choose_pipeline(self, pipeline):
         """
@@ -272,6 +274,10 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
         # Gets unique sources from filtered file
         unique_sources = list(set(filter_cat['SOURCE_NUMBER'].tolist()))
 
+        print('unique sources {}'.format(len(unique_sources)))
+
+        stats_keys = ['MEAN_A_IMAGE', 'MEAN_B_IMAGE', 'MEAN_CLASS_STAR',
+                      'MEDIAN_A_IMAGE', 'MEDIAN_B_IMAGE', 'MEDIAN_CLASS_STAR']
         extra_keys = ['A_IMAGE', 'B_IMAGE', 'THETA_IMAGE', 'ISOAREA_IMAGE',
                       'FWHM_IMAGE', 'FLUX_RADIUS', 'MAG_ISO', 'ELONGATION',
                       'ELLIPTICITY', 'CLASS_STAR']
@@ -290,20 +296,21 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
         areas_j = []
         for idx_l in range(0, 2, 1):
             areas_p = Process(target=self.get_areas_thread,
-                              args=(extra_keys, keys_l, sub_list_l[idx_l],
-                                    filter_cat, idx_l,))
+                              args=(stats_keys, extra_keys, keys_l,
+                                    sub_list_l[idx_l], filter_cat, idx_l,))
             areas_j.append(areas_p)
             areas_p.start()
 
         active_areas = list([job.is_alive() for job in areas_j])
+        print('1-active_areas {}'.format(active_areas))
         while True in active_areas:
             active_areas = list([job.is_alive() for job in areas_j])
             pass
 
         # Merges areas
         # Merges catalogs
-        list_1 = read_csv('{}_3_1.csv'.format(self.filter_o_n), index_col=0)
-        list_2 = read_csv('{}_3_2.csv'.format(self.filter_o_n), index_col=0)
+        list_1 = read_csv('{}_3_0.csv'.format(self.filter_o_n), index_col=0)
+        list_2 = read_csv('{}_3_1.csv'.format(self.filter_o_n), index_col=0)
 
         full_db = concat([list_1, list_2])
 
@@ -311,15 +318,25 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
             self.save_message('3')
             full_db.to_csv('{}_3.csv'.format(self.filter_o_n))
 
-    def get_areas_thread(self, extra_keys, keys_l, unique_sources_thread,
-                         filter_cat, idx_l):
+    """
+    def get_areas_thread_t(self, stats_keys, extra_keys, keys_l,
+                           unique_sources_thread, filter_cat, idx_l):
+        from time import sleep
+        for i in range(0, 100, 1):
+            print('process {} - {}'.format(idx_l, i))
+            sleep(1)
+    """
+
+    def get_areas_thread(self, stats_keys, extra_keys, keys_l,
+                         unique_sources_thread, filter_cat, idx_l):
         """
 
+        :param stats_keys:
         :param extra_keys:
         :param keys_l:
         :param unique_sources_thread:
         :param filter_cat:
-        :param idx:
+        :param idx_l:
         :return:
         """
         tmp_d = {}
@@ -329,16 +346,20 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
         for key_ in extra_keys:
             tmp_d[key_] = []
 
+        for key_ in stats_keys:
+            tmp_d[key_] = []
+
         # Loops over unique sources of filtered file
         for idx, source_ in enumerate(unique_sources_thread):
-            print(idx)
+            print('process {} - source {}'.format(idx_l, idx))
+            source_d = {'A_IMAGE': [], 'B_IMAGE': [], 'CLASS_STAR': []}
             o_df = filter_cat[filter_cat['SOURCE_NUMBER'].isin([source_])]
             for i, row in enumerate(o_df.itertuples(), 1):
                 # Populates temporal dictionary
                 o_alpha = row.ALPHA_J2000
                 o_delta = row.DELTA_J2000
-
-                catalog_n = tmp_d['CATALOG_NUMBER']
+                catalog_n = row.CATALOG_NUMBER
+                # catalog_n = tmp_d['CATALOG_NUMBER']
                 cat_file = self.get_cat(catalog_n)
                 # self.logger.debug('opening CCD catalog {}'.format(cat_file))
 
@@ -352,15 +373,56 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
                     # FIXME problemas entre sextractor y scamp
                     # Como el objeto no esta en las imagenes originales de
                     # sextractor lo borro del catalogo de scamp
+                    # print('cat_empty')
                     for idx_k, key_ in enumerate(keys_l):
                         tmp_d[key_].append('nan')
                     for idx_k, key_ in enumerate(extra_keys):
                         tmp_d[key_].append('nan')
                 else:
+                    # print('cat not empty')
                     for idx_k, key_ in enumerate(keys_l):
+                        """
+                        print('key {} - tmp_d[key_] {}'.format(key_,
+                                                               tmp_d[key_]))
+                        print('row[idx_k + 1]'.format(row[idx_k + 1]))
+                        """
                         tmp_d[key_].append(row[idx_k + 1])
                     for idx_k, key_ in enumerate(extra_keys):
                         tmp_d[key_].append(cat_df[key_].iloc[0])
+
+                    source_d['A_IMAGE'].append(cat_df['A_IMAGE'].iloc[0])
+                    source_d['B_IMAGE'].append(cat_df['B_IMAGE'].iloc[0])
+                    source_d['CLASS_STAR'].append(cat_df['CLASS_STAR'].iloc[0])
+
+            if 'nan' in source_d['A_IMAGE']:
+                mean_a_image = 'nan'
+                median_a_image = 'nan'
+            else:
+                mean_a_image = mean(source_d['A_IMAGE'])
+                median_a_image = median(source_d['A_IMAGE'])
+
+            if 'nan' in source_d['B_IMAGE']:
+                mean_b_image = 'nan'
+                median_b_image = 'nan'
+            else:
+                mean_b_image = mean(source_d['B_IMAGE'])
+                median_b_image = median(source_d['B_IMAGE'])
+
+            if 'nan' in source_d['CLASS_STAR']:
+                mean_class_star = 'nan'
+                median_class_star = 'nan'
+            else:
+                mean_class_star = mean(source_d['CLASS_STAR'])
+                median_class_star = median(source_d['CLASS_STAR'])
+
+            # Saves mean and median values from sources
+            for i_stats in range(0, len(o_df['SOURCE_NUMBER']), 1):
+                tmp_d['MEAN_A_IMAGE'].append(mean_a_image)
+                tmp_d['MEAN_B_IMAGE'].append(mean_b_image)
+                tmp_d['MEAN_CLASS_STAR'].append(mean_class_star)
+                tmp_d['MEDIAN_A_IMAGE'].append(median_a_image)
+                tmp_d['MEDIAN_B_IMAGE'].append(median_b_image)
+                tmp_d['MEDIAN_CLASS_STAR'].append(median_class_star)
 
         series_l = []
         series_d = {}
@@ -368,7 +430,10 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
             series_d[key_] = Series(tmp_d[key_], name=key_)
             series_l.append(series_d[key_])
 
-        full_db = concat([series_l], axis=1)
+        # print('series_l_{}'.format(idx_l))
+        # print(series_l)
+
+        full_db = concat(series_l, axis=1)
 
         if self.save:
             self.save_message('3_{}'.format(idx_l))
@@ -393,7 +458,7 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
         :return: full_db
         """
         self.logger.debug('Runs B_Image size filter')
-        full_db = b_filter(full_db, 1.57, 1.7)
+        full_db = b_filter(full_db, 1.607407, 1.741491)
 
         return full_db
 
