@@ -45,8 +45,8 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
         """
         # Filter variables
         self.class_star_limit = 0.97
-        self.proper_motion = 1
-        self.proper_motion_dects = 0.1
+        self.proper_motion = 0.3
+        self.proper_motion_dects = 0.3
 
         # Analysis variables
         self.prfs_d = extract_settings()
@@ -76,7 +76,8 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
         self.compute_pm(merged_db, full_db)
         self.get_areas()
 
-        full_db = read_csv('{}_3.csv'.format(self.filter_o_n))
+        """
+        full_db = read_csv('{}_3.csv'.format(self.filter_o_n), index_col=0)
 
         self.slow_db, self.fast_db = self.filter_class(full_db)
         if self.save:
@@ -119,11 +120,12 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
             self.save_message('8')
             full_db.to_csv('{}_8.csv'.format(self.filter_o_n))
 
-        full_db = full_db[full_db['PM'] > 0.0001]
+        full_db = full_db[full_db['PM'] > 0.001]
 
         if self.save:
             self.save_message('9')
             full_db.to_csv('{}_9.csv'.format(self.filter_o_n))
+        """
 
     def save_message(self, order):
         """
@@ -212,7 +214,7 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
         :return: full_db
         """
         # Computing pm
-        self.logger.debug('computing proper motion')
+        self.logger.debug('Computes proper motion')
         full_db = pm_compute(self.logger, merged_db, full_db)
         if self.save:
             self.save_message('2')
@@ -267,21 +269,42 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
 
         :return: full_db
         """
-        self.logger.debug('runs areas filter')
+        self.logger.debug('Populates filtered catalog with Sextractor data')
 
         # Opens filtered file
         filter_cat = read_csv('{}_2.csv'.format(self.filter_o_n), index_col=0)
         # Gets unique sources from filtered file
         unique_sources = list(set(filter_cat['SOURCE_NUMBER'].tolist()))
+        l_sourcs = len(unique_sources)  # Just to not break 79 characters
+        self.logger.debug('Unique sources to be analysed {}'.format(l_sourcs))
 
-        print('unique sources {}'.format(len(unique_sources)))
+        # 22-23
+        # MEDIAN_ERRA_IMAGE, MEAN_ERRA_IMAGE
+        # MEDIAN_ERRB_IMAGE, MEAN_ERRB_IMAGE
+
+        dict_keys = ['SOURCE_NUMBER', 'CATALOG_NUMBER', 'EXTENSION',
+                     'ASTR_INSTRUM', 'PHOT_INSTRUM', 'X_IMAGE', 'Y_IMAGE',
+                     'ISOAREA_IMAGE', 'A_IMAGE', 'MEDIAN_A_IMAGE',
+                     'MEAN_A_IMAGE', 'ERRA_IMAGE',  'MEDIAN_ERRA_IMAGE',
+                     'MEAN_ERRA_IMAGE', 'B_IMAGE', 'MEDIAN_B_IMAGE',
+                     'MEAN_B_IMAGE', 'ERRB_IMAGE', 'MEDIAN_ERRB_IMAGE',
+                     'MEAN_ERRB_IMAGE', 'THETA_IMAGE', 'ERRTHETA_IMAGE',
+                     'ALPHA_J2000', 'DELTA_J2000', 'ERRA_WORLD', 'ERRB_WORLD',
+                     'ERRTHETA_WORLD', 'EPOCH', 'FWHM_IMAGE', 'CLASS_STAR',
+                     'MEDIAN_CLASS_STAR', 'MEAN_CLASS_STAR', 'FLUX_RADIUS',
+                     'ELONGATION', 'ELLIPTICITY', 'MAG', 'MAGERR', 'MAG_ISO',
+                     'FLAGS_EXTRACTION', 'FLAGS_SCAMP', 'FLAGS_IMA', 'PM',
+                     'PMERR', 'PMALPHA', 'PMDELTA', 'PMALPHAERR', 'PMDELTAERR']
 
         stats_keys = ['MEAN_A_IMAGE', 'MEAN_B_IMAGE', 'MEAN_CLASS_STAR',
-                      'MEDIAN_A_IMAGE', 'MEDIAN_B_IMAGE', 'MEDIAN_CLASS_STAR']
+                      'MEDIAN_A_IMAGE', 'MEDIAN_B_IMAGE', 'MEDIAN_CLASS_STAR',
+                      'MEAN_ERRA_IMAGE', 'MEAN_ERRB_IMAGE', 'MEDIAN_ERRA_IMAGE',
+                      'MEDIAN_ERRB_IMAGE']
         extra_keys = ['A_IMAGE', 'B_IMAGE', 'THETA_IMAGE', 'ISOAREA_IMAGE',
                       'FWHM_IMAGE', 'FLUX_RADIUS', 'MAG_ISO', 'ELONGATION',
                       'ELLIPTICITY', 'CLASS_STAR']
-        keys_l = ['SOURCE_NUMBER', 'CATALOG_NUMBER', 'X_IMAGE', 'Y_IMAGE',
+        keys_l = ['SOURCE_NUMBER', 'CATALOG_NUMBER', 'EXTENSION',
+                  'ASTR_INSTRUM', 'PHOT_INSTRUM', 'X_IMAGE', 'Y_IMAGE',
                   'ERRA_IMAGE', 'ERRB_IMAGE', 'ERRTHETA_IMAGE', 'ALPHA_J2000',
                   'DELTA_J2000', 'ERRA_WORLD', 'ERRB_WORLD', 'ERRTHETA_WORLD',
                   'EPOCH', 'MAG', 'MAGERR', 'FLAGS_EXTRACTION', 'FLAGS_SCAMP',
@@ -296,13 +319,12 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
         areas_j = []
         for idx_l in range(0, 2, 1):
             areas_p = Process(target=self.get_areas_thread,
-                              args=(stats_keys, extra_keys, keys_l,
+                              args=(dict_keys, stats_keys, extra_keys, keys_l,
                                     sub_list_l[idx_l], filter_cat, idx_l,))
             areas_j.append(areas_p)
             areas_p.start()
 
         active_areas = list([job.is_alive() for job in areas_j])
-        print('1-active_areas {}'.format(active_areas))
         while True in active_areas:
             active_areas = list([job.is_alive() for job in areas_j])
             pass
@@ -318,19 +340,11 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
             self.save_message('3')
             full_db.to_csv('{}_3.csv'.format(self.filter_o_n))
 
-    """
-    def get_areas_thread_t(self, stats_keys, extra_keys, keys_l,
-                           unique_sources_thread, filter_cat, idx_l):
-        from time import sleep
-        for i in range(0, 100, 1):
-            print('process {} - {}'.format(idx_l, i))
-            sleep(1)
-    """
-
-    def get_areas_thread(self, stats_keys, extra_keys, keys_l,
+    def get_areas_thread(self, dict_keys, stats_keys, extra_keys, keys_l,
                          unique_sources_thread, filter_cat, idx_l):
         """
 
+        :param dict_keys:
         :param stats_keys:
         :param extra_keys:
         :param keys_l:
@@ -351,15 +365,15 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
 
         # Loops over unique sources of filtered file
         for idx, source_ in enumerate(unique_sources_thread):
-            print('process {} - source {}'.format(idx_l, idx))
-            source_d = {'A_IMAGE': [], 'B_IMAGE': [], 'CLASS_STAR': []}
+            print(idx, idx_l)
+            source_d = {'A_IMAGE': [], 'B_IMAGE': [], 'ERRA_IMAGE': [],
+                        'ERRB_IMAGE': [], 'CLASS_STAR': []}
             o_df = filter_cat[filter_cat['SOURCE_NUMBER'].isin([source_])]
             for i, row in enumerate(o_df.itertuples(), 1):
                 # Populates temporal dictionary
                 o_alpha = row.ALPHA_J2000
                 o_delta = row.DELTA_J2000
                 catalog_n = row.CATALOG_NUMBER
-                # catalog_n = tmp_d['CATALOG_NUMBER']
                 cat_file = self.get_cat(catalog_n)
                 # self.logger.debug('opening CCD catalog {}'.format(cat_file))
 
@@ -381,17 +395,14 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
                 else:
                     # print('cat not empty')
                     for idx_k, key_ in enumerate(keys_l):
-                        """
-                        print('key {} - tmp_d[key_] {}'.format(key_,
-                                                               tmp_d[key_]))
-                        print('row[idx_k + 1]'.format(row[idx_k + 1]))
-                        """
                         tmp_d[key_].append(row[idx_k + 1])
                     for idx_k, key_ in enumerate(extra_keys):
                         tmp_d[key_].append(cat_df[key_].iloc[0])
 
                     source_d['A_IMAGE'].append(cat_df['A_IMAGE'].iloc[0])
                     source_d['B_IMAGE'].append(cat_df['B_IMAGE'].iloc[0])
+                    source_d['ERRA_IMAGE'].append(cat_df['ERRA_IMAGE'].iloc[0])
+                    source_d['ERRB_IMAGE'].append(cat_df['ERRB_IMAGE'].iloc[0])
                     source_d['CLASS_STAR'].append(cat_df['CLASS_STAR'].iloc[0])
 
             if 'nan' in source_d['A_IMAGE']:
@@ -408,6 +419,20 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
                 mean_b_image = mean(source_d['B_IMAGE'])
                 median_b_image = median(source_d['B_IMAGE'])
 
+            if 'nan' in source_d['ERRA_IMAGE']:
+                mean_erra_image = 'nan'
+                median_erra_image = 'nan'
+            else:
+                mean_erra_image = mean(source_d['ERRA_IMAGE'])
+                median_erra_image = median(source_d['ERRA_IMAGE'])
+
+            if 'nan' in source_d['ERRB_IMAGE']:
+                mean_errb_image = 'nan'
+                median_errb_image = 'nan'
+            else:
+                mean_errb_image = mean(source_d['ERRB_IMAGE'])
+                median_errb_image = median(source_d['ERRB_IMAGE'])
+
             if 'nan' in source_d['CLASS_STAR']:
                 mean_class_star = 'nan'
                 median_class_star = 'nan'
@@ -419,9 +444,13 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
             for i_stats in range(0, len(o_df['SOURCE_NUMBER']), 1):
                 tmp_d['MEAN_A_IMAGE'].append(mean_a_image)
                 tmp_d['MEAN_B_IMAGE'].append(mean_b_image)
+                tmp_d['MEAN_ERRA_IMAGE'].append(mean_erra_image)
+                tmp_d['MEAN_ERRB_IMAGE'].append(mean_errb_image)
                 tmp_d['MEAN_CLASS_STAR'].append(mean_class_star)
                 tmp_d['MEDIAN_A_IMAGE'].append(median_a_image)
                 tmp_d['MEDIAN_B_IMAGE'].append(median_b_image)
+                tmp_d['MEDIAN_ERRA_IMAGE'].append(median_erra_image)
+                tmp_d['MEDIAN_ERRB_IMAGE'].append(median_errb_image)
                 tmp_d['MEDIAN_CLASS_STAR'].append(median_class_star)
 
         series_l = []
@@ -430,14 +459,12 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
             series_d[key_] = Series(tmp_d[key_], name=key_)
             series_l.append(series_d[key_])
 
-        # print('series_l_{}'.format(idx_l))
-        # print(series_l)
-
         full_db = concat(series_l, axis=1)
 
         if self.save:
             self.save_message('3_{}'.format(idx_l))
-            full_db.to_csv('{}_3_{}.csv'.format(self.filter_o_n, idx_l))
+            full_db.to_csv('{}_3_{}.csv'.format(self.filter_o_n, idx_l),
+                           columns=dict_keys)
 
     def filter_class(self, full_db):
         """
@@ -446,8 +473,8 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
         :return:
         """
         self.logger.debug('Runs class star filter')
-        slow_db = full_db[full_db['CLASS_STAR'] > self.class_star_limit]
-        fast_db = full_db[full_db['CLASS_STAR'] < self.class_star_limit]
+        slow_db = full_db[full_db['MEAN_CLASS_STAR'] > self.class_star_limit]
+        fast_db = full_db[full_db['MEAN_CLASS_STAR'] < self.class_star_limit]
 
         return slow_db, fast_db
 
@@ -458,7 +485,7 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
         :return: full_db
         """
         self.logger.debug('Runs B_Image size filter')
-        full_db = b_filter(full_db, 1.607407, 1.741491)
+        full_db = b_filter(full_db, 1.55, 1.70)
 
         return full_db
 

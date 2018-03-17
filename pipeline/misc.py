@@ -46,6 +46,8 @@ def get_fits(unique, mag):
 
     fits_dir = '{}/{}/CCDs/'.format(prfs_d['fits_dir'], mag)
 
+    print('dir {}'.format(fits_dir))
+
     files = listdir('{}'.format(fits_dir))
     for file_ in files:
         if file_[:1] == 'm' and file_[-5:] == '.fits':
@@ -549,7 +551,9 @@ def b_filter(full_db, b_low, b_up):
     :param b_up:
     :return: full_db
     """
-    mask = (full_db['B_IMAGE'] > float(b_low)) & (full_db['B_IMAGE'] < float(b_up))
+    up = full_db['MEAN_B_IMAGE'] > float(b_low)
+    down = full_db['MEAN_B_IMAGE'] < float(b_up)
+    mask = up & down
     full_db = full_db[mask]
 
     return full_db
@@ -591,7 +595,7 @@ def confidence_filter(db, r):
                 passed.append(source)
 
     # Passed if both dimension have required rsquared
-    passed = [p for p in passed if passed.count(p) == 2]
+    passed = [p for p in passed if passed.count(p) >= 2]
     passed = list(set(passed))
     db = db[db['SOURCE_NUMBER'].isin(passed)]
 

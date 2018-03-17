@@ -12,10 +12,8 @@ Todo:
 
 """
 from pandas import concat, read_csv, DataFrame
-from numpy import mean, std
 
-from misc import all_same, extract_settings
-from misc import speeds_range
+from misc import extract_settings, speeds_range, get_dither
 from regions import Create_regions
 
 
@@ -115,28 +113,15 @@ def redo_tmp_d():
 
     :return: tmp_d
     """
-    tmp_d = {'sex_cf': [], 'scmp_cf': [], 'boolean_l': [], 'catalog': [],
-             'CCD': [], 'source': [], 'epoch': [], 'i_pm': [],
-             'i_pm_alpha': [], 'i_pm_delta': [], 'i_alpha': [],
-             'i_delta': [], 'o_pm_alpha': [], 'o_pm_delta': [],
-             'o_pm_alpha_err': [], 'o_pm_delta_err': [], 'o_alpha': [],
-             'o_delta': [], 'error_a': [], 'error_b': []}
+    tmp_d = {'flag_sso': [], 'source': [], 'catalog_n': [], 'theta_image': [],
+             'fwhm_image': [], 'a_image': [], 'a_image_median': [],
+             'b_image': [], 'b_image_median': [], 'b_image_med/a_image_med': [],
+             'erra_image': [], 'errb_image': [], 'i_alpha': [], 'i_delta': [],
+             'o_alpha': [], 'o_delta': [], 'i_pm': [], 'i_pm_alpha': [],
+             'i_pm_delta': [], 'o_pm': [], 'o_pm_alpha': [], 'o_pm_delta': [],
+             'o_pm_norm': [], 'object': []}
 
     return tmp_d
-
-
-def redo_err_d():
-    """ Creates a dictionary
-
-    :return: err_d
-    """
-    err_d = {'sex_cf': [], 'scmp_cf': [], 'catalog': [],
-             'CCD': [], 'source': [], 'scmp_source': [], 'i_pm': [],
-             'i_pm_alpha': [], 'i_pm_delta': [], 'o_pm': [], 'o_pm_alpha': [],
-             'o_pm_delta': [], 'i_alpha': [], 'i_delta': [], 'o_alpha': [],
-             'o_delta': []}
-
-    return err_d
 
 
 def check_star(catalog_n, i_df, o_alpha, o_delta):
@@ -167,7 +152,7 @@ def check_mag(i_df, o_alpha, o_delta):
     :param o_delta:
     :return:
     """
-    tolerance = 0.0001389  # 0.5 arcsecond
+    tolerance = 0.0001389  # 0.5 arcsecondcp
 
     i_df = i_df[i_df['alpha_j2000'] + tolerance > o_alpha]
     i_df = i_df[o_alpha > i_df['alpha_j2000'] - tolerance]
@@ -176,47 +161,12 @@ def check_mag(i_df, o_alpha, o_delta):
 
     if i_df.empty:
         flag_mag = False
+        object_ = ''
     else:
         flag_mag = True
+        object_ = i_df['object'].iloc[0]
 
-    return flag_mag
-
-
-def cut_catalog(o_cat, margin, limits):
-    """
-
-    :param o_cat:
-    :param margin:
-    :param limits:
-    :return:
-    """
-    o_df = o_cat[o_cat['ALPHA_J2000'] + margin > limits['max_alpha']]
-    o_df = o_df[limits['min_alpha'] > o_df['ALPHA_J2000'] - margin]
-    o_df = o_df[o_df['DELTA_J2000'] + margin > limits['max_delta']]
-    o_df = o_df[limits['min_delta'] > o_df['DELTA_J2000'] - margin]
-
-    return o_df
-
-
-def check_cat_order(cat_list):
-    """
-
-    :param cat_list:
-    :return:
-    """
-    tmp_order = []
-
-    for idx_cat in range(0, len(cat_list), 1):
-        cat = cat_list[idx_cat]
-        dither = cat - (cat / 4) * 4
-        if dither == 0:
-            dither = 4
-        tmp_order.append(dither)
-
-    if sorted(tmp_order) == tmp_order:
-        return True
-    else:
-        return False
+    return flag_mag, object_
 
 
 class ScampPerformanceStars:
@@ -227,7 +177,7 @@ class ScampPerformanceStars:
         """
         self.save = True
         self.norm_speed = False  # Detected SSOs are classified according
-        self.filter_p_number = '7s'
+        self.filter_p_number = '9'
         # their input pm
         self.logger = logger
         self.mag = mag
@@ -266,7 +216,7 @@ class ScampPerformanceStars:
         for dither in range(1, 5, 1):
             cat_location = '{}/{}/Catalogs'.format(self.prfs_d['fits_dir'],
                                                    self.mag)
-            cat_name = '{}/Cat_20-21_d{}'.format(cat_location, dither)
+            cat_name = '{}/Cat_{}_d{}'.format(cat_location, self.mag, dither)
             input_dict[dither] = '{}.dat'.format(cat_name)
         input_dict = Create_regions(input_dict).check_ssos(self.mag, True)
 
@@ -297,6 +247,7 @@ class ScampPerformanceStars:
 
         :return:
         """
+        self.logger.debug('Magnitude bin {}'.format(self.mag))
         self.logger.debug('Scamp configuration {}'.format(self.scmp_cf))
         self.logger.debug('Sextractor configuration {}'.format(self.sex_cf))
 
@@ -304,6 +255,7 @@ class ScampPerformanceStars:
         stats_d = redo_stats_d()
         stats_d = populate_stats_d(stats_d)
 
+        """
         # Creates a dictionary for mean and populated with lists
         nonsso_d = {'a_image': [], 'b_image': []}
         for idx in range(0, len(self.prfs_d['pms']) + 1, 1):
@@ -315,14 +267,20 @@ class ScampPerformanceStars:
         for idx in range(0, len(self.prfs_d['pms']) + 1, 1):
             sso_d['a_image'].append([])
             sso_d['b_image'].append([])
+        """
 
-        """
-        # Creates a dictionary for standard deviation and populated with lists
-        sso_d = {'theta_image': []}
-        for idx in range(0, len(self.prfs_d['pms']) + 1, 1):
-            sso_d['a_image'].append([])
-            sso_d['b_image'].append([])
-        """
+        # Creates a (dictionary?) list for objects
+        sso_d = {'idx': [], 'source': [], 'CCD': [], 'dither': [],
+                 'a_image_median': [], 'b_image_median': [], 'theta_image': [],
+                 'fwhm_image': [], 'b_image_med/a_image_med': [],
+                 'erra_image': [], 'errb_image': [], 'alpha': [], 'delta': [],
+                 'i_pm': [], 'o_pm': []}
+        objects_d = {'idx': [], 'source': [], 'CCD': [], 'dither': [],
+                     'a_image_median': [], 'b_image_median': [],
+                     'theta_image': [], 'fwhm_image': [],
+                     'b_image_med/a_image_med': [], 'erra_image': [],
+                     'errb_image': [], 'alpha': [], 'delta': [], 'n_pm': [],
+                     'o_pm': []}
 
         input_dict = self.creates_input_dict()
         input_df = self.creates_input_df(input_dict)
@@ -341,20 +299,19 @@ class ScampPerformanceStars:
 
         # A catalogue populated by stars
         cat_loc = '{}/{}/Catalogs'.format(self.prfs_d['fits_dir'], self.mag)
-        cat_name = '{}/Cat_20-21_d1.dat'.format(cat_loc)
+        cat_name = '{}/Cat_{}_d1.dat'.format(cat_loc, self.mag)
         input_stars = Create_regions(cat_name).get_stars(self.mag)
+
         sources_n = len(o_unique_sources)
 
         self.logger.debug('unique sources to be analysed {}'.format(sources_n))
         # Loops over unique sources of filtered file
+        idx_false = 0
+        idx_true = 0
         for idx, source_ in enumerate(o_unique_sources):
-            # self.logger.debug('idx position {}'.format(idx))
+            self.logger.debug('idx position {}'.format(idx))
             # Initiate some values
-            tmp_d = {'flag_sso': [], 'source': [], 'theta_image': [],
-                     'a_image': [], 'b_image': [], 'i_alpha': [],
-                     'i_delta': [], 'o_alpha': [], 'o_delta': [], 'i_pm': [],
-                     'i_pm_alpha': [], 'i_pm_delta': [], 'o_pm': [],
-                     'o_pm_alpha': [], 'o_pm_delta': [], 'o_pm_norm': []}
+            tmp_d = redo_tmp_d()
 
             # Check if actual source lies in 20-21 magnitude gap
             # flag_mag = False
@@ -362,32 +319,52 @@ class ScampPerformanceStars:
             for i, row in enumerate(o_df.itertuples(), 1):
                 source = row.SOURCE_NUMBER
                 catalog_n = row.CATALOG_NUMBER
-                # a_image = row.A_IMAGE
-                # b_image = row.B_IMAGE
+                a_image_median = row.MEDIAN_A_IMAGE
+                b_image_median = row.MEDIAN_B_IMAGE
+                erra_image = row.ERRA_IMAGE
+                errb_image = row.ERRB_IMAGE
                 theta_image = row.THETA_IMAGE
+                fwhm_image = row.FWHM_IMAGE
                 o_alpha = row.ALPHA_J2000
                 o_delta = row.DELTA_J2000
                 o_pm = row.PM
                 o_pm_alpha = row.PMALPHA
                 o_pm_delta = row.PMDELTA
 
-                flag_mag = check_mag(input_stars, o_alpha, o_delta)
+                flag_mag, object_ = check_mag(input_stars, o_alpha, o_delta)
                 out_df = check_star(catalog_n, input_df, o_alpha, o_delta)
 
                 if out_df.empty and flag_mag:
                     tmp_d['flag_sso'].append(False)
-                    tmp_d['source'].append(source)
+                    tmp_d['catalog_n'].append(catalog_n)
+                    tmp_d['source'].append(source_)
+                    tmp_d['a_image_median'].append(a_image_median)
+                    tmp_d['b_image_median'].append(b_image_median)
+                    b_vs_a_median = b_image_median/a_image_median
+                    tmp_d['b_image_med/a_image_med'].append(b_vs_a_median)
+                    tmp_d['erra_image'].append(erra_image)
+                    tmp_d['errb_image'].append(errb_image)
                     tmp_d['theta_image'].append(theta_image)
+                    tmp_d['fwhm_image'].append(fwhm_image)
                     tmp_d['o_alpha'].append(o_alpha)
                     tmp_d['o_delta'].append(o_delta)
                     tmp_d['o_pm'].append(o_pm)
                     tmp_d['o_pm_alpha'].append(o_pm_alpha)
                     tmp_d['o_pm_delta'].append(o_pm_delta)
+                    tmp_d['object'].append(object_)
                 elif out_df.empty is not True:
                     # it's a SSO
                     tmp_d['flag_sso'].append(True)
+                    tmp_d['catalog_n'].append(catalog_n)
                     tmp_d['source'].append(source)
+                    tmp_d['a_image_median'].append(a_image_median)
+                    tmp_d['b_image_median'].append(b_image_median)
+                    b_vs_a_median = b_image_median/a_image_median
+                    tmp_d['b_image_med/a_image_med'].append(b_vs_a_median)
+                    tmp_d['erra_image'].append(erra_image)
+                    tmp_d['errb_image'].append(errb_image)
                     tmp_d['theta_image'].append(theta_image)
+                    tmp_d['fwhm_image'].append(fwhm_image)
                     i_alpha = out_df['alpha_j2000'].iloc[0]
                     tmp_d['i_alpha'].append(i_alpha)
                     i_delta = out_df['delta_j2000'].iloc[0]
@@ -395,8 +372,6 @@ class ScampPerformanceStars:
                     tmp_d['o_alpha'].append(o_alpha)
                     tmp_d['o_delta'].append(o_delta)
                     i_pm = out_df['pm_values'].iloc[0]
-                    if i_pm == 0.001:
-                        print('source {}'.format(source))
                     tmp_d['i_pm'].append(i_pm)
                     i_pm_alpha = out_df['pm_alpha'].iloc[0]
                     tmp_d['i_pm_alpha'].append(i_pm_alpha)
@@ -419,62 +394,111 @@ class ScampPerformanceStars:
 
             # stats for non-SSOs
             if flag_sso is not True and flag_pm:
+                # Normalise speed
                 o_pm_norm = self.get_norm_speed(tmp_d['o_pm'][0])
                 for idx_pm in range(0, len(tmp_d['o_pm']), 1):
-                    tmp_d['o_pm_norm'].append(o_pm_norm)
+                    # tmp_d['o_pm_norm'].append(o_pm_norm)
+                    objects_d['n_pm'].append(o_pm_norm)
 
                 idx = stats_d['i_pm'].index(o_pm_norm)
-
-                """
-                if len(tmp_d['source']) >= 3:
-                    print('false {}'.format(len(tmp_d['source'])))
-                else:
-                    print('error')
-
-                # nonsso_d['a_image'][idx].append(a_image)
-                # nonsso_d['b_image'][idx].append(b_image)
-                """
                 stats_d['N_meas'][idx] += 1
                 stats_d['N_false'][idx] += 1
-            # stats for SSOsls
+
+                for catalog_n_ in tmp_d['catalog_n']:
+                    objects_d['idx'].append(idx_false)
+                    ccd, dither = get_dither(catalog_n_)
+                    objects_d['CCD'].append(ccd)
+                    objects_d['dither'].append(dither)
+                for source_n in tmp_d['source']:
+                    objects_d['source'].append(int(source_n))
+                for a_image_median_ in tmp_d['a_image_median']:
+                    objects_d['a_image_median'].append(a_image_median_)
+                for b_image_median_ in tmp_d['b_image_median']:
+                    objects_d['b_image_median'].append(b_image_median_)
+                for theta_image_ in tmp_d['theta_image']:
+                    objects_d['theta_image'].append(theta_image_)
+                for b_vs_a_median_ in tmp_d['b_image_med/a_image_med']:
+                    objects_d['b_image_med/a_image_med'].append(b_vs_a_median_)
+                for erra_image_ in tmp_d['erra_image']:
+                    objects_d['erra_image'].append(erra_image_)
+                for errb_image_ in tmp_d['errb_image']:
+                    objects_d['errb_image'].append(errb_image_)
+                for fwhm_image_ in tmp_d['fwhm_image']:
+                    objects_d['fwhm_image'].append(fwhm_image_)
+                for alpha_ in tmp_d['o_alpha']:
+                    objects_d['alpha'].append(alpha_)
+                for delta_ in tmp_d['o_delta']:
+                    objects_d['delta'].append(delta_)
+                for o_pm_ in tmp_d['o_pm']:
+                    objects_d['o_pm'].append(o_pm_)
+
+                idx_false += 1
+
+                # objects_d.append(tmp_d['object'][0])
+            # stats for SSO
             elif flag_sso and flag_pm:
-                """
-                o_pm_norm = self.get_norm_speed(tmp_d['o_pm'][0])
-                for idx_ssos in range(0, len(tmp_d['o_pm']), 1):
-                    tmp_d['o_pm_norm'].append(o_pm_norm)
-
-                idx = stats_d['i_pm'].index(o_pm_norm)
-                """
-                """
-                if tmp_d['i_pm'][0] == 10.0:
-                    print(tmp_d['source'])
-                    print(tmp_d['o_pm'])
-                    print(tmp_d['i_alpha'], tmp_d['i_delta'])
-                    print(tmp_d['o_alpha'], tmp_d['o_delta'])
-                    print(" ")
-                """
                 idx = stats_d['i_pm'].index(tmp_d['i_pm'][0])
-
-                # sso_d['a_image'][idx].append(a_image)
-                # sso_d['b_image'][idx].append(b_image)
 
                 stats_d['N_meas'][idx] += 1
                 stats_d['N_se'][idx] += 1
 
-        # for key_ in ['a_image', 'b_image']:
-        #     print(key_)
-        #     for idx_pm, pm_ in enumerate(stats_d['i_pm']):
-        #         print(idx_pm, pm_)
-        #         print('non-sso mean {}'.format(mean(nonsso_d[key_][idx_pm])))
-        #         print('non-sso std {}'.format(std(nonsso_d[key_][idx_pm])))
-        #         print('sso mean {}'.format(mean(sso_d[key_][idx_pm])))
-        #         print('sso std {}'.format(std(sso_d[key_][idx_pm])))
+                for catalog_n_ in tmp_d['catalog_n']:
+                    sso_d['idx'].append(idx_true)
+                    ccd, dither = get_dither(catalog_n_)
+                    sso_d['CCD'].append(ccd)
+                    sso_d['dither'].append(dither)
+                for source_n in tmp_d['source']:
+                    sso_d['source'].append(int(source_n))
+                for a_image_median_ in tmp_d['a_image_median']:
+                    sso_d['a_image_median'].append(a_image_median_)
+                for b_image_median_ in tmp_d['b_image_median']:
+                    sso_d['b_image_median'].append(b_image_median_)
+                for theta_image_ in tmp_d['theta_image']:
+                    sso_d['theta_image'].append(theta_image_)
+                for b_vs_a_median_ in tmp_d['b_image_med/a_image_med']:
+                    sso_d['b_image_med/a_image_med'].append(b_vs_a_median_)
+                for erra_image_ in tmp_d['erra_image']:
+                    sso_d['erra_image'].append(erra_image_)
+                for errb_image_ in tmp_d['errb_image']:
+                    sso_d['errb_image'].append(errb_image_)
+                for fwhm_image_ in tmp_d['fwhm_image']:
+                    sso_d['fwhm_image'].append(fwhm_image_)
+                for alpha_ in tmp_d['o_alpha']:
+                    sso_d['alpha'].append(alpha_)
+                for delta_ in tmp_d['o_delta']:
+                    sso_d['delta'].append(delta_)
+                for i_pm_ in tmp_d['i_pm']:
+                    sso_d['i_pm'].append(i_pm_)
+                for o_pm_ in tmp_d['o_pm']:
+                    sso_d['o_pm'].append(o_pm_)
+
+                idx_true += 1
 
         stats_d = compute_factors(stats_d)
         stats_df = DataFrame(stats_d, columns=['i_pm', 'N_true', 'N_se',
                                                'N_false', 'N_meas', 'f_pur',
                                                'f_dr', 'f_com'])
         # Saves dataframe to csv file
-        stats_df.to_csv('scamp_test_{}.csv'.format(self.filter_p_number))
+        stats_df.to_csv('scamp_test_{}_{}.csv'.format(self.mag,
+                                                      self.filter_p_number))
+
+        objects_df = DataFrame(objects_d, columns=['idx', 'source', 'CCD',
+                                                   'dither', 'a_image_median',
+                                                   'b_image_median',
+                                                   'theta_image',
+                                                   'b_image_med/a_image_med',
+                                                   'erra_image', 'errb_image',
+                                                   'fwhm_image', 'alpha',
+                                                   'delta', 'n_pm', 'o_pm'])
+        objects_df.to_csv('false_positives_{}.csv'.format(self.mag))
+
+        sso_df = DataFrame(sso_d, columns=['idx', 'source', 'CCD', 'dither',
+                                           'a_image_median', 'b_image_median',
+                                           'theta_image',
+                                           'b_image_med/a_image_med',
+                                           'erra_image', 'errb_image',
+                                           'fwhm_image', 'alpha', 'delta',
+                                           'i_pm', 'o_pm'])
+        sso_df.to_csv('true_positives_{}.csv'.format(self.mag))
 
         return stats_d

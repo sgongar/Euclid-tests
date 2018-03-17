@@ -61,7 +61,7 @@ class Scamp:
                                          self.sex_d['deblend_mincount'],
                                          self.sex_d['detect_minarea'])
 
-        self.logger.info('scamp process for magnitude {}'.format(self.mag))
+        self.logger.info('Scamp process for magnitude {}'.format(self.mag))
         self.logger.info('Sextractor configuration: {}'.format(sex_cf))
         self.logger.info('Scamp configuration: {}'.format(self.scmp_cf))
 

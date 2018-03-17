@@ -61,8 +61,11 @@ class Sextractor:
 
         logger.info('sextractor configuration {}'.format(folder_n))
 
+        print('mags {}'.format(self.prfs_d['mags']))
+
         for mag_ in self.prfs_d['mags']:
             fits_files = get_fits(unique=False, mag=mag_)
+            print(fits_files)
             for image_idx in range(0, len(fits_files),
                                    self.prfs_d['cores_number']):
                 try:
@@ -75,8 +78,6 @@ class Sextractor:
                                                             folder_n)
                         create_folder(logger, folder_loc)
                         cat_name = '{}.cat'.format(fits_files[idx][:-5])
-
-                        print(mag_, cat_name)
 
                         # sextractor input and output
                         sex_input = '{}/{}/CCDs/{}'.format(analysis_dir, mag_,

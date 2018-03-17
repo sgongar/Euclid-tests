@@ -420,6 +420,7 @@ class Create_regions:
         list_x = catalog[:, 0]
         list_y = catalog[:, 1]
         list_mag = catalog[:, 2]
+        list_object = catalog[:, 3]
 
         stars = range(0, 137378, 1)  # stars+galaxies
         # stars = range(0, 12470, 1)  # stars
@@ -428,8 +429,9 @@ class Create_regions:
         s1 = Series(list_x, name='X_IMAGE', dtype=float64)
         s2 = Series(list_y, name='Y_IMAGE', dtype=float64)
         s3 = Series(list_mag, name='MAG_VALUES', dtype=float64)
+        s4 = Series(list_object, name='OBJECT', dtype=float64)
 
-        sources_df = concat([s1, s2, s3], axis=1)
+        sources_df = concat([s1, s2, s3, s4], axis=1)
         sources_df = sources_df.iloc[stars, :]
 
         ccd_loc = 'mag_{}_CCD_x0_y0_d1.fits'.format(mag_)
@@ -455,10 +457,11 @@ class Create_regions:
         alpha_j2000 = Series(alpha_list, name='alpha_j2000')
         delta_j2000 = Series(delta_list, name='delta_j2000')
         mag = Series(sources_df['MAG_VALUES'].tolist(), name='mag')
+        object_ = Series(sources_df['OBJECT'].tolist(), name='object')
 
-        df_stars = concat([alpha_j2000, delta_j2000, mag], axis=1)
-        # df_stars = df_stars[df_stars['mag'] > 20.0]
-        # df_stars = df_stars[21.0 > df_stars['mag']]
+        df_stars = concat([alpha_j2000, delta_j2000, mag, object_], axis=1)
+        df_stars = df_stars[df_stars['mag'] > 20.0]
+        df_stars = df_stars[21.0 > df_stars['mag']]
 
         return df_stars
 

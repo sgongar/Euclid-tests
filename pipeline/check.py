@@ -14,6 +14,8 @@ Versions:
 Todo:
     *
 
+*GNU Terry Pratchett*
+
 """
 from itertools import product
 from multiprocessing import Process
