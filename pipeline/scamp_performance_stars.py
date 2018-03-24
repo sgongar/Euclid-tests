@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """Python script for performance
-Mide las detecciones de cada tipo
+Obtiene los factores
 
 Versions:
 - 0.1
@@ -70,10 +70,11 @@ def redo_stats_d():
     return stats_d
 
 
-def populate_stats_d(stats_d):
+def populate_stats_d(stats_d, mag):
     """
 
     :param stats_d:
+    :param mag:
     :return:
     """
     prfs_d = extract_settings()
@@ -91,14 +92,22 @@ def populate_stats_d(stats_d):
     stats_d['alpha_std'].append(initial_float)
     stats_d['delta_std'].append(initial_float)
 
-    true_sources = [21, 22, 14, 17, 19, 22, 23, 19, 18, 21]
+    # re-check!
+    true_sources_d = {'20-21': [21, 22, 14, 17, 19, 22, 23, 19, 18, 21],
+                      '21-22': [22, 21, 19, 24, 16, 23, 18, 24, 24, 19],
+                      '22-23': [18, 24, 21, 22, 16, 22, 20, 20, 21, 26],
+                      '23-24': [21, 19, 25, 23, 22, 19, 20, 17, 20, 21],
+                      '24-25': [22, 19, 20, 14, 22, 17, 21, 20, 21, 18],
+                      # why so many?
+                      '25-26': [14, 23, 19, 27, 25, 29, 23, 21, 16, 22],
+                      '26-27': [21, 20, 22, 22, 22, 20, 18, 25, 23, 14]}
 
     for idx, pm_ in enumerate(prfs_d['pms']):
         stats_d['i_pm'].append(pm_)
         stats_d['N_meas'].append(initial_int)
         stats_d['N_false'].append(initial_int)
         stats_d['N_se'].append(initial_float)
-        stats_d['N_true'].append(true_sources[idx])
+        stats_d['N_true'].append(true_sources_d[mag][idx])
         stats_d['f_dr'].append(initial_float)
         stats_d['f_pur'].append(initial_float)
         stats_d['f_com'].append(initial_float)
@@ -238,7 +247,7 @@ class ScampPerformanceStars:
         input_df = input_df.reset_index(drop=True)
 
         if self.save:
-            input_df.to_csv('inputs.csv')
+            input_df.to_csv('inputs_{}.csv'.format(self.mag))
 
         return input_df
 
@@ -247,27 +256,13 @@ class ScampPerformanceStars:
 
         :return:
         """
-        self.logger.debug('Magnitude bin {}'.format(self.mag))
-        self.logger.debug('Scamp configuration {}'.format(self.scmp_cf))
-        self.logger.debug('Sextractor configuration {}'.format(self.sex_cf))
+        self.logger.debug('Magnitude bin: {}'.format(self.mag))
+        self.logger.debug('Scamp configuration: {}'.format(self.scmp_cf))
+        self.logger.debug('Sextractor configuration: {}'.format(self.sex_cf))
 
         # Creates a dictionary for statistics
         stats_d = redo_stats_d()
-        stats_d = populate_stats_d(stats_d)
-
-        """
-        # Creates a dictionary for mean and populated with lists
-        nonsso_d = {'a_image': [], 'b_image': []}
-        for idx in range(0, len(self.prfs_d['pms']) + 1, 1):
-            nonsso_d['a_image'].append([])
-            nonsso_d['b_image'].append([])
-
-        # Creates a dictionary for standard deviation and populated with lists
-        sso_d = {'a_image': [], 'b_image': []}
-        for idx in range(0, len(self.prfs_d['pms']) + 1, 1):
-            sso_d['a_image'].append([])
-            sso_d['b_image'].append([])
-        """
+        stats_d = populate_stats_d(stats_d, self.mag)
 
         # Creates a (dictionary?) list for objects
         sso_d = {'idx': [], 'source': [], 'CCD': [], 'dither': [],
@@ -330,6 +325,7 @@ class ScampPerformanceStars:
                 o_pm = row.PM
                 o_pm_alpha = row.PMALPHA
                 o_pm_delta = row.PMDELTA
+                # mag_iso_median = row.MEDIAN_MAG_ISO
 
                 flag_mag, object_ = check_mag(input_stars, o_alpha, o_delta)
                 out_df = check_star(catalog_n, input_df, o_alpha, o_delta)

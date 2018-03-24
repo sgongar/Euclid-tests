@@ -244,7 +244,7 @@ class SlowPMPerformanceSSOs:
         for dither in range(1, 5, 1):
             cat_location = '{}/{}/Catalogs'.format(self.prfs_d['fits_dir'],
                                                    self.mag)
-            cat_name = '{}/Cat_20-21_d{}'.format(cat_location, dither)
+            cat_name = '{}/Cat_{}_d{}'.format(cat_location, self.mag, dither)
             input_dict[dither] = '{}.dat'.format(cat_name)
         input_dict = Create_regions(input_dict).check_ssos(self.mag, True)
 

@@ -3,7 +3,6 @@
 
 
 from matplotlib import pyplot
-from matplotlib.backends.backend_pdf import PdfPages
 from numpy import arange, mean, std, array, polyfit, sum, sqrt, linspace, size
 from pandas import read_csv
 from scipy.stats import t, linregress
@@ -34,7 +33,7 @@ def scatterfit(x, y, a=None, b=None):
     return sd
 
 
-def predband(xd, yd, a, b, conf=0.40, x=None):
+def predband(xd, yd, a, b, conf=0.50, x=None):
     """
     Calculates the prediction band of the linear regression model at the desired confidence
     level.
@@ -96,53 +95,45 @@ def f(b, x):
     """
     return b[0] * x + b[1]
 
-
 def b_image_plot():
 
     data_dir = '/home/sgongora/Documents/CarpetaCompartida/full_stats_ssos'
 
     b_image = []
-    b_image_d = {}
     errb_image = []
     mag_iso = []
-    mag_iso_d = {}
     magerr_iso = []
 
     # reads b_image
-    for mag_ in ['20-21', '21-22', '22-23', '23-24', '24-25', '25-26', '26-27']:
-        b_image_d[mag_] = []
-        mag_iso_d[mag_] = []
-
+    for mag_ in ['20-21', '21-22', '22-23']:
         b_image_df = read_csv(
             '{}/f_{}_median_b_image_3.csv'.format(data_dir, mag_),
             index_col=0)
-        print(b_image_df.columns[:-3])
-        for column_ in b_image_df.columns[:-3]:
+        print(b_image_df.columns[:-4])
+        for column_ in b_image_df.columns[:-4]:
             list_to_append = b_image_df[column_].tolist()
             list_to_append = [x for x in list_to_append if type(x) != float]
             list_to_append = [x for x in list_to_append if 'mean' not in x]
             list_to_append = [float(x) for x in list_to_append]
             for element_ in list_to_append:
                 b_image.append(element_)
-                b_image_d[mag_].append(element_)
 
         mag_iso_df = read_csv(
             '{}/f_{}_median_mag_iso_3.csv'.format(data_dir, mag_),
             index_col=0)
-        for column_ in mag_iso_df.columns[:-3]:
+        for column_ in mag_iso_df.columns[:-4]:
             list_to_append = mag_iso_df[column_].tolist()
             list_to_append = [x for x in list_to_append if type(x) != float]
             list_to_append = [x for x in list_to_append if 'mean' not in x]
             list_to_append = [float(x) for x in list_to_append]
             for element_ in list_to_append:
                 mag_iso.append(element_)
-                mag_iso_d[mag_].append(element_)
 
         errb_image_df = read_csv(
             '{}/f_{}_median_errb_image_3.csv'.format(data_dir,
                                                      mag_),
             index_col=0)
-        for column_ in errb_image_df.columns[:-3]:
+        for column_ in errb_image_df.columns[:-4]:
             list_to_append = errb_image_df[column_].tolist()
             list_to_append = [x for x in list_to_append if type(x) != float]
             list_to_append = [x for x in list_to_append if 'mean' not in x]
@@ -154,7 +145,7 @@ def b_image_plot():
             '{}/f_{}_median_magerr_iso_3.csv'.format(data_dir,
                                                      mag_),
             index_col=0)
-        for column_ in magerr_iso_df.columns[:-3]:
+        for column_ in magerr_iso_df.columns[:-4]:
             list_to_append = magerr_iso_df[column_].tolist()
             list_to_append = [x for x in list_to_append if type(x) != float]
             list_to_append = [x for x in list_to_append if 'mean' not in x]
@@ -162,7 +153,7 @@ def b_image_plot():
             for element_ in list_to_append:
                 magerr_iso.append(element_)
 
-    test_fit = polyfit(mag_iso, b_image, 2)
+    test_fit = polyfit(mag_iso, b_image, 1)
 
     linear = Model(f)
     mydata = RealData(mag_iso, b_image, sx=magerr_iso, sy=errb_image)
@@ -170,150 +161,40 @@ def b_image_plot():
     myodr = ODR(mydata, linear, beta0=[test_fit[0], test_fit[1]])
 
     myoutput = myodr.run()
-    # myoutput.pprint()
+    myoutput.pprint()
 
-    lower, upper, x = predband(array(mag_iso), array(b_image),
+    upper, lower, x = predband(array(mag_iso), array(b_image),
                                myoutput.beta[0], myoutput.beta[1])
+    print(myoutput.beta)
     fit = myoutput.beta
 
     upper_fit = polyfit(x, upper, 1)
+    print(upper_fit)
     lower_fit = polyfit(x, lower, 1)
+    print(lower_fit)
 
     # reads mag_iso
     plot_size = [16.53, 11.69]
     plot_dpi = 100
 
-    with PdfPages('mag_iso_vs_b_image_2.pdf') as pdf:
-        fig = pyplot.figure(figsize=plot_size, dpi=plot_dpi)
-        ax_1 = fig.add_subplot(1, 1, 1)
-        ax_1.plot(mag_iso, b_image, 'bs')
-        colors = ['gs', 'rs', 'cs', 'ms', 'ys', 'ks', 'ws']
-        for idx_color, mag_ in enumerate(['20-21', '21-22', '22-23',
-                                          '23-24', '24-25', '25-26',
-                                          '26-27']):
-            ax_1.plot(mag_iso_d[mag_], b_image_d[mag_],
-                      colors[idx_color])
-        ax_1.plot([19, 27], [19 * myoutput.beta[0] + myoutput.beta[1],
-                             27 * myoutput.beta[0] + myoutput.beta[1]])
-        ax_1.plot([19, 27], [19 * upper_fit[0] + upper_fit[1],
-                             27 * upper_fit[0] + upper_fit[1]])
-        ax_1.plot([19, 27], [19 * lower_fit[0] + lower_fit[1],
-                             27 * lower_fit[0] + lower_fit[1]])
-        ax_1.set_ylabel('b_image')
-        ax_1.set_xlabel('mag_iso')
-        ax_1.grid(True)
-
-        pdf.savefig()
-
-    """
     fig = pyplot.figure(figsize=plot_size, dpi=plot_dpi)
     ax_1 = fig.add_subplot(1, 1, 1)
     ax_1.plot(mag_iso, b_image, 'bs')
     ax_1.plot([19, 27], [19 * myoutput.beta[0] + myoutput.beta[1],
                          27 * myoutput.beta[0] + myoutput.beta[1]])
-    ax_1.plot([19, 27], [19 * upper_fit[0] + upper_fit[1],
-                         27 * upper_fit[0] + upper_fit[1]])
-    ax_1.plot([19, 27], [19 * lower_fit[0] + lower_fit[1],
-                         27 * lower_fit[0] + lower_fit[1]])
+    ax_1.plot(x, upper)
+    ax_1.plot(x, lower)
     ax_1.set_ylabel('b_image')
     ax_1.set_xlabel('mag_iso')
     ax_1.grid(True)
 
     pyplot.show()
-    """
 
-    return fit, lower_fit, upper_fit, b_image, mag_iso
-
-def a_image_plot():
-
-    data_dir = '/home/sgongora/Documents/CarpetaCompartida/full_stats_ssos'
-
-    a_image = []
-    erra_image = []
-    mag_iso = []
-    magerr_iso = []
-
-    # reads b_image
-    for mag_ in ['20-21', '21-22', '22-23']:
-        a_image_df = read_csv(
-            '{}/f_{}_median_a_image_3.csv'.format(data_dir, mag_),
-            index_col=0)
-        for column_ in a_image_df.columns:
-            list_to_append = a_image_df[column_].tolist()
-            list_to_append = [x for x in list_to_append if type(x) != float]
-            list_to_append = [x for x in list_to_append if 'mean' not in x]
-            list_to_append = [float(x) for x in list_to_append]
-            for element_ in list_to_append:
-                a_image.append(element_)
-
-        mag_iso_df = read_csv(
-            '{}/f_{}_median_mag_iso_3.csv'.format(data_dir, mag_),
-            index_col=0)
-        for column_ in mag_iso_df.columns:
-            list_to_append = mag_iso_df[column_].tolist()
-            list_to_append = [x for x in list_to_append if type(x) != float]
-            list_to_append = [x for x in list_to_append if 'mean' not in x]
-            list_to_append = [float(x) for x in list_to_append]
-            for element_ in list_to_append:
-                mag_iso.append(element_)
-
-        erra_image_df = read_csv(
-            '{}/f_{}_median_erra_image_3.csv'.format(data_dir,
-                                                     mag_),
-            index_col=0)
-        for column_ in erra_image_df.columns:
-            list_to_append = erra_image_df[column_].tolist()
-            list_to_append = [x for x in list_to_append if type(x) != float]
-            list_to_append = [x for x in list_to_append if 'mean' not in x]
-            list_to_append = [float(x) for x in list_to_append]
-            for element_ in list_to_append:
-                erra_image.append(element_)
-
-        magerr_iso_df = read_csv(
-            '{}/f_{}_median_magerr_iso_3.csv'.format(data_dir,
-                                                     mag_),
-            index_col=0)
-        for column_ in magerr_iso_df.columns:
-            list_to_append = magerr_iso_df[column_].tolist()
-            list_to_append = [x for x in list_to_append if type(x) != float]
-            list_to_append = [x for x in list_to_append if 'mean' not in x]
-            list_to_append = [float(x) for x in list_to_append]
-            for element_ in list_to_append:
-                magerr_iso.append(element_)
-
-    test_fit = polyfit(mag_iso, a_image, 1)
-
-    linear = Model(f)
-    mydata = RealData(mag_iso, a_image, sx=magerr_iso, sy=erra_image)
-
-    myodr = ODR(mydata, linear, beta0=[test_fit[0], test_fit[1]])
-
-    myoutput = myodr.run()
-    myoutput.pprint()
-
-    # reads mag_iso
-    plot_size = [16.53, 11.69]
-    plot_dpi = 100
-
-    with PdfPages('mag_iso_vs_b_image.pdf') as pdf:
-        fig = pyplot.figure(figsize=plot_size, dpi=plot_dpi)
-        ax_1 = fig.add_subplot(1, 1, 1)
-        ax_1.plot(mag_iso, a_image, 'bs')
-        ax_1.plot([19, 27], [19 * myoutput.beta[0] + myoutput.beta[1],
-                             27 * myoutput.beta[0] + myoutput.beta[1]])
-        ax_1.set_ylabel('a_image')
-        ax_1.set_xlabel('mag_iso')
-        ax_1.grid(True)
-
-        pdf.savefig()
+    return fit, upper_fit, lower_fit
 
 
 if __name__ == "__main__":
     fit, lower_fit, upper_fit, b_image, mag_iso = b_image_plot()
-
-    print(fit)
-    print(lower_fit)
-    print(upper_fit)
 
     idx_in = 0
     idx_out = 0
@@ -331,6 +212,3 @@ if __name__ == "__main__":
     print('total: {}'.format(total))
     print('idx_in: {}'.format(idx_in))
     print('idx_out: {}'.format(idx_out))
-
-    # print(b_image_test, upper_test, lower_test)
-    # a_image_plot()

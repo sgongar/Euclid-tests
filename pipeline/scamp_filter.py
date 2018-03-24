@@ -45,8 +45,8 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
         """
         # Filter variables
         self.class_star_limit = 0.97
-        self.proper_motion = 0.3
-        self.proper_motion_dects = 0.3
+        self.proper_motion = 1.5
+        self.proper_motion_dects = 1.5
 
         # Analysis variables
         self.prfs_d = extract_settings()
@@ -69,13 +69,15 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
         self.filt_n = 'filt_{}_{}'.format(self.scmp_cf, self.mag)
 
         self.filter_o_n = '{}/{}'.format(self.filter_dir, self.filt_n)
+        self.logger.debug('Magnitude bin: {}'.format(self.mag))
 
+        """
         # Saves _1.csv
         (merged_db, full_db) = self.scamp_filter()
         # Saves _2.csv
         self.compute_pm(merged_db, full_db)
-        self.get_areas()
 
+        self.get_areas()
         """
         full_db = read_csv('{}_3.csv'.format(self.filter_o_n), index_col=0)
 
@@ -125,7 +127,6 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
         if self.save:
             self.save_message('9')
             full_db.to_csv('{}_9.csv'.format(self.filter_o_n))
-        """
 
     def save_message(self, order):
         """
@@ -278,10 +279,6 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
         l_sourcs = len(unique_sources)  # Just to not break 79 characters
         self.logger.debug('Unique sources to be analysed {}'.format(l_sourcs))
 
-        # 22-23
-        # MEDIAN_ERRA_IMAGE, MEAN_ERRA_IMAGE
-        # MEDIAN_ERRB_IMAGE, MEAN_ERRB_IMAGE
-
         dict_keys = ['SOURCE_NUMBER', 'CATALOG_NUMBER', 'EXTENSION',
                      'ASTR_INSTRUM', 'PHOT_INSTRUM', 'X_IMAGE', 'Y_IMAGE',
                      'ISOAREA_IMAGE', 'A_IMAGE', 'MEDIAN_A_IMAGE',
@@ -291,18 +288,28 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
                      'MEAN_ERRB_IMAGE', 'THETA_IMAGE', 'ERRTHETA_IMAGE',
                      'ALPHA_J2000', 'DELTA_J2000', 'ERRA_WORLD', 'ERRB_WORLD',
                      'ERRTHETA_WORLD', 'EPOCH', 'FWHM_IMAGE', 'CLASS_STAR',
-                     'MEDIAN_CLASS_STAR', 'MEAN_CLASS_STAR', 'FLUX_RADIUS',
-                     'ELONGATION', 'ELLIPTICITY', 'MAG', 'MAGERR', 'MAG_ISO',
+                     'MEDIAN_CLASS_STAR', 'MEAN_CLASS_STAR', 'FLUX_ISO',
+                     'MEDIAN_FLUX_ISO', 'MEAN_FLUX_ISO', 'FLUXERR_ISO',
+                     'MEDIAN_FLUXERR_ISO', 'MEAN_FLUXERR_ISO', 'FLUX_RADIUS',
+                     'ELONGATION', 'ELLIPTICITY', 'MEDIAN_ELLIPTICITY',
+                     'MEAN_ELLIPTICITY', 'MAG', 'MAGERR', 'MAG_ISO',
+                     'MEDIAN_MAG_ISO', 'MEAN_MAG_ISO', 'MAGERR_ISO',
+                     'MEDIAN_MAGERR_ISO', 'MEAN_MAGERR_ISO',
                      'FLAGS_EXTRACTION', 'FLAGS_SCAMP', 'FLAGS_IMA', 'PM',
                      'PMERR', 'PMALPHA', 'PMDELTA', 'PMALPHAERR', 'PMDELTAERR']
 
         stats_keys = ['MEAN_A_IMAGE', 'MEAN_B_IMAGE', 'MEAN_CLASS_STAR',
                       'MEDIAN_A_IMAGE', 'MEDIAN_B_IMAGE', 'MEDIAN_CLASS_STAR',
                       'MEAN_ERRA_IMAGE', 'MEAN_ERRB_IMAGE', 'MEDIAN_ERRA_IMAGE',
-                      'MEDIAN_ERRB_IMAGE']
+                      'MEDIAN_ERRB_IMAGE', 'MEDIAN_FLUX_ISO', 'MEAN_FLUX_ISO',
+                      'MEDIAN_FLUXERR_ISO', 'MEAN_FLUXERR_ISO',
+                      'MEDIAN_ELLIPTICITY', 'MEAN_ELLIPTICITY',
+                      'MEDIAN_MAG_ISO', 'MEAN_MAG_ISO', 'MEDIAN_MAGERR_ISO',
+                      'MEAN_MAGERR_ISO']
         extra_keys = ['A_IMAGE', 'B_IMAGE', 'THETA_IMAGE', 'ISOAREA_IMAGE',
-                      'FWHM_IMAGE', 'FLUX_RADIUS', 'MAG_ISO', 'ELONGATION',
-                      'ELLIPTICITY', 'CLASS_STAR']
+                      'FWHM_IMAGE', 'FLUX_ISO', 'FLUXERR_ISO', 'FLUX_RADIUS',
+                      'MAG_ISO', 'MAGERR_ISO', 'ELONGATION', 'ELLIPTICITY',
+                      'CLASS_STAR']
         keys_l = ['SOURCE_NUMBER', 'CATALOG_NUMBER', 'EXTENSION',
                   'ASTR_INSTRUM', 'PHOT_INSTRUM', 'X_IMAGE', 'Y_IMAGE',
                   'ERRA_IMAGE', 'ERRB_IMAGE', 'ERRTHETA_IMAGE', 'ALPHA_J2000',
@@ -367,7 +374,9 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
         for idx, source_ in enumerate(unique_sources_thread):
             print(idx, idx_l)
             source_d = {'A_IMAGE': [], 'B_IMAGE': [], 'ERRA_IMAGE': [],
-                        'ERRB_IMAGE': [], 'CLASS_STAR': []}
+                        'ERRB_IMAGE': [], 'CLASS_STAR': [],
+                        'FLUX_ISO': [], 'FLUXERR_ISO': [], 'FLUX_RADIUS': [],
+                        'MAG_ISO': [], 'MAGERR_ISO': [], 'ELLIPTICITY': []}
             o_df = filter_cat[filter_cat['SOURCE_NUMBER'].isin([source_])]
             for i, row in enumerate(o_df.itertuples(), 1):
                 # Populates temporal dictionary
@@ -404,6 +413,12 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
                     source_d['ERRA_IMAGE'].append(cat_df['ERRA_IMAGE'].iloc[0])
                     source_d['ERRB_IMAGE'].append(cat_df['ERRB_IMAGE'].iloc[0])
                     source_d['CLASS_STAR'].append(cat_df['CLASS_STAR'].iloc[0])
+                    source_d['FLUX_ISO'].append(cat_df['FLUX_ISO'].iloc[0])
+                    source_d['FLUXERR_ISO'].append(cat_df['FLUXERR_ISO'].iloc[0])
+                    source_d['FLUX_RADIUS'].append(cat_df['FLUX_RADIUS'].iloc[0])
+                    source_d['MAG_ISO'].append(cat_df['MAG_ISO'].iloc[0])
+                    source_d['MAGERR_ISO'].append(cat_df['MAGERR_ISO'].iloc[0])
+                    source_d['ELLIPTICITY'].append(cat_df['ELLIPTICITY'].iloc[0])
 
             if 'nan' in source_d['A_IMAGE']:
                 mean_a_image = 'nan'
@@ -440,18 +455,64 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
                 mean_class_star = mean(source_d['CLASS_STAR'])
                 median_class_star = median(source_d['CLASS_STAR'])
 
+            if 'nan' in source_d['FLUX_ISO']:
+                mean_flux_iso = 'nan'
+                median_flux_iso = 'nan'
+            else:
+                mean_flux_iso = mean(source_d['FLUX_ISO'])
+                median_flux_iso = median(source_d['FLUX_ISO'])
+
+            if 'nan' in source_d['FLUXERR_ISO']:
+                mean_fluxerr_iso = 'nan'
+                median_fluxerr_iso = 'nan'
+            else:
+                mean_fluxerr_iso = mean(source_d['FLUXERR_ISO'])
+                median_fluxerr_iso = median(source_d['FLUXERR_ISO'])
+
+            if 'nan' in source_d['MAG_ISO']:
+                mean_mag_iso = 'nan'
+                median_mag_iso = 'nan'
+            else:
+                mean_mag_iso = mean(source_d['MAG_ISO'])
+                median_mag_iso = median(source_d['MAG_ISO'])
+
+            if 'nan' in source_d['MAGERR_ISO']:
+                mean_magerr_iso = 'nan'
+                median_magerr_iso = 'nan'
+            else:
+                mean_magerr_iso = mean(source_d['MAGERR_ISO'])
+                median_magerr_iso = median(source_d['MAGERR_ISO'])
+
+            if 'nan' in source_d['ELLIPTICITY']:
+                mean_ellipticity = 'nan'
+                median_ellipticiy = 'nan'
+            else:
+                mean_ellipticity = mean(source_d['ELLIPTICITY'])
+                median_ellipticiy = median(source_d['ELLIPTICITY'])
+
             # Saves mean and median values from sources
             for i_stats in range(0, len(o_df['SOURCE_NUMBER']), 1):
-                tmp_d['MEAN_A_IMAGE'].append(mean_a_image)
-                tmp_d['MEAN_B_IMAGE'].append(mean_b_image)
-                tmp_d['MEAN_ERRA_IMAGE'].append(mean_erra_image)
-                tmp_d['MEAN_ERRB_IMAGE'].append(mean_errb_image)
-                tmp_d['MEAN_CLASS_STAR'].append(mean_class_star)
                 tmp_d['MEDIAN_A_IMAGE'].append(median_a_image)
                 tmp_d['MEDIAN_B_IMAGE'].append(median_b_image)
                 tmp_d['MEDIAN_ERRA_IMAGE'].append(median_erra_image)
                 tmp_d['MEDIAN_ERRB_IMAGE'].append(median_errb_image)
                 tmp_d['MEDIAN_CLASS_STAR'].append(median_class_star)
+                tmp_d['MEDIAN_FLUX_ISO'].append(median_flux_iso)
+                tmp_d['MEDIAN_FLUXERR_ISO'].append(median_fluxerr_iso)
+                tmp_d['MEDIAN_MAG_ISO'].append(median_mag_iso)
+                tmp_d['MEDIAN_MAGERR_ISO'].append(median_magerr_iso)
+                tmp_d['MEDIAN_ELLIPTICITY'].append(median_ellipticiy)
+
+                tmp_d['MEAN_A_IMAGE'].append(mean_a_image)
+                tmp_d['MEAN_B_IMAGE'].append(mean_b_image)
+                tmp_d['MEAN_ERRA_IMAGE'].append(mean_erra_image)
+                tmp_d['MEAN_ERRB_IMAGE'].append(mean_errb_image)
+                tmp_d['MEAN_CLASS_STAR'].append(mean_class_star)
+                tmp_d['MEAN_FLUX_ISO'].append(mean_flux_iso)
+                tmp_d['MEAN_FLUXERR_ISO'].append(mean_fluxerr_iso)
+                tmp_d['MEAN_MAG_ISO'].append(mean_mag_iso)
+                tmp_d['MEAN_MAGERR_ISO'].append(mean_magerr_iso)
+                tmp_d['MEAN_ELLIPTICITY'].append(mean_ellipticity)
 
         series_l = []
         series_d = {}
@@ -480,14 +541,127 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
 
     def filter_b(self, full_db):
         """
-        1.57 - 1.8
-        :param full_db:
+
         :return: full_db
         """
         self.logger.debug('Runs B_Image size filter')
-        full_db = b_filter(full_db, 1.55, 1.70)
+
+        # Gets unique sources from filtered file
+        unique_sources = list(set(full_db['SOURCE_NUMBER'].tolist()))
+        l_sourcs = len(unique_sources)  # Just to not break 79 characters
+        self.logger.debug('Unique sources to be analysed {}'.format(l_sourcs))
+
+        dict_keys = ['SOURCE_NUMBER', 'CATALOG_NUMBER', 'EXTENSION',
+                     'ASTR_INSTRUM', 'PHOT_INSTRUM', 'X_IMAGE', 'Y_IMAGE',
+                     'ISOAREA_IMAGE', 'A_IMAGE', 'MEDIAN_A_IMAGE',
+                     'MEAN_A_IMAGE', 'ERRA_IMAGE',  'MEDIAN_ERRA_IMAGE',
+                     'MEAN_ERRA_IMAGE', 'B_IMAGE', 'MEDIAN_B_IMAGE',
+                     'MEAN_B_IMAGE', 'ERRB_IMAGE', 'MEDIAN_ERRB_IMAGE',
+                     'MEAN_ERRB_IMAGE', 'THETA_IMAGE', 'ERRTHETA_IMAGE',
+                     'ALPHA_J2000', 'DELTA_J2000', 'ERRA_WORLD', 'ERRB_WORLD',
+                     'ERRTHETA_WORLD', 'EPOCH', 'FWHM_IMAGE', 'CLASS_STAR',
+                     'MEDIAN_CLASS_STAR', 'MEAN_CLASS_STAR', 'FLUX_ISO',
+                     'MEDIAN_FLUX_ISO', 'MEAN_FLUX_ISO', 'FLUXERR_ISO',
+                     'MEDIAN_FLUXERR_ISO', 'MEAN_FLUXERR_ISO', 'FLUX_RADIUS',
+                     'ELONGATION', 'ELLIPTICITY', 'MEDIAN_ELLIPTICITY',
+                     'MEAN_ELLIPTICITY', 'MAG', 'MAGERR', 'MAG_ISO',
+                     'MEDIAN_MAG_ISO', 'MEAN_MAG_ISO', 'MAGERR_ISO',
+                     'MEDIAN_MAGERR_ISO', 'MEAN_MAGERR_ISO',
+                     'FLAGS_EXTRACTION', 'FLAGS_SCAMP', 'FLAGS_IMA', 'PM',
+                     'PMERR', 'PMALPHA', 'PMDELTA', 'PMALPHAERR', 'PMDELTAERR']
+
+
+
+        # 0.5, hasta 0.3
+        # filter_params = {'central_fit': [-0.14273233, 4.56113342],
+        #                  'lower_fit': [-0.14288414, 4.49851371],
+        #                  'upper_fit': [-0.14258053, 4.62375314]}
+
+        # 0.4 hasta 0.1
+        # filter_params = {'central_fit': [-0.14417005, 4.59286226],
+        #                  'lower_fit': [-0.14411595, 4.53657401],
+        #                  'upper_fit': [-0.14422416, 4.64915051]}
+
+        # 0.4 hasta 0.3 mags = [21-25]
+        # filter_params = {'central_fit': [-0.13489287, 4.39921033],
+        #                  'lower_fit': [-0.13488375, 4.31335665],
+        #                  'upper_fit': [-0.134902, 4.485064]}
+
+        # 0.4 hasta 1 mags = [21-25]
+        # filter_params = {'central_fit': [-0.1352622, 4.41103641],
+        #                  'lower_fit': [-0.13525472, 4.32794007],
+        #                  'upper_fit': [-0.13526968, 4.49413276]}
+
+        # 0.4 hasta 1 mags = [21-27] not lineal response
+        filter_params = {'central_fit': [-0.13816623, 4.47217154],
+                         'lower_fit': [-0.1381669, 4.38973617],
+                         'upper_fit': [-0.13816556, 4.55460691]}
+
+        sub_list_1_size = len(unique_sources) / 2
+        sub_list_1 = unique_sources[:sub_list_1_size]
+        sub_list_2 = unique_sources[sub_list_1_size:]
+        sub_list_l = [sub_list_1, sub_list_2]
+
+        areas_j = []
+        for idx_l in range(0, 2, 1):
+            areas_p = Process(target=self.filter_b_thread,
+                              args=(dict_keys, sub_list_l[idx_l], full_db,
+                                    filter_params, idx_l,))
+            areas_j.append(areas_p)
+            areas_p.start()
+
+        active_areas = list([job.is_alive() for job in areas_j])
+        while True in active_areas:
+            active_areas = list([job.is_alive() for job in areas_j])
+            pass
+
+        # Merges areas
+        # Merges catalogs
+        list_1 = read_csv('{}_6s_0.csv'.format(self.filter_o_n), index_col=0)
+        list_2 = read_csv('{}_6s_1.csv'.format(self.filter_o_n), index_col=0)
+
+        full_db = concat([list_1, list_2])
 
         return full_db
+
+    def filter_b_thread(self, dict_keys, unique_sources_thread, full_db,
+                        filter_params, idx_l):
+        """
+
+        :param dict_keys:
+        :param unique_sources_thread:
+        :param full_db:
+        :param filter_params:
+        :param idx_l:
+        :return:
+        """
+        accepted = []
+        rejected = []
+
+        # Loops over unique sources of filtered file
+        for idx, source_ in enumerate(unique_sources_thread):
+            print('filter_b - thread {} - source {}'.format(idx_l, idx))
+
+            o_df = full_db[full_db['SOURCE_NUMBER'].isin([source_])].iloc[0]
+            mag = float(o_df['MEDIAN_MAG_ISO'])
+            b_image = float(o_df['MEDIAN_B_IMAGE'])
+
+            upper_test = (filter_params['upper_fit'][0] * mag) + \
+                         filter_params['upper_fit'][1]
+            lower_test = (filter_params['lower_fit'][0] * mag) + \
+                         filter_params['lower_fit'][1]
+
+            if float(lower_test) < b_image < float(upper_test):
+                accepted.append(source_)
+            else:
+                rejected.append(source_)
+
+        full_db = full_db[full_db['SOURCE_NUMBER'].isin(accepted)]
+
+        if self.save:
+            self.save_message('6s_{}'.format(idx_l))
+            full_db.to_csv('{}_6s_{}.csv'.format(self.filter_o_n, idx_l),
+                           columns=dict_keys)
 
     def filter_coherence(self, full_db):
         """

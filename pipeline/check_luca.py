@@ -33,7 +33,7 @@ from pandas import DataFrame
 from sextractor_performance import SextractorPerformance
 from sextractor_sizes import SextractorSizes
 from scamp_performance_stars import ScampPerformanceStars
-from scamp_performance_ssos import ScampPerformanceSSOs
+from scamp_performance_ssos import ScampPerformance, TotalScampPerformance
 from performance import PMPerformance, StatsPerformance
 from pm_performance_ssos import SlowPMPerformanceSSOs
 from sextractor_aux import Sextractor, CatalogCreation
@@ -334,18 +334,20 @@ class Check:
         """
         stats_d = {}
 
-        idx = 0
+        # idx = 0
         confs = list(product(self.sex_confs, self.scamp_confs))
-        mag = '20-21'
+        # mag = '20-21'
 
-        for conf_ in confs:
-            sex_cf = '{}_{}_{}_{}_{}'.format(conf_[0][0], conf_[0][2],
-                                             conf_[0][2], conf_[0][1],
-                                             conf_[0][3])
-            scmp_cf = '{}_{}_{}_{}'.format(conf_[1][0], conf_[1][1],
-                                           conf_[1][2], conf_[1][3])
+        for mag_ in self.prfs_d['mags']:
+            for conf_ in confs:
+                sex_cf = '{}_{}_{}_{}_{}'.format(conf_[0][0], conf_[0][2],
+                                                 conf_[0][2], conf_[0][1],
+                                                 conf_[0][3])
+                scmp_cf = '{}_{}_{}_{}'.format(conf_[1][0], conf_[1][1],
+                                               conf_[1][2], conf_[1][3])
 
-            ScampPerformanceSSOs(self.logger, mag, sex_cf, scmp_cf)
+                # ScampPerformance(self.logger, mag_, sex_cf, scmp_cf)
+                TotalScampPerformance(self.logger, mag_, sex_cf, scmp_cf)
 
         return True
 

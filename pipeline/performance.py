@@ -215,6 +215,7 @@ class StatsPerformance:
         :param sex_cf:
         :return:
         """
+        self.mag = mag
         errors_a_stars = []
         errors_b_stars = []
         errors_a_galaxies = []
@@ -226,9 +227,9 @@ class StatsPerformance:
         input_ssos_d = {}
         for d in range(1, 5, 1):
             cat_loc = '{}/{}/Catalogs'.format(self.prfs_d['fits_dir'], mag)
-            cat_name = '{}/Cat_20-21_d{}'.format(cat_loc, d)
+            cat_name = '{}/Cat_{}_d{}'.format(cat_loc, self.mag, d)
             input_ssos_d[d] = '{}.dat'.format(cat_name)
-        input_ssos_d = Create_regions(input_ssos_d).check_luca(mag, False, True)
+        input_ssos_d = Create_regions(input_ssos_d).check_luca(self.mag, False, True)
 
         # Creates a DataFrame from an input dictionary
         input_ssos_l = []

@@ -16,7 +16,6 @@ from math import modf
 from astropy import units
 from astropy.coordinates import Angle
 
-from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib import cm
 from matplotlib.ticker import FormatStrFormatter
 import matplotlib.image as mpimg
