@@ -91,10 +91,12 @@ class Scamp:
         scmp_p = scmp_p + scmp_6 + scmp_7 + scmp_8 + scmp_9
         scmp_p = scmp_p + scmp_10
 
-        create_folder(self.logger, cats_dir)
+        print(scmp_p)
 
-        process_scamp = Popen(scmp_p, shell=True)
-        process_scamp.wait()
+        # create_folder(self.logger, cats_dir)
+
+        # process_scamp = Popen(scmp_p, shell=True)
+        # process_scamp.wait()
 
         self.logger.info('Scamp process finished.')
 

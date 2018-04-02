@@ -32,8 +32,8 @@ from misc import create_sextractor_dict, create_scamp_dict
 from pandas import DataFrame
 from sextractor_performance import SextractorPerformance
 from sextractor_sizes import SextractorSizes
-from scamp_performance_stars import ScampPerformanceStars
-from scamp_performance_ssos import ScampPerformance, TotalScampPerformance
+from scamp_performance_stars import ScampPerformanceStars, TotalScampPerformanceStars
+from scamp_performance_ssos import ScampPerformance, TotalScampPerformanceSSOs
 from performance import PMPerformance, StatsPerformance
 from pm_performance_ssos import SlowPMPerformanceSSOs
 from sextractor_aux import Sextractor, CatalogCreation
@@ -347,7 +347,7 @@ class Check:
                                                conf_[1][2], conf_[1][3])
 
                 # ScampPerformance(self.logger, mag_, sex_cf, scmp_cf)
-                TotalScampPerformance(self.logger, mag_, sex_cf, scmp_cf)
+                TotalScampPerformanceSSOs(self.logger, mag_, sex_cf, scmp_cf)
 
         return True
 

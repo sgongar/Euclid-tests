@@ -529,9 +529,10 @@ class ScampPerformance:
         print(source_l)
 
 
-class TotalScampPerformance:
+class TotalScampPerformanceSSOs:
     def __init__(self, logger, mag, sex_cf, scmp_cf):
-        """
+        """ Me da los valores de salida de todos los SSOs presentes en filt 3
+        obtenidos o no
 
         """
         self.logger = logger
@@ -633,7 +634,7 @@ class TotalScampPerformance:
         return filtered_cat
 
     def check_pm_distribution(self):
-        """
+        """ loops over input dataframe if there is a match appends!
 
         :return:
         """
@@ -741,25 +742,20 @@ class TotalScampPerformance:
                 output_pm_ = tmp_d['output_pm'][0]
                 sso_d['output_pm'][idx].append(output_pm_)
                 median_flux_iso_ = tmp_d['median_flux_iso'][0]
-                sso_d['median_flux_iso'].append(median_flux_iso_)
+                sso_d['median_flux_iso'][idx].append(median_flux_iso_)
 
         keys = ['median_mag_iso', 'median_magerr_iso', 'median_a_image',
                 'median_erra_image', 'median_b_image', 'median_errb_image',
                 'median_flux_iso', 'median_class_star', 'ellipticity',
                 'output_pm']
-        """
-        keys = ['output_pm']
-        """
+
         for sso_key in keys:
             df2_keys = [0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1, 3, 10, 30]
             sso_d2 = {0.001: [], 0.003: [], 0.01: [], 0.03: [], 0.1: [],
                       0.3: [], 1: [], 3: [], 10: [], 30: []}
 
             sso_df = DataFrame(sso_d[sso_key])
-            print('test {} - {}'.format(sso_d[sso_key], sso_key))
             for column_ in sso_df.columns:
-                print('column {}'.format(column_))
-                print('column_ {}'.format(sso_df[column_]))
                 for idx, value_ in enumerate(sso_df[column_]):
                     sso_d2[df2_keys[idx]].append(value_)
 

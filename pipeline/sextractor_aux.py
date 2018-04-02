@@ -161,7 +161,6 @@ class Sextractor:
 
         for mag_ in self.prfs_d['mags']:
             fits_files = get_fits(unique=False, mag=mag_)
-            print(fits_files)
             for image_idx in range(0, len(fits_files),
                                    self.prfs_d['cores_number']):
                 try:

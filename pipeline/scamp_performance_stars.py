@@ -11,6 +11,7 @@ Todo:
     * Improve log messages
 
 """
+from numpy import array, isnan, nanmean, nan
 from pandas import concat, read_csv, DataFrame
 
 from misc import extract_settings, speeds_range, get_dither
@@ -498,3 +499,291 @@ class ScampPerformanceStars:
         sso_df.to_csv('true_positives_{}.csv'.format(self.mag))
 
         return stats_d
+
+
+class TotalScampPerformanceStars:
+    def __init__(self, logger, mag, sex_cf, scmp_cf):
+        """ Me da los valores de salida de todos las estrellas  y galaxias
+        presentes en filt 3 obtenidos o no
+
+        """
+        self.logger = logger
+        self.filter_p_number = 3
+        self.prfs_d = extract_settings()
+
+        self.mag = mag
+        self.scmp_cf = scmp_cf
+        self.sex_cf = sex_cf
+
+        self.save = True
+
+        self.data_d = self.creates_output_dict()
+        input_sources = self.check_pm_distribution()
+        self.get_data(input_sources)
+
+    def check_source(self, catalog_n, o_cat, i_alpha, i_delta):
+        """
+
+        :param catalog_n:
+        :param o_cat:
+        :param i_alpha:
+        :param i_delta:
+        :return:
+        """
+        o_df = o_cat[o_cat['CATALOG_NUMBER'].isin([catalog_n])]
+        o_df = o_df[o_df['ALPHA_J2000'] + self.prfs_d['tolerance'] > i_alpha]
+        o_df = o_df[i_alpha > o_df['ALPHA_J2000'] - self.prfs_d['tolerance']]
+        o_df = o_df[o_df['DELTA_J2000'] + self.prfs_d['tolerance'] > i_delta]
+        o_df = o_df[i_delta > o_df['DELTA_J2000'] - self.prfs_d['tolerance']]
+
+        return o_df
+
+    def get_norm_speed(self, o_pm):
+        """
+
+        :return:
+        """
+        speeds_d = speeds_range(self.prfs_d, 50)
+
+        pm_norm = 0
+        for key_ in speeds_d.keys():
+            low = speeds_d[key_][0]
+            high = speeds_d[key_][1]
+            if low < o_pm < high:
+                pm_norm = key_
+
+        return pm_norm
+
+    def creates_input_dict(self):
+        """ Creates an input dictionary. Each key contains SSOs' information
+        for each dither.
+
+        :return: input_dict
+        """
+        input_dict = {}
+        # Loops over the four dithers
+        for dither in range(1, 5, 1):
+            cat_location = '{}/{}/Catalogs'.format(self.prfs_d['fits_dir'],
+                                                   self.mag)
+            cat_name = '{}/Cat_{}_d{}'.format(cat_location, self.mag, dither)
+            input_dict[dither] = '{}.dat'.format(cat_name)
+        input_dict = Create_regions(input_dict).check_ssos(self.mag, True)
+
+        return input_dict
+
+    def creates_input_df(self, input_dict):
+        """ Creates an input dataframe from an input dictionary.
+
+        :return: input dataframe
+        """
+        occurrences = 3
+
+        input_list = []
+        for key_ in input_dict.keys():
+            input_list.append(input_dict[key_])
+
+        input_df = concat(input_list, axis=0)
+        # Look for >= 3 coincidences
+        input_df = concat(g for _, g in input_df.groupby('source')
+                          if len(g) >= occurrences)
+        input_df = input_df.reset_index(drop=True)
+
+        if self.save:
+            self.logger.debug('Saves input catalog')
+            input_df.to_csv('full_stats_ssos/inputs_{}.csv'.format(self.mag))
+
+        return input_df
+
+    def creates_output_dict(self):
+        """
+
+        :return: data_d
+        """
+        data_d = {}
+        for pm_ in self.prfs_d['pms']:
+            data_d[pm_] = []
+
+        return data_d
+
+    def gets_filtered_catalog(self):
+        """
+
+        :return: filtered_cat, filtered catalog
+        """
+        filter_n = 'filt_{}_{}_{}.csv'.format(self.scmp_cf, self.mag,
+                                              self.filter_p_number)
+        filter_o_n = '{}/{}/{}/{}/{}'.format(self.prfs_d['filter_dir'],
+                                             self.mag, self.sex_cf,
+                                             self.scmp_cf, filter_n)
+
+        self.logger.debug('Opens filtered catalog {}'.format(filter_n))
+        # Cross with filtered data - Opens datafile
+        filtered_cat = read_csv('{}'.format(filter_o_n), index_col=0)
+
+        return filtered_cat
+
+    def check_pm_distribution(self):
+        """
+
+        :return:
+        """
+        # Creates an input dictionary with all input sources
+        self.logger.debug('Magnitude bin: {}'.format(self.mag))
+        self.logger.debug('Scamp configuration: {}'.format(self.scmp_cf))
+        self.logger.debug('Sextractor configuration: {}'.format(self.sex_cf))
+
+        # Creates a dictionary
+        sso_d = {'catalog_n': [], 'median_a_image': [],
+                 'median_erra_image': [], 'median_b_image': [],
+                 'median_errb_image': [], 'median_class_star': [],
+                 'ellipticity': [], 'median_mag_iso': [],
+                 'median_magerr_iso': [], 'output_pm': [],
+                 'median_flux_iso': []}
+        for idx in range(0, len(self.prfs_d['pms']), 1):
+            sso_d['median_mag_iso'].append([])
+            sso_d['median_magerr_iso'].append([])
+            sso_d['catalog_n'].append([])
+            sso_d['median_a_image'].append([])
+            sso_d['median_erra_image'].append([])
+            sso_d['median_b_image'].append([])
+            sso_d['median_errb_image'].append([])
+            sso_d['median_class_star'].append([])
+            sso_d['ellipticity'].append([])
+            sso_d['output_pm'].append([])
+            sso_d['median_flux_iso'].append([])
+
+        input_dict = self.creates_input_dict()
+        input_df = self.creates_input_df(input_dict)
+
+        # Open particular file!
+        filter_cat = self.gets_filtered_catalog()
+
+        # Gets unique sources from input data
+        unique_sources = list(set(input_df['source'].tolist()))
+        input_sources = []
+        sources_n = len(unique_sources)
+        self.logger.debug('Input sources to be analysed {}'.format(sources_n))
+        # Loops over input data (Luca's catalog)
+        for idx_source, source_ in enumerate(unique_sources):
+            # print('source {}'.format(source_))
+            tmp_d = redo_tmp_d()
+            flag_sso = False
+            # i_pm = 0
+            # Gets associated data in input catalog
+            cat_df = input_df[input_df['source'].isin([source_])]
+            # Iterate over each detection of each source
+            for i, row in enumerate(cat_df.itertuples(), 1):
+                catalog_n = row.catalog
+                i_pm = row.pm_values
+                i_alpha = row.alpha_j2000
+                i_delta = row.delta_j2000
+
+                # Checks if there is a source closed to input one
+                o_df = self.check_source(catalog_n, filter_cat,
+                                         i_alpha, i_delta)
+
+                if o_df.empty is not True and o_df['PM'].size == 1:
+                    scmp_source = o_df['SOURCE_NUMBER'].iloc[0]
+                    input_sources.append(int(scmp_source))
+                else:
+                    pass
+
+        return list(set(input_sources))
+
+    def get_data(self, input_sources):
+        """
+
+        :param input_sources:
+        :return:
+        """
+
+        star_d = {'catalog_n': [], 'median_a_image': [],
+                  'median_erra_image': [], 'median_b_image': [],
+                  'median_errb_image': [], 'median_class_star': [],
+                  'ellipticity': [], 'median_mag_iso': [],
+                  'median_magerr_iso': [], 'output_pm': [],
+                  'median_flux_iso': []}
+        for idx in range(0, len(self.prfs_d['pms']) + 1, 1):
+            star_d['median_mag_iso'].append([])
+            star_d['median_magerr_iso'].append([])
+            star_d['catalog_n'].append([])
+            star_d['median_a_image'].append([])
+            star_d['median_erra_image'].append([])
+            star_d['median_b_image'].append([])
+            star_d['median_errb_image'].append([])
+            star_d['median_class_star'].append([])
+            star_d['ellipticity'].append([])
+            star_d['output_pm'].append([])
+            star_d['median_flux_iso'].append([])
+        o_df = self.gets_filtered_catalog()
+        stars_df = o_df[~o_df['SOURCE_NUMBER'].isin(input_sources)]
+
+        # Gets unique sources from input data
+        unique_sources = list(set(stars_df['SOURCE_NUMBER'].tolist()))
+        unique_sources = array(unique_sources)
+        unique_sources = unique_sources[~isnan(unique_sources)]
+
+        unique_sources = [value for value in unique_sources if value != nan]
+        sources_n = len(unique_sources)
+
+        self.logger.debug('Fixed sources to be analysed {}'.format(sources_n))
+        # Loops over input data (Luca's catalog)
+        for idx_source, source_ in enumerate(unique_sources):
+            # print('source {}'.format(source_))
+            tmp_d = redo_tmp_d()
+            flag_sso = False
+            # i_pm = 0
+            print(idx_source)
+            # Gets associated data in input catalog
+            cat_df = stars_df[stars_df['SOURCE_NUMBER'].isin([source_])]
+
+            o_pm = cat_df['PM'].iloc[0]
+            o_pm_norm = self.get_norm_speed(o_pm)
+
+            pms = [0, 0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1.0, 3.0, 10.0, 30.0]
+            idx = pms.index(o_pm_norm)
+
+            median_mag_iso = cat_df['MEDIAN_MAG_ISO'].iloc[0]
+            star_d['median_mag_iso'][idx].append(median_mag_iso)
+            median_magerr_iso = cat_df['MEDIAN_MAGERR_ISO'].iloc[0]
+            star_d['median_magerr_iso'][idx].append(median_magerr_iso)
+            median_a_image_ = cat_df['MEDIAN_A_IMAGE'].iloc[0]
+            star_d['median_a_image'][idx].append(median_a_image_)
+            median_erra_image_ = cat_df['MEDIAN_ERRA_IMAGE'].iloc[0]
+            star_d['median_erra_image'][idx].append(median_erra_image_)
+            median_b_image_ = cat_df['MEDIAN_B_IMAGE'].iloc[0]
+            star_d['median_b_image'][idx].append(median_b_image_)
+            median_errb_image_ = cat_df['MEDIAN_ERRB_IMAGE'].iloc[0]
+            star_d['median_errb_image'][idx].append(median_errb_image_)
+            median_class_star_ = cat_df['MEDIAN_CLASS_STAR'].iloc[0]
+            star_d['median_class_star'][idx].append(median_class_star_)
+            ellipticity_ = cat_df['ELLIPTICITY'].iloc[0]
+            star_d['ellipticity'][idx].append(ellipticity_)
+            output_pm_ = o_pm  # really needed?
+            star_d['output_pm'][idx].append(output_pm_)
+            median_flux_iso_ = cat_df['MEDIAN_FLUX_ISO'].iloc[0]
+            star_d['median_flux_iso'][idx].append(median_flux_iso_)
+
+        keys = ['median_mag_iso', 'median_magerr_iso', 'median_a_image',
+                'median_erra_image', 'median_b_image', 'median_errb_image',
+                'median_flux_iso', 'median_class_star', 'ellipticity',
+                'output_pm']
+
+        for star_key in keys:
+            df2_keys = [0, 0.001, 0.003, 0.01, 0.03,
+                        0.1, 0.3, 1, 3, 10, 30]
+            sso_d2 = {0: [], 0.001: [], 0.003: [], 0.01: [], 0.03: [],
+                      0.1: [], 0.3: [], 1: [], 3: [], 10: [], 30: []}
+
+            sso_df = DataFrame(star_d[star_key])
+            for column_ in sso_df.columns:
+                for idx, value_ in enumerate(sso_df[column_]):
+                    sso_d2[df2_keys[idx]].append(value_)
+
+            for key_ in sso_d2.keys():
+                sso_d2[key_].append('mean {}'.format(nanmean(sso_d2[key_])))
+
+            sso_df2 = DataFrame(sso_d2)
+            sso_df2_filename = 'f_{}_{}_{}.csv'.format(self.mag, star_key,
+                                                       self.filter_p_number)
+            sso_df2.to_csv('full_stats_stars/{}'.format(sso_df2_filename))

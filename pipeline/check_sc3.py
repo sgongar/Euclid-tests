@@ -18,13 +18,12 @@ from itertools import product
 from multiprocessing import Process
 from sys import argv
 
-from errors import CatalogueError
 from misc import setting_logger, extract_settings
 from misc import create_configurations, pipeline_help
 from misc import create_sextractor_dict, create_scamp_dict
 from sextractor_aux import SextractorSC3
 from scamp_aux import Scamp
-from scamp_filter import ScampFilter
+from scamp_filter_sc3 import ScampFilter
 
 __author__ = "Samuel Góngora García"
 __copyright__ = "Copyright 2017"

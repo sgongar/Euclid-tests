@@ -4,7 +4,7 @@
 
 from matplotlib import pyplot
 from matplotlib.backends.backend_pdf import PdfPages
-from numpy import arange, mean, std, array, polyfit, sum, sqrt, linspace, size
+from numpy import mean, std, array, polyfit, sum, sqrt, linspace, size
 from pandas import read_csv
 from scipy.stats import t, linregress
 from scipy.odr import Model, ODR, RealData
@@ -34,7 +34,7 @@ def scatterfit(x, y, a=None, b=None):
     return sd
 
 
-def predband(xd, yd, a, b, conf=0.40, x=None):
+def predband(xd, yd, a, b, conf=0.5, x=None):
     """
     Calculates the prediction band of the linear regression model at the desired confidence
     level.
@@ -97,7 +97,211 @@ def f(b, x):
     return b[0] * x + b[1]
 
 
-def b_image_plot():
+def a_image_vs_b_image_plot():
+    """
+
+    :return:
+    """
+
+    data_dir = '/home/sgongora/Documents/CarpetaCompartida/full_stats_ssos'
+
+    b_image = []
+    b_image_d = {}
+    errb_image = []
+    a_image = []
+    a_image_d = {}
+    erra_image = []
+
+    idx_mag = 3
+
+    # reads b_image
+    for mag_ in ['20-21', '21-22', '22-23', '23-24', '24-25', '25-26', '26-27']:
+        b_image_d[mag_] = []
+        a_image_d[mag_] = []
+
+        b_image_df = read_csv(
+            '{}/f_{}_median_b_image_3.csv'.format(data_dir, mag_),
+            index_col=0)
+        print(b_image_df.columns[:-idx_mag])
+        for column_ in b_image_df.columns[:-idx_mag]:
+            list_to_append = b_image_df[column_].tolist()
+            list_to_append = [x for x in list_to_append if type(x) != float]
+            list_to_append = [x for x in list_to_append if 'mean' not in x]
+            list_to_append = [float(x) for x in list_to_append]
+            for element_ in list_to_append:
+                b_image.append(element_)
+                b_image_d[mag_].append(element_)
+
+        a_image_df = read_csv(
+            '{}/f_{}_median_a_image_3.csv'.format(data_dir, mag_),
+            index_col=0)
+        for column_ in a_image_df.columns[:-idx_mag]:
+            list_to_append = a_image_df[column_].tolist()
+            list_to_append = [x for x in list_to_append if type(x) != float]
+            list_to_append = [x for x in list_to_append if 'mean' not in x]
+            list_to_append = [float(x) for x in list_to_append]
+            for element_ in list_to_append:
+                a_image.append(element_)
+                a_image_d[mag_].append(element_)
+
+        errb_image_df = read_csv(
+            '{}/f_{}_median_errb_image_3.csv'.format(data_dir,
+                                                     mag_),
+            index_col=0)
+        for column_ in errb_image_df.columns[:-idx_mag]:
+            list_to_append = errb_image_df[column_].tolist()
+            list_to_append = [x for x in list_to_append if type(x) != float]
+            list_to_append = [x for x in list_to_append if 'mean' not in x]
+            list_to_append = [float(x) for x in list_to_append]
+            for element_ in list_to_append:
+                errb_image.append(element_)
+
+        errb_image_df = read_csv(
+            '{}/f_{}_median_erra_image_3.csv'.format(data_dir,
+                                                     mag_),
+            index_col=0)
+        for column_ in errb_image_df.columns[:-idx_mag]:
+            list_to_append = errb_image_df[column_].tolist()
+            list_to_append = [x for x in list_to_append if type(x) != float]
+            list_to_append = [x for x in list_to_append if 'mean' not in x]
+            list_to_append = [float(x) for x in list_to_append]
+            for element_ in list_to_append:
+                erra_image.append(element_)
+
+    b_image = array(b_image)
+    b_image_filt = []
+    errb_image_filt = []
+    a_image = array(a_image)
+    a_image_filt = []
+    erra_image_filt = []
+
+    for idx in range(0, len(b_image), 1):
+        mask_b = abs(b_image[idx] - mean(b_image)) < 2 * std(b_image)
+        mask_a = abs(a_image[idx] - mean(a_image)) < 2 * std(a_image)
+
+        if mask_b and mask_a:
+            b_image_filt.append(b_image[idx])
+            errb_image_filt.append(errb_image[idx])
+            a_image_filt.append(a_image[idx])
+            erra_image_filt.append(erra_image[idx])
+
+    initial_fit = polyfit(b_image_filt, a_image_filt, 1)
+
+    linear = Model(f)
+    mydata = RealData(b_image_filt, a_image_filt,
+                      sx=errb_image_filt, sy=erra_image_filt)
+
+    myodr = ODR(mydata, linear, beta0=[initial_fit[0], initial_fit[1]])
+
+    myoutput = myodr.run()
+
+    lower, upper, x = predband(array(b_image_filt), array(a_image_filt),
+                               myoutput.beta[0], myoutput.beta[1])
+
+    # fit = myoutput.beta
+
+    # lower, upper, x = predband(array(b_image_filt), array(a_image_filt),
+    #                            initial_fit[0], initial_fit[1])
+
+    upper_fit = polyfit(x, upper, 1)
+    lower_fit = polyfit(x, lower, 1)
+
+    print(initial_fit)
+    print(lower_fit)
+    print(upper_fit)
+
+    # reads mag_iso
+    plot_size = [16.53, 11.69]
+    plot_dpi = 100
+
+    with PdfPages('b_image_vs_a_image_w_error_mags.pdf') as pdf:
+        fig = pyplot.figure(figsize=plot_size, dpi=plot_dpi)
+        ax_1 = fig.add_subplot(1, 1, 1)
+        # ax_1.plot(b_image, a_image, 'bs')
+        colors = ['gs', 'rs', 'cs', 'ms', 'ys', 'ks', 'ws']
+        for idx_color, mag_ in enumerate(['20-21', '21-22', '22-23', '23-24',
+                                          '24-25', '25-26', '26-27']):
+            ax_1.plot(b_image_d[mag_], a_image_d[mag_],
+                      colors[idx_color], label=mag_)
+        ax_1.plot([0.1, 5], [(0.1 * myoutput.beta[0]) + myoutput.beta[1],
+                             (5 * myoutput.beta[0]) + myoutput.beta[1]],
+                  label='cental_fit')
+        ax_1.plot([0.1, 5], [0.1 * upper_fit[0] + upper_fit[1],
+                             5 * upper_fit[0] + upper_fit[1]],
+                  label='upper_fit')
+        ax_1.plot([0.1, 5], [0.1 * lower_fit[0] + lower_fit[1],
+                             5 * lower_fit[0] + lower_fit[1]],
+                  label='lower_fit')
+
+        ax_1.set_ylabel('a_image')
+        ax_1.set_xlabel('b_image')
+        ax_1.grid(True)
+        ax_1.legend()
+
+        pdf.savefig()
+
+    with PdfPages('b_image_vs_a_image_w_o_error.pdf') as pdf:
+        lower, upper, x = predband(array(b_image_filt), array(a_image_filt),
+                                   initial_fit[0], initial_fit[1])
+        upper_fit = polyfit(x, upper, 1)
+        lower_fit = polyfit(x, lower, 1)
+
+        fig = pyplot.figure(figsize=plot_size, dpi=plot_dpi)
+        ax_2 = fig.add_subplot(1, 1, 1)
+        ax_2.plot(b_image, a_image, 'bs')
+        colors = ['gs', 'rs', 'cs', 'ms', 'ys', 'ks', 'ws']
+        for idx_color, mag_ in enumerate(['20-21', '21-22', '22-23', '23-24',
+                                          '24-25', '25-26', '26-27']):
+            ax_2.plot(b_image_d[mag_], a_image_d[mag_],
+                      colors[idx_color], label=mag_)
+        d2 = True
+        if d2:
+            ax_2.plot([0.1, 5], [(0.1 * initial_fit[0]) + initial_fit[1],
+                                 (5 * initial_fit[0]) + initial_fit[1]],
+                      label='central_fit')
+            ax_2.plot([0.1, 5], [0.1 * upper_fit[0] + upper_fit[1],
+                                 5 * upper_fit[0] + upper_fit[1]],
+                      label='upper_fit')
+            ax_2.plot([0.1, 5], [0.1 * lower_fit[0] + lower_fit[1],
+                                 5 * lower_fit[0] + lower_fit[1]],
+                      label='lower_fit')
+        else:
+            ax_2.plot([0.1, 5],
+                      [(0.1 * 0.1 * initial_fit[0]) + (0.1 * initial_fit[1]) + initial_fit[2],
+                       (5 * 5 * initial_fit[0]) + (5 * initial_fit[1]) + initial_fit[2]])
+
+        ax_2.set_ylabel('a_image')
+        ax_2.set_xlabel('b_image')
+        ax_2.grid(True)
+        ax_2.legend()
+
+        pdf.savefig()
+
+    """
+    fig = pyplot.figure(figsize=plot_size, dpi=plot_dpi)
+    ax_1 = fig.add_subplot(1, 1, 1)
+    ax_1.plot(mag_iso, b_image, 'bs')
+    ax_1.plot([19, 27], [19 * myoutput.beta[0] + myoutput.beta[1],
+                         27 * myoutput.beta[0] + myoutput.beta[1]])
+    ax_1.plot([19, 27], [19 * upper_fit[0] + upper_fit[1],
+                         27 * upper_fit[0] + upper_fit[1]])
+    ax_1.plot([19, 27], [19 * lower_fit[0] + lower_fit[1],
+                         27 * lower_fit[0] + lower_fit[1]])
+    ax_1.set_ylabel('b_image')
+    ax_1.set_xlabel('mag_iso')
+    ax_1.grid(True)
+
+    pyplot.show()
+    """
+
+    return initial_fit, lower_fit, upper_fit, b_image_filt, a_image_filt
+
+
+def mag_iso_vs_b_image_plot():
+    """
+
+    :return:
+    """
 
     data_dir = '/home/sgongora/Documents/CarpetaCompartida/full_stats_ssos'
 
@@ -116,7 +320,6 @@ def b_image_plot():
         b_image_df = read_csv(
             '{}/f_{}_median_b_image_3.csv'.format(data_dir, mag_),
             index_col=0)
-        print(b_image_df.columns[:-3])
         for column_ in b_image_df.columns[:-3]:
             list_to_append = b_image_df[column_].tolist()
             list_to_append = [x for x in list_to_append if type(x) != float]
@@ -179,18 +382,21 @@ def b_image_plot():
     upper_fit = polyfit(x, upper, 1)
     lower_fit = polyfit(x, lower, 1)
 
+    print(fit)
+    print(lower_fit)
+    print(upper_fit)
+
     # reads mag_iso
     plot_size = [16.53, 11.69]
     plot_dpi = 100
 
-    with PdfPages('mag_iso_vs_b_image_2.pdf') as pdf:
+    with PdfPages('mag_iso_vs_b_image.pdf') as pdf:
         fig = pyplot.figure(figsize=plot_size, dpi=plot_dpi)
         ax_1 = fig.add_subplot(1, 1, 1)
         ax_1.plot(mag_iso, b_image, 'bs')
         colors = ['gs', 'rs', 'cs', 'ms', 'ys', 'ks', 'ws']
-        for idx_color, mag_ in enumerate(['20-21', '21-22', '22-23',
-                                          '23-24', '24-25', '25-26',
-                                          '26-27']):
+        for idx_color, mag_ in enumerate(['20-21', '21-22', '22-23', '23-24',
+                                          '24-25', '25-26', '26-27']):
             ax_1.plot(mag_iso_d[mag_], b_image_d[mag_],
                       colors[idx_color])
         ax_1.plot([19, 27], [19 * myoutput.beta[0] + myoutput.beta[1],
@@ -224,7 +430,12 @@ def b_image_plot():
 
     return fit, lower_fit, upper_fit, b_image, mag_iso
 
-def a_image_plot():
+
+def mag_iso_vs_a_image_plot():
+    """
+
+    :return:
+    """
 
     data_dir = '/home/sgongora/Documents/CarpetaCompartida/full_stats_ssos'
 
@@ -289,13 +500,20 @@ def a_image_plot():
     myodr = ODR(mydata, linear, beta0=[test_fit[0], test_fit[1]])
 
     myoutput = myodr.run()
-    myoutput.pprint()
+    fit = myoutput.beta
+
+    lower, upper, x = predband(array(mag_iso), array(a_image),
+                               myoutput.beta[0], myoutput.beta[1])
+    fit = myoutput.beta
+
+    upper_fit = polyfit(x, upper, 1)
+    lower_fit = polyfit(x, lower, 1)
 
     # reads mag_iso
     plot_size = [16.53, 11.69]
     plot_dpi = 100
 
-    with PdfPages('mag_iso_vs_b_image.pdf') as pdf:
+    with PdfPages('mag_iso_vs_a_image.pdf') as pdf:
         fig = pyplot.figure(figsize=plot_size, dpi=plot_dpi)
         ax_1 = fig.add_subplot(1, 1, 1)
         ax_1.plot(mag_iso, a_image, 'bs')
@@ -307,30 +525,196 @@ def a_image_plot():
 
         pdf.savefig()
 
+    return fit, lower_fit, upper_fit, a_image, mag_iso
+
+
+def mag_iso_vs_flux_iso_plot(pdf):
+    """
+
+    :param pdf:
+    :return:
+    """
+    data_dir = '/home/sgongora/Documents/CarpetaCompartida/full_stats_ssos'
+
+    flux_iso = []
+    flux_iso_d = {}
+    mag_iso = []
+    mag_iso_d = {}
+
+    # reads b_image
+    for mag_ in ['20-21', '21-22', '22-23', '23-24', '24-25', '25-26', '26-27']:
+        flux_iso_d[mag_] = []
+        mag_iso_d[mag_] = []
+
+        flux_iso_df = read_csv(
+            '{}/f_{}_median_flux_iso_3.csv'.format(data_dir, mag_),
+            index_col=0)
+        print(flux_iso_df.columns[:-3])
+        for column_ in flux_iso_df.columns[:-3]:
+            list_to_append = flux_iso_df[column_].tolist()
+            list_to_append = [x for x in list_to_append if type(x) != float]
+            list_to_append = [x for x in list_to_append if 'mean' not in x]
+            list_to_append = [float(x) for x in list_to_append]
+            for element_ in list_to_append:
+                flux_iso.append(element_)
+                flux_iso_d[mag_].append(element_)
+
+        mag_iso_df = read_csv(
+            '{}/f_{}_median_mag_iso_3.csv'.format(data_dir, mag_),
+            index_col=0)
+        for column_ in mag_iso_df.columns[:-3]:
+            list_to_append = mag_iso_df[column_].tolist()
+            list_to_append = [x for x in list_to_append if type(x) != float]
+            list_to_append = [x for x in list_to_append if 'mean' not in x]
+            list_to_append = [float(x) for x in list_to_append]
+            for element_ in list_to_append:
+                mag_iso.append(element_)
+                mag_iso_d[mag_].append(element_)
+
+    fit = polyfit(mag_iso, flux_iso, 1)
+
+    lower, upper, x = predband(array(mag_iso), array(flux_iso), fit[0], fit[1])
+
+    upper_fit_2 = polyfit(x, upper, 1)
+    lower_fit_2 = polyfit(x, lower, 1)
+
+    # reads mag_iso
+    plot_size = [16.53, 11.69]
+    plot_dpi = 100
+
+    if pdf:
+        with PdfPages('mag_iso_vs_flux_iso.pdf') as pdf:
+            fig = pyplot.figure(figsize=plot_size, dpi=plot_dpi)
+            ax_1 = fig.add_subplot(1, 1, 1)
+            ax_1.plot(mag_iso, flux_iso, 'bs')
+            colors = ['gs', 'rs', 'cs', 'ms', 'ys', 'ks', 'ws']
+            for idx_color, mag_ in enumerate(['20-21', '21-22', '22-23',
+                                              '23-24', '24-25', '25-26',
+                                              '26-27']):
+                ax_1.plot(mag_iso_d[mag_], flux_iso_d[mag_],
+                          colors[idx_color])
+            ax_1.plot([19, 27], [19 * fit[0] + fit[1], 27 * fit[0] + fit[1]])
+            ax_1.plot([19, 27], [19 * upper_fit_2[0] + upper_fit_2[1],
+                                 27 * upper_fit_2[0] + upper_fit_2[1]])
+            ax_1.plot([19, 27], [19 * lower_fit_2[0] + lower_fit_2[1],
+                                 27 * lower_fit_2[0] + lower_fit_2[1]])
+            ax_1.set_ylabel('flux_iso')
+            ax_1.set_xlabel('mag_iso')
+            ax_1.grid(True)
+
+            pdf.savefig()
+    else:
+        fig = pyplot.figure(figsize=plot_size, dpi=plot_dpi)
+        ax_1 = fig.add_subplot(1, 1, 1)
+        ax_1.plot(mag_iso, flux_iso, 'bs')
+        colors = ['gs', 'rs', 'cs', 'ms', 'ys', 'ks', 'ws']
+        for idx_color, mag_ in enumerate(['20-21', '21-22', '22-23',
+                                          '23-24', '24-25', '25-26',
+                                          '26-27']):
+            ax_1.plot(mag_iso_d[mag_], flux_iso_d[mag_],
+                      colors[idx_color])
+        ax_1.plot([19, 27], [19 * fit[0] + fit[1], 27 * fit[0] + fit[1]])
+        ax_1.plot([19, 27], [19 * upper_fit_2[0] + upper_fit_2[1],
+                             27 * upper_fit_2[0] + upper_fit_2[1]])
+        ax_1.plot([19, 27], [19 * lower_fit_2[0] + lower_fit_2[1],
+                             27 * lower_fit_2[0] + lower_fit_2[1]])
+        ax_1.set_ylabel('flux_iso')
+        ax_1.set_xlabel('mag_iso')
+        ax_1.grid(True)
+
+    return fit, lower_fit_2, upper_fit_2, flux_iso, mag_iso
+
 
 if __name__ == "__main__":
-    fit, lower_fit, upper_fit, b_image, mag_iso = b_image_plot()
+    """
+    
+    """
+    flux = False
+    a_image = False
+    b_image = True
+    a_image_vs_b_image = False
 
-    print(fit)
-    print(lower_fit)
-    print(upper_fit)
+    if flux:
+        (fit, lower_fit, upper_fit,
+         flux_iso, mag_iso) = mag_iso_vs_flux_iso_plot(pdf=True)
 
-    idx_in = 0
-    idx_out = 0
-    total = len(b_image)
+        idx_in = 0
+        idx_out = 0
+        total = len(b_image)
 
-    for idx, mag_iso_ in enumerate(mag_iso):
-        upper_test = (upper_fit[0] * float(mag_iso_)) + upper_fit[1]
-        lower_test = (lower_fit[0] * float(mag_iso_)) + lower_fit[1]
+        for idx, mag_iso_ in enumerate(mag_iso):
+            upper_test = (upper_fit[0] * float(mag_iso_)) + upper_fit[1]
+            lower_test = (lower_fit[0] * float(mag_iso_)) + lower_fit[1]
 
-        if float(lower_test) < float(b_image[idx]) < float(upper_test):
-            idx_in += 1
-        else:
-            idx_out += 1
+            if float(lower_test) < float(flux_iso[idx]) < float(upper_test):
+                idx_in += 1
+            else:
+                idx_out += 1
 
-    print('total: {}'.format(total))
-    print('idx_in: {}'.format(idx_in))
-    print('idx_out: {}'.format(idx_out))
+        print('total: {}'.format(total))
+        print('idx_in: {}'.format(idx_in))
+        print('idx_out: {}'.format(idx_out))
 
-    # print(b_image_test, upper_test, lower_test)
-    # a_image_plot()
+    elif a_image:
+        (fit, lower_fit, upper_fit,
+         b_image, mag_iso) = mag_iso_vs_a_image_plot()
+
+        idx_in = 0
+        idx_out = 0
+        total = len(b_image)
+
+        for idx, mag_iso_ in enumerate(mag_iso):
+            upper_test = (upper_fit[0] * float(mag_iso_)) + upper_fit[1]
+            lower_test = (lower_fit[0] * float(mag_iso_)) + lower_fit[1]
+
+            if float(lower_test) < float(b_image[idx]) < float(upper_test):
+                idx_in += 1
+            else:
+                idx_out += 1
+
+        print('total: {}'.format(total))
+        print('idx_in: {}'.format(idx_in))
+        print('idx_out: {}'.format(idx_out))
+
+    elif b_image:
+        (fit, lower_fit, upper_fit,
+         b_image, mag_iso) = mag_iso_vs_b_image_plot()
+
+        idx_in = 0
+        idx_out = 0
+        total = len(b_image)
+
+        for idx, mag_iso_ in enumerate(mag_iso):
+            upper_test = (upper_fit[0] * float(mag_iso_)) + upper_fit[1]
+            lower_test = (lower_fit[0] * float(mag_iso_)) + lower_fit[1]
+
+            if float(lower_test) < float(b_image[idx]) < float(upper_test):
+                idx_in += 1
+            else:
+                idx_out += 1
+
+        print('total: {}'.format(total))
+        print('idx_in: {}'.format(idx_in))
+        print('idx_out: {}'.format(idx_out))
+
+    elif a_image_vs_b_image:
+        (fit, lower_fit, upper_fit,
+         b_image, a_image) = a_image_vs_b_image_plot()
+
+        idx_in = 0
+        idx_out = 0
+        total = len(b_image)
+
+        for idx, b_image_ in enumerate(b_image):
+            upper_test = (upper_fit[0] * float(b_image_)) + upper_fit[1]
+            lower_test = (lower_fit[0] * float(b_image_)) + lower_fit[1]
+
+            if float(lower_test) < float(a_image[idx]) < float(upper_test):
+                idx_in += 1
+            else:
+                idx_out += 1
+
+        print('total: {}'.format(total))
+        print('idx_in: {}'.format(idx_in))
+        print('idx_out: {}'.format(idx_out))
+        print('ratio: {}'.format(float(idx_in) / float(total)))
