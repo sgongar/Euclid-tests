@@ -33,7 +33,7 @@ __status__ = "Development"
 
 class ScampFilter:  # TODO Split scamp_filter method into single methods
 
-    def __init__(self, logger, mag, scmp_cf, sex_d):
+    def __init__(self, logger, scmp_cf, sex_d):
         """
 
         :param logger:
@@ -49,7 +49,6 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
         # Analysis variables
         self.prfs_d = extract_settings()
         self.logger = logger
-        self.mag = mag
         self.scmp_cf = scmp_cf
         self.sex_cf = '{}_{}_{}_{}_{}'.format(sex_d['deblend_nthresh'],
                                               sex_d['analysis_thresh'],
@@ -60,30 +59,24 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
         self.save = True
 
         # Filtered catalog dir
-        self.filter_dir = '{}/{}/{}/{}'.format(self.prfs_d['filter_dir'],
-                                               self.mag, self.sex_cf,
-                                               self.scmp_cf)
-        # Filtered catalog name
-        self.filt_n = 'filt_{}_{}'.format(self.scmp_cf, self.mag)
+        self.filter_dir = '/home/user/Work/Projects/pipeline/results/SC3'
+        self.filt_n = 'filt_'
 
         self.filter_o_n = '{}/{}'.format(self.filter_dir, self.filt_n)
-        self.logger.debug('Magnitude bin: {}'.format(self.mag))
 
         # Saves _1.csv
         (merged_db, full_db) = self.scamp_filter()
         # Saves _2.csv
         self.compute_pm(merged_db, full_db)
-
-        """
+        # Saves _3.csv
         self.get_areas()
-    
-        full_db = read_csv('{}_3.csv'.format(self.filter_o_n), index_col=0)
 
+        full_db = read_csv('{}_3.csv'.format(self.filter_o_n), index_col=0)
         self.slow_db, self.fast_db = self.filter_class(full_db)
         if self.save:
             self.save_message('4s')
             self.slow_db.to_csv('{}_4s.csv'.format(self.filter_o_n))
-            self.save_message('4f')
+            # self.save_message('4f')
             self.fast_db.to_csv('{}_4f.csv'.format(self.filter_o_n))
 
         filter_j = []
@@ -103,10 +96,13 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
         full_db = concat([slow_db, fast_db])
 
         slow_db = full_db[full_db['PM'] < self.proper_motion_dects]
-        slow_db = self.filter_detections(slow_db, 3)
-        if self.save:
-            self.save_message('7s')
-            slow_db.to_csv('{}_7s.csv'.format(self.filter_o_n))
+        try:
+            slow_db = self.filter_detections(slow_db, 3)
+            if self.save:
+                self.save_message('7s')
+                slow_db.to_csv('{}_7s.csv'.format(self.filter_o_n))
+        except ValueError:
+            slow = False
 
         fast_db = full_db[full_db['PM'] > self.proper_motion_dects]
         fast_db = self.filter_detections(fast_db, 1)
@@ -114,7 +110,10 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
             self.save_message('7f')
             fast_db.to_csv('{}_7f.csv'.format(self.filter_o_n))
 
-        full_db = concat([slow_db, fast_db])
+        if slow:
+            full_db = concat([slow_db, fast_db])
+        else:
+            full_db = fast_db
 
         if self.save:
             self.save_message('8')
@@ -125,7 +124,6 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
         if self.save:
             self.save_message('9')
             full_db.to_csv('{}_9.csv'.format(self.filter_o_n))
-        """
 
     def save_message(self, order):
         """
@@ -137,18 +135,17 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
         # self.logger.debug('Dir: {}'.format(self.filter_dir))
         self.logger.debug('Name: {}_{}.csv'.format(self.filt_n, order))
 
-    def get_cat(self, catalog_n):
+    def get_cat(self, cat_n):
         """
 
-        :param catalog_n:
+        :param cat_n:
         :return: cat_file
         """
-        ccd, dither = get_dither(catalog_n)
-
-        cat_loc = '{}/{}/CCDs/{}/'.format(self.prfs_d['fits_dir'], self.mag,
-                                          self.sex_cf)
-        cat_name = 'mag_{}_CCD_{}_d{}.cat'.format(self.mag, ccd, dither)
-        cat_file = '{}{}'.format(cat_loc, cat_name)
+        cats = ['', '1-000000-0000000__20170630T011437.3Z',
+                '2-000000-0000000__20170630T011642.0Z',
+                '3-000000-0000000__20170630T011848.6Z',
+                '4-000000-0000000__20170630T012050.1Z']
+        cat_file = 'EUC_VIS_SWL-DET-00{}_00.00_copy.cat'.format(cats[cat_n])
 
         return cat_file
 
@@ -159,41 +156,28 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
         """
         self.logger.info("Filtering scamp's output")
 
-        filter_dir = '{}/{}/{}/{}'.format(self.prfs_d['filter_dir'], self.mag,
-                                          self.sex_cf, self.scmp_cf)
-        create_folder(self.logger, filter_dir)
+        create_folder(self.logger, self.filter_dir)
 
         self.logger.debug('Scamp configuration: {}'.format(self.scmp_cf))
         self.logger.debug('Sextractor configuration: {}'.format(self.sex_cf))
 
         # Full catalog name
-        # full_n_dir = '{}/{}/{}/{}/'.format(self.prfs_d['catalogs_dir'],
-        #                                    self.mag, self.sex_cf, self.scmp_cf)
-        # full_n_cat = 'full_{}_{}_1.cat'.format(self.scmp_cf, self.mag)
-        # full_n = '{}{}'.format(full_n_dir, full_n_cat)
-        # Filtered catalog name
-
-        full_n = '/home/user/Work/Projects/pipeline/results/full_1.cat'
+        full_n = '{}/full_1.cat'.format(self.filter_dir)
 
         self.logger.debug('Opens full catalog')
-        # self.logger.debug('Dir: {}'.format(full_n_dir))
-        # self.logger.debug('Name: {}'.format(full_n_cat))
+        self.logger.debug('Dir: {}'.format(self.filter_dir))
+        self.logger.debug('Name: full_1.cat')  # Be careful, hardcoded!
         full_cat = fits.open(full_n)
         full_db = Table(full_cat[2].data)
         self.logger.debug('Converts full Astropy catalog to Pandas format')
         full_db = full_db.to_pandas()
 
         # Getting merge catalog
-        # mrgd_n_dir = '{}/{}/{}/{}/'.format(self.prfs_d['catalogs_dir'],
-        #                                    self.mag, self.sex_cf, self.scmp_cf)
-        # mrgd_n_cat = 'merged_{}_{}_1.cat'.format(self.scmp_cf, self.mag)
-        # mrgd_n = '{}{}'.format(mrgd_n_dir, mrgd_n_cat)
-
-        mrgd_n = '/home/user/Work/Projects/pipeline/results/merged_1.cat'
+        mrgd_n = '{}/merged_1.cat'.format(self.filter_dir)
 
         self.logger.debug('Opens merged catalog')
-        # self.logger.debug('Dir: {}'.format(mrgd_n_dir))
-        # self.logger.debug('Name: {}'.format(mrgd_n_cat))
+        self.logger.debug('Dir: {}'.format(self.filter_dir))
+        self.logger.debug('Name: merged_1.cat')  # Be careful, hardcoded!
         merged_cat = fits.open(mrgd_n)
         self.logger.debug('Converts merged Astropy catalog to Pandas format')
         merged_db = Table(merged_cat[2].data)
@@ -205,12 +189,8 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
         full_db = self.filter_detections(full_db, 3)
 
         if self.save:
-            # self.save_message('1')
-            # full_db.to_csv('{}_1.csv'.format(self.filter_o_n))
-
-            first_test_loc = '/home/user/Work/Projects/pipeline/results/1.csv'
-            full_db.to_csv('{}'.format(first_test_loc))
-
+            self.save_message('1')
+            full_db.to_csv('{}_1.csv'.format(self.filter_o_n))
 
         return merged_db, full_db
 
@@ -225,11 +205,8 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
         self.logger.debug('Computes proper motion')
         full_db = pm_compute(self.logger, merged_db, full_db)
         if self.save:
-            # self.save_message('2')
-            # full_db.to_csv('{}_2.csv'.format(self.filter_o_n))
-
-            second_test_loc = '/home/user/Work/Projects/pipeline/results/2.csv'
-            full_db.to_csv('{}'.format(second_test_loc))
+            self.save_message('2')
+            full_db.to_csv('{}_2.csv'.format(self.filter_o_n))
 
     def choose_pipeline(self, pipeline):
         """
@@ -285,6 +262,7 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
 
         # Opens filtered file
         filter_cat = read_csv('{}_2.csv'.format(self.filter_o_n), index_col=0)
+
         # Gets unique sources from filtered file
         unique_sources = list(set(filter_cat['SOURCE_NUMBER'].tolist()))
         l_sourcs = len(unique_sources)  # Just to not break 79 characters
@@ -397,7 +375,9 @@ class ScampFilter:  # TODO Split scamp_filter method into single methods
                 cat_file = self.get_cat(catalog_n)
                 # self.logger.debug('opening CCD catalog {}'.format(cat_file))
 
-                ccd_cat = fits.open(cat_file)
+                cat_dir = '/media/sf_CarpetaCompartida/luca_data/VIS_SC3/CCDs/'
+                ccd_cat = fits.open('{}{}'.format(cat_dir, cat_file))
+
                 ccd_df = Table(ccd_cat[2].data)
                 # self.logger.debug('converting CCD catalog to Pandas format')
                 ccd_df = ccd_df.to_pandas()

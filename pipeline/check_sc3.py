@@ -18,8 +18,9 @@ from itertools import product
 from multiprocessing import Process
 from sys import argv
 
-from misc import setting_logger, extract_settings
-from misc import create_configurations, pipeline_help
+from images_management_sc3 import extract_images, extract_flags
+from misc import setting_logger, extract_settings_sc3
+from misc import create_configurations, get_fits_sc3
 from misc import create_sextractor_dict, create_scamp_dict
 from sextractor_aux import SextractorSC3
 from scamp_aux import Scamp
@@ -57,7 +58,7 @@ class Check:
 
         """
         self.logger = setting_logger()
-        self.prfs_d = extract_settings()
+        self.prfs_d = extract_settings_sc3()
 
         # Scamp configurations.
         mode = {'type': 'scamp'}
@@ -66,8 +67,13 @@ class Check:
         mode = {'type': 'sextractor'}
         self.sex_confs, sex_confs_n = create_configurations(mode)
 
+        print('dentro')
+
         if argv[1] == '-full':
             if not self.full_pipeline():
+                raise Exception
+        elif argv[1] == '-split':
+            if not self.split():
                 raise Exception
         elif argv[1] == '-sextractor':
             if not self.sextractor():
@@ -89,6 +95,21 @@ class Check:
             raise Exception
         if not self.filt():
             raise Exception
+
+        return True
+
+    def split(self):
+        """
+
+        :return:
+        """
+        print('haha')
+        fits_list = get_fits_sc3()
+
+        for fits_ in fits_list:
+            extract_images(fits_)
+            extract_flags(fits_)
+            print(' ')
 
         return True
 
@@ -129,16 +150,15 @@ class Check:
         mode = {'type': 'sextractor'}
         confs_sex, total_confs = create_configurations(mode)
 
-        for mag in self.prfs_d['mags']:
-            for idx_scmp, conf_scmp in enumerate(self.scamp_confs):
-                # todo - check if everything is alright
-                scmp_d, scmp_cf = scamp_f_name(idx_scmp)
-                for idx_sex, conf_sex in enumerate(confs_sex):
-                    analysis_d, len_dicts = create_sextractor_dict(idx_sex,
-                                                                   False)
-                    if not Scamp(self.logger, mag, scmp_d, scmp_cf,
-                                 analysis_d):
-                        raise Exception  # todo improve Exception
+        for idx_scmp, conf_scmp in enumerate(self.scamp_confs):
+            # todo - check if everything is alright
+            scmp_d, scmp_cf = scamp_f_name(idx_scmp)
+            for idx_sex, conf_sex in enumerate(confs_sex):
+                analysis_d, len_dicts = create_sextractor_dict(idx_sex,
+                                                               False)
+                if not Scamp(self.logger, scmp_d, scmp_cf,
+                             analysis_d):
+                    raise Exception  # todo improve Exception
 
         return True
 
@@ -150,30 +170,28 @@ class Check:
 
         confs = list(product(self.sex_confs, self.scamp_confs))
 
-        for mag in self.prfs_d['mags']:
-            for idx, conf_ in enumerate(confs):
-                filt_j = []
-                # while len(filt_j) < self.prfs_d['cores_number'] + 1:
-                while len(filt_j) < 1:
-                    sex_d = {'deblend_mincount': conf_[0][1],
-                             'analysis_thresh': conf_[0][2],
-                             'detect_thresh': conf_[0][2],
-                             'deblend_nthresh': conf_[0][0],
-                             'detect_minarea': conf_[0][3],
-                             'filter': 'models/gauss_2.0_5x5.conv'}
+        for idx, conf_ in enumerate(confs):
+            filt_j = []
+            # while len(filt_j) < self.prfs_d['cores_number'] + 1:
+            while len(filt_j) < 1:
+                sex_d = {'deblend_mincount': conf_[0][1],
+                         'analysis_thresh': conf_[0][2],
+                         'detect_thresh': conf_[0][2],
+                         'deblend_nthresh': conf_[0][0],
+                         'detect_minarea': conf_[0][3],
+                         'filter': 'models/gauss_2.0_5x5.conv'}
 
-                    scmp_cf = '{}_{}_{}_{}'.format(conf_[1][0], conf_[1][1],
-                                                   conf_[1][2], conf_[1][3])
-                    filt_p = Process(target=ScampFilter,
-                                     args=(self.logger, mag,
-                                           scmp_cf, sex_d,))
-                    filt_j.append(filt_p)
-                    filt_p.start()
+                scmp_cf = '{}_{}_{}_{}'.format(conf_[1][0], conf_[1][1],
+                                               conf_[1][2], conf_[1][3])
+                filt_p = Process(target=ScampFilter,
+                                 args=(self.logger, scmp_cf, sex_d,))
+                filt_j.append(filt_p)
+                filt_p.start()
 
+            active_filt = list([j.is_alive() for j in filt_j])
+            while True in active_filt:
                 active_filt = list([j.is_alive() for j in filt_j])
-                while True in active_filt:
-                    active_filt = list([j.is_alive() for j in filt_j])
-                    pass
+                pass
 
         return True
 

@@ -67,6 +67,22 @@ def get_fits(unique, mag):
         return fits_list
 
 
+def get_fits_sc3():
+    """
+
+    :return:
+    """
+    prfs_d = extract_settings_sc3()
+    fits_list = []
+
+    files = listdir('{}'.format(prfs_d['fits_dir']))
+    for file_ in files:
+        if file_[-5:] == '.fits':
+            fits_list.append('{}/{}'.format(prfs_d['fits_dir'], file_))
+
+    return fits_list
+
+
 def get_fits_d(mag_, dither):
     """
 
@@ -312,6 +328,63 @@ def confmap(config_, section):
             print("exception on %s!" % option)
             dict1[option] = None
     return dict1
+
+
+def extract_settings_sc3():
+    """ creates a dictionary with all the configuration parameters
+        at this moment configuration file location is fixed at main directory
+
+    @return prfs_d: a dictionary which contains all valuable data
+    """
+    cf = ConfigParser()
+    cf.read(".settings_SC3.ini")
+
+    prfs_d = {}
+    os_version = get_os()
+
+    if os_version == 'centos':
+        prfs_d['version'] = confmap(cf, "Version")['centos_version']
+    else:
+        raise BadSettings('Operative system not chosen')
+
+    if os_version == 'centos':
+        prfs_d['home'] = confmap(cf, "HomeDirs")['centos_home']
+    else:
+        raise BadSettings('Operative system not chosen')
+
+    prfs_d['fits_dir'] = confmap(cf, "ImagesDirs")['fits_dir']
+    prfs_d['fits_dir'] = '{}{}'.format(prfs_d['version'], prfs_d['fits_dir'])
+
+    prfs_d['time_1'] = confmap(cf, "ImagesTime")['time_1']
+    prfs_d['time_2'] = confmap(cf, "ImagesTime")['time_2']
+    prfs_d['time_3'] = confmap(cf, "ImagesTime")['time_3']
+    prfs_d['time_4'] = confmap(cf, "ImagesTime")['time_4']
+
+    outputdirs_list = ['conf_scamp', 'conf_sex', 'params_sex', 'neural_sex',
+                       'params_cat', 'logger_config']
+    for conf_ in outputdirs_list:
+        prfs_d[conf_] = confmap(cf, "ConfigDirs")[conf_]
+        prfs_d[conf_] = prfs_d['home'] + prfs_d[conf_]
+
+    prfs_d['detections'] = int(confmap(cf, "Misc")['detections'])
+    prfs_d['pm_low'] = float(confmap(cf, "Misc")['pm_low'])
+    prfs_d['pm_up'] = float(confmap(cf, "Misc")['pm_up'])
+    prfs_d['pm_sn'] = float(confmap(cf, "Misc")['pm_sn'])
+    pms = confmap(cf, "Misc")['pms']
+    pms = pms.replace(",", " ")
+    prfs_d['pms'] = [float(x) for x in pms.split()]
+    mags = confmap(cf, "Misc")['mags']
+    mags = mags.replace(",", " ")
+    prfs_d['mags'] = mags.split()
+    prfs_d['r_fit'] = confmap(cf, "Misc")['r_fit']
+    prfs_d['cores_number'] = confmap(cf, "Misc")['cores_number']
+    if prfs_d['cores_number'] == '0':
+        prfs_d['cores_number'] = int(str(cpu_count()))
+        # TODO should leave free at least 20% of processors
+    else:
+        prfs_d['cores_number'] = int(prfs_d['cores_number'])
+
+    return prfs_d
 
 
 def extract_settings():

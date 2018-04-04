@@ -303,7 +303,7 @@ def mag_iso_vs_b_image_plot():
     :return:
     """
 
-    data_dir = '/home/sgongora/Documents/CarpetaCompartida/full_stats_ssos'
+    data_dir = '/home/sgongora/Documents/CarpetaCompartida/full_stats_stars'
 
     b_image = []
     b_image_d = {}
@@ -407,6 +407,8 @@ def mag_iso_vs_b_image_plot():
                              27 * lower_fit[0] + lower_fit[1]])
         ax_1.set_ylabel('b_image')
         ax_1.set_xlabel('mag_iso')
+        ax_1.set_xlim(20, 28)
+        ax_1.set_ylim(0.5, 4.5)
         ax_1.grid(True)
 
         pdf.savefig()
