@@ -518,8 +518,8 @@ class TotalScampPerformanceStars:
         self.save = True
 
         self.data_d = self.creates_output_dict()
-        input_sources = self.check_pm_distribution()
-        self.get_data(input_sources)
+        input_sources_d = self.check_pm_distribution()
+        self.get_data(input_sources_d)
 
     def check_source(self, catalog_n, o_cat, i_alpha, i_delta):
         """
@@ -567,9 +567,27 @@ class TotalScampPerformanceStars:
                                                    self.mag)
             cat_name = '{}/Cat_{}_d{}'.format(cat_location, self.mag, dither)
             input_dict[dither] = '{}.dat'.format(cat_name)
-        input_dict = Create_regions(input_dict).check_ssos(self.mag, True)
+        input_ssos = Create_regions(input_dict).check_ssos(self.mag, True)
 
-        return input_dict
+        input_dict = {}
+        # Loops over the four dithers
+        for dither in range(1, 5, 1):
+            cat_location = '{}/{}/Catalogs'.format(self.prfs_d['fits_dir'],
+                                                   self.mag)
+            cat_name = '{}/Cat_{}_d{}'.format(cat_location, self.mag, dither)
+            input_dict[dither] = '{}.dat'.format(cat_name)
+        input_stars = Create_regions(input_dict).check_stars(self.mag, True)
+
+        input_dict = {}
+        # Loops over the four dithers
+        for dither in range(1, 5, 1):
+            cat_location = '{}/{}/Catalogs'.format(self.prfs_d['fits_dir'],
+                                                   self.mag)
+            cat_name = '{}/Cat_{}_d{}'.format(cat_location, self.mag, dither)
+            input_dict[dither] = '{}.dat'.format(cat_name)
+        input_galaxies = Create_regions(input_dict).check_galaxies(self.mag,
+                                                                   True)
+        return input_ssos, input_stars, input_galaxies
 
     def creates_input_df(self, input_dict):
         """ Creates an input dataframe from an input dictionary.
@@ -652,29 +670,29 @@ class TotalScampPerformanceStars:
             sso_d['output_pm'].append([])
             sso_d['median_flux_iso'].append([])
 
-        input_dict = self.creates_input_dict()
-        input_df = self.creates_input_df(input_dict)
+        input_ssos, input_stars, input_galaxies = self.creates_input_dict()
+        input_ssos_df = self.creates_input_df(input_ssos)
+        input_stars_df = self.creates_input_df(input_stars)
+        input_galaxies_df = self.creates_input_df(input_galaxies)
 
         # Open particular file!
         filter_cat = self.gets_filtered_catalog()
 
+        # SSOs stuff  todo get out...to long
         # Gets unique sources from input data
-        unique_sources = list(set(input_df['source'].tolist()))
-        input_sources = []
+        unique_sources = list(set(input_ssos_df['source'].tolist()))
+        ssos_sources = []
         sources_n = len(unique_sources)
-        self.logger.debug('Input sources to be analysed {}'.format(sources_n))
+        self.logger.debug('Input SSOs to be analysed {}'.format(sources_n))
         # Loops over input data (Luca's catalog)
         for idx_source, source_ in enumerate(unique_sources):
-            # print('source {}'.format(source_))
-            tmp_d = redo_tmp_d()
-            flag_sso = False
-            # i_pm = 0
+            self.logger.debug('SSO idx {} - Total {}'.format(idx_source,
+                                                             sources_n))
             # Gets associated data in input catalog
-            cat_df = input_df[input_df['source'].isin([source_])]
+            cat_df = input_ssos_df[input_ssos_df['source'].isin([source_])]
             # Iterate over each detection of each source
             for i, row in enumerate(cat_df.itertuples(), 1):
                 catalog_n = row.catalog
-                i_pm = row.pm_values
                 i_alpha = row.alpha_j2000
                 i_delta = row.delta_j2000
 
@@ -684,19 +702,81 @@ class TotalScampPerformanceStars:
 
                 if o_df.empty is not True and o_df['PM'].size == 1:
                     scmp_source = o_df['SOURCE_NUMBER'].iloc[0]
-                    input_sources.append(int(scmp_source))
+                    ssos_sources.append(int(scmp_source))
                 else:
                     pass
 
-        return list(set(input_sources))
+        # Stars stuff todo get out...too long
+        # Gets unique sources from input data
+        unique_sources = list(set(input_stars_df['source'].tolist()))
+        stars_sources = []
+        sources_n = len(unique_sources)
+        self.logger.debug('Input stars to be analysed {}'.format(sources_n))
+        # Loops over input data (Luca's catalog)
+        for idx_source, source_ in enumerate(unique_sources):
+            self.logger.debug('Star idx {} - Total {}'.format(idx_source,
+                                                              sources_n))
+            # Gets associated data in input catalog
+            cat_df = input_stars_df[input_stars_df['source'].isin([source_])]
+            # Iterate over each detection of each source
+            for i, row in enumerate(cat_df.itertuples(), 1):
+                catalog_n = row.catalog
+                i_alpha = row.alpha_j2000
+                i_delta = row.delta_j2000
 
-    def get_data(self, input_sources):
+                # Checks if there is a source closed to input one
+                o_df = self.check_source(catalog_n, filter_cat,
+                                         i_alpha, i_delta)
+
+                if o_df.empty is not True and o_df['PM'].size == 1:
+                    scmp_source = o_df['SOURCE_NUMBER'].iloc[0]
+                    stars_sources.append(int(scmp_source))
+                else:
+                    pass
+
+        # Galaxies stuff todo get out...too long
+        # Gets unique sources from input data
+        unique_sources = list(set(input_galaxies_df['source'].tolist()))
+        galaxies_sources = []
+        sources_n = len(unique_sources)
+        self.logger.debug('Input galaxies to be analysed {}'.format(sources_n))
+        # Loops over input data (Luca's catalog)
+        for idx_source, source_ in enumerate(unique_sources):
+            self.logger.debug('Galaxy idx {} - Total {}'.format(idx_source,
+                                                                sources_n))
+            # Gets associated data in input catalog
+            cat_df = input_galaxies_df[input_galaxies_df['source'].isin([source_])]
+            # Iterate over each detection of each source
+            for i, row in enumerate(cat_df.itertuples(), 1):
+                catalog_n = row.catalog
+                i_alpha = row.alpha_j2000
+                i_delta = row.delta_j2000
+
+                # Checks if there is a source closed to input one
+                o_df = self.check_source(catalog_n, filter_cat,
+                                         i_alpha, i_delta)
+
+                if o_df.empty is not True and o_df['PM'].size == 1:
+                    scmp_source = o_df['SOURCE_NUMBER'].iloc[0]
+                    galaxies_sources.append(int(scmp_source))
+                else:
+                    pass
+
+        input_sources_d = {'SSOs': list(set(ssos_sources)),
+                           'stars': list(set(stars_sources)),
+                           'galaxies': list(set(galaxies_sources))}
+
+        return list(set(input_sources_d))
+
+    def get_data(self, input_sources_d):
         """
 
-        :param input_sources:
+        :param input_sources_d:
         :return:
         """
+        pms = [0, 0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1.0, 3.0, 10.0, 30.0]
 
+        # Stars stuff
         star_d = {'catalog_n': [], 'median_a_image': [],
                   'median_erra_image': [], 'median_b_image': [],
                   'median_errb_image': [], 'median_class_star': [],
@@ -716,7 +796,8 @@ class TotalScampPerformanceStars:
             star_d['output_pm'].append([])
             star_d['median_flux_iso'].append([])
         o_df = self.gets_filtered_catalog()
-        stars_df = o_df[~o_df['SOURCE_NUMBER'].isin(input_sources)]
+        stars_df = o_df[~o_df['SOURCE_NUMBER'].isin(input_sources_d['SSOs'])]
+        stars_df = stars_df[~stars_df['SOURCE_NUMBER'].isin(input_sources_d['galaxies'])]
 
         # Gets unique sources from input data
         unique_sources = list(set(stars_df['SOURCE_NUMBER'].tolist()))
@@ -726,21 +807,17 @@ class TotalScampPerformanceStars:
         unique_sources = [value for value in unique_sources if value != nan]
         sources_n = len(unique_sources)
 
-        self.logger.debug('Fixed sources to be analysed {}'.format(sources_n))
+        self.logger.debug('Fixed stars to be analysed {}'.format(sources_n))
         # Loops over input data (Luca's catalog)
         for idx_source, source_ in enumerate(unique_sources):
-            # print('source {}'.format(source_))
-            tmp_d = redo_tmp_d()
-            flag_sso = False
-            # i_pm = 0
-            print(idx_source)
+            self.logger.debug('Star stats {} - Total {}'.format(idx_source,
+                                                                sources_n))
             # Gets associated data in input catalog
             cat_df = stars_df[stars_df['SOURCE_NUMBER'].isin([source_])]
 
             o_pm = cat_df['PM'].iloc[0]
             o_pm_norm = self.get_norm_speed(o_pm)
 
-            pms = [0, 0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1.0, 3.0, 10.0, 30.0]
             idx = pms.index(o_pm_norm)
 
             median_mag_iso = cat_df['MEDIAN_MAG_ISO'].iloc[0]
@@ -772,18 +849,109 @@ class TotalScampPerformanceStars:
         for star_key in keys:
             df2_keys = [0, 0.001, 0.003, 0.01, 0.03,
                         0.1, 0.3, 1, 3, 10, 30]
-            sso_d2 = {0: [], 0.001: [], 0.003: [], 0.01: [], 0.03: [],
-                      0.1: [], 0.3: [], 1: [], 3: [], 10: [], 30: []}
+            star_d2 = {0: [], 0.001: [], 0.003: [], 0.01: [], 0.03: [],
+                       0.1: [], 0.3: [], 1: [], 3: [], 10: [], 30: []}
 
-            sso_df = DataFrame(star_d[star_key])
-            for column_ in sso_df.columns:
-                for idx, value_ in enumerate(sso_df[column_]):
-                    sso_d2[df2_keys[idx]].append(value_)
+            star_df = DataFrame(star_d[star_key])
+            for column_ in star_df.columns:
+                for idx, value_ in enumerate(star_df[column_]):
+                    star_d2[df2_keys[idx]].append(value_)
 
-            for key_ in sso_d2.keys():
-                sso_d2[key_].append('mean {}'.format(nanmean(sso_d2[key_])))
+            for key_ in star_d2.keys():
+                star_d2[key_].append('mean {}'.format(nanmean(star_d2[key_])))
 
-            sso_df2 = DataFrame(sso_d2)
-            sso_df2_filename = 'f_{}_{}_{}.csv'.format(self.mag, star_key,
+            star_df2 = DataFrame(star_d2)
+            star_df2_filename = 'f_{}_{}_{}.csv'.format(self.mag, star_key,
                                                        self.filter_p_number)
-            sso_df2.to_csv('full_stats_stars/{}'.format(sso_df2_filename))
+            star_df2.to_csv('full_stats_stars/{}'.format(star_df2_filename))
+
+        # Galaxies stuff
+        galaxy_d = {'catalog_n': [], 'median_a_image': [],
+                    'median_erra_image': [], 'median_b_image': [],
+                    'median_errb_image': [], 'median_class_star': [],
+                    'ellipticity': [], 'median_mag_iso': [],
+                    'median_magerr_iso': [], 'output_pm': [],
+                    'median_flux_iso': []}
+        for idx in range(0, len(self.prfs_d['pms']) + 1, 1):
+            galaxy_d['median_mag_iso'].append([])
+            galaxy_d['median_magerr_iso'].append([])
+            galaxy_d['catalog_n'].append([])
+            galaxy_d['median_a_image'].append([])
+            galaxy_d['median_erra_image'].append([])
+            galaxy_d['median_b_image'].append([])
+            galaxy_d['median_errb_image'].append([])
+            galaxy_d['median_class_star'].append([])
+            galaxy_d['ellipticity'].append([])
+            galaxy_d['output_pm'].append([])
+            galaxy_d['median_flux_iso'].append([])
+        o_df = self.gets_filtered_catalog()
+        galaxies_df = o_df[~o_df['SOURCE_NUMBER'].isin(input_sources_d['SSOs'])]
+        galaxies_df = galaxies_df[~galaxies_df['SOURCE_NUMBER'].isin(input_sources_d['stars'])]
+
+        # Gets unique sources from input data
+        unique_sources = list(set(galaxies_df['SOURCE_NUMBER'].tolist()))
+        unique_sources = array(unique_sources)
+        unique_sources = unique_sources[~isnan(unique_sources)]
+
+        unique_sources = [value for value in unique_sources if value != nan]
+        sources_n = len(unique_sources)
+
+        # Organiza los objetos por PM
+        self.logger.debug('Fixed galaxies to be analysed {}'.format(sources_n))
+        # Loops over input data (Luca's catalog)
+        for idx_source, source_ in enumerate(unique_sources):
+            self.logger.debug('Galaxy stats {} - Total {}'.format(idx_source,
+                                                                  sources_n))
+            # Gets associated data in input catalog
+            cat_df = galaxies_df[galaxies_df['SOURCE_NUMBER'].isin([source_])]
+
+            o_pm = cat_df['PM'].iloc[0]
+            o_pm_norm = self.get_norm_speed(o_pm)
+
+            idx = pms.index(o_pm_norm)
+
+            median_mag_iso = cat_df['MEDIAN_MAG_ISO'].iloc[0]
+            galaxy_d['median_mag_iso'][idx].append(median_mag_iso)
+            median_magerr_iso = cat_df['MEDIAN_MAGERR_ISO'].iloc[0]
+            galaxy_d['median_magerr_iso'][idx].append(median_magerr_iso)
+            median_a_image_ = cat_df['MEDIAN_A_IMAGE'].iloc[0]
+            galaxy_d['median_a_image'][idx].append(median_a_image_)
+            median_erra_image_ = cat_df['MEDIAN_ERRA_IMAGE'].iloc[0]
+            galaxy_d['median_erra_image'][idx].append(median_erra_image_)
+            median_b_image_ = cat_df['MEDIAN_B_IMAGE'].iloc[0]
+            galaxy_d['median_b_image'][idx].append(median_b_image_)
+            median_errb_image_ = cat_df['MEDIAN_ERRB_IMAGE'].iloc[0]
+            galaxy_d['median_errb_image'][idx].append(median_errb_image_)
+            median_class_star_ = cat_df['MEDIAN_CLASS_STAR'].iloc[0]
+            galaxy_d['median_class_star'][idx].append(median_class_star_)
+            ellipticity_ = cat_df['ELLIPTICITY'].iloc[0]
+            galaxy_d['ellipticity'][idx].append(ellipticity_)
+            output_pm_ = o_pm  # really needed?
+            galaxy_d['output_pm'][idx].append(output_pm_)
+            median_flux_iso_ = cat_df['MEDIAN_FLUX_ISO'].iloc[0]
+            galaxy_d['median_flux_iso'][idx].append(median_flux_iso_)
+
+        keys = ['median_mag_iso', 'median_magerr_iso', 'median_a_image',
+                'median_erra_image', 'median_b_image', 'median_errb_image',
+                'median_flux_iso', 'median_class_star', 'ellipticity',
+                'output_pm']
+
+        for galaxy_key in keys:
+            df2_keys = [0, 0.001, 0.003, 0.01, 0.03,
+                        0.1, 0.3, 1, 3, 10, 30]
+            galaxy_d2 = {0: [], 0.001: [], 0.003: [], 0.01: [], 0.03: [],
+                         0.1: [], 0.3: [], 1: [], 3: [], 10: [], 30: []}
+
+            galaxy_df = DataFrame(galaxy_d[galaxy_key])
+            for column_ in galaxy_df.columns:
+                for idx, value_ in enumerate(galaxy_df[column_]):
+                    galaxy_d2[df2_keys[idx]].append(value_)
+
+            for key_ in galaxy_d2.keys():
+                galaxy_d2[key_].append('mean {}'.format(nanmean(galaxy_d2[key_])))
+
+            galaxy_df2 = DataFrame(galaxy_d2)
+            galaxy_df2_filename = 'f_{}_{}_{}.csv'.format(self.mag, galaxy_key,
+                                                          self.filter_p_number)
+            galaxy_df2.to_csv('full_stats_galaxies/{}'.format(galaxy_df2_filename))
+

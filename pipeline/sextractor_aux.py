@@ -220,8 +220,10 @@ class Sextractor:
 
         cmd_3 = s_1 + s_2 + s_3 + s_4 + s_5 + s_6 + s_7 + s_8 + s_9 + s_10
 
-        sextractor_p = Popen(cmd_3, shell=True)
-        sextractor_p.wait()
+        print(cmd_3)
+
+        # sextractor_p = Popen(cmd_3, shell=True)
+        # sextractor_p.wait()
 
         return True
 

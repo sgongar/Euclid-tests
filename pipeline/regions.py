@@ -142,6 +142,8 @@ class Create_regions:
         :return:
         """
         input_d = self.input_catalogue
+        print(input_d)
+        print(input_d.keys())
 
         for dither_ in input_d.keys():
             catalog = genfromtxt(input_d[dither_])
