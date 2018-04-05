@@ -15,6 +15,7 @@ pipeline/.venv/*
 pipeline/swarp.xml
 
 ### Test reports ###
+pipeline/*.pdf
 pipeline/report*.pdf
 pipeline/reports/*
 
