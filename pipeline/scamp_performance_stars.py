@@ -766,7 +766,7 @@ class TotalScampPerformanceStars:
                            'stars': list(set(stars_sources)),
                            'galaxies': list(set(galaxies_sources))}
 
-        return list(set(input_sources_d))
+        return input_sources_d
 
     def get_data(self, input_sources_d):
         """

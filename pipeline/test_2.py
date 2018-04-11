@@ -97,14 +97,11 @@ def f(b, x):
     return b[0] * x + b[1]
 
 
-def a_image_vs_b_image_plot():
+def a_image_vs_b_image_plot(data_dir):
     """
 
     :return:
     """
-
-    data_dir = '/home/sgongora/Documents/CarpetaCompartida/full_stats_ssos'
-
     b_image = []
     b_image_d = {}
     errb_image = []
@@ -302,116 +299,118 @@ def mag_iso_vs_b_image_plot():
 
     :return:
     """
+    dir_ = '/home/sgongora/Documents/CarpetaCompartida/full_stats_'
+    data_dirs = ['{}ssos'.format(dir_), '{}galaxies'.format(dir_),
+                 '{}stars'.format(dir_)]
 
-    data_dir = '/home/sgongora/Documents/CarpetaCompartida/full_stats_stars'
-
-    b_image = []
-    b_image_d = {}
-    errb_image = []
-    mag_iso = []
-    mag_iso_d = {}
-    magerr_iso = []
-
-    # reads b_image
-    for mag_ in ['20-21', '21-22', '22-23', '23-24', '24-25', '25-26', '26-27']:
-        b_image_d[mag_] = []
-        mag_iso_d[mag_] = []
-
-        b_image_df = read_csv(
-            '{}/f_{}_median_b_image_3.csv'.format(data_dir, mag_),
-            index_col=0)
-        for column_ in b_image_df.columns[:-3]:
-            list_to_append = b_image_df[column_].tolist()
-            list_to_append = [x for x in list_to_append if type(x) != float]
-            list_to_append = [x for x in list_to_append if 'mean' not in x]
-            list_to_append = [float(x) for x in list_to_append]
-            for element_ in list_to_append:
-                b_image.append(element_)
-                b_image_d[mag_].append(element_)
-
-        mag_iso_df = read_csv(
-            '{}/f_{}_median_mag_iso_3.csv'.format(data_dir, mag_),
-            index_col=0)
-        for column_ in mag_iso_df.columns[:-3]:
-            list_to_append = mag_iso_df[column_].tolist()
-            list_to_append = [x for x in list_to_append if type(x) != float]
-            list_to_append = [x for x in list_to_append if 'mean' not in x]
-            list_to_append = [float(x) for x in list_to_append]
-            for element_ in list_to_append:
-                mag_iso.append(element_)
-                mag_iso_d[mag_].append(element_)
-
-        errb_image_df = read_csv(
-            '{}/f_{}_median_errb_image_3.csv'.format(data_dir,
-                                                     mag_),
-            index_col=0)
-        for column_ in errb_image_df.columns[:-3]:
-            list_to_append = errb_image_df[column_].tolist()
-            list_to_append = [x for x in list_to_append if type(x) != float]
-            list_to_append = [x for x in list_to_append if 'mean' not in x]
-            list_to_append = [float(x) for x in list_to_append]
-            for element_ in list_to_append:
-                errb_image.append(element_)
-
-        magerr_iso_df = read_csv(
-            '{}/f_{}_median_magerr_iso_3.csv'.format(data_dir,
-                                                     mag_),
-            index_col=0)
-        for column_ in magerr_iso_df.columns[:-3]:
-            list_to_append = magerr_iso_df[column_].tolist()
-            list_to_append = [x for x in list_to_append if type(x) != float]
-            list_to_append = [x for x in list_to_append if 'mean' not in x]
-            list_to_append = [float(x) for x in list_to_append]
-            for element_ in list_to_append:
-                magerr_iso.append(element_)
-
-    test_fit = polyfit(mag_iso, b_image, 2)
-
-    linear = Model(f)
-    mydata = RealData(mag_iso, b_image, sx=magerr_iso, sy=errb_image)
-
-    myodr = ODR(mydata, linear, beta0=[test_fit[0], test_fit[1]])
-
-    myoutput = myodr.run()
-    # myoutput.pprint()
-
-    lower, upper, x = predband(array(mag_iso), array(b_image),
-                               myoutput.beta[0], myoutput.beta[1])
-    fit = myoutput.beta
-
-    upper_fit = polyfit(x, upper, 1)
-    lower_fit = polyfit(x, lower, 1)
-
-    print(fit)
-    print(lower_fit)
-    print(upper_fit)
-
-    # reads mag_iso
-    plot_size = [16.53, 11.69]
-    plot_dpi = 100
+    colors = ['bs', 'rs', 'gs']
+    names = ['SSOs', 'Galaxies', 'Stars']
 
     with PdfPages('mag_iso_vs_b_image.pdf') as pdf:
-        fig = pyplot.figure(figsize=plot_size, dpi=plot_dpi)
-        ax_1 = fig.add_subplot(1, 1, 1)
-        ax_1.plot(mag_iso, b_image, 'bs')
-        colors = ['gs', 'rs', 'cs', 'ms', 'ys', 'ks', 'ws']
-        for idx_color, mag_ in enumerate(['20-21', '21-22', '22-23', '23-24',
-                                          '24-25', '25-26', '26-27']):
-            ax_1.plot(mag_iso_d[mag_], b_image_d[mag_],
-                      colors[idx_color])
-        ax_1.plot([19, 27], [19 * myoutput.beta[0] + myoutput.beta[1],
-                             27 * myoutput.beta[0] + myoutput.beta[1]])
-        ax_1.plot([19, 27], [19 * upper_fit[0] + upper_fit[1],
-                             27 * upper_fit[0] + upper_fit[1]])
-        ax_1.plot([19, 27], [19 * lower_fit[0] + lower_fit[1],
-                             27 * lower_fit[0] + lower_fit[1]])
-        ax_1.set_ylabel('b_image')
-        ax_1.set_xlabel('mag_iso')
-        ax_1.set_xlim(20, 28)
-        ax_1.set_ylim(0.5, 4.5)
-        ax_1.grid(True)
+        for idx, data_dir in enumerate(data_dirs):
+            # reads b_image
+            b_image = []  # Total b_image values
+            b_image_d = {}
+            errb_image = []
+            mag_iso = []  # Total mag_iso values
+            mag_iso_d = {}
+            magerr_iso = []
 
-        pdf.savefig()
+            for mag_ in ['20-21', '21-22', '22-23', '23-24', '24-25', '25-26', '26-27']:
+                b_image_d[mag_] = []
+                mag_iso_d[mag_] = []
+
+                b_image_df = read_csv(
+                    '{}/f_{}_median_b_image_3.csv'.format(data_dir, mag_),
+                    index_col=0)
+                for column_ in b_image_df.columns[:-3]:
+                    list_to_append = b_image_df[column_].tolist()
+                    list_to_append = [x for x in list_to_append if type(x) != float]
+                    list_to_append = [x for x in list_to_append if 'mean' not in x]
+                    list_to_append = [float(x) for x in list_to_append]
+                    for element_ in list_to_append:
+                        b_image.append(element_)
+                        b_image_d[mag_].append(element_)
+
+                mag_iso_df = read_csv(
+                    '{}/f_{}_median_mag_iso_3.csv'.format(data_dir, mag_),
+                    index_col=0)
+                for column_ in mag_iso_df.columns[:-3]:
+                    list_to_append = mag_iso_df[column_].tolist()
+                    list_to_append = [x for x in list_to_append if type(x) != float]
+                    list_to_append = [x for x in list_to_append if 'mean' not in x]
+                    list_to_append = [float(x) for x in list_to_append]
+                    for element_ in list_to_append:
+                        mag_iso.append(element_)
+                        mag_iso_d[mag_].append(element_)
+
+                errb_image_df = read_csv(
+                    '{}/f_{}_median_errb_image_3.csv'.format(data_dir,
+                                                             mag_),
+                    index_col=0)
+                for column_ in errb_image_df.columns[:-3]:
+                    list_to_append = errb_image_df[column_].tolist()
+                    list_to_append = [x for x in list_to_append if type(x) != float]
+                    list_to_append = [x for x in list_to_append if 'mean' not in x]
+                    list_to_append = [float(x) for x in list_to_append]
+                    for element_ in list_to_append:
+                        errb_image.append(element_)
+
+                magerr_iso_df = read_csv(
+                    '{}/f_{}_median_magerr_iso_3.csv'.format(data_dir,
+                                                             mag_),
+                    index_col=0)
+                for column_ in magerr_iso_df.columns[:-3]:
+                    list_to_append = magerr_iso_df[column_].tolist()
+                    list_to_append = [x for x in list_to_append if type(x) != float]
+                    list_to_append = [x for x in list_to_append if 'mean' not in x]
+                    list_to_append = [float(x) for x in list_to_append]
+                    for element_ in list_to_append:
+                        magerr_iso.append(element_)
+            if idx == 0:
+                test_fit = polyfit(mag_iso, b_image, 2)
+
+                linear = Model(f)
+                mydata = RealData(mag_iso, b_image, sx=magerr_iso, sy=errb_image)
+
+                myodr = ODR(mydata, linear, beta0=[test_fit[0], test_fit[1]])
+
+                myoutput = myodr.run()
+                # myoutput.pprint()
+
+                lower, upper, x = predband(array(mag_iso), array(b_image),
+                                           myoutput.beta[0], myoutput.beta[1])
+                fit = myoutput.beta
+
+                upper_fit = polyfit(x, upper, 1)
+                lower_fit = polyfit(x, lower, 1)
+
+            plot_size = [16.53, 11.69]
+            plot_dpi = 100
+            fig = pyplot.figure(figsize=plot_size, dpi=plot_dpi)
+            ax_1 = fig.add_subplot(1, 1, 1)
+
+            """
+            for idx_color, mag_ in enumerate(['20-21', '21-22', '22-23', '23-24',
+                                              '24-25', '25-26', '26-27']):
+                ax_1.plot(mag_iso_d[mag_], b_image_d[mag_],
+                          colors[idx_color])
+            """
+            ax_1.plot(mag_iso, b_image, colors[idx])
+            ax_1.plot([19, 27], [19 * myoutput.beta[0] + myoutput.beta[1],
+                                 27 * myoutput.beta[0] + myoutput.beta[1]])
+            ax_1.plot([19, 27], [19 * upper_fit[0] + upper_fit[1],
+                                 27 * upper_fit[0] + upper_fit[1]])
+            ax_1.plot([19, 27], [19 * lower_fit[0] + lower_fit[1],
+                                 27 * lower_fit[0] + lower_fit[1]])
+            ax_1.set_ylabel('b_image')
+            ax_1.set_xlabel('mag_iso')
+            ax_1.set_xlim(20, 28)
+            ax_1.set_ylim(0.5, 4.5)
+            ax_1.set_title('{}'.format(names[idx]))
+            ax_1.grid(True)
+
+            pdf.savefig()
 
     """
     fig = pyplot.figure(figsize=plot_size, dpi=plot_dpi)
@@ -433,14 +432,11 @@ def mag_iso_vs_b_image_plot():
     return fit, lower_fit, upper_fit, b_image, mag_iso
 
 
-def mag_iso_vs_a_image_plot():
+def mag_iso_vs_a_image_plot(data_dir):
     """
 
     :return:
     """
-
-    data_dir = '/home/sgongora/Documents/CarpetaCompartida/full_stats_ssos'
-
     a_image = []
     erra_image = []
     mag_iso = []
@@ -530,14 +526,13 @@ def mag_iso_vs_a_image_plot():
     return fit, lower_fit, upper_fit, a_image, mag_iso
 
 
-def mag_iso_vs_flux_iso_plot(pdf):
+def mag_iso_vs_flux_iso_plot(pdf, data_dir):
     """
 
     :param pdf:
+    :param data_dir:
     :return:
     """
-    data_dir = '/home/sgongora/Documents/CarpetaCompartida/full_stats_ssos'
-
     flux_iso = []
     flux_iso_d = {}
     mag_iso = []
@@ -636,9 +631,11 @@ if __name__ == "__main__":
     b_image = True
     a_image_vs_b_image = False
 
+    data_dir = '/home/sgongora/Documents/CarpetaCompartida/full_stats_galaxies'
+
     if flux:
         (fit, lower_fit, upper_fit,
-         flux_iso, mag_iso) = mag_iso_vs_flux_iso_plot(pdf=True)
+         flux_iso, mag_iso) = mag_iso_vs_flux_iso_plot(True, data_dir)
 
         idx_in = 0
         idx_out = 0
@@ -659,7 +656,7 @@ if __name__ == "__main__":
 
     elif a_image:
         (fit, lower_fit, upper_fit,
-         b_image, mag_iso) = mag_iso_vs_a_image_plot()
+         b_image, mag_iso) = mag_iso_vs_a_image_plot(data_dir)
 
         idx_in = 0
         idx_out = 0
@@ -701,7 +698,7 @@ if __name__ == "__main__":
 
     elif a_image_vs_b_image:
         (fit, lower_fit, upper_fit,
-         b_image, a_image) = a_image_vs_b_image_plot()
+         b_image, a_image) = a_image_vs_b_image_plot(data_dir)
 
         idx_in = 0
         idx_out = 0

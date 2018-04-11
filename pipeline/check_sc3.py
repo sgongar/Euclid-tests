@@ -67,10 +67,11 @@ class Check:
         mode = {'type': 'sextractor'}
         self.sex_confs, sex_confs_n = create_configurations(mode)
 
-        print('dentro')
-
         if argv[1] == '-full':
             if not self.full_pipeline():
+                raise Exception
+        if argv[1] == '-catalog':
+            if not self.catalog():
                 raise Exception
         elif argv[1] == '-split':
             if not self.split():
@@ -98,18 +99,28 @@ class Check:
 
         return True
 
+    def catalog(self):
+        """
+
+        :return:
+        """
+        # Opens input_catalog
+
+        # Gets simplified header
+        # Merges header and data
+        # Saves file
+
     def split(self):
         """
 
         :return:
         """
-        print('haha')
         fits_list = get_fits_sc3()
 
         for fits_ in fits_list:
             extract_images(fits_)
             extract_flags(fits_)
-            print(' ')
+            # extract_rms (?)
 
         return True
 
