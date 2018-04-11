@@ -51,49 +51,49 @@ class SextractorSC3:
         """
         logger.info('Starting sextractor process for fits images')
 
-        analysis_dir = '/media/sf_CarpetaCompartida/luca_data/VIS_SC3'
+        # TODO hardcoded!
+        dither_names = ['EUC_VIS_SWL-DET-001-000000-0000000__20170630T011437.3Z_00.00_',
+                        'EUC_VIS_SWL-DET-002-000000-0000000__20170630T011642.0Z_00.00_',
+                        'EUC_VIS_SWL-DET-003-000000-0000000__20170630T011848.6Z_00.00_',
+                        'EUC_VIS_SWL-DET-004-000000-0000000__20170630T012050.1Z_00.00_']
+        analysis_dir = '/pcdisk/holly/sgongora/Dev'  # TODO hardcoded!
+        cores_number = 24
 
-        folder_n = '{}_{}_{}_{}_{}'.format(analysis_d['deblend_nthresh'],
-                                           analysis_d['analysis_thresh'],
-                                           analysis_d['detect_thresh'],
-                                           analysis_d['deblend_mincount'],
-                                           analysis_d['detect_minarea'])
+        fits_files = []
+        # flag_files = []
+        active_sex = []
+        for idx in range(0, 36, 1):
+            for dither in dither_names:
+                fits_files.append('{}{}.fits'.format(dither, idx))
+                # flag_files.append('{}f{}.fits'.format(dither, idx))
 
-        logger.info('sextractor configuration {}'.format(folder_n))
+        for image_idx in range(0, len(fits_files), cores_number):
+            try:
+                sex_j = []
+                for proc in range(0, cores_number, 1):
+                    idx = image_idx + proc  # index
 
-        for mag_ in self.prfs_d['mags']:
-            fits_files = get_fits(unique=False, mag=mag_)
-            print(fits_files)
-            for image_idx in range(0, len(fits_files),
-                                   self.prfs_d['cores_number']):
-                try:
-                    sex_j = []
-                    for proc in range(0, self.prfs_d['cores_number'], 1):
-                        idx = image_idx + proc  # index
+                    sex_file = fits_files[idx]
+                    # sex_flag = flag_files[idx]
+                    folder_loc = '{}/CCDs'.format(analysis_dir)
+                    cat_name = '{}.cat'.format(fits_files[idx][:-5])
 
-                        sex_file = fits_files[idx]
-                        folder_loc = '{}/CCDs/{}'.format(analysis_dir, folder_n)
-                        create_folder(logger, folder_loc)
-                        cat_name = '{}.cat'.format(fits_files[idx][:-5])
+                    # sextractor input and output
+                    sex_input = '{}/{}'.format(folder_loc, sex_file)
+                    sex_output = '{}/{}'.format(folder_loc, cat_name)
+                    # sex_flag = '{}/{}'.format(folder_loc, sex_flag)
 
-                        # sextractor input and output
-                        sex_input = '{}/CCDs/{}'.format(analysis_dir, sex_file)
-                        sex_output = '{}/{}'.format(folder_loc, cat_name)
-
-                        sex_p = Process(target=self.sextractor_thread,
-                                        args=(sex_input, sex_output,
-                                              analysis_d,))
-                        sex_j.append(sex_p)
-                        sex_p.start()
+                    sex_p = Process(target=self.sextractor_thread,
+                                    args=(sex_input, sex_output, analysis_d))
+                    sex_j.append(sex_p)
+                    sex_p.start()
 
                     active_sex = list([job.is_alive() for job in sex_j])
-                    while True in active_sex:
-                        active_sex = list([job.is_alive() for job in sex_j])
-                        pass
-                except IndexError:
-                    logger.debug('Extraction finished')
-
-        logger.info('Extraction process of fits images finished')
+                while True in active_sex:
+                    active_sex = list([job.is_alive() for job in sex_j])
+                    pass
+            except IndexError:
+                print('Extraction finished')
 
         return True
 
@@ -121,10 +121,8 @@ class SextractorSC3:
 
         cmd_3 = s_1 + s_2 + s_3 + s_4 + s_5 + s_6 + s_7 + s_8 + s_9 + s_10
 
-        print(cmd_3)
-
-        # sextractor_p = Popen(cmd_3, shell=True)
-        # sextractor_p.wait()
+        sextractor_p = Popen(cmd_3, shell=True)
+        sextractor_p.wait()
 
         return True
 
