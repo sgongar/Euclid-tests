@@ -25,6 +25,7 @@ from misc import create_sextractor_dict, create_scamp_dict
 from sextractor_aux import SextractorSC3
 from scamp_aux import Scamp
 from scamp_filter_sc3 import ScampFilter
+from cosmic_sc3 import cosmic
 
 __author__ = "Samuel Góngora García"
 __copyright__ = "Copyright 2017"
