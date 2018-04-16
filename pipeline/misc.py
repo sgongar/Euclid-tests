@@ -153,6 +153,8 @@ def get_os():
         os_system = 'ubuntu'
     elif 'fedora-26' in platform():
         os_system = 'fedora'
+    elif 'fedora-19' in platform():
+        os_system = 'CAB'
     elif 'centos' in platform():
         os_system = 'centos'
     else:
@@ -344,11 +346,15 @@ def extract_settings_sc3():
 
     if os_version == 'centos':
         prfs_d['version'] = confmap(cf, "Version")['centos_version']
+    elif os_version == 'cab':
+        prfs_d['version'] = confmap(cf, "Version")['cab_version']
     else:
         raise BadSettings('Operative system not chosen')
 
     if os_version == 'centos':
         prfs_d['home'] = confmap(cf, "HomeDirs")['centos_home']
+    elif os_version == 'cab':
+        prfs_d['home'] = confmap(cf, "HomeDirs")['cab_home']
     else:
         raise BadSettings('Operative system not chosen')
 
@@ -373,9 +379,6 @@ def extract_settings_sc3():
     pms = confmap(cf, "Misc")['pms']
     pms = pms.replace(",", " ")
     prfs_d['pms'] = [float(x) for x in pms.split()]
-    mags = confmap(cf, "Misc")['mags']
-    mags = mags.replace(",", " ")
-    prfs_d['mags'] = mags.split()
     prfs_d['r_fit'] = confmap(cf, "Misc")['r_fit']
     prfs_d['cores_number'] = confmap(cf, "Misc")['cores_number']
     if prfs_d['cores_number'] == '0':

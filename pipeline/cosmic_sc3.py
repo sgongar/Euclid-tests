@@ -4,7 +4,8 @@
 """Python script for cosmic rays removal process
 
 Versions:
-- 0.1
+- 0.1 Initial release
+- 0.2 Move method
 
 Todo:
     * Improve log messages
@@ -12,56 +13,63 @@ Todo:
 """
 
 from os import listdir
+
 from astropy.io import fits
 from astroscrappy import detect_cosmics
 from multiprocessing import Process
 
-
-def cosmic():
-    fits_dir = '/pcdisk/holly/sgongora/Dev/CCDs'
-    output_dir = '/pcdisk/holly/sgongora/Dev/CCDs_filt'
-    cores_number = 8
-
-    active_cosmic = []
-    fits_files = listdir(fits_dir)
-
-    for cosmic_idx in range(0, len(fits_files), cores_number):
-        try:
-            cosmic_j = []
-            for proc in range(0, cores_number, 1):
-                idx = cosmic_idx + proc  # index
-                print(idx, len(fits_files))
-                fits_file = fits_files[idx]
-                cosmic_p = Process(target=cosmic_thread,
-                                   args=(fits_dir, output_dir, fits_file,))
-                cosmic_j.append(cosmic_p)
-                cosmic_p.start()
-
-                active_cosmic = list([job.is_alive() for job in cosmic_j])
-            while True in active_cosmic:
-                active_cosmic = list([job.is_alive() for job in cosmic_j])
-                pass
-        except IndexError:
-            print('Extraction finished')
-
-    print('Extraction process of fits images finished')
-
-    return True
+from misc import extract_settings_sc3
 
 
-def cosmic_thread(fits_dir, output_dir, fits_file):
-    """
-    """
-    data_, header = fits.getdata('{}/{}'.format(fits_dir, fits_file),
-                                 header=True)
+class Cosmic:
 
-    (cr_mask,
-     cleaned_array) = detect_cosmics(data_, sigclip=4.5, sigfrac=0.3,
-                                     objlim=5.0, gain=3.1, readnoise=4,
-                                     satlevel=64535.0, pssl=0.0, niter=4,
-                                     sepmed=True, cleantype='meanmask',
-                                     fsmode='median', psfmodel='gauss',
-                                     psffwhm=0.18, psfsize=7, psfk=None,
-                                     psfbeta=4.765, verbose=True)
+    def __init__(self):
+        print('hey bitches')
+        self.prfs_d = extract_settings_sc3()
+        print(self.prfs_d.keys())
+        print(self.prfs_d['home'])
+        print(self.prfs_d['fits_dir'])
 
-    fits.writeto('{}/{}'.format(output_dir, fits_file), cleaned_array, header)
+        active_cosmic = []
+        fits_files = listdir(self.prfs_d['fits_dir'])
+
+        for cosmic_idx in range(0, len(fits_files),
+                                self.prfs_d['cores_number']):
+            try:
+                cosmic_j = []
+                for proc in range(0, self.prfs_d['cores_number'], 1):
+                    idx = cosmic_idx + proc  # index
+                    print(idx, len(fits_files))
+                    fits_file = fits_files[idx]
+                    cosmic_p = Process(target=self.cosmic_thread,
+                                       args=(fits_file,))
+                    cosmic_j.append(cosmic_p)
+                    cosmic_p.start()
+
+                    active_cosmic = list([job.is_alive() for job in cosmic_j])
+                while True in active_cosmic:
+                    active_cosmic = list([job.is_alive() for job in cosmic_j])
+                    pass
+            except IndexError:
+                print('Extraction finished')
+
+        print('Extraction process of fits images finished')
+
+    def cosmic_thread(self, fits_file):
+        """
+        """
+        data_, header = fits.getdata('{}/{}'.format(self.prfs['fits_dir'],
+                                                    fits_file),
+                                     header=True)
+
+        (cr_mask,
+         cleaned_array) = detect_cosmics(data_, sigclip=4.5, sigfrac=0.3,
+                                         objlim=5.0, gain=3.1, readnoise=4,
+                                         satlevel=64535.0, pssl=0.0, niter=4,
+                                         sepmed=True, cleantype='meanmask',
+                                         fsmode='median', psfmodel='gauss',
+                                         psffwhm=0.18, psfsize=7, psfk=None,
+                                         psfbeta=4.765, verbose=True)
+
+        fits.writeto('{}/{}'.format(self.prfs_d['fits_dir'], fits_file),
+                     cleaned_array, header, clobber=True)

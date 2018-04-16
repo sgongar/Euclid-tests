@@ -25,7 +25,7 @@ from misc import create_sextractor_dict, create_scamp_dict
 from sextractor_aux import SextractorSC3
 from scamp_aux import Scamp
 from scamp_filter_sc3 import ScampFilter
-from cosmic_sc3 import cosmic
+from cosmic_sc3 import Cosmic
 
 __author__ = "Samuel Góngora García"
 __copyright__ = "Copyright 2017"
@@ -70,6 +70,9 @@ class Check:
 
         if argv[1] == '-full':
             if not self.full_pipeline():
+                raise Exception
+        if argv[1] == '-clean':
+            if not self.clean():
                 raise Exception
         if argv[1] == '-catalog':
             if not self.catalog():
@@ -130,6 +133,9 @@ class Check:
 
         :return: True if everything goes alright
         """
+        Cosmic()
+
+        return True
 
     def sextractor(self):
         """
