@@ -19,7 +19,7 @@ Todo:
 
 from subprocess import Popen
 
-from misc import extract_settings, create_folder
+from misc import extract_settings
 
 __author__ = "Samuel Góngora García"
 __copyright__ = "Copyright 2018"
@@ -32,22 +32,16 @@ __status__ = "Development"
 
 class ScampSC3:
 
-    def __init__(self, logger, mag, scmp_d, scmp_cf, sex_d):
+    def __init__(self, logger, scmp_d):
         """
 
         :param logger:
-        :param mag:
         :param scmp_d:
-        :param scmp_cf:
-        :param sex_d:
         """
         self.prfs_d = extract_settings()
 
         self.logger = logger
-        self.mag = mag
         self.scmp_d = scmp_d
-        self.scmp_cf = scmp_cf
-        self.sex_d = sex_d  # TODO
 
         self.scamp_process()
 
@@ -84,7 +78,6 @@ class ScampSC3:
         self.logger.info('Scamp process finished.')
 
         return True
-
 
 
 class Scamp:

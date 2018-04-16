@@ -174,8 +174,7 @@ class Check:
             for idx_sex, conf_sex in enumerate(confs_sex):
                 analysis_d, len_dicts = create_sextractor_dict(idx_sex,
                                                                False)
-                if not Scamp(self.logger, scmp_d, scmp_cf,
-                             analysis_d):
+                if not Scamp(self.logger, scmp_d):
                     raise Exception  # todo improve Exception
 
         return True
