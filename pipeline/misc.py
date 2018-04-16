@@ -686,12 +686,11 @@ def confidence_filter(db, r):
     return db
 
 
-def setting_logger():
+def setting_logger(prfs_d):
     """ sets-up a logger object ready to be used
 
     @return logger:
     """
-    prfs_d = extract_settings()
 
     config.fileConfig(prfs_d['logger_config'])
 

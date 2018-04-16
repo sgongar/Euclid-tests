@@ -58,8 +58,8 @@ class Check:
         """
 
         """
-        self.logger = setting_logger()
         self.prfs_d = extract_settings_sc3()
+        self.logger = setting_logger(self.prfs_d)
 
         # Scamp configurations.
         mode = {'type': 'scamp'}
