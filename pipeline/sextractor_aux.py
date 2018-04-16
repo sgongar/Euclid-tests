@@ -21,7 +21,7 @@ Todo:
 
 """
 
-from os import remove
+from os import listdir, remove
 from subprocess import Popen
 
 from multiprocessing import Process
@@ -57,6 +57,7 @@ class SextractorSC3:
         """
         logger.info('Starting sextractor process for fits images')
 
+        """
         # TODO hardcoded!
         dither_names = ['EUC_VIS_SWL-DET-001-000000-0000000__20170630T011437.3Z_00.00_',
                         'EUC_VIS_SWL-DET-002-000000-0000000__20170630T011642.0Z_00.00_',
@@ -71,15 +72,18 @@ class SextractorSC3:
             for dither in dither_names:
                 fits_files.append('{}{}.fits'.format(dither, idx))
                 # flag_files.append('{}f{}.fits'.format(dither, idx))
+        """
+        fits_files = listdir(self.prfs_d['fits_dir'])
+        active_sex = []
 
-        for image_idx in range(0, len(fits_files), cores_number):
+        for image_idx in range(0, len(fits_files),
+                               self.prfs_d['cores_number']):
             try:
                 sex_j = []
-                for proc in range(0, cores_number, 1):
+                for proc in range(0, self.prfs_d['cores_number'], 1):
                     idx = image_idx + proc  # index
 
                     sex_file = fits_files[idx]
-                    folder_loc = self.prfs_d['fits_dir']
                     cat_name = '{}.cat'.format(fits_files[idx][:-5])
 
                     # sextractor input and output
