@@ -23,7 +23,7 @@ from misc import setting_logger, extract_settings_sc3
 from misc import create_configurations, get_fits_sc3
 from misc import create_sextractor_dict, create_scamp_dict
 from sextractor_aux import SextractorSC3
-from scamp_aux import Scamp
+from scamp_aux import ScampSC3
 from scamp_filter_sc3 import ScampFilter
 from cosmic_sc3 import Cosmic
 
@@ -174,7 +174,7 @@ class Check:
             for idx_sex, conf_sex in enumerate(confs_sex):
                 analysis_d, len_dicts = create_sextractor_dict(idx_sex,
                                                                False)
-                if not Scamp(self.logger, scmp_d):
+                if not ScampSC3(self.logger, scmp_d):
                     raise Exception  # todo improve Exception
 
         return True
