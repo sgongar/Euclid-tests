@@ -13,7 +13,7 @@ Conventions:
 
 Versions:
 - 0.1: Initial release.
-- 0.2: Sextractor analysis for SC3 and luca's images splitted
+- 0.2: Sextractor analysis for SC3 and luca's images splitted.
 
 Todo:
     * Improve documentation
@@ -57,22 +57,6 @@ class SextractorSC3:
         """
         logger.info('Starting sextractor process for fits images')
 
-        """
-        # TODO hardcoded!
-        dither_names = ['EUC_VIS_SWL-DET-001-000000-0000000__20170630T011437.3Z_00.00_',
-                        'EUC_VIS_SWL-DET-002-000000-0000000__20170630T011642.0Z_00.00_',
-                        'EUC_VIS_SWL-DET-003-000000-0000000__20170630T011848.6Z_00.00_',
-                        'EUC_VIS_SWL-DET-004-000000-0000000__20170630T012050.1Z_00.00_']
-        cores_number = 24
-
-        fits_files = []
-        # flag_files = []
-        active_sex = []
-        for idx in range(0, 36, 1):
-            for dither in dither_names:
-                fits_files.append('{}{}.fits'.format(dither, idx))
-                # flag_files.append('{}f{}.fits'.format(dither, idx))
-        """
         fits_files = listdir(self.prfs_d['fits_dir'])
         active_sex = []
 
