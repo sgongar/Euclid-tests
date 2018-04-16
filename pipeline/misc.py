@@ -627,14 +627,6 @@ def b_filter(full_db, b_low, b_up):
     :param b_up:
     :return: full_db
     """
-
-
-
-
-
-
-
-
     up = full_db['MEAN_B_IMAGE'] > float(b_low)
     down = full_db['MEAN_B_IMAGE'] < float(b_up)
     mask = up & down
@@ -691,7 +683,7 @@ def setting_logger(prfs_d):
 
     @return logger:
     """
-
+    print(prfs_d['logger_config'])
     config.fileConfig(prfs_d['logger_config'])
 
     # TODO implement logger level setting
