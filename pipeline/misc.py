@@ -154,7 +154,7 @@ def get_os():
     elif 'fedora-26' in platform():
         os_system = 'fedora'
     elif 'fedora-19' in platform():
-        os_system = 'CAB'
+        os_system = 'cab'
     elif 'centos' in platform():
         os_system = 'centos'
     else:
