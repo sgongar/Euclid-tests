@@ -361,6 +361,12 @@ def extract_settings_sc3():
     prfs_d['fits_dir'] = confmap(cf, "ImagesDirs")['fits_dir']
     prfs_d['fits_dir'] = '{}{}'.format(prfs_d['version'], prfs_d['fits_dir'])
 
+    prfs_d['output_cats'] = confmap(cf, "CatsDirs")['output_cats']
+    prfs_d['output_cats'] = prfs_d['version'] + prfs_d['output_cats']
+    prfs_d['references'] = confmap(cf, "CatsDirs")['references']
+    prfs_d['references'] = prfs_d['version'] + prfs_d['references']
+
+
     prfs_d['time_1'] = confmap(cf, "ImagesTime")['time_1']
     prfs_d['time_2'] = confmap(cf, "ImagesTime")['time_2']
     prfs_d['time_3'] = confmap(cf, "ImagesTime")['time_3']
