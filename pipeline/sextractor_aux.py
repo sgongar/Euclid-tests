@@ -9,9 +9,14 @@ Conventions:
     * Single d means dictionary.
     * Single j means jobs.
     * Single p means process.
-    * loc means lcoation.
+    * loc means location.
+
+Versions:
+- 0.1: Initial release.
+- 0.2: Sextractor analysis for SC3 and luca's images splitted
 
 Todo:
+    * Improve documentation
     * Improve log messages
 
 """
@@ -21,13 +26,14 @@ from subprocess import Popen
 
 from multiprocessing import Process
 
-from misc import extract_settings, get_fits, create_folder
+from misc import extract_settings, create_folder
+from misc import extract_settings_sc3, get_fits
 
 
 __author__ = "Samuel Gongora-Garcia"
 __copyright__ = "Copyright 2017"
 __credits__ = ["Samuel Gongora-Garcia"]
-__version__ = "0.1"
+__version__ = "0.2"
 __maintainer__ = "Samuel Gongora-Garcia"
 __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
@@ -39,7 +45,7 @@ class SextractorSC3:
         """
 
         """
-        self.prfs_d = extract_settings()
+        self.prfs_d = extract_settings_sc3()
         self.sextractor_process(logger, analysis_d)
 
     def sextractor_process(self, logger, analysis_d):
