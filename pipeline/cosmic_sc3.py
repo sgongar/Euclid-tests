@@ -58,7 +58,7 @@ class Cosmic:
     def cosmic_thread(self, fits_file):
         """
         """
-        data_, header = fits.getdata('{}/{}'.format(self.prfs['fits_dir'],
+        data_, header = fits.getdata('{}/{}'.format(self.prfs_d['fits_dir'],
                                                     fits_file),
                                      header=True)
 
