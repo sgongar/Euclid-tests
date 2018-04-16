@@ -22,7 +22,7 @@ Todo:
 
 from subprocess import Popen
 
-from misc import extract_settings
+from misc import extract_settings_sc3
 
 __author__ = "Samuel Góngora García"
 __copyright__ = "Copyright 2018"
@@ -41,7 +41,7 @@ class ScampSC3:
         :param logger:
         :param scmp_d:
         """
-        self.prfs_d = extract_settings()
+        self.prfs_d = extract_settings_sc3()
 
         self.logger = logger
         self.scmp_d = scmp_d
