@@ -62,7 +62,6 @@ class SextractorSC3:
                         'EUC_VIS_SWL-DET-002-000000-0000000__20170630T011642.0Z_00.00_',
                         'EUC_VIS_SWL-DET-003-000000-0000000__20170630T011848.6Z_00.00_',
                         'EUC_VIS_SWL-DET-004-000000-0000000__20170630T012050.1Z_00.00_']
-        analysis_dir = '/pcdisk/holly/sgongora/Dev'  # TODO hardcoded!
         cores_number = 24
 
         fits_files = []
@@ -80,12 +79,14 @@ class SextractorSC3:
                     idx = image_idx + proc  # index
 
                     sex_file = fits_files[idx]
-                    folder_loc = '{}/CCDs'.format(analysis_dir)
+                    folder_loc = self.prfs_d['fits_dir']
                     cat_name = '{}.cat'.format(fits_files[idx][:-5])
 
                     # sextractor input and output
-                    sex_input = '{}/{}'.format(folder_loc, sex_file)
-                    sex_output = '{}/{}'.format(folder_loc, cat_name)
+                    sex_input = '{}/{}'.format(self.prfs_d['fits_dir'],
+                                               sex_file)
+                    sex_output = '{}/{}'.format(self.prfs_d['fits_dir'],
+                                                cat_name)
 
                     sex_p = Process(target=self.sextractor_thread,
                                     args=(sex_input, sex_output, analysis_d))
