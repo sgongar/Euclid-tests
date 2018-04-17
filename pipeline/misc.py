@@ -622,7 +622,8 @@ def pm_compute(logger, merged_db, full_db):
     #     print('----')
     #     print(patata)
 
-    for i in set(full_db['SOURCE_NUMBER']):
+    for i in full_db['SOURCE_NUMBER'].to_list():
+        print(i)
         full_db.loc[full_db['SOURCE_NUMBER'] == i,
                     'PM'] = pm.loc[i - 1]
         full_db.loc[full_db['SOURCE_NUMBER'] == i,
