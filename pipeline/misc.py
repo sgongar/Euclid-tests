@@ -598,6 +598,9 @@ def pm_compute(logger, merged_db, full_db):
     logger.debug('Computing proper motion error')
     pme = Series(np.sqrt(np.array(pmealpha**2 + pmedelta**2), dtype=float))
 
+    print(set(full_db['SOURCE_NUMBER']))
+
+    """
     for i in set(full_db['SOURCE_NUMBER']):
         full_db.loc[full_db['SOURCE_NUMBER'] == i,
                     'PM'] = pm.loc[i - 1]
@@ -611,7 +614,7 @@ def pm_compute(logger, merged_db, full_db):
                     'PMALPHAERR'] = pmealpha.loc[i - 1]
         full_db.loc[full_db['SOURCE_NUMBER'] == i,
                     'PMDELTAERR'] = pmedelta.loc[i - 1]
-
+    """
     return full_db
 
 
