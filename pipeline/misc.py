@@ -617,7 +617,7 @@ def pm_compute(logger, merged_db, full_db):
     print('lista {}'.format(len(lista)))
     print('unique {}'.format(len(list(set(lista)))))
 
-    print(lista)
+    # print(lista)
 
     for i in set(lista):
         print('source {}'.format(i))
