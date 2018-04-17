@@ -584,8 +584,13 @@ def pm_compute(logger, merged_db, full_db):
 
     @return db: a dataframe with all proper motions values
     """
-    """
     logger.debug('Computing right ascension proper motion')
+
+    print(merged_db['PMALPHA_J2000'])
+    test = merged_db[merged_db['PMALPHA_J2000'] / 8.75e6]
+    print(test)
+
+    """
     pmalpha = Series(merged_db.field('PMALPHA_J2000') / 8.75e6)  # 8.75e6
     logger.debug('Computing declination proper motion')
     pmdelta = Series(merged_db.field('PMDELTA_J2000') / 8.75e6)
@@ -599,36 +604,29 @@ def pm_compute(logger, merged_db, full_db):
     logger.debug('Computing proper motion error')
     pme = Series(np.sqrt(np.array(pmealpha**2 + pmedelta**2), dtype=float))
     """
-    print(type(set(full_db['SOURCE_NUMBER'])))
-    print(type(list(set(full_db['SOURCE_NUMBER']))))
-    print(full_db.columns)
-    print(merged_db.columns)
+    # print('input size {}'.format(merged_db.size))
+    # merged_alpha = merged_db[~merged_db['PMALPHA_J2000'].isin([0])]
+    # alpha_list = merged_alpha['SOURCE_NUMBER'].tolist()
+    #
+    # merged_delta = merged_db[~merged_db['PMDELTA_J2000'].isin([0])]
+    # delta_list = merged_delta['SOURCE_NUMBER'].tolist()
+    #
+    # lista = alpha_list + delta_list
+    # print('alpha {}'.format(len(alpha_list)))
+    # print('delta {}'.format(len(delta_list)))
+    # print('lista {}'.format(len(lista)))
+    # print('unique {}'.format(len(list(set(lista)))))
+    #
+    # # print(lista)
+    #
+    # for i in set(lista):
+    #     print('source {}'.format(i))
+    #     print(merged_db[merged_db['SOURCE_NUMBER'].isin([i])])
+    #     print(merged_db.loc[merged_db['SOURCE_NUMBER'] == i, 'PMALPHA_J2000'])
+    #     print(merged_db.loc[merged_db['SOURCE_NUMBER'] == i, 'PMDELTA_J2000'])
+    #     print('----')
+    #     print(patata)
 
-    print('input size {}'.format(merged_db.size))
-    merged_alpha = merged_db[~merged_db['PMALPHA_J2000'].isin([0])]
-    alpha_list = merged_alpha['SOURCE_NUMBER'].tolist()
-
-    merged_delta = merged_db[~merged_db['PMDELTA_J2000'].isin([0])]
-    delta_list = merged_delta['SOURCE_NUMBER'].tolist()
-
-    lista = alpha_list + delta_list
-    print('alpha {}'.format(len(alpha_list)))
-    print('delta {}'.format(len(delta_list)))
-    print('lista {}'.format(len(lista)))
-    print('unique {}'.format(len(list(set(lista)))))
-
-    # print(lista)
-
-    for i in set(lista):
-        print('source {}'.format(i))
-        print(merged_db[merged_db['SOURCE_NUMBER'].isin([i])])
-        print(merged_db.loc[merged_db['SOURCE_NUMBER'] == i, 'PMALPHA_J2000'])
-        print(merged_db.loc[merged_db['SOURCE_NUMBER'] == i, 'PMDELTA_J2000'])
-        print('----')
-        print(patata)
-
-
-    """
     for i in set(full_db['SOURCE_NUMBER']):
         full_db.loc[full_db['SOURCE_NUMBER'] == i,
                     'PM'] = pm.loc[i - 1]
@@ -642,7 +640,7 @@ def pm_compute(logger, merged_db, full_db):
                     'PMALPHAERR'] = pmealpha.loc[i - 1]
         full_db.loc[full_db['SOURCE_NUMBER'] == i,
                     'PMDELTAERR'] = pmedelta.loc[i - 1]
-    """
+
     return full_db
 
 
