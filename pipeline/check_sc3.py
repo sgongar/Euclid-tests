@@ -24,7 +24,7 @@ from misc import create_configurations, get_fits_sc3
 from misc import create_sextractor_dict, create_scamp_dict
 from sextractor_aux import SextractorSC3
 from scamp_aux import ScampSC3
-from scamp_filter_sc3 import ScampFilter
+from scamp_filter_sc3 import ScampFilterSC3
 from cosmic_sc3 import Cosmic
 
 __author__ = "Samuel Góngora García"
@@ -87,7 +87,8 @@ class Check:
             if not self.scamp():
                 raise Exception
         elif argv[1] == '-filter':
-            self.filt()
+            if not self.filt():
+                raise Exception
 
     def full_pipeline(self):
         """
@@ -200,7 +201,7 @@ class Check:
 
                 scmp_cf = '{}_{}_{}_{}'.format(conf_[1][0], conf_[1][1],
                                                conf_[1][2], conf_[1][3])
-                filt_p = Process(target=ScampFilter,
+                filt_p = Process(target=ScampFilterSC3,
                                  args=(self.logger, scmp_cf, sex_d,))
                 filt_j.append(filt_p)
                 filt_p.start()

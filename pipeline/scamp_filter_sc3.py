@@ -31,7 +31,7 @@ __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
 
 
-class ScampFilter:  # TODO Split scamp_filter method into single methods
+class ScampFilterSC3:  # TODO Split scamp_filter method into single methods
 
     def __init__(self, logger, scmp_cf, sex_d):
         """
