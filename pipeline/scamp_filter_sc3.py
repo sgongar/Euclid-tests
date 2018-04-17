@@ -344,9 +344,8 @@ class ScampFilterSC3:  # TODO Split scamp_filter method into single methods
         self.logger.debug('Removes 0 catalog detections')
         full_db = full_db.loc[~full_db['CATALOG_NUMBER'].isin([0])]
 
-        print('antes {} - {}'.format(full_db.size, merged_db.size))
         full_db, merged_db = self.filter_detections(full_db, merged_db, 3)
-        print('despues {} - {}'.format(full_db.size, merged_db.size))
+
 
         if self.save:
             self.save_message('1')
