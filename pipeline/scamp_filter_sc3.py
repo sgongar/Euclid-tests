@@ -60,7 +60,8 @@ class ScampFilterSC3:  # TODO Split scamp_filter method into single methods
         # Saves _1.csv
         (merged_db, full_db) = self.scamp_filter()
         # Saves _2.csv
-        self.compute_pm(merged_db, full_db)
+        full_db = self.compute_pm(merged_db, full_db)
+        print(full_db.size)
         # Saves _3.csv
         # self.get_areas()
 
@@ -346,7 +347,6 @@ class ScampFilterSC3:  # TODO Split scamp_filter method into single methods
 
         full_db, merged_db = self.filter_detections(full_db, merged_db, 3)
 
-
         if self.save:
             self.save_message('1')
             full_db.to_csv('{}_full_1.csv'.format(self.filter_o_n))
@@ -367,6 +367,8 @@ class ScampFilterSC3:  # TODO Split scamp_filter method into single methods
         if self.save:
             self.save_message('2')
             full_db.to_csv('{}_2.csv'.format(self.filter_o_n))
+
+        return full_db
 
     def choose_pipeline(self, pipeline):
         """

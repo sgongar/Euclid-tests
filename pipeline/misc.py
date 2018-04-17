@@ -586,24 +586,19 @@ def pm_compute(logger, merged_db, full_db):
     """
     logger.debug('Computing right ascension proper motion')
 
-    print(merged_db['PMALPHA_J2000'])
-    test = merged_db['PMALPHA_J2000'].divide(8.75e6)
-    print(test)
-
-    """
-    pmalpha = Series(merged_db.field('PMALPHA_J2000') / 8.75e6)  # 8.75e6
+    pmalpha = merged_db['PMALPHA_J2000'].divide(8.75e6)
     logger.debug('Computing declination proper motion')
-    pmdelta = Series(merged_db.field('PMDELTA_J2000') / 8.75e6)
+    pmdelta = merged_db['PMDELTA_J2000'].divide(8.75e6)
     logger.debug('Computing right ascension proper motion error')
-    pmealpha = Series(merged_db.field('PMALPHAERR_J2000') / 8.75e6)
+    pmealpha = merged_db['PMALPHAERR_J2000'].divide(8.75e6)
     logger.debug('Computing declination proper motion error')
-    pmedelta = Series(merged_db.field('PMDELTAERR_J2000') / 8.75e6)
+    pmedelta = merged_db['PMDELTAERR_J2000'].divide(8.75e6)
 
     logger.debug('Computing proper motion')
     pm = Series(np.sqrt(np.array(pmalpha**2 + pmdelta**2), dtype=float))
     logger.debug('Computing proper motion error')
     pme = Series(np.sqrt(np.array(pmealpha**2 + pmedelta**2), dtype=float))
-    """
+
     # print('input size {}'.format(merged_db.size))
     # merged_alpha = merged_db[~merged_db['PMALPHA_J2000'].isin([0])]
     # alpha_list = merged_alpha['SOURCE_NUMBER'].tolist()
