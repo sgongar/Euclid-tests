@@ -584,6 +584,7 @@ def pm_compute(logger, merged_db, full_db):
 
     @return db: a dataframe with all proper motions values
     """
+    """
     logger.debug('Computing right ascension proper motion')
     pmalpha = Series(merged_db.field('PMALPHA_J2000') / 8.75e6)  # 8.75e6
     logger.debug('Computing declination proper motion')
@@ -597,7 +598,7 @@ def pm_compute(logger, merged_db, full_db):
     pm = Series(np.sqrt(np.array(pmalpha**2 + pmdelta**2), dtype=float))
     logger.debug('Computing proper motion error')
     pme = Series(np.sqrt(np.array(pmealpha**2 + pmedelta**2), dtype=float))
-
+    """
     print(set(full_db['SOURCE_NUMBER']))
     print(list(set(full_db['SOURCE_NUMBER'])))
     print(full_db.columns)
