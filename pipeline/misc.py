@@ -614,6 +614,7 @@ def pm_compute(logger, merged_db, full_db):
     print('alpha {}'.format(len(alpha_list)))
     print('delta {}'.format(len(delta_list)))
     print('lista {}'.format(len(lista)))
+    print('unique {}'.format(len(list(set(lista)))))
 
 
     """
