@@ -604,8 +604,12 @@ def pm_compute(logger, merged_db, full_db):
     print(full_db.columns)
     print(merged_db.columns)
 
-    print(merged_db.size)
-    print(merged_db[merged_db['PMALPHA_J2000'] > 0].size)
+    print('input size {}'.format(merged_db.size))
+    merged_alpha = merged_db[merged_db['PMALPHA_J2000'] > 0]
+    print('alpha {}'.format(merged_alpha.size))
+    merged_delta = merged_alpha[merged_alpha['PMDELTA_J2000'] > 0]
+    print('delta {}'.format(merged_delta.size))
+
 
     """
     for i in set(full_db['SOURCE_NUMBER']):
