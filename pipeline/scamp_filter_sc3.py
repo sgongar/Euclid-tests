@@ -343,7 +343,7 @@ class ScampFilterSC3:  # TODO Split scamp_filter method into single methods
 
         # Removing 0 catalog detections
         self.logger.debug('Removes 0 catalog detections')
-        full_db = full_db.loc[~full_db['CATALOG_NUMBER'].isin([0])]
+        # full_db = full_db.loc[~full_db['CATALOG_NUMBER'].isin([0])]
 
         full_db, merged_db = self.filter_detections(full_db, merged_db, 3)
 
