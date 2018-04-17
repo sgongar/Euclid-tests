@@ -605,10 +605,10 @@ def pm_compute(logger, merged_db, full_db):
     print(merged_db.columns)
 
     print('input size {}'.format(merged_db.size))
-    merged_alpha = merged_db[merged_db['PMALPHA_J2000'].isin([0])]
+    merged_alpha = merged_db[~merged_db['PMALPHA_J2000'].isin([0])]
     alpha_list = merged_alpha['SOURCE_NUMBER'].tolist()
 
-    merged_delta = merged_db[merged_db['PMDELTA_J2000'].isin([0])]
+    merged_delta = merged_db[~merged_db['PMDELTA_J2000'].isin([0])]
     delta_list = merged_delta['SOURCE_NUMBER'].tolist()
 
     lista = alpha_list + delta_list
