@@ -344,9 +344,9 @@ class ScampFilterSC3:  # TODO Split scamp_filter method into single methods
         self.logger.debug('Removes 0 catalog detections')
         full_db = full_db.loc[~full_db['CATALOG_NUMBER'].isin([0])]
 
-        print('antes {}'.format(full_db.size))
-        full_db = self.filter_detections(full_db, 3)
-        print('despues {}'.format(full_db.size))
+        print('antes {} - {}'.format(full_db.size, merged_db.size))
+        full_db, merged_db = self.filter_detections(full_db, merged_db, 3)
+        print('despues {} - {}'.format(full_db.size, merged_db.size))
 
         if self.save:
             self.save_message('1')
@@ -896,15 +896,17 @@ class ScampFilterSC3:  # TODO Split scamp_filter method into single methods
 
         return full_db
 
-    def filter_detections(self, full_db, detections):
+    def filter_detections(self, full_db, merged_db, detections):
         """
 
         :param full_db:
+        :param merged_db:
         :param detections:
         :return:
         """
         self.logger.debug('Filter by detections number')
         full_db = concat(g for _, g in full_db.groupby("SOURCE_NUMBER")
                          if len(g) >= int(detections))
+        merged_db = merged_db[merged_db['NPOS_OK'] >= int(detections)]
 
-        return full_db
+        return full_db, merged_db
