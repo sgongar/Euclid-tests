@@ -621,8 +621,8 @@ def pm_compute(logger, merged_db, full_db):
 
     for i in set(lista):
         print(i)
-        print(full_db.loc[full_db['SOURCE_NUMBER'] == i, 'PMALPHA_J2000'])
-        print(full_db.loc[full_db['SOURCE_NUMBER'] == i, 'PMDELTA_J2000'])
+        print(merged_db.loc[merged_db['SOURCE_NUMBER'] == i, 'PMALPHA_J2000'])
+        print(merged_db.loc[merged_db['SOURCE_NUMBER'] == i, 'PMDELTA_J2000'])
 
 
     """
