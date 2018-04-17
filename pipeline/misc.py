@@ -620,9 +620,10 @@ def pm_compute(logger, merged_db, full_db):
     print(lista)
 
     for i in set(lista):
-        print(i)
+        print('source {}'.format(i))
         print(merged_db.loc[merged_db['SOURCE_NUMBER'] == i, 'PMALPHA_J2000'])
         print(merged_db.loc[merged_db['SOURCE_NUMBER'] == i, 'PMDELTA_J2000'])
+        print('----')
 
 
     """
