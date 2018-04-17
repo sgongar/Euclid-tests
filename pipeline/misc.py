@@ -607,6 +607,7 @@ def pm_compute(logger, merged_db, full_db):
     print('input size {}'.format(merged_db.size))
     merged_alpha = merged_db[~merged_db['PMALPHA_J2000'].isin([0])]
     alpha_list = merged_alpha['SOURCE_NUMBER'].tolist()
+
     merged_delta = merged_db[~merged_db['PMDELTA_J2000'].isin([0])]
     delta_list = merged_delta['SOURCE_NUMBER'].tolist()
 
@@ -615,6 +616,12 @@ def pm_compute(logger, merged_db, full_db):
     print('delta {}'.format(len(delta_list)))
     print('lista {}'.format(len(lista)))
     print('unique {}'.format(len(list(set(lista)))))
+
+    print(lista)
+
+    for i in set(lista):
+        print(i)
+        print(full_db.loc[full_db['SOURCE_NUMBER'] == i])
 
 
     """
