@@ -587,7 +587,7 @@ def pm_compute(logger, merged_db, full_db):
     logger.debug('Computing right ascension proper motion')
 
     print(merged_db['PMALPHA_J2000'])
-    test = merged_db['PMALPHA_J2000'].divide(8)
+    test = merged_db['PMALPHA_J2000'].divide(8.75e6)
     print(test)
 
     """
