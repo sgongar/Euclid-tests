@@ -22,7 +22,7 @@ Todo:
 
 from subprocess import Popen
 
-from misc import extract_settings_sc3
+from misc import extract_settings, extract_settings_sc3
 
 __author__ = "Samuel Góngora García"
 __copyright__ = "Copyright 2018"
