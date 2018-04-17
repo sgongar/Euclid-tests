@@ -603,6 +603,9 @@ def pm_compute(logger, merged_db, full_db):
     print(full_db.columns)
     print(merged_db.columns)
 
+    print(merged_db.size)
+    print(merged_db[merged_db['PMALPHA_J2000'] > 0].size)
+
     """
     for i in set(full_db['SOURCE_NUMBER']):
         full_db.loc[full_db['SOURCE_NUMBER'] == i,

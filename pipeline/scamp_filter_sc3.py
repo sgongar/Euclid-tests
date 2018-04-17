@@ -338,6 +338,8 @@ class ScampFilterSC3:  # TODO Split scamp_filter method into single methods
         # todo - checks if Pandas format gonna be useful!
         merged_db = Table(merged_cat[2].data)
 
+        merged_db = merged_db.to_pandas()
+
         # Removing 0 catalog detections
         self.logger.debug('Removes 0 catalog detections')
         full_db = full_db.loc[~full_db['CATALOG_NUMBER'].isin([0])]
