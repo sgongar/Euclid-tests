@@ -62,7 +62,7 @@ class ScampFilterSC3:  # TODO Split scamp_filter method into single methods
         print(self.filter_o_n)
 
         # Saves _1.csv
-        (merged_db, full_db) = self.scamp_filter()
+        # (merged_db, full_db) = self.scamp_filter()
         # Saves _2.csv
         # self.compute_pm(merged_db, full_db)
         # Saves _3.csv

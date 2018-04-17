@@ -372,7 +372,7 @@ def extract_settings_sc3():
     prfs_d['filtered'] = prfs_d['version'] + prfs_d['filtered']
 
     prfs_d['time_1'] = confmap(cf, "ImagesTime")['time_1']  # 1st dither time
-    prfs_d['time_2'] = -confmap(cf, "ImagesTime")['time_2']  # 2nd dither time
+    prfs_d['time_2'] = confmap(cf, "ImagesTime")['time_2']  # 2nd dither time
     prfs_d['time_3'] = confmap(cf, "ImagesTime")['time_3']  # 3nd dither time
     prfs_d['time_4'] = confmap(cf, "ImagesTime")['time_4']  # 4th dither time
 
