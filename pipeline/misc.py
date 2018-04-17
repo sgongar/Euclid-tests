@@ -361,16 +361,20 @@ def extract_settings_sc3():
     prfs_d['fits_dir'] = confmap(cf, "ImagesDirs")['fits_dir']
     prfs_d['fits_dir'] = '{}{}'.format(prfs_d['version'], prfs_d['fits_dir'])
 
+    # todo - comment!
     prfs_d['output_cats'] = confmap(cf, "CatsDirs")['output_cats']
     prfs_d['output_cats'] = prfs_d['version'] + prfs_d['output_cats']
+    # todo - comment!
     prfs_d['references'] = confmap(cf, "CatsDirs")['references']
     prfs_d['references'] = prfs_d['version'] + prfs_d['references']
+    # todo - comment!
+    prfs_d['filtered'] = confmap(cf, "CatsDirs")['filtered']
+    prfs_d['filtered'] = prfs_d['version'] + prfs_d['filtered']
 
-
-    prfs_d['time_1'] = confmap(cf, "ImagesTime")['time_1']
-    prfs_d['time_2'] = confmap(cf, "ImagesTime")['time_2']
-    prfs_d['time_3'] = confmap(cf, "ImagesTime")['time_3']
-    prfs_d['time_4'] = confmap(cf, "ImagesTime")['time_4']
+    prfs_d['time_1'] = confmap(cf, "ImagesTime")['time_1']  # 1st dither time
+    prfs_d['time_2'] = -confmap(cf, "ImagesTime")['time_2']  # 2nd dither time
+    prfs_d['time_3'] = confmap(cf, "ImagesTime")['time_3']  # 3nd dither time
+    prfs_d['time_4'] = confmap(cf, "ImagesTime")['time_4']  # 4th dither time
 
     outputdirs_list = ['conf_scamp', 'conf_sex', 'params_sex', 'neural_sex',
                        'params_cat', 'logger_config']

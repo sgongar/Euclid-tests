@@ -19,7 +19,7 @@ from astropy.table import Table
 from numpy import mean, median
 from pandas import concat, read_csv, Series
 
-from misc import pm_compute, extract_settings, check_source
+from misc import pm_compute, extract_settings_sc3, check_source
 from misc import b_filter, create_folder, get_dither, confidence_filter
 
 __author__ = "Samuel Góngora García"
@@ -48,29 +48,25 @@ class ScampFilterSC3:  # TODO Split scamp_filter method into single methods
         self.proper_motion_dects = 1.5
 
         # Analysis variables
-        self.prfs_d = extract_settings()
+        self.prfs_d = extract_settings_sc3()
         self.logger = logger
         self.scmp_cf = scmp_cf
-        self.sex_cf = '{}_{}_{}_{}_{}'.format(sex_d['deblend_nthresh'],
-                                              sex_d['analysis_thresh'],
-                                              sex_d['detect_thresh'],
-                                              sex_d['deblend_mincount'],
-                                              sex_d['detect_minarea'])
 
         self.save = True
 
         # Filtered catalog dir
-        self.filter_dir = '/home/user/Work/Projects/pipeline/results/SC3'
         self.filt_n = 'filt_'
 
-        self.filter_o_n = '{}/{}'.format(self.filter_dir, self.filt_n)
+        self.filter_o_n = '{}/{}'.format(self.prfs_d['filtered'], self.filt_n)
+
+        print(self.filter_o_n)
 
         # Saves _1.csv
-        # (merged_db, full_db) = self.scamp_filter()
+        (merged_db, full_db) = self.scamp_filter()
         # Saves _2.csv
         # self.compute_pm(merged_db, full_db)
         # Saves _3.csv
-        self.get_areas()
+        # self.get_areas()
 
         """
         full_db = read_csv('{}_3.csv'.format(self.filter_o_n), index_col=0)
@@ -316,10 +312,10 @@ class ScampFilterSC3:  # TODO Split scamp_filter method into single methods
         """
         self.logger.info("Filtering scamp's output")
 
-        create_folder(self.logger, self.filter_dir)
+        # create_folder(self.logger, self.filter_dir)
 
-        self.logger.debug('Scamp configuration: {}'.format(self.scmp_cf))
-        self.logger.debug('Sextractor configuration: {}'.format(self.sex_cf))
+        # self.logger.debug('Scamp configuration: {}'.format(self.scmp_cf))
+        # self.logger.debug('Sextractor configuration: {}'.format(self.sex_cf))
 
         # Full catalog name
         full_n = '{}/full_1.cat'.format(self.filter_dir)
