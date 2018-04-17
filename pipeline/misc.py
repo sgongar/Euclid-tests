@@ -604,7 +604,7 @@ def pm_compute(logger, merged_db, full_db):
     print(pm.size)
     print('----')
 
-    for idx_merged, source in enumerate(merged_db['SOURCE_NUMBER']):
+    for idx_merged, source in enumerate(full_db['SOURCE_NUMBER']):
         print(idx_merged, source)
 
     print(patata)
