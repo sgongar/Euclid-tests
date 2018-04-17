@@ -50,19 +50,15 @@ class ScampFilterSC3:  # TODO Split scamp_filter method into single methods
         # Analysis variables
         self.prfs_d = extract_settings_sc3()
         self.logger = logger
-        self.scmp_cf = scmp_cf
 
         self.save = True
 
         # Filtered catalog dir
         self.filt_n = 'filt_'
-
         self.filter_o_n = '{}/{}'.format(self.prfs_d['filtered'], self.filt_n)
 
-        print(self.filter_o_n)
-
         # Saves _1.csv
-        # (merged_db, full_db) = self.scamp_filter()
+        (merged_db, full_db) = self.scamp_filter()
         # Saves _2.csv
         # self.compute_pm(merged_db, full_db)
         # Saves _3.csv
@@ -314,14 +310,11 @@ class ScampFilterSC3:  # TODO Split scamp_filter method into single methods
 
         # create_folder(self.logger, self.filter_dir)
 
-        # self.logger.debug('Scamp configuration: {}'.format(self.scmp_cf))
-        # self.logger.debug('Sextractor configuration: {}'.format(self.sex_cf))
-
         # Full catalog name
-        full_n = '{}/full_1.cat'.format(self.filter_dir)
+        full_n = '{}/full_1.cat'.format(self.prfs_d['references'])
 
         self.logger.debug('Opens full catalog')
-        self.logger.debug('Dir: {}'.format(self.filter_dir))
+        self.logger.debug('Dir: {}'.format(self.prfs_d['references']))
         self.logger.debug('Name: full_1.cat')  # Be careful, hardcoded!
         full_cat = fits.open(full_n)
         full_db = Table(full_cat[2].data)
@@ -329,10 +322,10 @@ class ScampFilterSC3:  # TODO Split scamp_filter method into single methods
         full_db = full_db.to_pandas()
 
         # Getting merge catalog
-        mrgd_n = '{}/merged_1.cat'.format(self.filter_dir)
+        mrgd_n = '{}/merged_1.cat'.format(self.prfs_d['references'])
 
         self.logger.debug('Opens merged catalog')
-        self.logger.debug('Dir: {}'.format(self.filter_dir))
+        self.logger.debug('Dir: {}'.format(self.prfs_d['references']))
         self.logger.debug('Name: merged_1.cat')  # Be careful, hardcoded!
         merged_cat = fits.open(mrgd_n)
         self.logger.debug('Converts merged Astropy catalog to Pandas format')
