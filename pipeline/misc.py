@@ -599,6 +599,9 @@ def pm_compute(logger, merged_db, full_db):
     pme = Series(np.sqrt(np.array(pmealpha**2 + pmedelta**2), dtype=float))
 
     print(set(full_db['SOURCE_NUMBER']))
+    print(list(set(full_db['SOURCE_NUMBER'])))
+    print(full_db.columns)
+    print(merged_db.columns)
 
     """
     for i in set(full_db['SOURCE_NUMBER']):
