@@ -350,7 +350,8 @@ class ScampFilterSC3:  # TODO Split scamp_filter method into single methods
 
         if self.save:
             self.save_message('1')
-            full_db.to_csv('{}_1.csv'.format(self.filter_o_n))
+            full_db.to_csv('{}_full_1.csv'.format(self.filter_o_n))
+            merged_db.to_csv('{}_merged_1.csv'.format(self.filter_o_n))
 
         return merged_db, full_db
 
