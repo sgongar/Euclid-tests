@@ -609,13 +609,13 @@ def pm_compute(logger, merged_db, full_db):
     # asi que las fuentes de merged no estan bien
 
     for idx_full, source in enumerate(full_db['SOURCE_NUMBER']):
-        print(idx_full, source)
+        full_p_db = full_db[full_db['SOURCE_NUMBER'].isin([source])]
+        merged_p_db = merged_db[merged_db['SOURCE_NUMBER'].isin([source])]
 
-        idx = merged_db['SOURCE_NUMBER'][merged_db['SOURCE_NUMBER'] == source].index[0]
-
-        print(idx)
-
-        pmalpha_l.append(pmalpha.loc[idx])
+        print(full_p_db)
+        print(merged_p_db)
+        print('----')
+        # pmalpha_l.append(pmalpha.loc[idx])
         """
         # print(idx)
         # print(full_db[full_db['SOURCE_NUMBER'].isin([source])])
