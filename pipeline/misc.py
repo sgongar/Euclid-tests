@@ -608,17 +608,17 @@ def pm_compute(logger, merged_db, full_db):
     # no me vale el conteo de tres
     # asi que las fuentes de merged no estan bien
 
-    for idx_merged, source in enumerate(full_db['SOURCE_NUMBER']):
+    for idx_merged, source in enumerate(merged_db['SOURCE_NUMBER']):
         print(idx_merged, source)
-        try:
-            idx = merged_db['SOURCE_NUMBER'][merged_db['SOURCE_NUMBER'] == source].index[0]
-        except IndexError:
-            print(merged_db['SOURCE_NUMBER'][merged_db['SOURCE_NUMBER'] == source])
-            raise Exception
+        # try:
+        #     idx = merged_db['SOURCE_NUMBER'][merged_db['SOURCE_NUMBER'] == source].index[0]
+        # except IndexError:
+        #     print(merged_db['SOURCE_NUMBER'][merged_db['SOURCE_NUMBER'] == source])
+        #     raise Exception
         # print(idx)
-        print(full_db[full_db['SOURCE_NUMBER'].isin([source])])
-        print(merged_db[merged_db['SOURCE_NUMBER'].isin([source])])
-        print('---')
+        # print(full_db[full_db['SOURCE_NUMBER'].isin([source])])
+        # print(merged_db[merged_db['SOURCE_NUMBER'].isin([source])])
+        # print('---')
         # ve de fuente en fuente,
         # cuenta cuantas hay
         # crea una nueva serie con las frecuencias

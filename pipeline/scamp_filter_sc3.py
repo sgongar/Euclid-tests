@@ -907,8 +907,9 @@ class ScampFilterSC3:  # TODO Split scamp_filter method into single methods
         :return:
         """
         self.logger.debug('Filter by detections number')
-        full_db = concat(g for _, g in full_db.groupby("SOURCE_NUMBER")
-                         if len(g) >= int(detections))
-        # merged_db = merged_db[merged_db['NMAG'] >= int(detections)]
+        # full_db = concat(g for _, g in full_db.groupby("SOURCE_NUMBER")
+        #                  if len(g) >= int(detections))
+        merged_db = merged_db[merged_db['NPOS_OK'] >= int(detections)]
+        merged_db = merged_db[merged_db['NMAG'] >= int(detections)]
 
         return full_db, merged_db
