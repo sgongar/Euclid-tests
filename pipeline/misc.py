@@ -646,6 +646,8 @@ def pm_compute(logger, merged_db, full_db):
 
     full_db['PM'] = pm_s
 
+    print(full_db['PM'].size)
+
     return full_db
 
 
