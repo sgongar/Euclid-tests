@@ -613,13 +613,12 @@ def pm_compute(logger, merged_db, full_db):
         merged_p_db = merged_db[merged_db['SOURCE_NUMBER'].isin([source])]
         full_p_db = full_db[full_db['SOURCE_NUMBER'].isin([source])]
 
-
         print(pmalpha)
         print('tipo {}'.format(type(pmalpha)))
 
         for idx in full_p_db['SOURCE_NUMBER']:
             print(pmalpha.loc[idx_merged])
-            pmalpha_l.append(pmalpha.loc[idx_merged])
+            pmalpha_l.append(pmalpha.iloc[idx_merged])
 
         print(pmalpha_l)
 
