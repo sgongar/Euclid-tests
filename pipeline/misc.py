@@ -608,6 +608,7 @@ def pm_compute(logger, merged_db, full_db):
     # no me vale el conteo de tres
     # asi que las fuentes de merged no estan bien
 
+    print(type(full_db['SOURCE_NUMBER']))
     for idx_merged, source in enumerate(full_db['SOURCE_NUMBER']):
         print(idx_merged, source)
         # ve de fuente en fuente,
