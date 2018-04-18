@@ -628,11 +628,11 @@ def pm_compute(logger, merged_db, full_db):
             pme_l.append(pme.iloc[idx_merged])
 
             print(pmalpha.iloc[idx_merged])
-            print(pmdelta.iloc[idx_merged])
-            print(pmealpha.iloc[idx_merged])
-            print(pmedelta.iloc[idx_merged])
-            print(pm.iloc[idx_merged])
-            print(pme.iloc[idx_merged])
+            # print(pmdelta.iloc[idx_merged])
+            # print(pmealpha.iloc[idx_merged])
+            # print(pmedelta.iloc[idx_merged])
+            # print(pm.iloc[idx_merged])
+            # print(pme.iloc[idx_merged])
 
         print('part {}'.format(part_idx))
         print('total {}'.format(first_idx))
