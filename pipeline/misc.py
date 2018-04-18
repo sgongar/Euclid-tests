@@ -585,8 +585,8 @@ def pm_compute(logger, merged_db, full_db):
     @return db: a dataframe with all proper motions values
     """
     logger.debug('Computing right ascension proper motion')
-
     pmalpha = merged_db['PMALPHA_J2000'].divide(8.75e6)
+    pmalpha_l = []
     logger.debug('Computing declination proper motion')
     pmdelta = merged_db['PMDELTA_J2000'].divide(8.75e6)
     logger.debug('Computing right ascension proper motion error')
@@ -611,11 +611,11 @@ def pm_compute(logger, merged_db, full_db):
     for idx_full, source in enumerate(full_db['SOURCE_NUMBER']):
         print(idx_full, source)
 
-        try:
-            idx = merged_db['SOURCE_NUMBER'][merged_db['SOURCE_NUMBER'] == source].index[0]
-        except IndexError:
-            print(merged_db['SOURCE_NUMBER'][merged_db['SOURCE_NUMBER'] == source])
-            raise Exception
+        idx = merged_db['SOURCE_NUMBER'][merged_db['SOURCE_NUMBER'] == source].index[0]
+
+        print(idx)
+
+        pmalpha_l.append(pmalpha.loc[idx])
         """
         # print(idx)
         # print(full_db[full_db['SOURCE_NUMBER'].isin([source])])
