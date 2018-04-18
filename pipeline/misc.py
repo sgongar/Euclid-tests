@@ -589,61 +589,40 @@ def pm_compute(logger, merged_db, full_db):
     pmalpha_l = []
     logger.debug('Computing declination proper motion')
     pmdelta = merged_db['PMDELTA_J2000'].divide(8.75e6)
+    pmdelta_l = []
     logger.debug('Computing right ascension proper motion error')
     pmealpha = merged_db['PMALPHAERR_J2000'].divide(8.75e6)
+    pmealpha_l = []
     logger.debug('Computing declination proper motion error')
     pmedelta = merged_db['PMDELTAERR_J2000'].divide(8.75e6)
+    pmedelta_l = []
 
     logger.debug('Computing proper motion')
     pm = Series(np.sqrt(np.array(pmalpha**2 + pmdelta**2), dtype=float))
+    pm_l = []
     logger.debug('Computing proper motion error')
     pme = Series(np.sqrt(np.array(pmealpha**2 + pmedelta**2), dtype=float))
-
-    print('----')
-    print(len(list(set(full_db['SOURCE_NUMBER'].tolist()))))
-    print(len(list(set(merged_db['SOURCE_NUMBER'].tolist()))))
-
-    print(list(set(full_db['SOURCE_NUMBER'].tolist()) - set(merged_db['SOURCE_NUMBER'].tolist())))
-    # scamp cuenta los catalogos cero en ok, por que??
-    # no me vale el conteo de tres
-    # asi que las fuentes de merged no estan bien
+    pme_l = []
 
     for idx_merged, source in enumerate(merged_db['SOURCE_NUMBER']):
-        print(idx_merged)
-        merged_p_db = merged_db[merged_db['SOURCE_NUMBER'].isin([source])]
+        print('{} - {}'.format(idx_merged, len(merged_db['SOURCE_NUMBER'])))
         full_p_db = full_db[full_db['SOURCE_NUMBER'].isin([source])]
 
-        print(pmalpha)
-        print('tipo {}'.format(type(pmalpha)))
-
         for idx in full_p_db['SOURCE_NUMBER']:
-            print(pmalpha.iloc[idx_merged])
             pmalpha_l.append(pmalpha.iloc[idx_merged])
+            pmdelta_l.append(pmdelta.iloc[idx_merged])
+            pmealpha_l.append(pmealpha.iloc[idx_merged])
+            pmedelta_l.append(pmedelta.iloc[idx_merged])
+            pm_l.append(pm.iloc[idx_merged])
+            pme_l.append(pme.iloc[idx_merged])
 
-        print(pmalpha_l)
+    print(full_db['SOURCE_NUMBER'].size)
+    print(len(pmalpha_l))
+    print(len(pmdelta_l))
 
-        print(full_p_db)
-        print(patata)
-
-        """
-        print(full_p_db)
-        print(merged_p_db)
-        """
-        print('----')
-        # pmalpha_l.append(pmalpha.loc[idx])
-        """
-        # print(idx)
-        # print(full_db[full_db['SOURCE_NUMBER'].isin([source])])
-        # print(merged_db[merged_db['SOURCE_NUMBER'].isin([source])])
-        # print('---')
-        # ve de fuente en fuente,
-        # cuenta cuantas hay
-        # crea una nueva serie con las frecuencias
-        # print(full_db[full_db['SOURCE_NUMBER'].isin([source])])
-        """
     print(patata)
-    """
 
+    """
     print(set(merged_db['SOURCE_NUMBER']))
     for i in set(merged_db['SOURCE_NUMBER']):
         print i
