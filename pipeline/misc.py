@@ -662,6 +662,7 @@ def pm_compute(logger, merged_db, full_db):
 
     from pandas import concat
     test_df = concat([full_db['SOURCE_NUMBER'].reset_index(), pm_s], axis=1)
+    del test_df['index']
 
     return test_df
 
