@@ -18,7 +18,7 @@ from platform import platform
 
 from ConfigParser import ConfigParser
 import numpy as np
-from pandas import Series
+from pandas import concat, Series
 import statsmodels.api as sm
 
 from errors import BadSettings
@@ -626,11 +626,27 @@ def pm_compute(logger, merged_df, full_df):
     pm_s = Series(pm_l, name='PM', dtype=float)
     pme_s = Series(pme_l, name='PME', dtype=float)
 
-    print(full_df.columns)
-    print(patata)
-
-    from pandas import concat
-    df = concat([full_df['SOURCE_NUMBER'].reset_index(), pm_s], axis=1)
+    df = concat([full_df['SOURCE_NUMBER'].reset_index(),
+                 full_df['CATALOG_NUMBER'].reset_index(),
+                 full_df['EXTENSION'].reset_index(),
+                 full_df['ASTR_INSTRUM'].reset_index(),
+                 full_df['PHOT_INSTRUM'].reset_index(),
+                 full_df['X_IMAGE'].reset_index(),
+                 full_df['Y_IMAGE'].reset_index(),
+                 full_df['ERRA_IMAGE'].reset_index(),
+                 full_df['ERRB_IMAGE'].reset_index(),
+                 full_df['ERRTHETA_IMAGE'].reset_index(),
+                 full_df['ALPHA_J2000'].reset_index(),
+                 full_df['DELTA_J2000'].reset_index(),
+                 full_df['ERRA_WORLD'].reset_index(),
+                 full_df['ERRB_WORLD'].reset_index(),
+                 full_df['ERRTHETA_WORLD'].reset_index(),
+                 full_df['EPOCH'].reset_index(), full_df['MAG'].reset_index(),
+                 full_df['MAGERR'].reset_index(),
+                 full_df['FLAGS_EXTRACTION'].reset_index(),
+                 full_df['FLAGS_SCAMP'].reset_index(),
+                 full_df['FLAGS_IMA'].reset_index(), pmalpha_s,
+                 pmdelta_s, pmealpha_s, pmedelta_s, pm_s, pme_s], axis=1)
     del df['index']
 
     return df
