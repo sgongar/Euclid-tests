@@ -61,7 +61,6 @@ class ScampFilterSC3:  # TODO Split scamp_filter method into single methods
         (merged_db, full_db) = self.scamp_filter()
         # Saves _2.csv
         full_db = self.compute_pm(merged_db, full_db)
-        print(full_db.size)
         # Saves _3.csv
         # self.get_areas()
 

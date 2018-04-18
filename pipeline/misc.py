@@ -641,6 +641,9 @@ def pm_compute(logger, merged_db, full_db):
     pm_s = Series(pm_l, name='PM', dtype=float)
     pme_s = Series(pme_l, name='PME', dtype=float)
 
+    print(full_db['SOURCE_NUMBER'].size)
+    print(len(pm_l), pm_s.size)
+
     full_db['PM'] = pm_s
 
     return full_db
