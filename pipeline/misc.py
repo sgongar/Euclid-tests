@@ -613,17 +613,21 @@ def pm_compute(logger, merged_db, full_db):
     first_idx = 0
 
     for idx_merged, source in enumerate(merged_db['SOURCE_NUMBER']):
+        part_idx = 0
         first_idx += 1
         # print('{} - {}'.format(idx_merged, len(merged_db['SOURCE_NUMBER'])))
         full_p_db = full_db[full_db['SOURCE_NUMBER'].isin([source])]
 
         for idx in full_p_db['SOURCE_NUMBER']:
+            part_idx += 1
             pmalpha_l.append(pmalpha.iloc[idx_merged])
             pmdelta_l.append(pmdelta.iloc[idx_merged])
             pmealpha_l.append(pmealpha.iloc[idx_merged])
             pmedelta_l.append(pmedelta.iloc[idx_merged])
             pm_l.append(pm.iloc[idx_merged])
             pme_l.append(pme.iloc[idx_merged])
+
+        print('part {}'.format(part_idx))
 
     print('total {}'.format(first_idx))
 
