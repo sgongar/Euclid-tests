@@ -574,27 +574,27 @@ def get_limits(first_list, second_list):
     return limits
 
 
-def pm_compute(logger, merged_db, full_db):
+def pm_compute(logger, merged_df, full_df):
     """ given a merged catalogue and a full one return a full catalogue with
         proper motions in arcseconds per hour
 
     @param logger: a logger object
-    @param merged_db:
-    @param full_db:
+    @param merged_df:
+    @param full_df:
 
     @return db: a dataframe with all proper motions values
     """
     logger.debug('Computing right ascension proper motion')
-    pmalpha = merged_db['PMALPHA_J2000'].divide(8.75e6)
+    pmalpha = merged_df['PMALPHA_J2000'].divide(8.75e6)
     pmalpha_l = []
     logger.debug('Computing declination proper motion')
-    pmdelta = merged_db['PMDELTA_J2000'].divide(8.75e6)
+    pmdelta = merged_df['PMDELTA_J2000'].divide(8.75e6)
     pmdelta_l = []
     logger.debug('Computing right ascension proper motion error')
-    pmealpha = merged_db['PMALPHAERR_J2000'].divide(8.75e6)
+    pmealpha = merged_df['PMALPHAERR_J2000'].divide(8.75e6)
     pmealpha_l = []
     logger.debug('Computing declination proper motion error')
-    pmedelta = merged_db['PMDELTAERR_J2000'].divide(8.75e6)
+    pmedelta = merged_df['PMDELTAERR_J2000'].divide(8.75e6)
     pmedelta_l = []
 
     logger.debug('Computing proper motion')
@@ -604,42 +604,18 @@ def pm_compute(logger, merged_db, full_db):
     pme = Series(np.sqrt(np.array(pmealpha**2 + pmedelta**2), dtype=float))
     pme_l = []
 
-    print('1 {}'.format(pmalpha.size))
-    print('2 {}'.format(pm.size))
-
-    print('merged {}'.format(merged_db['SOURCE_NUMBER'].size))
-    print('full {}'.format(full_db['SOURCE_NUMBER'].size))
-
-    first_idx = 0
-
-    for idx_merged, source in enumerate(merged_db['SOURCE_NUMBER']):
+    for idx_merged, source in enumerate(merged_df['SOURCE_NUMBER']):
         part_idx = 0
         # print('{} - {}'.format(idx_merged, len(merged_db['SOURCE_NUMBER'])))
-        full_p_db = full_db[full_db['SOURCE_NUMBER'].isin([source])]
+        full_p_db = full_df[full_df['SOURCE_NUMBER'].isin([source])]
 
         for idx in full_p_db['SOURCE_NUMBER']:
-            part_idx += 1
-            first_idx += 1
             pmalpha_l.append(pmalpha.iloc[idx_merged])
             pmdelta_l.append(pmdelta.iloc[idx_merged])
             pmealpha_l.append(pmealpha.iloc[idx_merged])
             pmedelta_l.append(pmedelta.iloc[idx_merged])
             pm_l.append(pm.iloc[idx_merged])
             pme_l.append(pme.iloc[idx_merged])
-
-            # print(pmalpha.iloc[idx_merged])
-            # print(pmdelta.iloc[idx_merged])
-            # print(pmealpha.iloc[idx_merged])
-            # print(pmedelta.iloc[idx_merged])
-            # print(pm.iloc[idx_merged])
-            # print(pme.iloc[idx_merged])
-
-        print('part {}'.format(part_idx))
-        print('total {}'.format(first_idx))
-
-    print('total {}'.format(first_idx))
-
-    print(pm_l)
 
     # Series creation
     pmalpha_s = Series(pmalpha_l, name='PMALPHA_J2000', dtype=float)
@@ -650,13 +626,14 @@ def pm_compute(logger, merged_db, full_db):
     pm_s = Series(pm_l, name='PM', dtype=float)
     pme_s = Series(pme_l, name='PME', dtype=float)
 
-    print(full_db.columns)
+    print(full_df.columns)
+    print(patata)
 
     from pandas import concat
-    test_df = concat([full_db['SOURCE_NUMBER'].reset_index(), pm_s], axis=1)
-    del test_df['index']
+    df = concat([full_df['SOURCE_NUMBER'].reset_index(), pm_s], axis=1)
+    del df['index']
 
-    return test_df
+    return df
 
 
 def pm_filter(full_db, pm_low, pm_up):
