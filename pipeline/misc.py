@@ -604,21 +604,19 @@ def pm_compute(logger, merged_db, full_db):
     print(len(list(set(merged_db['SOURCE_NUMBER'].tolist()))))
 
     print(list(set(full_db['SOURCE_NUMBER'].tolist()) - set(merged_db['SOURCE_NUMBER'].tolist())))
-    print(patata)
-
-    """
     # scamp cuenta los catalogos cero en ok, por que??
     # no me vale el conteo de tres
     # asi que las fuentes de merged no estan bien
 
-    for idx_merged, source in enumerate(merged_db['SOURCE_NUMBER']):
-        print(idx_merged, source)
+    for idx_full, source in enumerate(full_db['SOURCE_NUMBER']):
+        print(idx_full, source)
 
-        # try:
-        #     idx = merged_db['SOURCE_NUMBER'][merged_db['SOURCE_NUMBER'] == source].index[0]
-        # except IndexError:
-        #     print(merged_db['SOURCE_NUMBER'][merged_db['SOURCE_NUMBER'] == source])
-        #     raise Exception
+        try:
+            idx = merged_db['SOURCE_NUMBER'][merged_db['SOURCE_NUMBER'] == source].index[0]
+        except IndexError:
+            print(merged_db['SOURCE_NUMBER'][merged_db['SOURCE_NUMBER'] == source])
+            raise Exception
+        """
         # print(idx)
         # print(full_db[full_db['SOURCE_NUMBER'].isin([source])])
         # print(merged_db[merged_db['SOURCE_NUMBER'].isin([source])])
@@ -627,7 +625,7 @@ def pm_compute(logger, merged_db, full_db):
         # cuenta cuantas hay
         # crea una nueva serie con las frecuencias
         # print(full_db[full_db['SOURCE_NUMBER'].isin([source])])
-
+        """
     print(patata)
     """
 
@@ -646,7 +644,7 @@ def pm_compute(logger, merged_db, full_db):
                     'PMALPHAERR'] = pmealpha.loc[i - 1]
         full_db.loc[full_db['SOURCE_NUMBER'] == i,
                     'PMDELTAERR'] = pmedelta.loc[i - 1]
-
+    """
     print('out')
 
     return full_db
