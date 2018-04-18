@@ -616,30 +616,16 @@ def pm_compute(logger, merged_db, full_db):
             pm_l.append(pm.iloc[idx_merged])
             pme_l.append(pme.iloc[idx_merged])
 
-    print(full_db['SOURCE_NUMBER'].size)
-    print(len(pmalpha_l))
-    print(len(pmdelta_l))
+    # Series creation
+    pmalpha_s = Series(pmalpha_l, name='PMALPHA_J2000', dtype=float)
+    pmdelta_s = Series(pmdelta_l, name='PMDELTA_J2000', dtype=float)
+    pmealpha_s = Series(pmealpha_l, name='PMALPHAERR_J2000', dtype=float)
+    pmedelta_s = Series(pmedelta_l, name='PMDELTAERR_J2000', dtype=float)
 
-    print(patata)
+    pm_s = Series(pm_l, name='PM', dtype=float)
+    pme_s = Series(pme_l, name='PME', dtype=float)
 
-    """
-    print(set(merged_db['SOURCE_NUMBER']))
-    for i in set(merged_db['SOURCE_NUMBER']):
-        print i
-        full_db.loc[full_db['SOURCE_NUMBER'] == i,
-                    'PM'] = pm.loc[i - 1]
-        full_db.loc[full_db['SOURCE_NUMBER'] == i,
-                    'PMERR'] = pme.loc[i - 1]
-        full_db.loc[full_db['SOURCE_NUMBER'] == i,
-                    'PMALPHA'] = pmalpha.loc[i - 1]
-        full_db.loc[full_db['SOURCE_NUMBER'] == i,
-                    'PMDELTA'] = pmdelta.loc[i - 1]
-        full_db.loc[full_db['SOURCE_NUMBER'] == i,
-                    'PMALPHAERR'] = pmealpha.loc[i - 1]
-        full_db.loc[full_db['SOURCE_NUMBER'] == i,
-                    'PMDELTAERR'] = pmedelta.loc[i - 1]
-    """
-    print('out')
+    full_db['PM'] = pm_s
 
     return full_db
 
