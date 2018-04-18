@@ -610,8 +610,11 @@ def pm_compute(logger, merged_db, full_db):
 
     for idx_merged, source in enumerate(merged_db['SOURCE_NUMBER']):
         print(idx_merged)
-        # full_p_db = full_db[full_db['SOURCE_NUMBER'].isin([source])]
         merged_p_db = merged_db[merged_db['SOURCE_NUMBER'].isin([source])]
+        full_p_db = full_db[full_db['SOURCE_NUMBER'].isin([source])]
+
+        print(full_p_db)
+        print(patata)
         print(pm.loc[idx_merged])
 
         """
