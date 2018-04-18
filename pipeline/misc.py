@@ -603,6 +603,7 @@ def pm_compute(logger, merged_db, full_db):
     print(len(list(set(full_db['SOURCE_NUMBER'].tolist()))))
     print(len(list(set(merged_db['SOURCE_NUMBER'].tolist()))))
 
+    """
     print(patata)
 
     # scamp cuenta los catalogos cero en ok, por que??
@@ -627,8 +628,9 @@ def pm_compute(logger, merged_db, full_db):
         # print(full_db[full_db['SOURCE_NUMBER'].isin([source])])
 
     print(patata)
+    """
+
     for i in set(merged_db['SOURCE_NUMBER']):
-        print(i)
         full_db.loc[full_db['SOURCE_NUMBER'] == i,
                     'PM'] = pm.loc[i - 1]
         full_db.loc[full_db['SOURCE_NUMBER'] == i,
@@ -641,6 +643,8 @@ def pm_compute(logger, merged_db, full_db):
                     'PMALPHAERR'] = pmealpha.loc[i - 1]
         full_db.loc[full_db['SOURCE_NUMBER'] == i,
                     'PMDELTAERR'] = pmedelta.loc[i - 1]
+
+    print('out')
 
     return full_db
 
