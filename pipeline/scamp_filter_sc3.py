@@ -907,9 +907,12 @@ class ScampFilterSC3:  # TODO Split scamp_filter method into single methods
         :return:
         """
         self.logger.debug('Filter by detections number')
+        # De momento lo quito
         # full_db = concat(g for _, g in full_db.groupby("SOURCE_NUMBER")
         #                  if len(g) >= int(detections))
+        # Filter by astrometry
         merged_db = merged_db[merged_db['NPOS_OK'] >= int(detections)]
+        # Filter by photometry
         merged_db = merged_db[merged_db['NMAG'] >= int(detections)]
 
         return full_db, merged_db

@@ -599,10 +599,14 @@ def pm_compute(logger, merged_db, full_db):
     logger.debug('Computing proper motion error')
     pme = Series(np.sqrt(np.array(pmealpha**2 + pmedelta**2), dtype=float))
 
-    print(full_db['SOURCE_NUMBER'].size)
-    print(pmalpha.size)
-    print(pm.size)
-    print('----')
+    print(merged_db['SOURCE_NUMBER'].tolist())
+
+    test_lista = merged_db['SOURCE_NUMBER'].tolist()
+    print(full_db.size)
+    full_db = full_db[full_db['SOURCE_NUMBER'].isin([test_lista])]
+    print(full_db.size)
+
+    print(patata)
 
     # scamp cuenta los catalogos cero en ok, por que??
     # no me vale el conteo de tres
@@ -610,6 +614,7 @@ def pm_compute(logger, merged_db, full_db):
 
     for idx_merged, source in enumerate(merged_db['SOURCE_NUMBER']):
         print(idx_merged, source)
+
         # try:
         #     idx = merged_db['SOURCE_NUMBER'][merged_db['SOURCE_NUMBER'] == source].index[0]
         # except IndexError:
