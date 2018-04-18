@@ -612,7 +612,7 @@ def pm_compute(logger, merged_db, full_db):
         print(idx_merged)
         merged_p_db = merged_db[merged_db['SOURCE_NUMBER'].isin([source])]
         full_p_db = full_db[full_db['SOURCE_NUMBER'].isin([source])]
-        for idx in full_p_db['SOURCE_NUMBER'].size:
+        for idx in full_p_db['SOURCE_NUMBER']:
             print(idx)
         print(len(full_p_db['SOURCE_NUMBER'].tolist()))
 
