@@ -617,7 +617,7 @@ def pm_compute(logger, merged_db, full_db):
         print('tipo {}'.format(type(pmalpha)))
 
         for idx in full_p_db['SOURCE_NUMBER']:
-            print(pmalpha.loc[idx_merged])
+            print(pmalpha.iloc[idx_merged])
             pmalpha_l.append(pmalpha.iloc[idx_merged])
 
         print(pmalpha_l)
