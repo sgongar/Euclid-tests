@@ -660,7 +660,9 @@ def pm_compute(logger, merged_db, full_db):
     print(full_db['SOURCE_NUMBER'].size)
     print(full_db['PM'].size)
 
-    return full_db
+    test_df = full_db['SOURCE_NUMBER'] + pm_s
+
+    return test_df
 
 
 def pm_filter(full_db, pm_low, pm_up):
