@@ -915,4 +915,7 @@ class ScampFilterSC3:  # TODO Split scamp_filter method into single methods
         # Filter by photometry
         merged_db = merged_db[merged_db['NMAG'] >= int(detections)]
 
+        source_list = merged_db['SOURCE_NUMBER'].tolist()
+        full_db = full_db[full_db['SOURCE_NUMBER'].isin(source_list)]
+
         return full_db, merged_db

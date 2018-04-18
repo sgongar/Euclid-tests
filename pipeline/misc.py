@@ -599,13 +599,6 @@ def pm_compute(logger, merged_db, full_db):
     logger.debug('Computing proper motion error')
     pme = Series(np.sqrt(np.array(pmealpha**2 + pmedelta**2), dtype=float))
 
-    print(merged_db['SOURCE_NUMBER'].tolist())
-
-    test_lista = merged_db['SOURCE_NUMBER'].tolist()
-    print(full_db.size)
-    full_db = full_db[full_db['SOURCE_NUMBER'].isin(test_lista)]
-    print(full_db.size)
-
     print('----')
     print(len(list(set(full_db['SOURCE_NUMBER'].tolist()))))
     print(len(list(set(merged_db['SOURCE_NUMBER'].tolist()))))
