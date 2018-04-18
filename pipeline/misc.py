@@ -603,9 +603,10 @@ def pm_compute(logger, merged_db, full_db):
     print(len(list(set(full_db['SOURCE_NUMBER'].tolist()))))
     print(len(list(set(merged_db['SOURCE_NUMBER'].tolist()))))
 
-    """
+    print(list(set(full_db['SOURCE_NUMBER'].tolist()) - set(merged_db['SOURCE_NUMBER'].tolist())))
     print(patata)
 
+    """
     # scamp cuenta los catalogos cero en ok, por que??
     # no me vale el conteo de tres
     # asi que las fuentes de merged no estan bien
