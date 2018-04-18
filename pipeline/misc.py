@@ -613,12 +613,13 @@ def pm_compute(logger, merged_db, full_db):
         merged_p_db = merged_db[merged_db['SOURCE_NUMBER'].isin([source])]
         full_p_db = full_db[full_db['SOURCE_NUMBER'].isin([source])]
         for idx in full_p_db['SOURCE_NUMBER']:
-            print(idx)
-        print(len(full_p_db['SOURCE_NUMBER'].tolist()))
+            print(pmalpha.loc[idx_merged])
+            pmalpha_l.append(pmalpha.loc[idx_merged])
+
+        print(pmalpha_l)
 
         print(full_p_db)
         print(patata)
-        print(pm.loc[idx_merged])
 
         """
         print(full_p_db)
