@@ -660,7 +660,9 @@ def pm_compute(logger, merged_db, full_db):
     print(full_db['SOURCE_NUMBER'].size)
     print(full_db['PM'].size)
 
-    test_df = full_db['SOURCE_NUMBER'] + pm_s
+
+    from pandas import concat
+    test_df = concat([full_db['SOURCE_NUMBER'], pm_s])
 
     return test_df
 
