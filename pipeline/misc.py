@@ -612,8 +612,8 @@ def pm_compute(logger, merged_db, full_db):
         print(idx_merged, source)
         idx = merged_db['SOURCE_NUMBER'][merged_db['SOURCE_NUMBER'] == source].index[0]
         print(idx)
-        print(full_db[full_db['SOURCE_NUMBER']].isin([source]))
-        print(merged_db[merged_db['SOURCE_NUMBER']].isin([source]))
+        print(full_db[full_db['SOURCE_NUMBER'].isin([source])])
+        print(merged_db[merged_db['SOURCE_NUMBER'].isin([source])])
         print('---')
         # ve de fuente en fuente,
         # cuenta cuantas hay
