@@ -604,8 +604,15 @@ def pm_compute(logger, merged_db, full_db):
     print(pm.size)
     print('----')
 
-    for idx_merged, source in enumerate(merged_db['SOURCE_NUMBER']):
+    # scamp cuenta los catalogos cero en ok, por que??
+    # no me vale el conteo de tres
+    # asi que las fuentes de merged no estan bien
+
+    for idx_merged, source in enumerate(full_db['SOURCE_NUMBER']):
         print(idx_merged, source)
+        # ve de fuente en fuente,
+        # cuenta cuantas hay
+        # crea una nueva serie con las frecuencias
         print(full_db[full_db['SOURCE_NUMBER'].isin([source])])
 
     print(patata)
