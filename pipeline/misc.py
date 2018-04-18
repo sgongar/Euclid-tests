@@ -603,7 +603,7 @@ def pm_compute(logger, merged_db, full_db):
 
     test_lista = merged_db['SOURCE_NUMBER'].tolist()
     print(full_db.size)
-    full_db = full_db[full_db['SOURCE_NUMBER'].isin([test_lista])]
+    full_db = full_db[full_db['SOURCE_NUMBER'].isin(test_lista)]
     print(full_db.size)
 
     print(patata)
