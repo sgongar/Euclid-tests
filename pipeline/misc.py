@@ -606,6 +606,10 @@ def pm_compute(logger, merged_db, full_db):
     full_db = full_db[full_db['SOURCE_NUMBER'].isin(test_lista)]
     print(full_db.size)
 
+    print('----')
+    print(len(list(set(full_db['SOURCE_NUMBER'].tolist()))))
+    print(len(list(set(merged_db['SOURCE_NUMBER'].tolist()))))
+
     print(patata)
 
     # scamp cuenta los catalogos cero en ok, por que??
