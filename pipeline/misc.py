@@ -610,7 +610,11 @@ def pm_compute(logger, merged_db, full_db):
 
     for idx_merged, source in enumerate(full_db['SOURCE_NUMBER']):
         print(idx_merged, source)
-        idx = merged_db['SOURCE_NUMBER'][merged_db['SOURCE_NUMBER'] == source].index[0]
+        try:
+            idx = merged_db['SOURCE_NUMBER'][merged_db['SOURCE_NUMBER'] == source].index[0]
+        except IndexError:
+            print(merged_db['SOURCE_NUMBER'][merged_db['SOURCE_NUMBER'] == source])
+            raise Exception
         print(idx)
         print(full_db[full_db['SOURCE_NUMBER'].isin([source])])
         print(merged_db[merged_db['SOURCE_NUMBER'].isin([source])])
