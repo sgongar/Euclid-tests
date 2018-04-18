@@ -604,17 +604,27 @@ def pm_compute(logger, merged_db, full_db):
     pme = Series(np.sqrt(np.array(pmealpha**2 + pmedelta**2), dtype=float))
     pme_l = []
 
+    print('1 {}'.format(pmalpha.size))
+    print('2 {}'.format(pm.size))
+
+    print('full {}'.format(full_db['SOURCE_NUMBER'].size))
+
+    first_idx = 0
+
     for idx_merged, source in enumerate(merged_db['SOURCE_NUMBER']):
-        print('{} - {}'.format(idx_merged, len(merged_db['SOURCE_NUMBER'])))
+        # print('{} - {}'.format(idx_merged, len(merged_db['SOURCE_NUMBER'])))
         full_p_db = full_db[full_db['SOURCE_NUMBER'].isin([source])]
 
         for idx in full_p_db['SOURCE_NUMBER']:
+            first_idx += 1
             pmalpha_l.append(pmalpha.iloc[idx_merged])
             pmdelta_l.append(pmdelta.iloc[idx_merged])
             pmealpha_l.append(pmealpha.iloc[idx_merged])
             pmedelta_l.append(pmedelta.iloc[idx_merged])
             pm_l.append(pm.iloc[idx_merged])
             pme_l.append(pme.iloc[idx_merged])
+
+    print('total {}'.format(first_idx))
 
     # Series creation
     pmalpha_s = Series(pmalpha_l, name='PMALPHA_J2000', dtype=float)
