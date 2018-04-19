@@ -568,8 +568,8 @@ class ScampFilterSC3:  # TODO Split scamp_filter method into single methods
         cat_d = {}
         for cat_n in range(1, cats_number + 1, 1):
             cat_file = self.get_cat(cat_n)
-            cat_data = fits.open('{}{}'.format(self.prfs_d['fits_dir'],
-                                               cat_file))
+            cat_data = fits.open('{}/{}'.format(self.prfs_d['fits_dir'],
+                                                cat_file))
 
             ccd_df = Table(cat_data[2].data)
             self.logger.debug('converting CCD catalog to Pandas format')
