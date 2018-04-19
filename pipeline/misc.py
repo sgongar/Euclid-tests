@@ -1027,3 +1027,21 @@ def check_source(o_df, o_alpha, o_delta):
     o_df = o_df[o_delta > o_df['DELTA_J2000'] - prfs_d['tolerance']]
 
     return o_df
+
+
+def check_source_sc3(o_df, o_alpha, o_delta):
+    """
+
+    :param o_df:
+    :param o_alpha:
+    :param o_delta:
+    :return:
+    """
+    prfs_d = extract_settings_sc3()
+
+    o_df = o_df[o_df['ALPHA_J2000'] + prfs_d['tolerance'] > o_alpha]
+    o_df = o_df[o_alpha > o_df['ALPHA_J2000'] - prfs_d['tolerance']]
+    o_df = o_df[o_df['DELTA_J2000'] + prfs_d['tolerance'] > o_delta]
+    o_df = o_df[o_delta > o_df['DELTA_J2000'] - prfs_d['tolerance']]
+
+    return o_df

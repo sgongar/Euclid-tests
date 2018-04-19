@@ -19,7 +19,7 @@ from astropy.table import Table
 from numpy import mean, median
 from pandas import concat, read_csv, Series
 
-from misc import pm_compute, extract_settings_sc3, check_source
+from misc import pm_compute, extract_settings_sc3, check_source_sc3
 from misc import b_filter, create_folder, get_dither, confidence_filter
 
 __author__ = "Samuel Góngora García"
@@ -572,7 +572,7 @@ class ScampFilterSC3:  # TODO Split scamp_filter method into single methods
                                                 cat_file))
 
             ccd_df = Table(cat_data[2].data)
-            self.logger.debug('converting CCD catalog to Pandas format')
+            self.logger.debug('CCD catalog {} to Pandas'.format(cat_n))
             cat_d[cat_n] = ccd_df.to_pandas()
 
         # Loops over unique sources of filtered file
@@ -590,7 +590,7 @@ class ScampFilterSC3:  # TODO Split scamp_filter method into single methods
                 cat_n = row.CATALOG_NUMBER
                 # self.logger.debug('opening CCD catalog {}'.format(cat_file))
 
-                cat_df = check_source(cat_d[cat_n], o_alpha, o_delta)
+                cat_df = check_source_sc3(cat_d[cat_n], o_alpha, o_delta)
                 if cat_df.empty:
                     # FIXME problemas entre sextractor y scamp
                     # Como el objeto no esta en las imagenes originales de
