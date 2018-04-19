@@ -605,7 +605,6 @@ def pm_compute(logger, merged_df, full_df):
     pme_l = []
 
     for idx_merged, source in enumerate(merged_df['SOURCE_NUMBER']):
-        part_idx = 0
         # print('{} - {}'.format(idx_merged, len(merged_db['SOURCE_NUMBER'])))
         full_p_db = full_df[full_df['SOURCE_NUMBER'].isin([source])]
 

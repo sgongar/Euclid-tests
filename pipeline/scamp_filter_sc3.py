@@ -62,7 +62,7 @@ class ScampFilterSC3:  # TODO Split scamp_filter method into single methods
         # Saves _2.csv
         full_db = self.compute_pm(merged_db, full_db)
         # Saves _3.csv
-        # self.get_areas()
+        self.get_areas(full_db)
 
         """
         full_db = read_csv('{}_3.csv'.format(self.filter_o_n), index_col=0)
@@ -414,7 +414,7 @@ class ScampFilterSC3:  # TODO Split scamp_filter method into single methods
             self.save_message('6f')
             fast_db.to_csv('{}_6f.csv'.format(self.filter_o_n))
 
-    def get_areas(self):
+    def get_areas(self, full_db):
         """
 
         :return: full_db
@@ -422,7 +422,8 @@ class ScampFilterSC3:  # TODO Split scamp_filter method into single methods
         self.logger.debug('Populates filtered catalog with Sextractor data')
 
         # Opens filtered file
-        filter_cat = read_csv('{}_2.csv'.format(self.filter_o_n), index_col=0)
+        # filter_cat = read_csv('{}_2.csv'.format(self.filter_o_n), index_col=0)
+        filter_cat = full_db
 
         # Gets unique sources from filtered file
         unique_sources = list(set(filter_cat['SOURCE_NUMBER'].tolist()))
