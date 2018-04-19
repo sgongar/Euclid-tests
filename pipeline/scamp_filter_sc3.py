@@ -567,9 +567,9 @@ class ScampFilterSC3:  # TODO Split scamp_filter method into single methods
         cats_number = 144
         cat_d = {}
         for cat_n in range(1, cats_number + 1, 1):
-            cat_dir = '/media/sf_CarpetaCompartida/luca_data/VIS_SC3/CCDs/cats/'
             cat_file = self.get_cat(cat_n)
-            cat_data = fits.open('{}{}'.format(cat_dir, cat_file))
+            cat_data = fits.open('{}{}'.format(self.prfs_d['fits_dir'],
+                                               cat_file))
 
             ccd_df = Table(cat_data[2].data)
             self.logger.debug('converting CCD catalog to Pandas format')
