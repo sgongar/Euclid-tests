@@ -396,6 +396,7 @@ def extract_settings_sc3():
         # TODO should leave free at least 20% of processors
     else:
         prfs_d['cores_number'] = int(prfs_d['cores_number'])
+    prfs_d['tolerance'] = float(confmap(cf, "Misc")['tolerance'])
 
     return prfs_d
 
