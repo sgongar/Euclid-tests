@@ -571,7 +571,6 @@ class ScampFilterSC3:  # TODO Split scamp_filter method into single methods
 
         # Loops over unique sources of filtered file
         for idx, source_ in enumerate(unique_sources_thread):
-            print(idx, idx_l)
             source_d = {'A_IMAGE': [], 'B_IMAGE': [], 'ERRA_IMAGE': [],
                         'ERRB_IMAGE': [], 'CLASS_STAR': [],
                         'FLUX_ISO': [], 'FLUXERR_ISO': [], 'FLUX_RADIUS': [],
