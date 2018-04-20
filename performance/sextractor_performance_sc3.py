@@ -14,7 +14,7 @@ from astropy.io import fits
 from astropy.table import Table
 from astropy.wcs import WCS
 
-# from pandas import read_csv
+from pandas import concat
 
 from misc import extract_settings_sc3
 
@@ -236,10 +236,11 @@ def merge_cats(cat_d):
     cat_list = []
 
     for idx, cat_ in enumerate(cat_d.keys()):
-        print(idx)
-        print(type(cat_d[cat_]))
+        cat_list.append(cat_d[cat_])
 
-    return cat_list
+    full_cat = concat(cat_list)
+
+    return full_cat
 
 
 def main():
@@ -250,6 +251,9 @@ def main():
     cat_d = load_sextractor_cats()
     # Get boundaries for all catalogs
     full_cat = merge_cats(cat_d)
+
+    print(full_cat)
+
 
     """
     # Look for sources
