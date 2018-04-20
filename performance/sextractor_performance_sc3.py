@@ -10,6 +10,10 @@ Todo:
 
 """
 
+from astropy.io import fits
+from astropy.table import Table
+from pandas import read_csv
+
 from pipeline.misc import extract_settings_sc3
 
 __author__ = "Samuel Gongora-Garcia"
@@ -23,12 +27,19 @@ __status__ = "Development"
 
 
 def check_source(i_alpha, i_delta, e_df):
-    tolerance = 0.0001389  # 0.5 arcsecond
+    """
 
-    e_df = e_df[e_df['ALPHA_J2000'] + tolerance > i_alpha]
-    e_df = e_df[i_alpha > e_df['ALPHA_J2000'] - tolerance]
-    e_df = e_df[e_df['DELTA_J2000'] + tolerance > i_delta]
-    e_df = e_df[i_delta > e_df['DELTA_J2000'] - tolerance]
+    :param i_alpha:
+    :param i_delta:
+    :param e_df:
+    :return:
+    """
+    prfs_d = extract_settings_sc3()
+
+    e_df = e_df[e_df['ALPHA_J2000'] + prfs_d['tolerance'] > i_alpha]
+    e_df = e_df[i_alpha > e_df['ALPHA_J2000'] - prfs_d['tolerance']]
+    e_df = e_df[e_df['DELTA_J2000'] + prfs_d['tolerance'] > i_delta]
+    e_df = e_df[i_delta > e_df['DELTA_J2000'] - prfs_d['tolerance']]
 
     return e_df
 
@@ -37,6 +48,11 @@ def main():
     source_list = []
 
     input_catalog = read_csv('sc3_mer_10_starflag1.csv')
+    # Load all catalogs
+
+    # Get boundaries for all catalogs
+    # Look for sources
+    # Create two dataframes (stars and galaxies)
     extracted_catalog = fits.open('test_cat.cat')
     full_db = Table(extracted_catalog[2].data)
     full_db = full_db.to_pandas()
@@ -57,26 +73,6 @@ def main():
                            'ERRB_WORLD', 'MAG_AUTO', 'MAGERR_AUTO']]
 
     return sliced_df
-
-
-def create_data(sliced_df):
-    c1 = fits.Column(name='X_WORLD', format='1E', unit='deg', 
-                     disp='E18.10', array=sliced_df['X_WORLD'])
-    c2 = fits.Column(name='Y_WORLD', format='1E', unit='deg',
-                     disp='E18.10', array=sliced_df['Y_WORLD'])
-    c3 = fits.Column(name = 'ERRA_WORLD', format = '1E',
-                     unit = 'deg', disp = 'G12.7', array=sliced_df['ERRA_WORLD'])
-    c4 = fits.Column(name = 'ERRB_WORLD', format = '1E',
-                     unit = 'deg', disp = 'G12.7', array=sliced_df['ERRB_WORLD'])
-    c5 = fits.Column(name = 'MAG_AUTO', format = '1E',
-                     unit = 'mag', disp = 'F8.4', array=sliced_df['MAG_AUTO'])
-    c6 = fits.Column(name = 'MAGERR_AUTO', format = '1E',
-                     unit = 'mag', disp = 'F8.4', array=sliced_df['MAGERR_AUTO'])
-
-    coldefs = fits.ColDefs([c1, c2, c3, c4, c5])
-    data = fits.BinTableHDU.from_columns(coldefs)
-
-    return data
 
 
 def create_cat(loc, data):

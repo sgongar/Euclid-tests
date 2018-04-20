@@ -1,5 +1,25 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+"""Python script for time measurements
+
+Todo:
+    * Improve log messages
+
+"""
+
 from pandas import concat, read_csv, Series
-from misc import compare_floats
+from pipeline.misc import compare_floats
+
+__author__ = "Samuel Gongora-Garcia"
+__copyright__ = "Copyright 2017"
+__credits__ = ["Samuel Gongora-Garcia"]
+__license__ = "GPL"
+__version__ = "0.1"
+__maintainer__ = "Samuel Gongora-Garcia"
+__email__ = "sgongora@cab.inta-csic.es"
+__status__ = "Development"
+
 
 
 def analyse_perfomance(logger, prefs_dict):
