@@ -409,7 +409,7 @@ def load_sextractor_cats():
         cat_data = fits.open('{}/{}'.format(prfs_d['fits_dir'], cat_file))
 
         ccd_df = Table(cat_data[2].data)
-        print('CCD catalog {} to Pandas'.format(cat_n))
+        # print('CCD catalog {} to Pandas'.format(cat_n))
         cat_d[cat_n] = ccd_df.to_pandas()
 
     return cat_d
@@ -427,6 +427,8 @@ def get_boundaries():
     for fits_n in range(1, fits_number + 1, 1):
         fits_file = get_fits(fits_n)
         fits_loc = '{}/{}'.format(prfs_d['fits_dir'], fits_file)
+
+        print('loc {}'.format(fits_loc))
 
         borders_d[fits_file] = get_fits_limits(fits_loc)
 
