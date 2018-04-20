@@ -24,11 +24,7 @@ from misc import extract_settings_sc3
 class Cosmic:
 
     def __init__(self):
-        print('hey bitches')
         self.prfs_d = extract_settings_sc3()
-        print(self.prfs_d.keys())
-        print(self.prfs_d['home'])
-        print(self.prfs_d['fits_dir'])
 
         active_cosmic = []
         fits_files = listdir(self.prfs_d['fits_dir'])

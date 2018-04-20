@@ -1,9 +1,0 @@
-astropy==2.0.2
-numpy==1.13.3
-mock
-pandas==0.20.3
-python_dateutil==2.6.1
-statsmodels==0.8.0
-pytz==2017.2
-patsy
-six==1.11.0

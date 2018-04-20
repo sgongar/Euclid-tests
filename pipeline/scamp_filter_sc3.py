@@ -60,13 +60,13 @@ class ScampFilterSC3:  # TODO Split scamp_filter method into single methods
         # Saves _1.csv
         (merged_db, full_db) = self.scamp_filter()
         # Saves _2.csv
-        full_db = self.compute_pm(merged_db, full_db)
+        full_df = self.compute_pm(merged_db, full_db)
         # Saves _3.csv
-        self.get_areas(full_db)
+        full_df = self.get_areas(full_df)
 
         """
-        full_db = read_csv('{}_3.csv'.format(self.filter_o_n), index_col=0)
-        self.slow_db, self.fast_db = self.filter_class(full_db)
+        # full_db = read_csv('{}_3.csv'.format(self.filter_o_n), index_col=0)
+        self.slow_df, self.fast_df = self.filter_class(full_df)
         if self.save:
             self.save_message('4s')
             self.slow_db.to_csv('{}_4s.csv'.format(self.filter_o_n))
@@ -360,7 +360,35 @@ class ScampFilterSC3:  # TODO Split scamp_filter method into single methods
         :param full_db:
         :return: full_db
         """
+        """
         # Computing pm
+        sub_list_size = len(unique_sources) / self.prfs_d['cores_number']
+
+        sub_list_l = []
+        for idx_sub_list in range(0, self.prfs_d['cores_number'], 1):
+            if idx_sub_list != (self.prfs_d['cores_number'] - 1):
+                idx_down = sub_list_size * idx_sub_list
+                idx_up = sub_list_size * (idx_sub_list + 1)
+                sub_list_l.append(unique_sources[idx_down:idx_up])
+            else:
+                idx_down = sub_list_size * idx_sub_list
+                sub_list_l.append(unique_sources[idx_down:])
+
+        areas_j = []
+        for idx_l in range(0, self.prfs_d['cores_number'], 1):
+            areas_p = Process(target=self.get_areas_thread,
+                              args=(dict_keys, stats_keys, extra_keys, keys_l,
+                                    sub_list_l[idx_l], filter_cat, idx_l,
+                                    cat_d,))
+            areas_j.append(areas_p)
+            areas_p.start()
+
+        active_areas = list([job.is_alive() for job in areas_j])
+        while True in active_areas:
+            active_areas = list([job.is_alive() for job in areas_j])
+            pass
+        """
+
         self.logger.debug('Computes proper motion')
         full_db = pm_compute(self.logger, merged_db, full_db)
         if self.save:
@@ -414,19 +442,15 @@ class ScampFilterSC3:  # TODO Split scamp_filter method into single methods
             self.save_message('6f')
             fast_db.to_csv('{}_6f.csv'.format(self.filter_o_n))
 
-    def get_areas(self, full_db):
+    def get_areas(self, full_df):
         """
 
-        :return: full_db
+        :return: full_df
         """
         self.logger.debug('Populates filtered catalog with Sextractor data')
 
-        # Opens filtered file
-        # filter_cat = read_csv('{}_2.csv'.format(self.filter_o_n), index_col=0)
-        filter_cat = full_db
-
         # Gets unique sources from filtered file
-        unique_sources = list(set(filter_cat['SOURCE_NUMBER'].tolist()))
+        unique_sources = list(set(full_df['SOURCE_NUMBER'].tolist()))
         l_sourcs = len(unique_sources)  # Just to not break 79 characters
         self.logger.debug('Unique sources to be analysed {}'.format(l_sourcs))
 
@@ -481,11 +505,22 @@ class ScampFilterSC3:  # TODO Split scamp_filter method into single methods
                 idx_down = sub_list_size * idx_sub_list
                 sub_list_l.append(unique_sources[idx_down:])
 
+        cats_number = 144
+        cat_d = {}
+        for cat_n in range(1, cats_number + 1, 1):
+            cat_file = self.get_cat(cat_n)
+            cat_data = fits.open('{}/{}'.format(self.prfs_d['fits_dir'],
+                                                cat_file))
+
+            ccd_df = Table(cat_data[2].data)
+            self.logger.debug('CCD catalog {} to Pandas'.format(cat_n))
+            cat_d[cat_n] = ccd_df.to_pandas()
+
         areas_j = []
         for idx_l in range(0, self.prfs_d['cores_number'], 1):
             areas_p = Process(target=self.get_areas_thread,
                               args=(dict_keys, stats_keys, extra_keys, keys_l,
-                                    sub_list_l[idx_l], filter_cat, idx_l,))
+                                    sub_list_l[idx_l], full_df, idx_l, cat_d,))
             areas_j.append(areas_p)
             areas_p.start()
 
@@ -502,47 +537,16 @@ class ScampFilterSC3:  # TODO Split scamp_filter method into single methods
                             index_col=0)
             csv_list.append(csv_)
 
-        full_db = concat(csv_list)
+        full_df = concat(csv_list)
 
         if self.save:
             self.save_message('3')
-            full_db.to_csv('{}_3.csv'.format(self.filter_o_n))
+            full_df.to_csv('{}_3.csv'.format(self.filter_o_n))
 
-
-
-        """
-        sub_list_1_size = len(unique_sources) / 2
-        sub_list_1 = unique_sources[:sub_list_1_size]
-        sub_list_2 = unique_sources[sub_list_1_size:]
-        sub_list_l = [sub_list_1, sub_list_2]
-
-        areas_j = []
-        for idx_l in range(0, 2, 1):
-            areas_p = Process(target=self.get_areas_thread,
-                              args=(dict_keys, stats_keys, extra_keys, keys_l,
-                                    sub_list_l[idx_l], filter_cat, idx_l,))
-            areas_j.append(areas_p)
-            areas_p.start()
-
-        active_areas = list([job.is_alive() for job in areas_j])
-        while True in active_areas:
-            active_areas = list([job.is_alive() for job in areas_j])
-            pass
-
-        # Merges areas
-        # Merges catalogs
-        list_1 = read_csv('{}_3_0.csv'.format(self.filter_o_n), index_col=0)
-        list_2 = read_csv('{}_3_1.csv'.format(self.filter_o_n), index_col=0)
-
-        full_db = concat([list_1, list_2])
-        
-        if self.save:
-            self.save_message('3')
-            full_db.to_csv('{}_3.csv'.format(self.filter_o_n))
-        """
+        return full_df
 
     def get_areas_thread(self, dict_keys, stats_keys, extra_keys, keys_l,
-                         unique_sources_thread, filter_cat, idx_l):
+                         unique_sources_thread, filter_cat, idx_l, cat_d):
         """
 
         :param dict_keys:
@@ -552,6 +556,7 @@ class ScampFilterSC3:  # TODO Split scamp_filter method into single methods
         :param unique_sources_thread:
         :param filter_cat:
         :param idx_l:
+        :param cat_d:
         :return:
         """
         tmp_d = {}
@@ -563,17 +568,6 @@ class ScampFilterSC3:  # TODO Split scamp_filter method into single methods
 
         for key_ in stats_keys:
             tmp_d[key_] = []
-
-        cats_number = 144
-        cat_d = {}
-        for cat_n in range(1, cats_number + 1, 1):
-            cat_file = self.get_cat(cat_n)
-            cat_data = fits.open('{}/{}'.format(self.prfs_d['fits_dir'],
-                                                cat_file))
-
-            ccd_df = Table(cat_data[2].data)
-            self.logger.debug('CCD catalog {} to Pandas'.format(cat_n))
-            cat_d[cat_n] = ccd_df.to_pandas()
 
         # Loops over unique sources of filtered file
         for idx, source_ in enumerate(unique_sources_thread):
