@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-"""Python script for time measurements
+"""
 
 
 Todo:
@@ -68,15 +68,10 @@ def extract_settings_sc3():
     @return prfs_d: a dictionary which contains all valuable data
     """
     cf = ConfigParser()
-    from os import getcwd
-    print(getcwd())
     cf.read(".settings_SC3.ini")
 
     prfs_d = {}
     os_version = get_os()
-
-    print(cf)
-    print('os {}'.format(os_version))
 
     if os_version == 'centos':
         prfs_d['version'] = conf_map(cf, "Version")['centos_version']
