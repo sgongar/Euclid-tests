@@ -344,6 +344,8 @@ def extract_settings_sc3():
     prfs_d = {}
     os_version = get_os()
 
+    print('os {}'.format(os_version))
+
     if os_version == 'centos':
         prfs_d['version'] = confmap(cf, "Version")['centos_version']
     elif os_version == 'cab':
