@@ -137,6 +137,7 @@ __status__ = "Development"
 '4-000000-0000000__20170630T012050.1Z_00.00_9']
 """
 
+
 def get_cat(cat_n):
     """  TODO get scamp organization in order to reduce the lines number
 
@@ -216,7 +217,7 @@ def load_sextractor_cats():
     """
     prfs_d = extract_settings_sc3()
 
-    cats_number = 144  # todo hardcoded!
+    cats_number = 36  # todo hardcoded!
     cat_d = {}
     for cat_n in range(1, cats_number + 1, 1):
         cat_file = get_cat(cat_n)
