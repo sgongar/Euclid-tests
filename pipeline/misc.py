@@ -344,6 +344,8 @@ def extract_settings_sc3():
     prfs_d = {}
     os_version = get_os()
 
+    print(cf)
+
     print('os {}'.format(os_version))
 
     if os_version == 'centos':
