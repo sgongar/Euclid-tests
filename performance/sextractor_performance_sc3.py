@@ -239,6 +239,7 @@ def merge_cats(cat_d):
         cat_list.append(cat_d[cat_])
 
     full_cat = concat(cat_list)
+    full_cat = full_cat.reset_index(drop=True)
 
     return full_cat
 
