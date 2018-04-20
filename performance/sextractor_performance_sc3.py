@@ -14,7 +14,7 @@ from astropy.io import fits
 from astropy.table import Table
 from pandas import read_csv
 
-from pipeline.misc import extract_settings_sc3
+from misc import extract_settings_sc3
 
 __author__ = "Samuel Gongora-Garcia"
 __copyright__ = "Copyright 2018"
