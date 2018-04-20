@@ -38,9 +38,17 @@ def get_fits_limits(fits_image):
     # logger.info('getting limits of {} image'.format(fits_image))
 
     data, header = fits.getdata(fits_image, header=True)
+    print('data {}'.format(data))
+    print('header {}'.format(header))
+
     w = WCS(fits_image)
 
+    print('w {}'.format(w))
+
     above_x, above_y = header['NAXIS1'], header['NAXIS2']
+    print('above_x {}'.format(above_x))
+    print('above_y {}'.format(above_y))
+
     above_ra, above_dec = w.all_pix2world(above_x, above_y, 0)
 
     below_ra, below_dec = w.all_pix2world(0, 0, 0)
