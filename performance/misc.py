@@ -68,6 +68,8 @@ def extract_settings_sc3():
     @return prfs_d: a dictionary which contains all valuable data
     """
     cf = ConfigParser()
+    from os import getcwd
+    print(getcwd())
     cf.read(".settings_SC3.ini")
 
     prfs_d = {}
