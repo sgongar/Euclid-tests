@@ -14,7 +14,7 @@ from astropy.io import fits
 from astropy.table import Table
 from pandas import read_csv
 
-# from pipeline.misc import extract_settings_sc3
+from pipeline.misc import extract_settings_sc3
 
 __author__ = "Samuel Gongora-Garcia"
 __copyright__ = "Copyright 2018"
@@ -259,12 +259,6 @@ def main():
     return sliced_df
     """
 
+
 if __name__ == "__main__":
-    import os
-
-    try:
-        user_paths = os.environ['PYTHONPATH'].split(os.pathsep)
-    except KeyError:
-        user_paths = []
-
-    # main()
+    main()
