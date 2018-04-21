@@ -12,9 +12,8 @@ Todo:
 
 from astropy.io import fits
 from astropy.table import Table
-from astropy.wcs import WCS
 
-from pandas import concat
+from pandas import concat, read_csv
 
 from misc import extract_settings_sc3
 
@@ -202,10 +201,10 @@ def check_source(i_alpha, i_delta, e_df):
     """
     prfs_d = extract_settings_sc3()
 
-    e_df = e_df[e_df['ALPHA_J2000'] + prfs_d['tolerance'] > i_alpha]
-    e_df = e_df[i_alpha > e_df['ALPHA_J2000'] - prfs_d['tolerance']]
-    e_df = e_df[e_df['DELTA_J2000'] + prfs_d['tolerance'] > i_delta]
-    e_df = e_df[i_delta > e_df['DELTA_J2000'] - prfs_d['tolerance']]
+    e_df = e_df[e_df['rightascension'] + prfs_d['tolerance'] > i_alpha]
+    e_df = e_df[i_alpha > e_df['rightascension'] - prfs_d['tolerance']]
+    e_df = e_df[e_df['declination'] + prfs_d['tolerance'] > i_delta]
+    e_df = e_df[i_delta > e_df['declination'] - prfs_d['tolerance']]
 
     return e_df
 
@@ -248,41 +247,30 @@ def merge_cats(cat_d):
 
 
 def main():
-    source_list = []
+    """
 
-    # input_catalog = read_csv('sc3_mer_10_starflag1.csv')
+    :return:
+    """
+    input_catalog = read_csv('1523634221737L.csv')
+    input_catalog = input_catalog[input_catalog['dither'].isin([1])]
     # Load all catalogs
     cat_d = load_sextractor_cats()
     # Get boundaries for all catalogs
     full_cat = merge_cats(cat_d)
 
-    print(full_cat)
-
-
-    """
     # Look for sources
-    # Create two dataframes (stars and galaxies)
-    extracted_catalog = fits.open('test_cat.cat')
-    full_db = Table(extracted_catalog[2].data)
-    full_db = full_db.to_pandas()
-
-    total = input_catalog['X_WORLD'].size
+    total = input_catalog['rightascension'].size
     for i, row in enumerate(input_catalog.itertuples(), 1):
         print('source number: {} - total number: {}'.format(i, total))
-        i_alpha = row.X_WORLD
-        i_delta = row.Y_WORLD
+        i_alpha = row.rightascension
+        i_delta = row.declination
 
-        e_df = check_source(i_alpha, i_delta, full_db)
+        e_df = check_source(i_alpha, i_delta, full_cat)
+
         if e_df.empty is not True:
-            if e_df['NUMBER'].size == 1:
-                source_list.append(e_df['NUMBER'].iloc[0])
-
-    sliced_df = full_db[full_db['NUMBER'].isin(source_list)]
-    sliced_df = sliced_df[['X_WORLD', 'Y_WORLD', 'ERRA_WORLD',
-                           'ERRB_WORLD', 'MAG_AUTO', 'MAGERR_AUTO']]
-
-    return sliced_df
-    """
+            print('algo')
+        else:
+            print('nada')
 
 
 if __name__ == "__main__":
