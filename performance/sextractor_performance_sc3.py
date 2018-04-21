@@ -201,10 +201,10 @@ def check_source(i_alpha, i_delta, e_df):
     """
     prfs_d = extract_settings_sc3()
 
-    e_df = e_df[e_df['rightascension'] + prfs_d['tolerance'] > i_alpha]
-    e_df = e_df[i_alpha > e_df['rightascension'] - prfs_d['tolerance']]
-    e_df = e_df[e_df['declination'] + prfs_d['tolerance'] > i_delta]
-    e_df = e_df[i_delta > e_df['declination'] - prfs_d['tolerance']]
+    e_df = e_df[e_df['ALPHA_J2000'] + prfs_d['tolerance'] > i_alpha]
+    e_df = e_df[i_alpha > e_df['ALPHA_J2000'] - prfs_d['tolerance']]
+    e_df = e_df[e_df['DELTA_J2000'] + prfs_d['tolerance'] > i_delta]
+    e_df = e_df[i_delta > e_df['DELTA_J2000'] - prfs_d['tolerance']]
 
     return e_df
 
