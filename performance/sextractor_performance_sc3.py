@@ -259,18 +259,25 @@ def main():
     full_cat = merge_cats(cat_d)
 
     # Look for sources
-    total = input_catalog['rightascension'].size
+    total_ones = input_catalog['rightascension'].size
+    right_ones = 0
+    false_ones = 0
+
     for i, row in enumerate(input_catalog.itertuples(), 1):
-        print('source number: {} - total number: {}'.format(i, total))
+        # print('source number: {} - total number: {}'.format(i, total_ones))
         i_alpha = row.rightascension
         i_delta = row.declination
 
         e_df = check_source(i_alpha, i_delta, full_cat)
 
         if e_df.empty is not True:
-            print('algo')
+            right_ones += 1
         else:
-            print('nada')
+            false_ones += 1
+
+    print('total ones {}'.format(total_ones))
+    print('right ones {}'.format(right_ones))
+    print('false ones {}'.format(false_ones))
 
 
 if __name__ == "__main__":
