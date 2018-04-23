@@ -342,6 +342,10 @@ def ab_size(input_catalog, full_cat, pdf):
             ax_1.plot(mag_iso_l, a_image_l, label='mean value')
             ax_1.plot(mag_iso_l, b_image_l, label='std value')
 
+        pdf.savefig()  # saves figure
+        plt.clf()  # clear current figure
+        plt.close(fig)  # removes figure
+
 
 if __name__ == "__main__":
     input_catalog, full_cat = main()
