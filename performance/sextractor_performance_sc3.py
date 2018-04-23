@@ -14,6 +14,8 @@ from sys import argv
 
 from astropy.io import fits
 from astropy.table import Table
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
 from pandas import concat, read_csv
 
 from misc import extract_settings_sc3
@@ -291,7 +293,7 @@ def extracted(input_catalog, full_cat):
     print('false ones {}'.format(false_ones))
 
 
-def ab_size(input_catalog, full_cat):
+def ab_size(input_catalog, full_cat, pdf):
     """
 
     :param input_catalog:
@@ -325,12 +327,27 @@ def ab_size(input_catalog, full_cat):
     print('mag_iso length {}'.format(len(mag_iso_l)))
     print('mag_aper length {}'.format(len(mag_aper_l)))
 
+    if pdf:
+        # PDF parameters
+        plot_size = [16.53, 11.69]
+        plot_dpi = 100
+        pdf_name = 'movement.pdf'
+
+        with PdfPages(pdf_name) as pdf:
+            # First galaxy curve
+            fig = plt.figure(figsize=plot_size, dpi=plot_dpi)
+            ax_1 = fig.add_subplot(1, 1, 1)
+            ax_1.set_title('TEST')
+
+            ax_1.plot(mag_iso_l, a_image_l, label='mean value')
+            ax_1.plot(mag_iso_l, b_image_l, label='std value')
+
 
 if __name__ == "__main__":
     input_catalog, full_cat = main()
 
     if argv[1] == '-extracted':
-        extracted()
-    elif argv[1] == 'ab_size':
-        ab_size()
+        extracted(input_catalog, full_cat)
+    elif argv[1] == '-ab_size':
+        ab_size(input_catalog, full_cat, pdf=True)
 
