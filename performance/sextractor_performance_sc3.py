@@ -318,6 +318,9 @@ def ab_size(input_catalog, full_cat, pdf):
             ax_1.scatter(mag_iso_g_l, a_image_g_l, label='a_image', c='b')
             ax_1.scatter(mag_iso_g_l, b_image_g_l, label='b_image', c='g')
 
+            ax_1.set_xlim(10, 26)
+            ax_1.set_ylim(0, 40)
+
             ax_1.legend(loc=4)
             ax_1.grid(True)
 
@@ -332,6 +335,9 @@ def ab_size(input_catalog, full_cat, pdf):
 
             ax_2.scatter(mag_iso_s_l, a_image_s_l, label='a_image', c='b')
             ax_2.scatter(mag_iso_s_l, b_image_s_l, label='b_image', c='g')
+
+            ax_2.set_xlim(10, 26)
+            ax_2.set_ylim(0, 40)
 
             ax_2.legend(loc=4)
             ax_2.grid(True)
@@ -348,6 +354,9 @@ def ab_size(input_catalog, full_cat, pdf):
             ax_3.scatter(mag_aper_g_l, a_image_g_l, label='a_image', c='b')
             ax_3.scatter(mag_aper_g_l, b_image_g_l, label='b_image', c='g')
 
+            ax_3.set_xlim(10, 26)
+            ax_3.set_ylim(0, 40)
+
             ax_3.legend(loc=4)
             ax_3.grid(True)
 
@@ -362,6 +371,9 @@ def ab_size(input_catalog, full_cat, pdf):
 
             ax_4.scatter(mag_aper_s_l, a_image_s_l, label='a_image', c='b')
             ax_4.scatter(mag_aper_s_l, b_image_s_l, label='b_image', c='g')
+
+            ax_4.set_xlim(10, 26)
+            ax_4.set_ylim(0, 40)
 
             ax_4.legend(loc=4)
             ax_4.grid(True)
