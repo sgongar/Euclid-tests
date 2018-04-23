@@ -257,6 +257,8 @@ def main():
     cat_d = load_sextractor_cats()
     # Get boundaries for all catalogs
     full_cat = merge_cats(cat_d)
+    print(full_cat.columns)
+    print(patata)
 
     # Look for sources
     total_ones = input_catalog['rightascension'].size
