@@ -10,9 +10,10 @@ Todo:
 
 """
 
+from sys import argv
+
 from astropy.io import fits
 from astropy.table import Table
-
 from pandas import concat, read_csv
 
 from misc import extract_settings_sc3
@@ -257,9 +258,17 @@ def main():
     cat_d = load_sextractor_cats()
     # Get boundaries for all catalogs
     full_cat = merge_cats(cat_d)
-    print(full_cat.columns)
-    print(patata)
 
+    return input_catalog, full_cat
+
+
+def extracted(input_catalog, full_cat):
+    """
+
+    :param input_catalog:
+    :param full_cat:
+    :return:
+    """
     # Look for sources
     total_ones = input_catalog['rightascension'].size
     right_ones = 0
@@ -282,5 +291,46 @@ def main():
     print('false ones {}'.format(false_ones))
 
 
+def ab_size(input_catalog, full_cat):
+    """
+
+    :param input_catalog:
+    :param full_cat:
+    :return:
+    """
+    # Look for sources
+    total_ones = input_catalog['rightascension'].size
+    a_image_l = []
+    b_image_l = []
+    mag_iso_l = []
+    mag_aper_l = []
+
+    for i, row in enumerate(input_catalog.itertuples(), 1):
+        print('source number: {} - total number: {}'.format(i, total_ones))
+        i_alpha = row.rightascension
+        i_delta = row.declination
+
+        e_df = check_source(i_alpha, i_delta, full_cat)
+
+        if e_df.empty is not True:
+            a_image_l.append(e_df['A_IMAGE'].loc[0])
+            b_image_l.append(e_df['B_IMAGE'].loc[0])
+            mag_iso_l.append(e_df['MAG_ISO'].loc[0])
+            mag_aper_l.append(e_df['MAG_APER'].loc[0])
+        else:
+            pass
+
+    print('a_image length {}'.format(len(a_image_l)))
+    print('b_image length {}'.format(len(b_image_l)))
+    print('mag_iso length {}'.format(len(mag_iso_l)))
+    print('mag_aper length {}'.format(len(mag_aper_l)))
+
+
 if __name__ == "__main__":
-    main()
+    input_catalog, full_cat = main()
+
+    if argv[1] == '-extracted':
+        extracted()
+    elif argv[1] == 'ab_size':
+        ab_size()
+
