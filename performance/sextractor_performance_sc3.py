@@ -334,17 +334,31 @@ def ab_size(input_catalog, full_cat, pdf):
         pdf_name = 'movement.pdf'
 
         with PdfPages(pdf_name) as pdf:
-            # First galaxy curve
-            fig = plt.figure(figsize=plot_size, dpi=plot_dpi)
-            ax_1 = fig.add_subplot(1, 1, 1)
+            # MAG_ISO
+            fig_1 = plt.figure(figsize=plot_size, dpi=plot_dpi)
+            ax_1 = fig_1.add_subplot(1, 1, 1)
             ax_1.set_title('TEST')
 
-            ax_1.plot(mag_iso_l, a_image_l, label='mean value')
-            ax_1.plot(mag_iso_l, b_image_l, label='std value')
+            ax_1.scatter(mag_iso_l, a_image_l, label='a_image', c='b')
+            ax_1.scatter(mag_iso_l, b_image_l, label='b_image', c='g')
+            ax_1.legend(loc=4)
 
             pdf.savefig()  # saves figure
             plt.clf()  # clear current figure
-            plt.close(fig)  # removes figure
+            plt.close(fig_1)  # removes figure
+
+            # MAG_APER
+            fig_2 = plt.figure(figsize=plot_size, dpi=plot_dpi)
+            ax_2 = fig_2.add_subplot(1, 1, 1)
+            ax_2.set_title('TEST')
+
+            ax_2.scatter(mag_aper_l, a_image_l, label='a_image', c='b')
+            ax_2.scatter(mag_aper_l, b_image_l, label='b_image', c='g')
+            ax_2.legend(loc=4)
+
+            pdf.savefig()  # saves figure
+            plt.clf()  # clear current figure
+            plt.close(fig_2)  # removes figure
 
 
 if __name__ == "__main__":
