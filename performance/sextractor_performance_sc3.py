@@ -315,7 +315,14 @@ def ab_size(input_catalog, full_cat, pdf):
         e_df = check_source(i_alpha, i_delta, full_cat)
 
         if e_df.empty is not True:
-            a_image_l.append(e_df['A_IMAGE'].loc[0])
+            print(e_df['A_IMAGE'])
+            print(type(e_df['A_IMAGE']))
+            print(e_df['A_IMAGE'].iloc[0])
+            print(type(e_df['A_IMAGE'].iloc[0]))
+            print(e_df['A_IMAGE'].loc[0])
+            print(type(e_df['A_IMAGE'].loc[0]))
+            print(patata)
+            a_image_l.append(e_df['A_IMAGE'])
             b_image_l.append(e_df['B_IMAGE'].loc[0])
             mag_iso_l.append(e_df['MAG_ISO'].loc[0])
             mag_aper_l.append(e_df['MAG_APER'].loc[0])
