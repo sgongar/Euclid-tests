@@ -30,7 +30,7 @@ def get_os():
 
     @return os_system: a string which contains the operative system name
     """
-    if 'fedora-19' in platform():
+    if 'fedora-19' in platform() or 'fedora-23' in platform():
         os_system = 'cab'
     elif 'centos' in platform():
         os_system = 'centos'
