@@ -146,47 +146,17 @@ def get_cat(cat_n):
     :param cat_n:
     :return: cat_file
     """
-    cat_part_1 = 'EUC_VIS_SWL-DET-00'
+    cat_part_1 = 'EUC_VIS_SWL-DET-001-000000-0000000' \
+                 '__20170630T011437.3Z_00.00_'
 
     cats_final = []
-    cats_partial = ['', '1-000000-0000000__20170630T011437.3Z_00.00_0',
-                    '1-000000-0000000__20170630T011437.3Z_00.00_10',
-                    '1-000000-0000000__20170630T011437.3Z_00.00_11',
-                    '1-000000-0000000__20170630T011437.3Z_00.00_12',
-                    '1-000000-0000000__20170630T011437.3Z_00.00_13',
-                    '1-000000-0000000__20170630T011437.3Z_00.00_14',
-                    '1-000000-0000000__20170630T011437.3Z_00.00_15',
-                    '1-000000-0000000__20170630T011437.3Z_00.00_16',
-                    '1-000000-0000000__20170630T011437.3Z_00.00_17',
-                    '1-000000-0000000__20170630T011437.3Z_00.00_18',
-                    '1-000000-0000000__20170630T011437.3Z_00.00_19',
-                    '1-000000-0000000__20170630T011437.3Z_00.00_1',
-                    '1-000000-0000000__20170630T011437.3Z_00.00_20',
-                    '1-000000-0000000__20170630T011437.3Z_00.00_21',
-                    '1-000000-0000000__20170630T011437.3Z_00.00_22',
-                    '1-000000-0000000__20170630T011437.3Z_00.00_23',
-                    '1-000000-0000000__20170630T011437.3Z_00.00_24',
-                    '1-000000-0000000__20170630T011437.3Z_00.00_25',
-                    '1-000000-0000000__20170630T011437.3Z_00.00_26',
-                    '1-000000-0000000__20170630T011437.3Z_00.00_27',
-                    '1-000000-0000000__20170630T011437.3Z_00.00_28',
-                    '1-000000-0000000__20170630T011437.3Z_00.00_29',
-                    '1-000000-0000000__20170630T011437.3Z_00.00_2',
-                    '1-000000-0000000__20170630T011437.3Z_00.00_30',
-                    '1-000000-0000000__20170630T011437.3Z_00.00_31',
-                    '1-000000-0000000__20170630T011437.3Z_00.00_32',
-                    '1-000000-0000000__20170630T011437.3Z_00.00_33',
-                    '1-000000-0000000__20170630T011437.3Z_00.00_34',
-                    '1-000000-0000000__20170630T011437.3Z_00.00_35',
-                    '1-000000-0000000__20170630T011437.3Z_00.00_3',
-                    '1-000000-0000000__20170630T011437.3Z_00.00_4',
-                    '1-000000-0000000__20170630T011437.3Z_00.00_5',
-                    '1-000000-0000000__20170630T011437.3Z_00.00_6',
-                    '1-000000-0000000__20170630T011437.3Z_00.00_7',
-                    '1-000000-0000000__20170630T011437.3Z_00.00_8',
-                    '1-000000-0000000__20170630T011437.3Z_00.00_9']
+    cat_indexes = ['0', '10', '11', '12', '13', '14', '15', '16', '17', '18',
+                   '19', '1', '20', '21', '22', '23', '24', '25', '26', '27',
+                   '28', '29', '2', '30', '31', '32', '33', '34', '35', '3',
+                   '4', '5', '6', '7', '8', '9']
 
-    for cat_ in cats_partial:
+    cats_final.append(' ')
+    for cat_ in cat_indexes:
         cats_final.append('{}{}.cat'.format(cat_part_1, cat_))
 
     cat_file = cats_final[cat_n]
@@ -302,30 +272,36 @@ def ab_size(input_catalog, full_cat, pdf):
     """
     # Look for sources
     total_ones = input_catalog['rightascension'].size
-    a_image_l = []
-    b_image_l = []
-    mag_iso_l = []
-    mag_aper_l = []
+    a_image_g_l = []
+    b_image_g_l = []
+    mag_iso_g_l = []
+    mag_aper_g_l = []
+    a_image_s_l = []
+    b_image_s_l = []
+    mag_iso_s_l = []
+    mag_aper_s_l = []
 
     for i, row in enumerate(input_catalog.itertuples(), 1):
         print('source number: {} - total number: {}'.format(i, total_ones))
         i_alpha = row.rightascension
         i_delta = row.declination
+        i_class = str(row.starflag)
 
         e_df = check_source(i_alpha, i_delta, full_cat)
 
         if e_df.empty is not True:
-            a_image_l.append(e_df['A_IMAGE'].iloc[0])
-            b_image_l.append(e_df['B_IMAGE'].iloc[0])
-            mag_iso_l.append(e_df['MAG_ISO'].iloc[0])
-            mag_aper_l.append(e_df['MAG_APER'].iloc[0])
+            if i_class == '0':
+                a_image_g_l.append(e_df['A_IMAGE'].iloc[0])
+                b_image_g_l.append(e_df['B_IMAGE'].iloc[0])
+                mag_iso_g_l.append(e_df['MAG_ISO'].iloc[0])
+                mag_aper_g_l.append(e_df['MAG_APER'].iloc[0])
+            elif i_class == '1':
+                a_image_s_l.append(e_df['A_IMAGE'].iloc[0])
+                b_image_s_l.append(e_df['B_IMAGE'].iloc[0])
+                mag_iso_s_l.append(e_df['MAG_ISO'].iloc[0])
+                mag_aper_s_l.append(e_df['MAG_APER'].iloc[0])
         else:
             pass
-
-    print('a_image length {}'.format(len(a_image_l)))
-    print('b_image length {}'.format(len(b_image_l)))
-    print('mag_iso length {}'.format(len(mag_iso_l)))
-    print('mag_aper length {}'.format(len(mag_aper_l)))
 
     if pdf:
         # PDF parameters
@@ -334,31 +310,65 @@ def ab_size(input_catalog, full_cat, pdf):
         pdf_name = 'movement.pdf'
 
         with PdfPages(pdf_name) as pdf:
-            # MAG_ISO
+            # MAG_ISO Galaxies
             fig_1 = plt.figure(figsize=plot_size, dpi=plot_dpi)
             ax_1 = fig_1.add_subplot(1, 1, 1)
-            ax_1.set_title('TEST')
+            ax_1.set_title('MAG_ISO - Galaxies')
 
-            ax_1.scatter(mag_iso_l, a_image_l, label='a_image', c='b')
-            ax_1.scatter(mag_iso_l, b_image_l, label='b_image', c='g')
+            ax_1.scatter(mag_iso_g_l, a_image_g_l, label='a_image', c='b')
+            ax_1.scatter(mag_iso_g_l, b_image_g_l, label='b_image', c='g')
+
             ax_1.legend(loc=4)
+            ax_1.grid(True)
 
             pdf.savefig()  # saves figure
             plt.clf()  # clear current figure
             plt.close(fig_1)  # removes figure
 
-            # MAG_APER
+            # MAG_ISO Stars
             fig_2 = plt.figure(figsize=plot_size, dpi=plot_dpi)
             ax_2 = fig_2.add_subplot(1, 1, 1)
-            ax_2.set_title('TEST')
+            ax_2.set_title('MAG_ISO - Stars')
 
-            ax_2.scatter(mag_aper_l, a_image_l, label='a_image', c='b')
-            ax_2.scatter(mag_aper_l, b_image_l, label='b_image', c='g')
+            ax_2.scatter(mag_iso_s_l, a_image_s_l, label='a_image', c='b')
+            ax_2.scatter(mag_iso_s_l, b_image_s_l, label='b_image', c='g')
+
             ax_2.legend(loc=4)
+            ax_2.grid(True)
 
             pdf.savefig()  # saves figure
             plt.clf()  # clear current figure
             plt.close(fig_2)  # removes figure
+
+            # MAG_APER
+            fig_3 = plt.figure(figsize=plot_size, dpi=plot_dpi)
+            ax_3 = fig_3.add_subplot(1, 1, 1)
+            ax_3.set_title('MAG_APER - Galaxies')
+
+            ax_3.scatter(mag_aper_g_l, a_image_g_l, label='a_image', c='b')
+            ax_3.scatter(mag_aper_g_l, b_image_g_l, label='b_image', c='g')
+
+            ax_3.legend(loc=4)
+            ax_3.grid(True)
+
+            pdf.savefig()  # saves figure
+            plt.clf()  # clear current figure
+            plt.close(fig_3)  # removes figure
+
+            # MAG_APER
+            fig_4 = plt.figure(figsize=plot_size, dpi=plot_dpi)
+            ax_4 = fig_4.add_subplot(1, 1, 1)
+            ax_4.set_title('TEST')
+
+            ax_4.scatter(mag_aper_s_l, a_image_s_l, label='a_image', c='b')
+            ax_4.scatter(mag_aper_s_l, b_image_s_l, label='b_image', c='g')
+
+            ax_4.legend(loc=4)
+            ax_4.grid(True)
+
+            pdf.savefig()  # saves figure
+            plt.clf()  # clear current figure
+            plt.close(fig_3)  # removes figure
 
 
 if __name__ == "__main__":
