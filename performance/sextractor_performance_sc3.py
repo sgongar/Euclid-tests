@@ -235,16 +235,16 @@ def ab_size(input_catalog, full_cat, pdf):
             plt.clf()  # clear current figure
             plt.close(fig_2)  # removes figure
 
-            # B_IMAGE / A_IMAGE Galaxies
+            # MAG_APER
             fig_3 = plt.figure(figsize=plot_size, dpi=plot_dpi)
             ax_3 = fig_3.add_subplot(1, 1, 1)
-            ax_3.set_title('B/A_IMAGE - Galaxies')
+            ax_3.set_title('MAG_APER - Galaxies')
 
-            ax_3.scatter(b_image_g_l, a_image_g_l, label='b_image/a_image',
-                         c='b')
+            ax_3.scatter(mag_aper_g_l, a_image_g_l, label='a_image', c='b')
+            ax_3.scatter(mag_aper_g_l, b_image_g_l, label='b_image', c='g')
 
-            # ax_3.set_xlim(10, 26)
-            # ax_3.set_ylim(0, 40)
+            ax_3.set_xlim(10, 26)
+            ax_3.set_ylim(0, 40)
 
             ax_3.legend(loc=4)
             ax_3.grid(True)
@@ -256,10 +256,10 @@ def ab_size(input_catalog, full_cat, pdf):
             # MAG_APER
             fig_4 = plt.figure(figsize=plot_size, dpi=plot_dpi)
             ax_4 = fig_4.add_subplot(1, 1, 1)
-            ax_4.set_title('MAG_APER - Galaxies')
+            ax_4.set_title('MAG_APER - Stars')
 
-            ax_4.scatter(mag_aper_g_l, a_image_g_l, label='a_image', c='b')
-            ax_4.scatter(mag_aper_g_l, b_image_g_l, label='b_image', c='g')
+            ax_4.scatter(mag_aper_s_l, a_image_s_l, label='a_image', c='b')
+            ax_4.scatter(mag_aper_s_l, b_image_s_l, label='b_image', c='g')
 
             ax_4.set_xlim(10, 26)
             ax_4.set_ylim(0, 40)
@@ -271,16 +271,16 @@ def ab_size(input_catalog, full_cat, pdf):
             plt.clf()  # clear current figure
             plt.close(fig_4)  # removes figure
 
-            # MAG_APER
+            # B_IMAGE / A_IMAGE Galaxies
             fig_5 = plt.figure(figsize=plot_size, dpi=plot_dpi)
             ax_5 = fig_5.add_subplot(1, 1, 1)
-            ax_5.set_title('MAG_APER - Stars')
+            ax_5.set_title('B/A_IMAGE - Galaxies')
 
-            ax_5.scatter(mag_aper_s_l, a_image_s_l, label='a_image', c='b')
-            ax_5.scatter(mag_aper_s_l, b_image_s_l, label='b_image', c='g')
+            ax_5.scatter(b_image_g_l, a_image_g_l, label='b_image/a_image',
+                         c='b')
 
-            ax_5.set_xlim(10, 26)
-            ax_5.set_ylim(0, 40)
+            ax_5.set_xlim(0, 25)
+            ax_5.set_ylim(0, 25)
 
             ax_5.legend(loc=4)
             ax_5.grid(True)
@@ -297,8 +297,8 @@ def ab_size(input_catalog, full_cat, pdf):
             ax_6.scatter(b_image_s_l, a_image_s_l, label='b_image/a_image',
                          c='b')
 
-            # ax_3.set_xlim(10, 26)
-            # ax_3.set_ylim(0, 40)
+            ax_6.set_xlim(0, 25)
+            ax_6.set_ylim(0, 25)
 
             ax_6.legend(loc=4)
             ax_6.grid(True)
