@@ -40,7 +40,7 @@ pipeline/logs/*
 
 ### Plots ###
 pipeline/plots/*
-performance/output/*.pdf
+performance/output/*
 
 ### Local backup ###
 old/
