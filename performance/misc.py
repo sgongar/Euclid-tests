@@ -113,13 +113,6 @@ def extract_settings_luca():
     prfs_d['first_sso'] = conf_map(cf, "CatsOrganization")['first_sso']
     prfs_d['first_sso'] = int(prfs_d['first_sso'])
 
-    outputdirs_list = ['plots_dir', 'results_dir', 'images_out', 'fits_out',
-                       'report_out', 'dithers_out', 'catalogs_dir', 'tmp_out',
-                       'filter_dir']
-    for conf_ in outputdirs_list:
-        prfs_d[conf_] = conf_map(cf, "OutputDirs")[conf_]
-        prfs_d[conf_] = prfs_d['home'] + prfs_d[conf_]
-
     prfs_d['detections'] = int(conf_map(cf, "Misc")['detections'])
     prfs_d['pm_low'] = float(conf_map(cf, "Misc")['pm_low'])
     prfs_d['pm_up'] = float(conf_map(cf, "Misc")['pm_up'])
