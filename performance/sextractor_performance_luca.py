@@ -9,8 +9,8 @@ La idea es que compare los objetos extraidos en total con los que tengo.
 Todo:
     * Script not complete!!!!!
 
+*GNU Terry Pratchett*
 """
-
 from sys import argv
 
 from astropy.io import fits
