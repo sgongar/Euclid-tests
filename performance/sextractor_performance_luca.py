@@ -86,16 +86,10 @@ def load_sextractor_cats():
             cat_data = fits.open('{}/{}/CCDs/{}'.format(prfs_d['fits_dir'],
                                                         mag_, cat_file))
             ccd_df = Table(cat_data[2].data)
-            idx_n = 'm{}_x{}_y{}_d{}'.format(mag_, idx_n[0], idx_n[1], dither)
-            print(idx_n)
-
-    """
-        ccd_df = Table(cat_data[2].data)
-        # print('CCD catalog {} to Pandas'.format(cat_n))
-        cat_d[cat_n] = ccd_df.to_pandas()
+            cat_n = 'm{}_x{}_y{}_d{}'.format(mag_, idx_n[0], idx_n[1], dither)
+            cat_d[cat_n] = ccd_df.to_pandas()
 
     return cat_d
-    """
 
 
 def merge_cats(cat_d):
@@ -125,12 +119,13 @@ class ABPerformance:
         # Selects only first dither ocurrences
         self.input_catalog = input_catalog[input_catalog['dither'].isin([1])]
         # Load all catalogs
-        # cat_d = load_sextractor_cats()
-        load_sextractor_cats()
-        """
+        cat_d = load_sextractor_cats()
         # Merges single CCD catalogs into a full catalog one
         self.full_cat = merge_cats(cat_d)
 
+        print(self.full_cat)
+
+        """
         self.pdf = True
         self.plot_size = [16.53, 11.69]
         self.plot_dpi = 100
