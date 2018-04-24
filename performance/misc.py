@@ -116,7 +116,6 @@ def extract_settings_luca():
     prfs_d['detections'] = int(conf_map(cf, "Misc")['detections'])
     prfs_d['pm_low'] = float(conf_map(cf, "Misc")['pm_low'])
     prfs_d['pm_up'] = float(conf_map(cf, "Misc")['pm_up'])
-    prfs_d['pm_sn'] = float(conf_map(cf, "Misc")['pm_sn'])
     pms = conf_map(cf, "Misc")['pms']
     pms = pms.replace(",", " ")
     prfs_d['pms'] = [float(x) for x in pms.split()]
