@@ -61,6 +61,87 @@ def conf_map(config_, section):
     return dict1
 
 
+def extract_settings_luca():
+    """ creates a dictionary with all the configuration parameters
+        at this moment configuration file location is fixed at main directory
+
+    @return prfs_d: a dictionary which contains all valuable data
+    """
+    cf = ConfigParser()
+    cf.read(".settings.ini")
+
+    os_version = get_os()
+
+    prfs_d = {'cat': conf_map(cf, "Version")['cat_version']}
+
+    if os_version == 'fedora':
+        prfs_d['home'] = conf_map(cf, "HomeDirs")['fed_home']
+    elif os_version == 'centos':
+        prfs_d['home'] = conf_map(cf, "HomeDirs")['centos_home']
+    else:
+        raise BadSettings('Operative system not chosen')
+
+    if os_version == 'fedora':
+        prfs_d['version'] = conf_map(cf, "Version")['fed_version']
+        prfs_d['version'] = prfs_d['version'] + prfs_d['cat']
+    elif os_version == 'centos':
+        prfs_d['version'] = conf_map(cf, "Version")['centos_version']
+        prfs_d['version'] = prfs_d['version'] + prfs_d['cat']
+    else:
+        raise BadSettings('Operative system not chosen')
+
+    prfs_d['fits_dir'] = conf_map(cf, "ImagesDirs")['fits_dir']
+    # prfs_d['fits_dir'] = prfs_d['version'] + prfs_d['fits_dir']
+    prfs_d['fits_dir'] = prfs_d['version']  # hardcoded
+
+    outputdirs_list = ['conf_scamp', 'conf_sex', 'params_sex', 'neural_sex',
+                       'params_cat', 'logger_config']
+    for conf_ in outputdirs_list:
+        prfs_d[conf_] = conf_map(cf, "ConfigDirs")[conf_]
+        prfs_d[conf_] = prfs_d['home'] + prfs_d[conf_]
+
+    prfs_d['output_cats'] = conf_map(cf, "CatsDirs")['output_cats']
+    prfs_d['output_cats'] = prfs_d['version'] + prfs_d['output_cats']
+    prfs_d['input_cats'] = conf_map(cf, "CatsDirs")['input_cats']
+    prfs_d['input_cats'] = prfs_d['version'] + prfs_d['input_cats']
+    prfs_d['input_ref'] = conf_map(cf, "CatsDirs")['input_ref']
+
+    prfs_d['first_star'] = conf_map(cf, "CatsOrganization")['first_star']
+    prfs_d['first_star'] = int(prfs_d['first_star'])
+    prfs_d['first_galaxy'] = conf_map(cf, "CatsOrganization")['first_galaxy']
+    prfs_d['first_galaxy'] = int(prfs_d['first_galaxy'])
+    prfs_d['first_sso'] = conf_map(cf, "CatsOrganization")['first_sso']
+    prfs_d['first_sso'] = int(prfs_d['first_sso'])
+
+    outputdirs_list = ['plots_dir', 'results_dir', 'images_out', 'fits_out',
+                       'report_out', 'dithers_out', 'catalogs_dir', 'tmp_out',
+                       'filter_dir']
+    for conf_ in outputdirs_list:
+        prfs_d[conf_] = conf_map(cf, "OutputDirs")[conf_]
+        prfs_d[conf_] = prfs_d['home'] + prfs_d[conf_]
+
+    prfs_d['detections'] = int(conf_map(cf, "Misc")['detections'])
+    prfs_d['pm_low'] = float(conf_map(cf, "Misc")['pm_low'])
+    prfs_d['pm_up'] = float(conf_map(cf, "Misc")['pm_up'])
+    prfs_d['pm_sn'] = float(conf_map(cf, "Misc")['pm_sn'])
+    pms = conf_map(cf, "Misc")['pms']
+    pms = pms.replace(",", " ")
+    prfs_d['pms'] = [float(x) for x in pms.split()]
+    mags = conf_map(cf, "Misc")['mags']
+    mags = mags.replace(",", " ")
+    prfs_d['mags'] = mags.split()
+    prfs_d['r_fit'] = conf_map(cf, "Misc")['r_fit']
+    prfs_d['cores_number'] = conf_map(cf, "Misc")['cores_number']
+    if prfs_d['cores_number'] == '0':
+        prfs_d['cores_number'] = int(str(cpu_count()))
+        # TODO should leave free at least 20% of processors
+    else:
+        prfs_d['cores_number'] = int(prfs_d['cores_number'])
+    prfs_d['tolerance'] = float(conf_map(cf, "Misc")['tolerance'])
+
+    return prfs_d
+
+
 def extract_settings_sc3():
     """ creates a dictionary with all the configuration parameters
         at this moment configuration file location is fixed at main directory
