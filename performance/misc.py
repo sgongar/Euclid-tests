@@ -70,41 +70,41 @@ def extract_settings_luca():
     cf = ConfigParser()
     cf.read(".settings.ini")
 
+    prfs_d = {}
     os_version = get_os()
 
-    prfs_d = {'cat': conf_map(cf, "Version")['cat_version']}
-
-    if os_version == 'fedora':
-        prfs_d['home'] = conf_map(cf, "HomeDirs")['fed_home']
-    elif os_version == 'centos':
-        prfs_d['home'] = conf_map(cf, "HomeDirs")['centos_home']
+    if os_version == 'centos':
+        prfs_d['version'] = conf_map(cf, "Version")['centos_version']
+    elif os_version == 'cab':
+        prfs_d['version'] = conf_map(cf, "Version")['cab_version']
     else:
         raise BadSettings('Operative system not chosen')
 
-    if os_version == 'fedora':
-        prfs_d['version'] = conf_map(cf, "Version")['fed_version']
-        prfs_d['version'] = prfs_d['version'] + prfs_d['cat']
-    elif os_version == 'centos':
-        prfs_d['version'] = conf_map(cf, "Version")['centos_version']
-        prfs_d['version'] = prfs_d['version'] + prfs_d['cat']
+    if os_version == 'centos':
+        prfs_d['home'] = conf_map(cf, "HomeDirs")['centos_home']
+    elif os_version == 'cab':
+        prfs_d['home'] = conf_map(cf, "HomeDirs")['cab_home']
     else:
         raise BadSettings('Operative system not chosen')
 
     prfs_d['fits_dir'] = conf_map(cf, "ImagesDirs")['fits_dir']
-    # prfs_d['fits_dir'] = prfs_d['version'] + prfs_d['fits_dir']
-    prfs_d['fits_dir'] = prfs_d['version']  # hardcoded
+    prfs_d['fits_dir'] = '{}{}'.format(prfs_d['version'], prfs_d['fits_dir'])
+
+    # todo - comment!
+    prfs_d['output_cats'] = conf_map(cf, "CatsDirs")['output_cats']
+    prfs_d['output_cats'] = prfs_d['version'] + prfs_d['output_cats']
+    # todo - comment!
+    prfs_d['references'] = conf_map(cf, "CatsDirs")['references']
+    prfs_d['references'] = prfs_d['version'] + prfs_d['references']
+    # todo - comment!
+    prfs_d['filtered'] = conf_map(cf, "CatsDirs")['filtered']
+    prfs_d['filtered'] = prfs_d['version'] + prfs_d['filtered']
 
     outputdirs_list = ['conf_scamp', 'conf_sex', 'params_sex', 'neural_sex',
                        'params_cat', 'logger_config']
     for conf_ in outputdirs_list:
         prfs_d[conf_] = conf_map(cf, "ConfigDirs")[conf_]
         prfs_d[conf_] = prfs_d['home'] + prfs_d[conf_]
-
-    prfs_d['output_cats'] = conf_map(cf, "CatsDirs")['output_cats']
-    prfs_d['output_cats'] = prfs_d['version'] + prfs_d['output_cats']
-    prfs_d['input_cats'] = conf_map(cf, "CatsDirs")['input_cats']
-    prfs_d['input_cats'] = prfs_d['version'] + prfs_d['input_cats']
-    prfs_d['input_ref'] = conf_map(cf, "CatsDirs")['input_ref']
 
     prfs_d['first_star'] = conf_map(cf, "CatsOrganization")['first_star']
     prfs_d['first_star'] = int(prfs_d['first_star'])
