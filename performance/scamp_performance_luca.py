@@ -121,7 +121,7 @@ class TotalScampPerformanceStars:
 
         if self.save:
             print('Saves input catalog')
-            input_df.to_csv('full_stats_ssos/inputs_{}.csv'.format(self.mag))
+            input_df.to_csv('tmp/inputs_{}.csv'.format(self.mag))
 
         return input_df
 
