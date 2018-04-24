@@ -3,14 +3,24 @@
 
 """
 
+Content:
+    * get_fits_limits
+    * get_fits_d
+    * get_os
+    * conf_map
+    * extract_settings_luca
+    * extract_settings_sc3
 
 Todo:
     * Improve log messages
     * Improve usability
 """
 
+from astropy.io import fits
+from astropy.wcs import WCS
 from multiprocessing import cpu_count
 from ConfigParser import ConfigParser
+from os import listdir
 from platform import platform
 
 from errors import BadSettings
@@ -22,6 +32,55 @@ __version__ = "0.1"
 __maintainer__ = "Samuel Góngora García"
 __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
+
+
+def get_fits_limits(fits_image):
+    """ todo - to another new file?
+
+    @param fits_image: fits image
+
+    @return limits: a dict with ra/dec limits above_ra, below_ra,
+                    above_dec_, below_dec
+    """
+    # logger.info('getting limits of {} image'.format(fits_image))
+
+    data, header = fits.getdata(fits_image, header=True)
+    w = WCS(fits_image)
+
+    above_x, above_y = header['NAXIS1'], header['NAXIS2']
+    above_ra, above_dec = w.all_pix2world(above_x, above_y, 0)
+
+    below_ra, below_dec = w.all_pix2world(0, 0, 0)
+
+    limits = {'below_ra': float(above_ra), 'above_ra': float(below_ra),
+              'below_dec': float(below_dec), 'above_dec': float(above_dec)}
+
+    # check position
+    # sometimes some values could be higher when are tagged as "lowest"
+    return limits
+
+
+def get_fits_d(mag_, dither):
+    """
+
+    :param mag_:
+    :param dither:
+    :return:
+    """
+    prfs_d = extract_settings_luca()
+    fits_list = []
+
+    files = listdir('{}/{}/CCDs/'.format(prfs_d['fits_dir'], mag_))
+    for file_ in files:
+        if file_[:1] == 'm' and file_[-5:] == '.fits':
+            fits_list.append(file_)
+
+    list_out = []
+    for file_ in fits_list:
+        if file_[-6:-5] == str(dither):
+            list_out.append(file_)
+
+    return list_out
 
 
 def get_os():

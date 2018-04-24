@@ -7,7 +7,7 @@
 La idea es que compare los objetos extraidos en total con los que tengo.
 
 Todo:
-    * Improve log messages
+    * Script not complete!!!!!
 
 """
 
@@ -20,6 +20,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 from pandas import concat, read_csv
 
 from misc import extract_settings_luca
+from regions import Create_regions
 
 __author__ = "Samuel Gongora-Garcia"
 __copyright__ = "Copyright 2018"
@@ -28,6 +29,42 @@ __version__ = "0.1"
 __maintainer__ = "Samuel Gongora-Garcia"
 __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
+
+
+def creates_input_dict(self):
+    """ Creates an input dictionary. Each key contains SSOs' information
+    for each dither.
+
+    :return: input_dict
+    """
+    input_dict = {}
+    # Loops over the four dithers
+    for dither in range(1, 5, 1):
+        cat_location = '{}/{}/Catalogs'.format(self.prfs_d['fits_dir'],
+                                               self.mag)
+        cat_name = '{}/Cat_{}_d{}'.format(cat_location, self.mag, dither)
+        input_dict[dither] = '{}.dat'.format(cat_name)
+    input_ssos = Create_regions(input_dict).check_ssos(self.mag, True)
+
+    input_dict = {}
+    # Loops over the four dithers
+    for dither in range(1, 5, 1):
+        cat_location = '{}/{}/Catalogs'.format(self.prfs_d['fits_dir'],
+                                               self.mag)
+        cat_name = '{}/Cat_{}_d{}'.format(cat_location, self.mag, dither)
+        input_dict[dither] = '{}.dat'.format(cat_name)
+    input_stars = Create_regions(input_dict).check_stars(self.mag, True)
+
+    input_dict = {}
+    # Loops over the four dithers
+    for dither in range(1, 5, 1):
+        cat_location = '{}/{}/Catalogs'.format(self.prfs_d['fits_dir'],
+                                               self.mag)
+        cat_name = '{}/Cat_{}_d{}'.format(cat_location, self.mag, dither)
+        input_dict[dither] = '{}.dat'.format(cat_name)
+    input_galaxies = Create_regions(input_dict).check_galaxies(self.mag,
+                                                               True)
+    return input_ssos, input_stars, input_galaxies
 
 
 def get_cat(mag, dither, cat_n):
@@ -111,21 +148,17 @@ def merge_cats(cat_d):
 
 class ABPerformance:
 
-    def __init__(self, input_name):
+    def __init__(self):
         """
 
         """
-        input_catalog = read_csv(input_name)
-        # Selects only first dither ocurrences
-        self.input_catalog = input_catalog[input_catalog['dither'].isin([1])]
+        # Load input catalog
+
         # Load all catalogs
         cat_d = load_sextractor_cats()
         # Merges single CCD catalogs into a full catalog one
         self.full_cat = merge_cats(cat_d)
 
-        print(self.full_cat)
-
-        """
         self.pdf = True
         self.plot_size = [16.53, 11.69]
         self.plot_dpi = 100
@@ -133,8 +166,8 @@ class ABPerformance:
                        'mag_aper_g_l': [], 'a_image_s_l': [], 'b_image_s_l': [],
                        'mag_iso_s_l': [], 'mag_aper_s_l': []}
         self.extract_ab_size()
-        self.plot()
-        """
+        # self.plot()
+
     def extract_ab_size(self):
         """
 
@@ -303,11 +336,10 @@ class ABPerformance:
 
 
 if __name__ == "__main__":
-    input_catalog_name = '1523634221737L.csv'
 
     try:
         if argv[1] == '-ab_size':
-            ab_size = ABPerformance(input_catalog_name)
+            ab_size = ABPerformance()
     except IndexError:
         print('Select a valid option')
         print(' - ab_size')
