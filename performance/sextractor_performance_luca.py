@@ -30,24 +30,22 @@ __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
 
 
-def get_cat(cat_n):
-    """  TODO get scamp organization in order to reduce the lines number
-
-    :param cat_n:
-    :return: cat_file
+def get_cat(mag, dither, cat_n):
     """
-    cat_part_1 = 'EUC_VIS_SWL-DET-001-000000-0000000' \
-                 '__20170630T011437.3Z_00.00_'
 
+    :param mag:
+    :param dither:
+    :param cat_n:
+    :return:
+    """
     cats_final = []
-    cat_indexes = ['0', '10', '11', '12', '13', '14', '15', '16', '17', '18',
-                   '19', '1', '20', '21', '22', '23', '24', '25', '26', '27',
-                   '28', '29', '2', '30', '31', '32', '33', '34', '35', '3',
-                   '4', '5', '6', '7', '8', '9']
 
-    cats_final.append(' ')
-    for cat_ in cat_indexes:
-        cats_final.append('{}{}.cat'.format(cat_part_1, cat_))
+    opts = [[0, 0], [0, 1], [0, 2], [1, 0], [1, 1],
+            [1, 2], [2, 0], [2, 1], [2, 2]]
+    for opt_ in opts:
+        cat_name = 'mag_{}_CCD_x{}_y{}_d{}.cat'.format(mag, opt_[0], opt_[1],
+                                                       dither)
+        cats_final.append(cat_name)
 
     cat_file = cats_final[cat_n]
 
@@ -79,8 +77,13 @@ def load_sextractor_cats():
     """
     prfs_d = extract_settings_luca()
 
+    dither = 1  # todo - hardcoded!
+
+    cat_d = {}
     for mag_ in prfs_d['mags']:
-        print(prfs_d['fits_dir'])
+        for idx in range(0, 9, 1):  # todo - hardcoded!
+            cat_file = get_cat(mag_, dither, idx)
+            print('{}/{}'.format(prfs_d['fits_dir'], cat_file))
 
     """
     cats_number = 36  # todo hardcoded!
