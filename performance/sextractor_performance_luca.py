@@ -86,6 +86,7 @@ def load_sextractor_cats():
             cat_data = fits.open('{}/{}/CCDs/{}'.format(prfs_d['fits_dir'],
                                                         mag_, cat_file))
             ccd_df = Table(cat_data[2].data)
+            idx_n = 'm{}_x{}_y{}_d{}'.format(mag_, idx_n[0], idx_n[1], dither)
             print(idx_n)
 
     """
