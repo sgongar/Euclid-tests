@@ -83,7 +83,7 @@ def load_sextractor_cats():
     for mag_ in prfs_d['mags']:
         for idx in range(0, 9, 1):  # todo - hardcoded!
             cat_file = get_cat(mag_, dither, idx)
-            print('{}/{}/{}'.format(prfs_d['fits_dir'], mag_, cat_file))
+            print('{}/{}/CCDs/{}'.format(prfs_d['fits_dir'], mag_, cat_file))
 
     """
     cats_number = 36  # todo hardcoded!
