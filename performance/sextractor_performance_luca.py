@@ -309,5 +309,9 @@ class ABPerformance:
 if __name__ == "__main__":
     input_catalog_name = '1523634221737L.csv'
 
-    if argv[1] == '-ab_size':
-        ab_size = ABPerformance(input_catalog_name)
+    try:
+        if argv[1] == '-ab_size':
+            ab_size = ABPerformance(input_catalog_name)
+    except IndexError:
+        print('Select a valid option')
+        print(' - ab_size')
