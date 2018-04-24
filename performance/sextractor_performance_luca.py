@@ -49,7 +49,7 @@ def get_cat(mag, dither, cat_n):
 
     cat_file = cats_final[cat_n]
 
-    return cat_file
+    return cat_file, opts[cat_n]
 
 
 def check_source(i_alpha, i_delta, e_df):
@@ -82,16 +82,13 @@ def load_sextractor_cats():
     cat_d = {}
     for mag_ in prfs_d['mags']:
         for idx in range(0, 9, 1):  # todo - hardcoded!
-            cat_file = get_cat(mag_, dither, idx)
-            print('{}/{}/CCDs/{}'.format(prfs_d['fits_dir'], mag_, cat_file))
+            cat_file, idx_n = get_cat(mag_, dither, idx)
+            cat_data = fits.open('{}/{}/CCDs/{}'.format(prfs_d['fits_dir'],
+                                                        mag_, cat_file))
+            ccd_df = Table(cat_data[2].data)
+            print(idx_n)
 
     """
-    cats_number = 36  # todo hardcoded!
-    cat_d = {}
-    for cat_n in range(1, cats_number + 1, 1):
-        cat_file = get_cat(cat_n)
-        cat_data = fits.open('{}/{}'.format(prfs_d['fits_dir'], cat_file))
-
         ccd_df = Table(cat_data[2].data)
         # print('CCD catalog {} to Pandas'.format(cat_n))
         cat_d[cat_n] = ccd_df.to_pandas()
