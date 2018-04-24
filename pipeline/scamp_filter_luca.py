@@ -12,6 +12,8 @@ Versions:
 Todo:
     * Improve documentation
     * Speed-up areas process
+
+*GNU Terry Pratchett*
 """
 
 from multiprocessing import Process

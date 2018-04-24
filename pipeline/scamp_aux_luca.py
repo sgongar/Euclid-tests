@@ -11,7 +11,6 @@ Todo:
     * sex_cf and scmp_cf should come from main file
 
 *GNU Terry Pratchett*
-
 """
 from subprocess import Popen
 

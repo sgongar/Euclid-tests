@@ -14,11 +14,13 @@ Conventions:
 Versions:
 - 0.1: Initial release.
 - 0.2: Sextractor analysis for SC3 and luca's images splitted.
+- 0.3: Sextractor analysis for SC3 moved to sextractor_aux_sc3.py
 
 Todo:
     * Improve documentation
     * Improve log messages
 
+*GNU Terry Pratchett*
 """
 
 from os import listdir, remove

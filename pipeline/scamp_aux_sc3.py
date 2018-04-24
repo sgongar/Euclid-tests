@@ -16,7 +16,6 @@ Todo:
     * Improve documentation
 
 *GNU Terry Pratchett*
-
 """
 from subprocess import Popen
 
