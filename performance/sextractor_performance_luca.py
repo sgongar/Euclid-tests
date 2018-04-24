@@ -80,7 +80,7 @@ def load_sextractor_cats():
     prfs_d = extract_settings_luca()
 
     for mag_ in prfs_d['mags']:
-        print(mag_)
+        print(prfs_d['fits_dir'])
 
     """
     cats_number = 36  # todo hardcoded!
