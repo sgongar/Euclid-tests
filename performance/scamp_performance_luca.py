@@ -44,8 +44,8 @@ class TotalScampPerformanceStars:
 
         # self.scmp_cf = scmp_cf
         # self.sex_cf = sex_cf
-        self.scmp_cf = 'scamp'
-        self.sex_cf = 'sex'
+        self.scmp_cf = '10_1.1_0.5_0.04'
+        self.sex_cf = '30_1.5_1.5_0.01_4'
 
         self.save = True
 
@@ -180,21 +180,20 @@ class TotalScampPerformanceStars:
         # Open particular file!
         filter_cat = self.gets_filtered_catalog()
 
-        print(filter_cat)
-
-        """
-        # SSOs stuff  todo get out...to long
         # Gets unique sources from input data
         unique_sources = list(set(input_ssos_df['source'].tolist()))
-        ssos_sources = []
+        # ssos_sources = []
         sources_n = len(unique_sources)
-        self.logger.debug('Input SSOs to be analysed {}'.format(sources_n))
+        print('Input SSOs to be analysed {}'.format(sources_n))
         # Loops over input data (Luca's catalog)
         for idx_source, source_ in enumerate(unique_sources):
             self.logger.debug('SSO idx {} - Total {}'.format(idx_source,
                                                              sources_n))
             # Gets associated data in input catalog
             cat_df = input_ssos_df[input_ssos_df['source'].isin([source_])]
+            print(cat_df)
+
+            """
             # Iterate over each detection of each source
             for i, row in enumerate(cat_df.itertuples(), 1):
                 catalog_n = row.catalog
