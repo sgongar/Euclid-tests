@@ -272,6 +272,9 @@ class ScampPerformanceSSOs:
 
         # Open particular file!
         filter_cat = self.gets_filtered_catalog()
+        # Filter by mag!
+        filter_cat = filter_cat[filter_cat['MAG_ISO'] < 21]
+        filter_cat = filter_cat[filter_cat['MAG_ISO'] > 20]
 
         # Gets unique sources from input data
         # unique_sources = list(set(input_ssos_df['source'].tolist()))
@@ -285,6 +288,7 @@ class ScampPerformanceSSOs:
             print('Source idx {} - Total {}'.format(idx_source, sources_n))
             # Gets associated data in input catalog
             source_df = filter_cat[filter_cat['SOURCE_NUMBER'].isin([source_])]
+            print(source_df['MAG_ISO'])
 
             # Iterate over each detection of each source
             for i, row in enumerate(source_df.itertuples(), 1):
@@ -501,27 +505,6 @@ class ScampPerformanceSSOs:
 #                                                           self.filter_p_number)
 #             galaxy_df2.to_csv('full_stats_galaxies/{}'.format(galaxy_df2_filename))
 #
-# # def check_mag(i_df, o_alpha, o_delta):
-# #     """
-# #
-# #     :param i_df:
-# #     :param o_alpha:
-# #     :param o_delta:
-# #     :return:
-# #     """
-# #     tolerance = 0.0001389  # 0.5 arcsecond
-# #
-# #     i_df = i_df[i_df['alpha_j2000'] + tolerance > o_alpha]
-# #     i_df = i_df[o_alpha > i_df['alpha_j2000'] - tolerance]
-# #     i_df = i_df[i_df['delta_j2000'] + tolerance > o_delta]
-# #     i_df = i_df[o_delta > i_df['delta_j2000'] - tolerance]
-# #
-# #     if i_df.empty:
-# #         flag_mag = False
-# #     else:
-# #         flag_mag = True
-# #
-# #     return flag_mag
 #
 #
 # class ScampPerformance:
