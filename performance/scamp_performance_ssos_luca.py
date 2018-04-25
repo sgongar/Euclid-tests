@@ -144,7 +144,7 @@ class ScampPerformanceSSOs:
             self.mag = mag_
             self.data_d = self.creates_output_dict()
             input_sources_d = self.check_pm_distribution()
-            self.get_stats(input_sources_d)
+            # self.get_stats(input_sources_d)
 
     def gets_filtered_catalog(self):
         """
@@ -274,6 +274,9 @@ class ScampPerformanceSSOs:
         # unique_sources = list(set(input_ssos_df['source'].tolist()))
         unique_sources = list(set(filter_cat['SOURCE_NUMBER'].tolist()))
         print(unique_sources)
+        unique_sources.remove('nan')
+        print(unique_sources)
+        print(patata)
         sources_n = len(unique_sources)
         print('Input sources to be analysed {}'.format(sources_n))
         # Loops over input data (Luca's catalog)
