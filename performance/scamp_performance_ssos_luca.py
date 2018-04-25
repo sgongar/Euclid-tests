@@ -87,6 +87,19 @@ def redo_stats_d():
     return stats_d
 
 
+def redo_tmp_d():
+    """ Creates a dictionary
+
+    :return: tmp_d
+    """
+    prfs_d = extract_settings_luca()
+    tmp_d = {}
+    for mag_ in prfs_d['mags']:
+        tmp_d[mag_] = {'right': 0, 'false': 0, 'total': 0}
+
+    return tmp_d
+
+
 def check_source(catalog_n, o_cat, i_alpha, i_delta):
     """
 
@@ -134,12 +147,11 @@ class ScampPerformanceSSOs:
         self.filter_p_number = 3
         self.prfs_d = extract_settings_luca()
 
-        # self.scmp_cf = scmp_cf
-        # self.sex_cf = sex_cf
         self.scmp_cf = '10_1.1_0.5_0.04'
         self.sex_cf = '30_1.5_1.5_0.01_4'
 
         self.save = True
+        self.tmp_d = redo_tmp_d()
 
         for mag_ in self.prfs_d['mags']:
             self.mag = mag_
@@ -282,6 +294,8 @@ class ScampPerformanceSSOs:
         unique_sources = filter(lambda a: a > 0, unique_sources)
 
         sources_n = len(unique_sources)
+        self.tmp_d[self.mag]['total'] = sources_n
+
         print('Input sources to be analysed {}'.format(sources_n))
         # Loops over input data (Luca's catalog)
         for idx_source, source_ in enumerate(unique_sources):
@@ -301,10 +315,12 @@ class ScampPerformanceSSOs:
 
                 if o_df.empty is not True and o_df['pm_values'].size == 1:
                     print(o_df)
-                #     scmp_source = o_df['SOURCE_NUMBER'].iloc[0]
-                #     ssos_sources.append(int(scmp_source))
+                    self.tmp_d[self.mag]['right'] += 1
                 else:
                     print('nothin')
+                    self.tmp_d[self.mag]['false'] += 1
+
+        print(self.tmp_d[self.mag])
 
         stats_d = redo_stats_d()
 
