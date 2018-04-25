@@ -14,8 +14,9 @@ Versions:
 - 0.1
 
 Todo:
-    * Improve log messages
-    * Get out check_source
+    * Improve log messages - create logger instance
+    * Get out check_source -> new file
+    * Multi-threading support
 
 *GNU Terry Pratchett*
 """
@@ -275,6 +276,7 @@ class ScampPerformanceSSOs:
         # unique_sources = list(set(input_ssos_df['source'].tolist()))
         unique_sources = list(set(filter_cat['SOURCE_NUMBER'].tolist()))
         print(unique_sources[-1], type(unique_sources[-1]))
+        print(nan, type(nan))
         unique_sources.remove(nan)
         print(unique_sources)
         print(patata)
