@@ -11,7 +11,6 @@ Todo:
 
 *GNU Terry Pratchett*
 """
-
 from multiprocessing import Process
 
 from astropy.io import fits

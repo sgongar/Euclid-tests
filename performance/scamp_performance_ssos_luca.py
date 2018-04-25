@@ -15,16 +15,17 @@ Versions:
 
 Todo:
     * Improve log messages
+    * Get out check_source
 
+*GNU Terry Pratchett*
 """
-
 from pandas import concat, read_csv
 
 from misc import extract_settings_luca
 from regions import Create_regions
 
 __author__ = "Samuel Góngora García"
-__copyright__ = "Copyright 2017"
+__copyright__ = "Copyright 2018"
 __credits__ = ["Samuel Góngora García"]
 __version__ = "0.1"
 __maintainer__ = "Samuel Góngora García"
@@ -32,7 +33,44 @@ __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
 
 
-class TotalScampPerformanceStars:
+def check_source(catalog_n, o_cat, i_alpha, i_delta):
+    """
+
+    :param catalog_n:
+    :param o_cat:
+    :param i_alpha:
+    :param i_delta:
+    :return:
+    """
+    prfs_d = extract_settings_luca()
+
+    o_df = o_cat[o_cat['CATALOG_NUMBER'].isin([catalog_n])]
+    o_df = o_df[o_df['ALPHA_J2000'] + prfs_d['tolerance'] > i_alpha]
+    o_df = o_df[i_alpha > o_df['ALPHA_J2000'] - prfs_d['tolerance']]
+    o_df = o_df[o_df['DELTA_J2000'] + prfs_d['tolerance'] > i_delta]
+    o_df = o_df[i_delta > o_df['DELTA_J2000'] - prfs_d['tolerance']]
+
+    return o_df
+
+
+#     def get_norm_speed(self, o_pm):
+#         """
+#
+#         :return:
+#         """
+#         speeds_d = speeds_range(self.prfs_d, 50)
+#
+#         pm_norm = 0
+#         for key_ in speeds_d.keys():
+#             low = speeds_d[key_][0]
+#             high = speeds_d[key_][1]
+#             if low < o_pm < high:
+#                 pm_norm = key_
+#
+#         return pm_norm
+
+
+class ScampPerformanceSSOs:
 
     def __init__(self):
         """ Me da los valores de salida de todos las estrellas  y galaxias
@@ -52,9 +90,8 @@ class TotalScampPerformanceStars:
         for mag_ in self.prfs_d['mags']:
             self.mag = mag_
             self.data_d = self.creates_output_dict()
-            # input_sources_d = self.check_pm_distribution()
-            self.check_pm_distribution()
-            # self.get_data(input_sources_d)
+            input_sources_d = self.check_pm_distribution()
+            self.get_stats(input_sources_d)
 
     def gets_filtered_catalog(self):
         """
@@ -182,7 +219,7 @@ class TotalScampPerformanceStars:
 
         # Gets unique sources from input data
         unique_sources = list(set(input_ssos_df['source'].tolist()))
-        # ssos_sources = []
+        ssos_sources = []
         sources_n = len(unique_sources)
         print('Input SSOs to be analysed {}'.format(sources_n))
         # Loops over input data (Luca's catalog)
@@ -190,9 +227,7 @@ class TotalScampPerformanceStars:
             print('SSO idx {} - Total {}'.format(idx_source, sources_n))
             # Gets associated data in input catalog
             cat_df = input_ssos_df[input_ssos_df['source'].isin([source_])]
-            print(cat_df)
 
-            """
             # Iterate over each detection of each source
             for i, row in enumerate(cat_df.itertuples(), 1):
                 catalog_n = row.catalog
@@ -200,15 +235,14 @@ class TotalScampPerformanceStars:
                 i_delta = row.delta_j2000
 
                 # Checks if there is a source closed to input one
-                o_df = self.check_source(catalog_n, filter_cat,
-                                         i_alpha, i_delta)
+                o_df = check_source(catalog_n, filter_cat, i_alpha, i_delta)
 
                 if o_df.empty is not True and o_df['PM'].size == 1:
                     scmp_source = o_df['SOURCE_NUMBER'].iloc[0]
                     ssos_sources.append(int(scmp_source))
                 else:
                     pass
-
+        """
         # Stars stuff todo get out...too long
         # Gets unique sources from input data
         unique_sources = list(set(input_stars_df['source'].tolist()))
@@ -236,7 +270,8 @@ class TotalScampPerformanceStars:
                     stars_sources.append(int(scmp_source))
                 else:
                     pass
-
+        """
+        """
         # Galaxies stuff todo get out...too long
         # Gets unique sources from input data
         unique_sources = list(set(input_galaxies_df['source'].tolist()))
@@ -264,47 +299,16 @@ class TotalScampPerformanceStars:
                     galaxies_sources.append(int(scmp_source))
                 else:
                     pass
-
+        """
+        """
         input_sources_d = {'SSOs': list(set(ssos_sources)),
                            'stars': list(set(stars_sources)),
                            'galaxies': list(set(galaxies_sources))}
+        """
+        input_sources_d = {'SSOs': list(set(ssos_sources))}
 
         return input_sources_d
-        """
-#
-#     def check_source(self, catalog_n, o_cat, i_alpha, i_delta):
-#         """
-#
-#         :param catalog_n:
-#         :param o_cat:
-#         :param i_alpha:
-#         :param i_delta:
-#         :return:
-#         """
-#         o_df = o_cat[o_cat['CATALOG_NUMBER'].isin([catalog_n])]
-#         o_df = o_df[o_df['ALPHA_J2000'] + self.prfs_d['tolerance'] > i_alpha]
-#         o_df = o_df[i_alpha > o_df['ALPHA_J2000'] - self.prfs_d['tolerance']]
-#         o_df = o_df[o_df['DELTA_J2000'] + self.prfs_d['tolerance'] > i_delta]
-#         o_df = o_df[i_delta > o_df['DELTA_J2000'] - self.prfs_d['tolerance']]
-#
-#         return o_df
-#
-#     def get_norm_speed(self, o_pm):
-#         """
-#
-#         :return:
-#         """
-#         speeds_d = speeds_range(self.prfs_d, 50)
-#
-#         pm_norm = 0
-#         for key_ in speeds_d.keys():
-#             low = speeds_d[key_][0]
-#             high = speeds_d[key_][1]
-#             if low < o_pm < high:
-#                 pm_norm = key_
-#
-#         return pm_norm
-#
+
 
 #
 #     def get_data(self, input_sources_d):
@@ -1722,4 +1726,4 @@ class TotalScampPerformanceStars:
 
 
 if __name__ == "__main__":
-    TotalScampPerformanceStars()
+    ScampPerformanceSSOs()

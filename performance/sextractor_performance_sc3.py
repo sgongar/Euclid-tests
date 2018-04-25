@@ -8,6 +8,7 @@ La idea es que compare los objetos extraidos en total con los que tengo.
 Todo:
     * Improve log messages
 
+*GNU Terry Pratchett*
 """
 
 from sys import argv
