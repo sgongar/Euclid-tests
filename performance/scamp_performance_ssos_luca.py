@@ -284,7 +284,7 @@ class ScampPerformanceSSOs:
 
             # Iterate over each detection of each source
             for i, row in enumerate(source_df.itertuples(), 1):
-                catalog_n = row.CATALOG
+                catalog_n = row.CATALOG_NUMBER
                 i_alpha = row.ALPHA_J2000
                 i_delta = row.DELTA_J2000
 
