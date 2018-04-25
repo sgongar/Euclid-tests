@@ -267,10 +267,8 @@ class ScampPerformanceSSOs:
 
         input_ssos, input_stars, input_galaxies = self.creates_input_dict()
         input_ssos_df = self.creates_input_df(input_ssos)
-        print(input_ssos_df.columns)
-        print(patata)
-        input_stars_df = self.creates_input_df(input_stars)
-        input_galaxies_df = self.creates_input_df(input_galaxies)
+        # input_stars_df = self.creates_input_df(input_stars)
+        # input_galaxies_df = self.creates_input_df(input_galaxies)
 
         # Open particular file!
         filter_cat = self.gets_filtered_catalog()
