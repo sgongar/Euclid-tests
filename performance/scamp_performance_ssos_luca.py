@@ -33,6 +33,59 @@ __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
 
 
+def compute_factors(stats_d):
+    """
+    N_meas: number of all detected sources(including false detections)
+    N_se: number of simulated sources recovered by source extraction
+    N_true: number of simulated input sources
+    f_dr: detection rate f_pur: purity
+    f_com: completeness
+
+    f_dr = N_meas / N_true = (N_se + N_false) / N_true
+    f_pur = N_se / N_meas = N_se / (N_se + N_false)
+    f_com = f_dr * f_pur = N_se / N_true
+
+    :param stats_d:
+    :return:
+    """
+    for idx in range(0, len(stats_d['f_dr']), 1):
+        n_meas = stats_d['N_meas'][idx]
+        n_se = stats_d['N_se'][idx]
+        n_true = stats_d['N_true'][idx]
+        try:
+            f_dr = n_meas / n_true
+            f_dr = float("{0:.2f}".format(f_dr))
+            stats_d['f_dr'][idx] = f_dr
+        except ZeroDivisionError:
+            stats_d['f_dr'][idx] = 'nan'
+        try:
+            f_pur = n_se / n_meas
+            f_pur = float("{0:.2f}".format(f_pur))
+            stats_d['f_pur'][idx] = f_pur
+        except ZeroDivisionError:
+            stats_d['f_pur'][idx] = 'nan'
+        try:
+            f_com = n_se / n_true
+            f_com = float("{0:.2f}".format(f_com))
+            stats_d['f_com'][idx] = f_com
+        except ZeroDivisionError:
+            stats_d['f_com'][idx] = 'nan'
+
+    return stats_d
+
+
+def redo_stats_d():
+    """ Creates a dictionary
+
+    :return: tmp_d
+    """
+    stats_d = {'i_pm': [], 'N_meas': [], 'N_false': [], 'N_se': [],
+               'N_true': [], 'f_dr': [], 'f_pur': [], 'f_com': [],
+               'alpha_std': [], 'delta_std': []}
+
+    return stats_d
+
+
 def check_source(catalog_n, o_cat, i_alpha, i_delta):
     """
 
@@ -218,96 +271,39 @@ class ScampPerformanceSSOs:
         filter_cat = self.gets_filtered_catalog()
 
         # Gets unique sources from input data
-        unique_sources = list(set(input_ssos_df['source'].tolist()))
-        ssos_sources = []
+        # unique_sources = list(set(input_ssos_df['source'].tolist()))
+        unique_sources = list(set(filter_cat['SOURCE_NUMBER'].tolist()))
+        print(unique_sources)
         sources_n = len(unique_sources)
-        print('Input SSOs to be analysed {}'.format(sources_n))
+        print('Input sources to be analysed {}'.format(sources_n))
         # Loops over input data (Luca's catalog)
         for idx_source, source_ in enumerate(unique_sources):
-            print('SSO idx {} - Total {}'.format(idx_source, sources_n))
+            print('Source idx {} - Total {}'.format(idx_source, sources_n))
             # Gets associated data in input catalog
-            cat_df = input_ssos_df[input_ssos_df['source'].isin([source_])]
+            source_df = filter_cat[filter_cat['SOURCE_NUMBER'].isin([source_])]
 
             # Iterate over each detection of each source
-            for i, row in enumerate(cat_df.itertuples(), 1):
-                catalog_n = row.catalog
-                i_alpha = row.alpha_j2000
-                i_delta = row.delta_j2000
+            for i, row in enumerate(source_df.itertuples(), 1):
+                catalog_n = row.CATALOG
+                i_alpha = row.ALPHA_J2000
+                i_delta = row.DELTA_J2000
 
-                # Checks if there is a source closed to input one
-                o_df = check_source(catalog_n, filter_cat, i_alpha, i_delta)
+                print('catalog_n {}'.format(catalog_n))
+                print('i_alpha {}'.format(i_alpha))
+                print('i_delta {}'.format(i_delta))
 
-                if o_df.empty is not True and o_df['PM'].size == 1:
-                    scmp_source = o_df['SOURCE_NUMBER'].iloc[0]
-                    ssos_sources.append(int(scmp_source))
-                else:
-                    pass
-        """
-        # Stars stuff todo get out...too long
-        # Gets unique sources from input data
-        unique_sources = list(set(input_stars_df['source'].tolist()))
-        stars_sources = []
-        sources_n = len(unique_sources)
-        self.logger.debug('Input stars to be analysed {}'.format(sources_n))
-        # Loops over input data (Luca's catalog)
-        for idx_source, source_ in enumerate(unique_sources):
-            self.logger.debug('Star idx {} - Total {}'.format(idx_source,
-                                                              sources_n))
-            # Gets associated data in input catalog
-            cat_df = input_stars_df[input_stars_df['source'].isin([source_])]
-            # Iterate over each detection of each source
-            for i, row in enumerate(cat_df.itertuples(), 1):
-                catalog_n = row.catalog
-                i_alpha = row.alpha_j2000
-                i_delta = row.delta_j2000
+                # # Checks if there is a source closed to input one
+                # o_df = check_source(catalog_n, filter_cat, i_alpha, i_delta)
+                #
+                # if o_df.empty is not True and o_df['PM'].size == 1:
+                #     scmp_source = o_df['SOURCE_NUMBER'].iloc[0]
+                #     ssos_sources.append(int(scmp_source))
+                # else:
+                #     pass
 
-                # Checks if there is a source closed to input one
-                o_df = self.check_source(catalog_n, filter_cat,
-                                         i_alpha, i_delta)
+        stats_d = redo_stats_d()
 
-                if o_df.empty is not True and o_df['PM'].size == 1:
-                    scmp_source = o_df['SOURCE_NUMBER'].iloc[0]
-                    stars_sources.append(int(scmp_source))
-                else:
-                    pass
-        """
-        """
-        # Galaxies stuff todo get out...too long
-        # Gets unique sources from input data
-        unique_sources = list(set(input_galaxies_df['source'].tolist()))
-        galaxies_sources = []
-        sources_n = len(unique_sources)
-        self.logger.debug('Input galaxies to be analysed {}'.format(sources_n))
-        # Loops over input data (Luca's catalog)
-        for idx_source, source_ in enumerate(unique_sources):
-            self.logger.debug('Galaxy idx {} - Total {}'.format(idx_source,
-                                                                sources_n))
-            # Gets associated data in input catalog
-            cat_df = input_galaxies_df[input_galaxies_df['source'].isin([source_])]
-            # Iterate over each detection of each source
-            for i, row in enumerate(cat_df.itertuples(), 1):
-                catalog_n = row.catalog
-                i_alpha = row.alpha_j2000
-                i_delta = row.delta_j2000
-
-                # Checks if there is a source closed to input one
-                o_df = self.check_source(catalog_n, filter_cat,
-                                         i_alpha, i_delta)
-
-                if o_df.empty is not True and o_df['PM'].size == 1:
-                    scmp_source = o_df['SOURCE_NUMBER'].iloc[0]
-                    galaxies_sources.append(int(scmp_source))
-                else:
-                    pass
-        """
-        """
-        input_sources_d = {'SSOs': list(set(ssos_sources)),
-                           'stars': list(set(stars_sources)),
-                           'galaxies': list(set(galaxies_sources))}
-        """
-        input_sources_d = {'SSOs': list(set(ssos_sources))}
-
-        return input_sources_d
+        return stats_d
 
 
 #
@@ -497,71 +493,6 @@ class ScampPerformanceSSOs:
 #             galaxy_df2_filename = 'f_{}_{}_{}.csv'.format(self.mag, galaxy_key,
 #                                                           self.filter_p_number)
 #             galaxy_df2.to_csv('full_stats_galaxies/{}'.format(galaxy_df2_filename))
-#
-#
-#
-# def redo_tmp_d():
-#     """ Creates a dictionary
-#
-#     :return: tmp_d
-#     """
-#     tmp_d = {'theta_image': [], 'fwhm_image': [], 'median_a_image': [],
-#              'median_b_image': [], 'median_erra_image': [],
-#              'median_errb_image': [], 'median_class_star': [],
-#              'ellipticity': [], 'median_mag_iso': [], 'median_magerr_iso': [],
-#              'output_pm': [], 'median_flux_iso': []}
-#
-#     return tmp_d
-#
-#
-# def redo_stats_d():
-#     """ Creates a dictionary
-#
-#     :return: tmp_d
-#     """
-#     stats_d = {'i_pm': [], 'mean': [], 'std': [], 'min': [], 'max': []}
-#
-#     return stats_d
-#
-#
-# def populate_stats_d(stats_d):
-#     """
-#
-#     :param stats_d:
-#     :return:
-#     """
-#     prfs_d = extract_settings()
-#     initial_float = 0.0
-#
-#     for idx, pm_ in enumerate(prfs_d['pms'][:-1]):
-#         stats_d['i_pm'].append(pm_)
-#         stats_d['mean'].append(initial_float)
-#         stats_d['std'].append(initial_float)
-#         stats_d['min'].append(initial_float)
-#         stats_d['max'].append(initial_float)
-#
-#     return stats_d
-#
-#
-# # def check_star(catalog_n, i_df, o_alpha, o_delta):
-# #     """
-# #
-# #     :param catalog_n:
-# #     :param i_df:0
-# #     :param o_alpha:
-# #     :param o_delta:
-# #     :return:
-# #     """
-# #     tolerance = 0.0001389  # 0.5 arcsecond
-# #
-# #     i_df = i_df[i_df['catalog'].isin([catalog_n])]
-# #     i_df = i_df[i_df['alpha_j2000'] + tolerance > o_alpha]
-# #     i_df = i_df[o_alpha > i_df['alpha_j2000'] - tolerance]
-# #     i_df = i_df[i_df['delta_j2000'] + tolerance > o_delta]
-# #     i_df = i_df[o_delta > i_df['delta_j2000'] - tolerance]
-# #
-# #     return i_df
-#
 #
 # # def check_mag(i_df, o_alpha, o_delta):
 # #     """
@@ -1243,58 +1174,6 @@ class ScampPerformanceSSOs:
 #                                                        self.filter_p_number)
 #             sso_df2.to_csv('full_stats_ssos/{}'.format(sso_df2_filename))
 #
-#
-# def compute_factors(stats_d):
-#     """
-#     N_meas: number of all detected sources(including false detections)
-#     N_se: number of simulated sources recovered by source extraction
-#     N_true: number of simulated input sources
-#     f_dr: detection rate f_pur: purity
-#     f_com: completeness
-#
-#     f_dr = N_meas / N_true = (N_se + N_false) / N_true
-#     f_pur = N_se / N_meas = N_se / (N_se + N_false)
-#     f_com = f_dr * f_pur = N_se / N_true
-#
-#     :param stats_d:
-#     :return:
-#     """
-#     for idx in range(0, len(stats_d['f_dr']), 1):
-#         n_meas = stats_d['N_meas'][idx]
-#         n_se = stats_d['N_se'][idx]
-#         n_true = stats_d['N_true'][idx]
-#         try:
-#             f_dr = n_meas / n_true
-#             f_dr = float("{0:.2f}".format(f_dr))
-#             stats_d['f_dr'][idx] = f_dr
-#         except ZeroDivisionError:
-#             stats_d['f_dr'][idx] = 'nan'
-#         try:
-#             f_pur = n_se / n_meas
-#             f_pur = float("{0:.2f}".format(f_pur))
-#             stats_d['f_pur'][idx] = f_pur
-#         except ZeroDivisionError:
-#             stats_d['f_pur'][idx] = 'nan'
-#         try:
-#             f_com = n_se / n_true
-#             f_com = float("{0:.2f}".format(f_com))
-#             stats_d['f_com'][idx] = f_com
-#         except ZeroDivisionError:
-#             stats_d['f_com'][idx] = 'nan'
-#
-#     return stats_d
-#
-#
-# def redo_stats_d():
-#     """ Creates a dictionary
-#
-#     :return: tmp_d
-#     """
-#     stats_d = {'i_pm': [], 'N_meas': [], 'N_false': [], 'N_se': [],
-#                'N_true': [], 'f_dr': [], 'f_pur': [], 'f_com': [],
-#                'alpha_std': [], 'delta_std': []}
-#
-#     return stats_d
 #
 #
 # def populate_stats_d(stats_d, mag):
