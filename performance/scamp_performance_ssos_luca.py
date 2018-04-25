@@ -302,7 +302,7 @@ class ScampPerformanceSSOs:
             print('Source idx {} - Total {}'.format(idx_source, sources_n))
             # Gets associated data in input catalog
             source_df = filter_cat[filter_cat['SOURCE_NUMBER'].isin([source_])]
-            print(source_df['MAG_ISO'])
+            print(source_df)
 
             # Iterate over each detection of each source
             for i, row in enumerate(source_df.itertuples(), 1):
@@ -314,11 +314,10 @@ class ScampPerformanceSSOs:
                 o_df = check_source(catalog_n, input_ssos_df, i_alpha, i_delta)
 
                 if o_df.empty is not True and o_df['pm_values'].size == 1:
-                    print(o_df)
                     self.tmp_d[self.mag]['right'] += 1
                 else:
-                    print('nothin')
                     self.tmp_d[self.mag]['false'] += 1
+            print('----------------------------------------------------------')
 
         print(self.tmp_d[self.mag])
 
