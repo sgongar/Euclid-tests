@@ -268,6 +268,8 @@ class ScampPerformanceSSOs:
 
         input_ssos, input_stars, input_galaxies = self.creates_input_dict()
         input_ssos_df = self.creates_input_df(input_ssos)
+        print(input_ssos_df.columns)
+        print(patata)
         input_stars_df = self.creates_input_df(input_stars)
         input_galaxies_df = self.creates_input_df(input_galaxies)
 
@@ -279,8 +281,6 @@ class ScampPerformanceSSOs:
         unique_sources = list(set(filter_cat['SOURCE_NUMBER'].tolist()))
         unique_sources = filter(lambda a: a > 0, unique_sources)
 
-        print(unique_sources)
-        print(patata)
         sources_n = len(unique_sources)
         print('Input sources to be analysed {}'.format(sources_n))
         # Loops over input data (Luca's catalog)
@@ -295,18 +295,15 @@ class ScampPerformanceSSOs:
                 i_alpha = row.ALPHA_J2000
                 i_delta = row.DELTA_J2000
 
-                print('catalog_n {}'.format(catalog_n))
-                print('i_alpha {}'.format(i_alpha))
-                print('i_delta {}'.format(i_delta))
+                # Checks if there is a source closed to input one
+                o_df = check_source(catalog_n, input_ssos_df, i_alpha, i_delta)
 
-                # # Checks if there is a source closed to input one
-                # o_df = check_source(catalog_n, filter_cat, i_alpha, i_delta)
-                #
-                # if o_df.empty is not True and o_df['PM'].size == 1:
+                if o_df.empty is not True and o_df['PM'].size == 1:
+                    print(o_df)
                 #     scmp_source = o_df['SOURCE_NUMBER'].iloc[0]
                 #     ssos_sources.append(int(scmp_source))
-                # else:
-                #     pass
+                else:
+                    print('nothin')
 
         stats_d = redo_stats_d()
 
