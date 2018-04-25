@@ -18,7 +18,7 @@ Todo:
 
 """
 
-from pandas import concat
+from pandas import concat, read_csv
 
 from misc import extract_settings_luca
 from regions import Create_regions
@@ -55,6 +55,23 @@ class TotalScampPerformanceStars:
             # input_sources_d = self.check_pm_distribution()
             self.check_pm_distribution()
             # self.get_data(input_sources_d)
+
+    def gets_filtered_catalog(self):
+        """
+
+        :return: filtered_cat, filtered catalog
+        """
+        filter_n = 'filt_{}_{}_{}.csv'.format(self.scmp_cf, self.mag,
+                                              self.filter_p_number)
+        filter_o_n = '{}/{}/{}/{}/{}'.format(self.prfs_d['filtered'],
+                                             self.mag, self.sex_cf,
+                                             self.scmp_cf, filter_n)
+
+        print('Opens filtered catalog {}'.format(filter_n))
+        # Cross with filtered data - Opens datafile
+        filtered_cat = read_csv('{}'.format(filter_o_n), index_col=0)
+
+        return filtered_cat
 
     def creates_output_dict(self):
         """
@@ -157,16 +174,15 @@ class TotalScampPerformanceStars:
 
         input_ssos, input_stars, input_galaxies = self.creates_input_dict()
         input_ssos_df = self.creates_input_df(input_ssos)
-        print(input_ssos_df)
         input_stars_df = self.creates_input_df(input_stars)
-        print(input_stars_df)
         input_galaxies_df = self.creates_input_df(input_galaxies)
-        print(input_galaxies_df)
 
-        """
         # Open particular file!
         filter_cat = self.gets_filtered_catalog()
 
+        print(filter_cat)
+
+        """
         # SSOs stuff  todo get out...to long
         # Gets unique sources from input data
         unique_sources = list(set(input_ssos_df['source'].tolist()))
@@ -291,22 +307,7 @@ class TotalScampPerformanceStars:
 #
 #         return pm_norm
 #
-#     def gets_filtered_catalog(self):
-#         """
-#
-#         :return: filtered_cat, filtered catalog
-#         """
-#         filter_n = 'filt_{}_{}_{}.csv'.format(self.scmp_cf, self.mag,
-#                                               self.filter_p_number)
-#         filter_o_n = '{}/{}/{}/{}/{}'.format(self.prfs_d['filter_dir'],
-#                                              self.mag, self.sex_cf,
-#                                              self.scmp_cf, filter_n)
-#
-#         self.logger.debug('Opens filtered catalog {}'.format(filter_n))
-#         # Cross with filtered data - Opens datafile
-#         filtered_cat = read_csv('{}'.format(filter_o_n), index_col=0)
-#
-#         return filtered_cat
+
 #
 #     def get_data(self, input_sources_d):
 #         """
