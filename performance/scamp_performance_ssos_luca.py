@@ -277,7 +277,10 @@ class ScampPerformanceSSOs:
         unique_sources = list(set(filter_cat['SOURCE_NUMBER'].tolist()))
         print(unique_sources[-1], type(unique_sources[-1]))
         print(nan, type(nan))
-        unique_sources.remove(nan)
+        try:
+            unique_sources.remove(nan)
+        except ValueError:
+            print('error')
         print(unique_sources)
         print(patata)
         sources_n = len(unique_sources)
