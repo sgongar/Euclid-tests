@@ -20,7 +20,7 @@ Todo:
 
 *GNU Terry Pratchett*
 """
-from numpy import nan
+from numpy import array, nan
 from pandas import concat, read_csv
 
 from misc import extract_settings_luca
@@ -147,6 +147,8 @@ class ScampPerformanceSSOs:
             self.data_d = self.creates_output_dict()
             input_sources_d = self.check_pm_distribution()
             # self.get_stats(input_sources_d)
+
+        self.plot()
 
     def gets_filtered_catalog(self):
         """
@@ -275,12 +277,8 @@ class ScampPerformanceSSOs:
         # Gets unique sources from input data
         # unique_sources = list(set(input_ssos_df['source'].tolist()))
         unique_sources = list(set(filter_cat['SOURCE_NUMBER'].tolist()))
-        print(unique_sources[-1], type(unique_sources[-1]))
-        print(nan, type(nan))
-        try:
-            unique_sources.remove(nan)
-        except ValueError:
-            print('error')
+        unique_sources = filter(lambda a: a != nan, unique_sources)
+
         print(unique_sources)
         print(patata)
         sources_n = len(unique_sources)
@@ -314,6 +312,12 @@ class ScampPerformanceSSOs:
 
         return stats_d
 
+    def plot(self):
+        """
+
+        :return:
+        """
+        print('hello')
 
 #
 #     def get_data(self, input_sources_d):
