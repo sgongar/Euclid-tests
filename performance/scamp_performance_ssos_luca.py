@@ -20,7 +20,6 @@ Todo:
 
 *GNU Terry Pratchett*
 """
-from numpy import array, nan
 from pandas import concat, read_csv
 
 from misc import extract_settings_luca
@@ -99,11 +98,11 @@ def check_source(catalog_n, o_cat, i_alpha, i_delta):
     """
     prfs_d = extract_settings_luca()
 
-    o_df = o_cat[o_cat['CATALOG_NUMBER'].isin([catalog_n])]
-    o_df = o_df[o_df['ALPHA_J2000'] + prfs_d['tolerance'] > i_alpha]
-    o_df = o_df[i_alpha > o_df['ALPHA_J2000'] - prfs_d['tolerance']]
-    o_df = o_df[o_df['DELTA_J2000'] + prfs_d['tolerance'] > i_delta]
-    o_df = o_df[i_delta > o_df['DELTA_J2000'] - prfs_d['tolerance']]
+    o_df = o_cat[o_cat['catalog'].isin([catalog_n])]
+    o_df = o_df[o_df['alpha_j2000'] + prfs_d['tolerance'] > i_alpha]
+    o_df = o_df[i_alpha > o_df['alpha_j2000'] - prfs_d['tolerance']]
+    o_df = o_df[o_df['delta_j2000'] + prfs_d['tolerance'] > i_delta]
+    o_df = o_df[i_delta > o_df['delta_j2000'] - prfs_d['tolerance']]
 
     return o_df
 
