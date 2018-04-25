@@ -295,7 +295,7 @@ class ScampPerformanceSSOs:
                 # Checks if there is a source closed to input one
                 o_df = check_source(catalog_n, input_ssos_df, i_alpha, i_delta)
 
-                if o_df.empty is not True and o_df['PM'].size == 1:
+                if o_df.empty is not True and o_df['pm_values'].size == 1:
                     print(o_df)
                 #     scmp_source = o_df['SOURCE_NUMBER'].iloc[0]
                 #     ssos_sources.append(int(scmp_source))
