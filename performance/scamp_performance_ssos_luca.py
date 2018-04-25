@@ -277,7 +277,7 @@ class ScampPerformanceSSOs:
         # Gets unique sources from input data
         # unique_sources = list(set(input_ssos_df['source'].tolist()))
         unique_sources = list(set(filter_cat['SOURCE_NUMBER'].tolist()))
-        unique_sources = filter(lambda a: a != nan, unique_sources)
+        unique_sources = filter(lambda a: a > 0, unique_sources)
 
         print(unique_sources)
         print(patata)
