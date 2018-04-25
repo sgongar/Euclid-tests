@@ -187,8 +187,7 @@ class TotalScampPerformanceStars:
         print('Input SSOs to be analysed {}'.format(sources_n))
         # Loops over input data (Luca's catalog)
         for idx_source, source_ in enumerate(unique_sources):
-            self.logger.debug('SSO idx {} - Total {}'.format(idx_source,
-                                                             sources_n))
+            print('SSO idx {} - Total {}'.format(idx_source, sources_n))
             # Gets associated data in input catalog
             cat_df = input_ssos_df[input_ssos_df['source'].isin([source_])]
             print(cat_df)
