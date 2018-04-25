@@ -19,6 +19,7 @@ Todo:
 
 *GNU Terry Pratchett*
 """
+from numpy import nan
 from pandas import concat, read_csv
 
 from misc import extract_settings_luca
@@ -274,7 +275,7 @@ class ScampPerformanceSSOs:
         # unique_sources = list(set(input_ssos_df['source'].tolist()))
         unique_sources = list(set(filter_cat['SOURCE_NUMBER'].tolist()))
         print(unique_sources)
-        unique_sources.remove('nan')
+        unique_sources.remove(nan)
         print(unique_sources)
         print(patata)
         sources_n = len(unique_sources)
