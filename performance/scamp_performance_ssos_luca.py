@@ -71,6 +71,16 @@ def compute_factors(stats_d):
     return stats_d
 
 
+def redo_check_d():
+    """ Creates a dictionary
+
+    :return:
+    """
+    check_d = {'detections': 0}
+
+    return check_d
+
+
 def redo_stats_d():
     """ Creates a dictionary
 
@@ -298,8 +308,8 @@ class ScampPerformanceSSOs:
             print('Source idx {} - Total {}'.format(idx_source, sources_n))
             # Gets associated data in input catalog
             source_df = filter_cat[filter_cat['SOURCE_NUMBER'].isin([source_])]
-            print(source_df)
 
+            check_d = redo_check_d()  # Creates a dictionary
             # Iterate over each detection of each source
             for i, row in enumerate(source_df.itertuples(), 1):
                 catalog_n = row.CATALOG_NUMBER
@@ -311,11 +321,15 @@ class ScampPerformanceSSOs:
 
                 if o_df.empty is not True and o_df['pm_values'].size == 1:
                     self.tmp_d[self.mag]['right'] += 1
+                    check_d['detections'] += 1
                 else:
                     self.tmp_d[self.mag]['false'] += 1
-            print('----------------------------------------------------------')
 
-        print(self.tmp_d[self.mag])
+            if check_d['detections'] >= 3:
+                print('ok')
+            else:
+                print('not')
+            print('---')
 
         stats_d = redo_stats_d()
 
