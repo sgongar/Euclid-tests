@@ -2,13 +2,9 @@
 # -*- coding: utf-8 -*-
 
 """Python script for performance
-Obtiene los valores de median, mean y demas de estrellas y ssos
-Todo:
-- Falta max, min y alguna medida estadistica exotica
-Obtiene los objetos de los catalogos filtrados.
-- Todos los objetos han sido detectados correctamente
-Obtiene los objetos directamente de la entrada.
-- No le importa que hayan sido detectados o no
+calcula los factores!
+Obtiene los valores de median, mean y demas de ssos. Tira de las fuentes
+agrupadas por scamp
 
 Versions:
 - 0.1

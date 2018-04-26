@@ -11,7 +11,7 @@ Versions:
 - 0.6 Plotting methods out to plots.py file
 
 Todo:
-    * Improve log messages
+    * Check useful methods
 
 """
 from os import makedirs, path
