@@ -291,8 +291,8 @@ class ScampPerformanceSSOs:
         # Open particular file!
         filter_cat = self.gets_filtered_catalog()
         # Filter by mag!
-        filter_cat = filter_cat[filter_cat['MAG_ISO'] < 21]
-        filter_cat = filter_cat[filter_cat['MAG_ISO'] > 20]
+        filter_cat = filter_cat[filter_cat['MAG_ISO'] < self.mag[3:5]]
+        filter_cat = filter_cat[filter_cat['MAG_ISO'] > self.mag[0:2]]
 
         # Gets unique sources from input data
         # unique_sources = list(set(input_ssos_df['source'].tolist()))
@@ -305,7 +305,7 @@ class ScampPerformanceSSOs:
         print('Input sources to be analysed {}'.format(sources_n))
         # Loops over input data (Luca's catalog)
         for idx_source, source_ in enumerate(unique_sources):
-            print('Source idx {} - Total {}'.format(idx_source, sources_n))
+            # print('Source idx {} - Total {}'.format(idx_source, sources_n))
             # Gets associated data in input catalog
             source_df = filter_cat[filter_cat['SOURCE_NUMBER'].isin([source_])]
 
@@ -322,16 +322,21 @@ class ScampPerformanceSSOs:
                 if o_df.empty is not True and o_df['pm_values'].size == 1:
                     self.tmp_d[self.mag]['right'] += 1
                     check_d['detections'] += 1
-                    print('ok')
+                    # print('ok')
                 else:
                     self.tmp_d[self.mag]['false'] += 1
-                    print('no')
+                    # print('no')
 
             if check_d['detections'] >= 3:
-                print('total - ok')
+                # print('total - ok')
+                self.tmp_d[self.mag]['right'] += 1
             else:
-                print('total - no')
-            print('---')
+                # print('total - no')
+                self.tmp_d[self.mag]['false'] += 1
+            # print('---')
+
+        print(self.mag)
+        print(self.tmp_d[self.mag])
 
         stats_d = redo_stats_d()
 
