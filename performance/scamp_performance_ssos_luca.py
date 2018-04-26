@@ -291,6 +291,8 @@ class ScampPerformanceSSOs:
         # Open particular file!
         filter_cat = self.gets_filtered_catalog()
         # Filter by mag!
+        print(self.mag[3:5], type(self.mag[3:5]))
+        print(self.mag[0:2], type(self.mag[0:2]))
         filter_cat = filter_cat[filter_cat['MAG_ISO'] < self.mag[3:5]]
         filter_cat = filter_cat[filter_cat['MAG_ISO'] > self.mag[0:2]]
 
