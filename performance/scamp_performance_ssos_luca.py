@@ -307,7 +307,7 @@ class ScampPerformanceSSOs:
         # Loops over input data (Luca's catalog)
         for idx_source, source_ in enumerate(unique_sources):
             test += 1
-            # print('Source idx {} - Total {}'.format(idx_source, sources_n))
+            print('Source idx {} - Total {}'.format(idx_source, sources_n))
             # Gets associated data in input catalog
             source_df = filter_cat[filter_cat['SOURCE_NUMBER'].isin([source_])]
 
@@ -330,10 +330,10 @@ class ScampPerformanceSSOs:
                     # print('no')
 
             if check_d['detections'] >= 3:
-                # print('total - ok')
+                print('total - ok')
                 self.tmp_d[self.mag]['right'] += 1
             else:
-                # print('total - no')
+                print('total - no')
                 self.tmp_d[self.mag]['false'] += 1
             # print('---')
 
