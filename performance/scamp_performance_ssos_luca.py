@@ -322,13 +322,15 @@ class ScampPerformanceSSOs:
                 if o_df.empty is not True and o_df['pm_values'].size == 1:
                     self.tmp_d[self.mag]['right'] += 1
                     check_d['detections'] += 1
+                    print('ok')
                 else:
                     self.tmp_d[self.mag]['false'] += 1
+                    print('no')
 
             if check_d['detections'] >= 3:
-                print('ok')
+                print('total - ok')
             else:
-                print('not')
+                print('total - no')
             print('---')
 
         stats_d = redo_stats_d()
