@@ -128,6 +128,41 @@ def check_source(catalog_n, o_cat, i_alpha, i_delta):
     return o_df
 
 
+def speeds_range(prfs_d, confidence):
+    """ given a confidence value returns a dict with speeds
+
+    @param prfs_d:
+    @param confidence:
+
+    @return speeds_dict:
+    """
+    speeds_dict = {}
+    for pm_ in prfs_d['pms']:
+        speeds_dict[pm_] = [pm_ - pm_ * confidence / 100,
+                            pm_ + pm_ * confidence / 100]
+
+    return speeds_dict
+
+
+def get_norm_speed(o_pm):
+    """
+
+    :return:
+    """
+    prfs_d = extract_settings_luca()
+
+    speeds_d = speeds_range(prfs_d, 50)
+
+    pm_norm = 0
+    for key_ in speeds_d.keys():
+        low = speeds_d[key_][0]
+        high = speeds_d[key_][1]
+        if low < o_pm < high:
+            pm_norm = key_
+
+    return pm_norm
+
+
 class ScampPerformanceSSOs:
 
     def __init__(self):
@@ -307,11 +342,10 @@ class ScampPerformanceSSOs:
                 o_df = check_source(catalog_n, input_ssos_df, o_alpha, o_delta)
 
                 if o_df.empty is not True and o_df['pm_values'].size == 1:
-                    print(o_df['pm_values'])
                     check_d['detections'] += 1
                     pm_right = float(o_df['pm_values'])
                 else:
-                    print(o_pm)  # todo get norm value
+                    pm_false = get_norm_speed(o_pm)
                     pass
 
             if check_d['detections'] >= 3:
@@ -764,23 +798,6 @@ class TotalScampPerformanceSSOs:
 #             self.check_stars()
 #         elif ssos:
 #             self.check_ssos()
-#
-#     def get_norm_speed(self, o_pm):
-#         """
-#
-#         :return:
-#         """
-#         speeds_d = speeds_range(self.prfs_d, 50)
-#
-#         pm_norm = 0
-#         for key_ in speeds_d.keys():
-#             low = speeds_d[key_][0]
-#             high = speeds_d[key_][1]
-#             if low < o_pm < high:
-#                 pm_norm = key_
-#
-#         return pm_norm
-#
 #     def creates_input_dict(self):
 #         """ Creates an input dictionary. Each key contains SSOs' information
 #         for each dither.
