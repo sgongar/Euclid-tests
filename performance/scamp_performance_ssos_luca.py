@@ -102,6 +102,7 @@ def redo_tmp_d():
     tmp_d = {}
     for mag_ in prfs_d['mags']:
         tmp_d[mag_] = {}
+        tmp_d[mag_][0] = {'right': 0, 'false': 0, 'total': 0}
         for pm_ in prfs_d['pms']:
             tmp_d[mag_][pm_] = {'right': 0, 'false': 0, 'total': 0}
 
@@ -181,7 +182,6 @@ class ScampPerformanceSSOs:
 
         for mag_ in self.prfs_d['mags']:
             self.mag = mag_
-            self.data_d = self.creates_output_dict()
             input_sources_d = self.check_pm_distribution()
             # self.get_stats(input_sources_d)
 
