@@ -319,7 +319,7 @@ class ScampPerformanceSSOs:
                 o_df = check_source(catalog_n, input_ssos_df, i_alpha, i_delta)
 
                 if o_df.empty is not True and o_df['pm_values'].size == 1:
-                    print(o_df.columns)
+                    print(o_df['pm_values'])
                     # self.tmp_d[self.mag]['right'] += 1
                     check_d['detections'] += 1
                     # print('ok')
