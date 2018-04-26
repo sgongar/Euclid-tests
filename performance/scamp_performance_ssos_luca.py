@@ -101,7 +101,9 @@ def redo_tmp_d():
     prfs_d = extract_settings_luca()
     tmp_d = {}
     for mag_ in prfs_d['mags']:
-        tmp_d[mag_] = {'right': 0, 'false': 0, 'total': 0}
+        tmp_d[mag_] = {}
+        for pm_ in prfs_d['pms']:
+            tmp_d[mag_][pm_] = {'right': 0, 'false': 0, 'total': 0}
 
     return tmp_d
 
@@ -124,23 +126,6 @@ def check_source(catalog_n, o_cat, i_alpha, i_delta):
     o_df = o_df[i_delta > o_df['delta_j2000'] - prfs_d['tolerance']]
 
     return o_df
-
-
-#     def get_norm_speed(self, o_pm):
-#         """
-#
-#         :return:
-#         """
-#         speeds_d = speeds_range(self.prfs_d, 50)
-#
-#         pm_norm = 0
-#         for key_ in speeds_d.keys():
-#             low = speeds_d[key_][0]
-#             high = speeds_d[key_][1]
-#             if low < o_pm < high:
-#                 pm_norm = key_
-#
-#         return pm_norm
 
 
 class ScampPerformanceSSOs:
@@ -308,32 +293,33 @@ class ScampPerformanceSSOs:
             # Gets associated data in input catalog
             source_df = filter_cat[filter_cat['SOURCE_NUMBER'].isin([source_])]
 
+            pm_right = False
+            pm_false = False
             check_d = redo_check_d()  # Creates a dictionary
             # Iterate over each detection of each source
             for i, row in enumerate(source_df.itertuples(), 1):
                 catalog_n = row.CATALOG_NUMBER
-                i_alpha = row.ALPHA_J2000
-                i_delta = row.DELTA_J2000
+                o_alpha = row.ALPHA_J2000
+                o_delta = row.DELTA_J2000
+                o_pm = row.PM
 
                 # Checks if there is a source closed to input one
-                o_df = check_source(catalog_n, input_ssos_df, i_alpha, i_delta)
+                o_df = check_source(catalog_n, input_ssos_df, o_alpha, o_delta)
 
                 if o_df.empty is not True and o_df['pm_values'].size == 1:
                     print(o_df['pm_values'])
-                    # self.tmp_d[self.mag]['right'] += 1
                     check_d['detections'] += 1
-                    # print('ok')
+                    pm_right = float(o_df['pm_values'])
                 else:
-                    # self.tmp_d[self.mag]['false'] += 1
-                    # print('no')
+                    print(o_pm)  # todo get norm value
                     pass
 
             if check_d['detections'] >= 3:
                 # print('total - ok')
-                self.tmp_d[self.mag]['right'] += 1
+                self.tmp_d[self.mag][pm_right]['right'] += 1
             else:
                 # print('total - no')
-                self.tmp_d[self.mag]['false'] += 1
+                self.tmp_d[self.mag][pm_false['false'] += 1
             # print('---')
 
         print(self.tmp_d[self.mag])
