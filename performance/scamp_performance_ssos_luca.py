@@ -150,7 +150,7 @@ class ScampPerformanceSSOs:
         presentes en filt 3 obtenidos o no
 
         """
-        self.filter_p_number = 3
+        self.filter_p_number = 9
         self.prfs_d = extract_settings_luca()
 
         self.scmp_cf = '10_1.1_0.5_0.04'
@@ -331,10 +331,10 @@ class ScampPerformanceSSOs:
                     pass
 
             if check_d['detections'] >= 3:
-                print('total - ok')
+                # print('total - ok')
                 self.tmp_d[self.mag]['right'] += 1
             else:
-                print('total - no')
+                # print('total - no')
                 self.tmp_d[self.mag]['false'] += 1
             # print('---')
 
