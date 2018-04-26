@@ -319,7 +319,7 @@ class ScampPerformanceSSOs:
                 self.tmp_d[self.mag][pm_right]['right'] += 1
             else:
                 # print('total - no')
-                self.tmp_d[self.mag][pm_false['false'] += 1
+                self.tmp_d[self.mag][pm_false]['false'] += 1
             # print('---')
 
         print(self.tmp_d[self.mag])
