@@ -303,8 +303,10 @@ class ScampPerformanceSSOs:
         self.tmp_d[self.mag]['total'] = sources_n
 
         print('Input sources to be analysed {}'.format(sources_n))
+        test = 0
         # Loops over input data (Luca's catalog)
         for idx_source, source_ in enumerate(unique_sources):
+            test += 1
             # print('Source idx {} - Total {}'.format(idx_source, sources_n))
             # Gets associated data in input catalog
             source_df = filter_cat[filter_cat['SOURCE_NUMBER'].isin([source_])]
@@ -335,7 +337,7 @@ class ScampPerformanceSSOs:
                 self.tmp_d[self.mag]['false'] += 1
             # print('---')
 
-        print(self.mag)
+        print(self.mag, test)
         print(self.tmp_d[self.mag])
 
         stats_d = redo_stats_d()
