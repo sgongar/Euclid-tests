@@ -30,7 +30,7 @@ __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
 
 
-def compute_factors(stats_d):
+def compute_factors(stats_d, tmp_d):
     """
     N_meas: number of all detected sources(including false detections)
     N_se: number of simulated sources recovered by source extraction
@@ -45,6 +45,15 @@ def compute_factors(stats_d):
     :param stats_d:
     :return:
     """
+    prfs_d = extract_settings_luca()
+
+    for mag_ in prfs_d['mags']:
+        stats_d[mag_] = {}
+        for pm_ in prfs_d['pms']:
+            stats_d[mag_][pm_] = {'i_pm': [], 'N_meas': [], 'N_false': [],
+                                  'N_se': [], 'N_true': [], 'f_dr': [],
+                                  'f_pur': [], 'f_com': []}
+
     for idx in range(0, len(stats_d['f_dr']), 1):
         n_meas = stats_d['N_meas'][idx]
         n_se = stats_d['N_se'][idx]
@@ -89,6 +98,7 @@ def redo_stats_d():
     prfs_d = extract_settings_luca()
     stats_d = {}
     for mag_ in prfs_d['mags']:
+        stats_d[mag_] = {}
         for pm_ in prfs_d['pms']:
             stats_d[mag_][pm_] = {'i_pm': [], 'N_meas': [], 'N_false': [],
                                   'N_se': [], 'N_true': [], 'f_dr': [],
@@ -182,9 +192,9 @@ class ScampPerformanceSSOs:
         self.sex_cf = '30_1.5_1.5_0.01_4'
 
         self.save = True
-        self.tmp_d = redo_tmp_d()
 
         for mag_ in self.prfs_d['mags']:
+            self.tmp_d = redo_tmp_d()
             self.mag = mag_
             input_sources_d = self.check_pm_distribution()
             # self.get_stats(input_sources_d)
@@ -332,41 +342,40 @@ class ScampPerformanceSSOs:
             # Gets associated data in input catalog
             source_df = filter_cat[filter_cat['SOURCE_NUMBER'].isin([source_])]
 
-            print(source_df['SOURCE_NUMBER'].size)
+            if int(source_df['SOURCE_NUMBER'].size) >= 3:
+                pm_right = False
+                pm_false = False
+                check_d = redo_check_d()  # Creates a dictionary
+                # Iterate over each detection of each source
+                for i, row in enumerate(source_df.itertuples(), 1):
+                    catalog_n = row.CATALOG_NUMBER
+                    o_alpha = row.ALPHA_J2000
+                    o_delta = row.DELTA_J2000
+                    o_pm = row.PM
 
-            pm_right = False
-            pm_false = False
-            check_d = redo_check_d()  # Creates a dictionary
-            # Iterate over each detection of each source
-            for i, row in enumerate(source_df.itertuples(), 1):
-                catalog_n = row.CATALOG_NUMBER
-                o_alpha = row.ALPHA_J2000
-                o_delta = row.DELTA_J2000
-                o_pm = row.PM
+                    # Checks if there is a source closed to input one
+                    o_df = check_source(catalog_n, input_ssos_df,
+                                        o_alpha, o_delta)
 
-                # Checks if there is a source closed to input one
-                o_df = check_source(catalog_n, input_ssos_df, o_alpha, o_delta)
+                    if o_df.empty is not True and o_df['pm_values'].size == 1:
+                        check_d['detections'] += 1
+                        pm_right = float(o_df['pm_values'])
+                    else:
+                        pm_false = get_norm_speed(o_pm)
+                        pass
 
-                if o_df.empty is not True and o_df['pm_values'].size == 1:
-                    check_d['detections'] += 1
-                    pm_right = float(o_df['pm_values'])
+                if check_d['detections'] >= 3:
+                    # print('total - ok')
+                    self.tmp_d[self.mag][pm_right]['right'] += 1
                 else:
-                    pm_false = get_norm_speed(o_pm)
-                    pass
-
-            if check_d['detections'] >= 3:
-                # print('total - ok')
-                self.tmp_d[self.mag][pm_right]['right'] += 1
-            else:
-                # print('total - no')
-                self.tmp_d[self.mag][pm_false]['false'] += 1
-            # print('---')
+                    # print('total - no')
+                    self.tmp_d[self.mag][pm_false]['false'] += 1
+                # print('---')
 
         print(self.tmp_d[self.mag])
 
         stats_d = redo_stats_d()
-
-        print(stats_d)
+        stats_d = compute_factors(stats_d, self.tmp_d)
 
         return stats_d
 
@@ -378,216 +387,214 @@ class ScampPerformanceSSOs:
         print('hello')
 
 
-class TotalScampPerformanceSSOs:
-
-    def __init__(self):
-        """ Me da los valores de salida de todos las estrellas  y galaxias
-        presentes en filt 3 obtenidos o no
-
-        """
-        self.filter_p_number = 3
-        self.prfs_d = extract_settings_luca()
-
-        self.scmp_cf = '10_1.1_0.5_0.04'
-        self.sex_cf = '30_1.5_1.5_0.01_4'
-
-        self.save = True
-        self.tmp_d = redo_tmp_d()
-
-        for mag_ in self.prfs_d['mags']:
-            self.mag = mag_
-            self.data_d = self.creates_output_dict()
-            input_sources_d = self.check_pm_distribution()
-            # self.get_stats(input_sources_d)
-
-        self.plot()
-
-    def gets_filtered_catalog(self):
-        """
-
-        :return: filtered_cat, filtered catalog
-        """
-        filter_n = 'filt_{}_{}_{}.csv'.format(self.scmp_cf, self.mag,
-                                              self.filter_p_number)
-        filter_o_n = '{}/{}/{}/{}/{}'.format(self.prfs_d['filtered'],
-                                             self.mag, self.sex_cf,
-                                             self.scmp_cf, filter_n)
-
-        print('Opens filtered catalog {}'.format(filter_n))
-        # Cross with filtered data - Opens datafile
-        filtered_cat = read_csv('{}'.format(filter_o_n), index_col=0)
-
-        return filtered_cat
-
-    def creates_output_dict(self):
-        """
-
-        :return: data_d
-        """
-        data_d = {}
-        for pm_ in self.prfs_d['pms']:
-            data_d[pm_] = []
-
-        return data_d
-
-    def creates_input_dict(self):
-        """ Creates an input dictionary. Each key contains SSOs' information
-        for each dither.
-
-        :return: input_dict
-        """
-        input_dict = {}
-        # Loops over the four dithers
-        for dither in range(1, 5, 1):
-            cat_location = '{}/{}/Catalogs'.format(self.prfs_d['fits_dir'],
-                                                   self.mag)
-            cat_name = '{}/Cat_{}_d{}'.format(cat_location, self.mag, dither)
-            input_dict[dither] = '{}.dat'.format(cat_name)
-        input_ssos = Create_regions(input_dict).check_ssos(self.mag, True)
-
-        input_dict = {}
-        # Loops over the four dithers
-        for dither in range(1, 5, 1):
-            cat_location = '{}/{}/Catalogs'.format(self.prfs_d['fits_dir'],
-                                                   self.mag)
-            cat_name = '{}/Cat_{}_d{}'.format(cat_location, self.mag, dither)
-            input_dict[dither] = '{}.dat'.format(cat_name)
-        input_stars = Create_regions(input_dict).check_stars(self.mag, True)
-
-        input_dict = {}
-        # Loops over the four dithers
-        for dither in range(1, 5, 1):
-            cat_location = '{}/{}/Catalogs'.format(self.prfs_d['fits_dir'],
-                                                   self.mag)
-            cat_name = '{}/Cat_{}_d{}'.format(cat_location, self.mag, dither)
-            input_dict[dither] = '{}.dat'.format(cat_name)
-        input_galaxies = Create_regions(input_dict).check_galaxies(self.mag,
-                                                                   True)
-        return input_ssos, input_stars, input_galaxies
-
-    def creates_input_df(self, input_dict):
-        """ Creates an input dataframe from an input dictionary.
-
-        :return: input dataframe
-        """
-        occurrences = 3
-
-        input_list = []
-        for key_ in input_dict.keys():
-            input_list.append(input_dict[key_])
-
-        input_df = concat(input_list, axis=0)
-        # Look for >= 3 coincidences
-        input_df = concat(g for _, g in input_df.groupby('source')
-                          if len(g) >= occurrences)
-        input_df = input_df.reset_index(drop=True)
-
-        if self.save:
-            print('Saves input catalog')
-            input_df.to_csv('tmp/inputs_{}.csv'.format(self.mag))
-
-        return input_df
-
-    def check_pm_distribution(self):
-        """
-
-        :return:
-        """
-        # Creates an input dictionary with all input sources
-        print('Magnitude bin: {}'.format(self.mag))
-        print('Scamp configuration: {}'.format(self.scmp_cf))
-        print('Sextractor configuration: {}'.format(self.sex_cf))
-
-        # Creates a dictionary
-        sso_d = {'catalog_n': [], 'median_a_image': [],
-                 'median_erra_image': [], 'median_b_image': [],
-                 'median_errb_image': [], 'median_class_star': [],
-                 'ellipticity': [], 'median_mag_iso': [],
-                 'median_magerr_iso': [], 'output_pm': [],
-                 'median_flux_iso': []}
-        for idx in range(0, len(self.prfs_d['pms']), 1):
-            sso_d['median_mag_iso'].append([])
-            sso_d['median_magerr_iso'].append([])
-            sso_d['catalog_n'].append([])
-            sso_d['median_a_image'].append([])
-            sso_d['median_erra_image'].append([])
-            sso_d['median_b_image'].append([])
-            sso_d['median_errb_image'].append([])
-            sso_d['median_class_star'].append([])
-            sso_d['ellipticity'].append([])
-            sso_d['output_pm'].append([])
-            sso_d['median_flux_iso'].append([])
-
-        input_ssos, input_stars, input_galaxies = self.creates_input_dict()
-        input_ssos_df = self.creates_input_df(input_ssos)
-        # input_stars_df = self.creates_input_df(input_stars)
-        # input_galaxies_df = self.creates_input_df(input_galaxies)
-
-        # Open particular file!
-        filter_cat = self.gets_filtered_catalog()
-        # Filter by mag!
-        filter_cat = filter_cat[filter_cat['MAG_ISO'] < float(self.mag[3:5])]
-        filter_cat = filter_cat[filter_cat['MAG_ISO'] > float(self.mag[0:2])]
-
-        # Gets unique sources from input data
-        # unique_sources = list(set(input_ssos_df['source'].tolist()))
-        unique_sources = list(set(filter_cat['SOURCE_NUMBER'].tolist()))
-        unique_sources = filter(lambda a: a > 0, unique_sources)
-
-        sources_n = len(unique_sources)
-        self.tmp_d[self.mag]['total'] = sources_n
-
-        print('Input sources to be analysed {}'.format(sources_n))
-        test = 0
-        # Loops over input data (Luca's catalog)
-        for idx_source, source_ in enumerate(unique_sources):
-            test += 1
-            print('Source idx {} - Total {}'.format(idx_source, sources_n))
-            # Gets associated data in input catalog
-            source_df = filter_cat[filter_cat['SOURCE_NUMBER'].isin([source_])]
-
-            check_d = redo_check_d()  # Creates a dictionary
-            # Iterate over each detection of each source
-            for i, row in enumerate(source_df.itertuples(), 1):
-                catalog_n = row.CATALOG_NUMBER
-                i_alpha = row.ALPHA_J2000
-                i_delta = row.DELTA_J2000
-
-                # Checks if there is a source closed to input one
-                o_df = check_source(catalog_n, input_ssos_df, i_alpha, i_delta)
-
-                if o_df.empty is not True and o_df['pm_values'].size == 1:
-                    # self.tmp_d[self.mag]['right'] += 1
-                    check_d['detections'] += 1
-                    # print('ok')
-                else:
-                    # self.tmp_d[self.mag]['false'] += 1
-                    # print('no')
-                    pass
-
-            if check_d['detections'] >= 3:
-                # print('total - ok')
-                self.tmp_d[self.mag]['right'] += 1
-            else:
-                # print('total - no')
-                self.tmp_d[self.mag]['false'] += 1
-            # print('---')
-
-        print(self.mag, test)
-        print(self.tmp_d[self.mag])
-
-        stats_d = redo_stats_d()
-
-        return stats_d
-
-    def plot(self):
-        """
-
-        :return:
-        """
-        print('hello')
-
-
+# class TotalScampPerformanceSSOs:
+#
+#     def __init__(self):
+#         """ Me da los valores de salida de todos las estrellas  y galaxias
+#         presentes en filt 3 obtenidos o no
+#
+#         """
+#         self.filter_p_number = 3
+#         self.prfs_d = extract_settings_luca()
+#
+#         self.scmp_cf = '10_1.1_0.5_0.04'
+#         self.sex_cf = '30_1.5_1.5_0.01_4'
+#
+#         self.save = True
+#         self.tmp_d = redo_tmp_d()
+#
+#         for mag_ in self.prfs_d['mags']:
+#             self.mag = mag_
+#             self.data_d = self.creates_output_dict()
+#             input_sources_d = self.check_pm_distribution()
+#             # self.get_stats(input_sources_d)
+#
+#         self.plot()
+#
+#     def gets_filtered_catalog(self):
+#         """
+#
+#         :return: filtered_cat, filtered catalog
+#         """
+#         filter_n = 'filt_{}_{}_{}.csv'.format(self.scmp_cf, self.mag,
+#                                               self.filter_p_number)
+#         filter_o_n = '{}/{}/{}/{}/{}'.format(self.prfs_d['filtered'],
+#                                              self.mag, self.sex_cf,
+#                                              self.scmp_cf, filter_n)
+#
+#         print('Opens filtered catalog {}'.format(filter_n))
+#         # Cross with filtered data - Opens datafile
+#         filtered_cat = read_csv('{}'.format(filter_o_n), index_col=0)
+#
+#         return filtered_cat
+#
+#     def creates_output_dict(self):
+#         """
+#
+#         :return: data_d
+#         """
+#         data_d = {}
+#         for pm_ in self.prfs_d['pms']:
+#             data_d[pm_] = []
+#
+#         return data_d
+#
+#     def creates_input_dict(self):
+#         """ Creates an input dictionary. Each key contains SSOs' information
+#         for each dither.
+#
+#         :return: input_dict
+#         """
+#         input_dict = {}
+#         # Loops over the four dithers
+#         for dither in range(1, 5, 1):
+#             cat_location = '{}/{}/Catalogs'.format(self.prfs_d['fits_dir'],
+#                                                    self.mag)
+#             cat_name = '{}/Cat_{}_d{}'.format(cat_location, self.mag, dither)
+#             input_dict[dither] = '{}.dat'.format(cat_name)
+#         input_ssos = Create_regions(input_dict).check_ssos(self.mag, True)
+#
+#         input_dict = {}
+#         # Loops over the four dithers
+#         for dither in range(1, 5, 1):
+#             cat_location = '{}/{}/Catalogs'.format(self.prfs_d['fits_dir'],
+#                                                    self.mag)
+#             cat_name = '{}/Cat_{}_d{}'.format(cat_location, self.mag, dither)
+#             input_dict[dither] = '{}.dat'.format(cat_name)
+#         input_stars = Create_regions(input_dict).check_stars(self.mag, True)
+#
+#         input_dict = {}
+#         # Loops over the four dithers
+#         for dither in range(1, 5, 1):
+#             cat_location = '{}/{}/Catalogs'.format(self.prfs_d['fits_dir'],
+#                                                    self.mag)
+#             cat_name = '{}/Cat_{}_d{}'.format(cat_location, self.mag, dither)
+#             input_dict[dither] = '{}.dat'.format(cat_name)
+#         input_galaxies = Create_regions(input_dict).check_galaxies(self.mag,
+#                                                                    True)
+#         return input_ssos, input_stars, input_galaxies
+#
+#     def creates_input_df(self, input_dict):
+#         """ Creates an input dataframe from an input dictionary.
+#
+#         :return: input dataframe
+#         """
+#         occurrences = 3
+#
+#         input_list = []
+#         for key_ in input_dict.keys():
+#             input_list.append(input_dict[key_])
+#
+#         input_df = concat(input_list, axis=0)
+#         # Look for >= 3 coincidences
+#         input_df = concat(g for _, g in input_df.groupby('source')
+#                           if len(g) >= occurrences)
+#         input_df = input_df.reset_index(drop=True)
+#
+#         if self.save:
+#             print('Saves input catalog')
+#             input_df.to_csv('tmp/inputs_{}.csv'.format(self.mag))
+#
+#         return input_df
+#
+#     def check_pm_distribution(self):
+#         """
+#
+#         :return:
+#         """
+#         # Creates an input dictionary with all input sources
+#         print('Magnitude bin: {}'.format(self.mag))
+#         print('Scamp configuration: {}'.format(self.scmp_cf))
+#         print('Sextractor configuration: {}'.format(self.sex_cf))
+#
+#         # Creates a dictionary
+#         sso_d = {'catalog_n': [], 'median_a_image': [],
+#                  'median_erra_image': [], 'median_b_image': [],
+#                  'median_errb_image': [], 'median_class_star': [],
+#                  'ellipticity': [], 'median_mag_iso': [],
+#                  'median_magerr_iso': [], 'output_pm': [],
+#                  'median_flux_iso': []}
+#         for idx in range(0, len(self.prfs_d['pms']), 1):
+#             sso_d['median_mag_iso'].append([])
+#             sso_d['median_magerr_iso'].append([])
+#             sso_d['catalog_n'].append([])
+#             sso_d['median_a_image'].append([])
+#             sso_d['median_erra_image'].append([])
+#             sso_d['median_b_image'].append([])
+#             sso_d['median_errb_image'].append([])
+#             sso_d['median_class_star'].append([])
+#             sso_d['ellipticity'].append([])
+#             sso_d['output_pm'].append([])
+#             sso_d['median_flux_iso'].append([])
+#
+#         input_ssos, input_stars, input_galaxies = self.creates_input_dict()
+#         input_ssos_df = self.creates_input_df(input_ssos)
+#         # input_stars_df = self.creates_input_df(input_stars)
+#         # input_galaxies_df = self.creates_input_df(input_galaxies)
+#
+#         # Open particular file!
+#         filter_cat = self.gets_filtered_catalog()
+#         # Filter by mag!
+#         filter_cat = filter_cat[filter_cat['MAG_ISO'] < float(self.mag[3:5])]
+#         filter_cat = filter_cat[filter_cat['MAG_ISO'] > float(self.mag[0:2])]
+#
+#         # Gets unique sources from input data
+#         # unique_sources = list(set(input_ssos_df['source'].tolist()))
+#         unique_sources = list(set(filter_cat['SOURCE_NUMBER'].tolist()))
+#         unique_sources = filter(lambda a: a > 0, unique_sources)
+#
+#         sources_n = len(unique_sources)
+#         self.tmp_d[self.mag]['total'] = sources_n
+#
+#         print('Input sources to be analysed {}'.format(sources_n))
+#         test = 0
+#         # Loops over input data (Luca's catalog)
+#         for idx_source, source_ in enumerate(unique_sources):
+#             test += 1
+#             print('Source idx {} - Total {}'.format(idx_source, sources_n))
+#             # Gets associated data in input catalog
+#             source_df = filter_cat[filter_cat['SOURCE_NUMBER'].isin([source_])]
+#
+#             check_d = redo_check_d()  # Creates a dictionary
+#             # Iterate over each detection of each source
+#             for i, row in enumerate(source_df.itertuples(), 1):
+#                 catalog_n = row.CATALOG_NUMBER
+#                 i_alpha = row.ALPHA_J2000
+#                 i_delta = row.DELTA_J2000
+#
+#                 # Checks if there is a source closed to input one
+#                 o_df = check_source(catalog_n, input_ssos_df, i_alpha, i_delta)
+#
+#                 if o_df.empty is not True and o_df['pm_values'].size == 1:
+#                     # self.tmp_d[self.mag]['right'] += 1
+#                     check_d['detections'] += 1
+#                     # print('ok')
+#                 else:
+#                     # self.tmp_d[self.mag]['false'] += 1
+#                     # print('no')
+#                     pass
+#
+#             if check_d['detections'] >= 3:
+#                 # print('total - ok')
+#                 self.tmp_d[self.mag]['right'] += 1
+#             else:
+#                 # print('total - no')
+#                 self.tmp_d[self.mag]['false'] += 1
+#             # print('---')
+#
+#         print(self.mag, test)
+#         print(self.tmp_d[self.mag])
+#
+#         stats_d = redo_stats_d()
+#
+#         return stats_d
+#
+#     def plot(self):
+#         """
+#
+#         :return:
+#         """
+#         print('hello')
 #
 #     def get_data(self, input_sources_d):
 #         """
