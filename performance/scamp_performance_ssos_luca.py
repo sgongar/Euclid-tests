@@ -16,6 +16,7 @@ Todo:
 
 *GNU Terry Pratchett*
 """
+from numpy import nan
 from pandas import concat, read_csv
 
 from misc import extract_settings_luca
@@ -48,34 +49,35 @@ def compute_factors(stats_d, tmp_d):
     prfs_d = extract_settings_luca()
 
     for mag_ in prfs_d['mags']:
-        stats_d[mag_] = {}
         for pm_ in prfs_d['pms']:
-            stats_d[mag_][pm_] = {'i_pm': [], 'N_meas': [], 'N_false': [],
-                                  'N_se': [], 'N_true': [], 'f_dr': [],
-                                  'f_pur': [], 'f_com': []}
-
-    for idx in range(0, len(stats_d['f_dr']), 1):
-        n_meas = stats_d['N_meas'][idx]
-        n_se = stats_d['N_se'][idx]
-        n_true = stats_d['N_true'][idx]
-        try:
-            f_dr = n_meas / n_true
-            f_dr = float("{0:.2f}".format(f_dr))
-            stats_d['f_dr'][idx] = f_dr
-        except ZeroDivisionError:
-            stats_d['f_dr'][idx] = 'nan'
-        try:
-            f_pur = n_se / n_meas
-            f_pur = float("{0:.2f}".format(f_pur))
-            stats_d['f_pur'][idx] = f_pur
-        except ZeroDivisionError:
-            stats_d['f_pur'][idx] = 'nan'
-        try:
-            f_com = n_se / n_true
-            f_com = float("{0:.2f}".format(f_com))
-            stats_d['f_com'][idx] = f_com
-        except ZeroDivisionError:
-            stats_d['f_com'][idx] = 'nan'
+            stats_d[mag_][pm_]['i_pm'].append(pm_)
+            n_meas = tmp_d[mag_][pm_]['right'] + tmp_d[mag_][pm_]['false']
+            stats_d[mag_][pm_]['n_meas'].append(n_meas)
+            n_false = tmp_d[mag_][pm_]['false']
+            stats_d[mag_][pm_]['n_false'].append(n_false)
+            n_se = tmp_d[mag_][pm_]['right']
+            stats_d[mag_][pm_]['n_se'].append(n_se)
+            n_true = tmp_d[mag_][pm_]['total']
+            stats_d[mag_][pm_]['n_true'].append(n_true)
+            # Factors computation
+            try:
+                f_dr = n_meas / n_true
+                f_dr = float("{0:.2f}".format(f_dr))
+                stats_d[mag_][pm_]['f_dr'] = f_dr
+            except ZeroDivisionError:
+                stats_d[mag_][pm_]['f_dr'] = nan
+            try:
+                f_pur = n_se / n_meas
+                f_pur = float("{0:.2f}".format(f_pur))
+                stats_d[mag_][pm_]['f_pur'] = f_pur
+            except ZeroDivisionError:
+                stats_d[mag_][pm_]['f_pur'] = nan
+            try:
+                f_com = n_se / n_true
+                f_com = float("{0:.2f}".format(f_com))
+                stats_d[mag_][pm_]['f_com'] = f_com
+            except ZeroDivisionError:
+                stats_d[mag_][pm_]['f_com'] = f_com
 
     return stats_d
 
@@ -100,8 +102,8 @@ def redo_stats_d():
     for mag_ in prfs_d['mags']:
         stats_d[mag_] = {}
         for pm_ in prfs_d['pms']:
-            stats_d[mag_][pm_] = {'i_pm': [], 'N_meas': [], 'N_false': [],
-                                  'N_se': [], 'N_true': [], 'f_dr': [],
+            stats_d[mag_][pm_] = {'i_pm': [], 'n_meas': [], 'n_false': [],
+                                  'n_se': [], 'n_true': [], 'f_dr': [],
                                   'f_pur': [], 'f_com': []}
 
     return stats_d
@@ -109,6 +111,7 @@ def redo_stats_d():
 
 def redo_tmp_d():
     """ Creates a dictionary
+    todo - solve total problem!
 
     :return: tmp_d
     """
@@ -194,9 +197,11 @@ class ScampPerformanceSSOs:
         self.save = True
 
         for mag_ in self.prfs_d['mags']:
+            print('mag {}'.format(mag_))
             self.tmp_d = redo_tmp_d()
             self.mag = mag_
-            input_sources_d = self.check_pm_distribution()
+            stats_d = self.check_pm_distribution()
+            print(stats_d)
             # self.get_stats(input_sources_d)
 
         self.plot()
@@ -371,8 +376,6 @@ class ScampPerformanceSSOs:
                     # print('total - no')
                     self.tmp_d[self.mag][pm_false]['false'] += 1
                 # print('---')
-
-        print(self.tmp_d[self.mag])
 
         stats_d = redo_stats_d()
         stats_d = compute_factors(stats_d, self.tmp_d)
