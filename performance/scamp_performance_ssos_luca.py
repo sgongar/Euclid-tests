@@ -86,9 +86,13 @@ def redo_stats_d():
 
     :return: tmp_d
     """
-    stats_d = {'i_pm': [], 'N_meas': [], 'N_false': [], 'N_se': [],
-               'N_true': [], 'f_dr': [], 'f_pur': [], 'f_com': [],
-               'alpha_std': [], 'delta_std': []}
+    prfs_d = extract_settings_luca()
+    stats_d = {}
+    for mag_ in prfs_d['mags']:
+        for pm_ in prfs_d['pms']:
+            stats_d[mag_][pm_] = {'i_pm': [], 'N_meas': [], 'N_false': [],
+                                  'N_se': [], 'N_true': [], 'f_dr': [],
+                                  'f_pur': [], 'f_com': []}
 
     return stats_d
 
@@ -328,6 +332,8 @@ class ScampPerformanceSSOs:
             # Gets associated data in input catalog
             source_df = filter_cat[filter_cat['SOURCE_NUMBER'].isin([source_])]
 
+            print(source_df['SOURCE_NUMBER'].size)
+
             pm_right = False
             pm_false = False
             check_d = redo_check_d()  # Creates a dictionary
@@ -359,6 +365,8 @@ class ScampPerformanceSSOs:
         print(self.tmp_d[self.mag])
 
         stats_d = redo_stats_d()
+
+        print(stats_d)
 
         return stats_d
 
