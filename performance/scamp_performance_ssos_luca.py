@@ -77,7 +77,7 @@ def compute_factors(stats_d, tmp_d):
                 f_com = float("{0:.2f}".format(f_com))
                 stats_d[mag_][pm_]['f_com'] = f_com
             except ZeroDivisionError:
-                stats_d[mag_][pm_]['f_com'] = f_com
+                stats_d[mag_][pm_]['f_com'] = nan
 
     return stats_d
 
