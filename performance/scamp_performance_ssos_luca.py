@@ -195,10 +195,10 @@ class ScampPerformanceSSOs:
         self.sex_cf = '30_1.5_1.5_0.01_4'
 
         self.save = True
+        self.tmp_d = redo_tmp_d()
 
         for mag_ in self.prfs_d['mags']:
             print('mag {}'.format(mag_))
-            self.tmp_d = redo_tmp_d()
             self.mag = mag_
             stats_d = self.check_pm_distribution()
             print(stats_d)
