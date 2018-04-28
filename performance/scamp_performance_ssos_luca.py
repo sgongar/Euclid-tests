@@ -13,6 +13,7 @@ Todo:
     * Improve log messages - create logger instance
     * Get out check_source -> new file
     * Multi-threading support
+    * Get number of input sources for each situation
 
 *GNU Terry Pratchett*
 """
@@ -50,7 +51,6 @@ def compute_factors(stats_d, tmp_d):
 
     for mag_ in prfs_d['mags']:
         for pm_ in prfs_d['pms']:
-            stats_d[mag_][pm_]['i_pm'].append(pm_)
             n_meas = tmp_d[mag_][pm_]['right'] + tmp_d[mag_][pm_]['false']
             stats_d[mag_][pm_]['n_meas'].append(n_meas)
             n_false = tmp_d[mag_][pm_]['false']
@@ -102,9 +102,9 @@ def redo_stats_d():
     for mag_ in prfs_d['mags']:
         stats_d[mag_] = {}
         for pm_ in prfs_d['pms']:
-            stats_d[mag_][pm_] = {'i_pm': [], 'n_meas': [], 'n_false': [],
-                                  'n_se': [], 'n_true': [], 'f_dr': [],
-                                  'f_pur': [], 'f_com': []}
+            stats_d[mag_][pm_] = {'n_meas': [], 'n_false': [], 'n_se': [],
+                                  'n_true': [], 'f_dr': [], 'f_pur': [],
+                                  'f_com': []}
 
     return stats_d
 
