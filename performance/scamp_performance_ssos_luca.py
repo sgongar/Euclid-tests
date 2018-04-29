@@ -18,7 +18,7 @@ Todo:
 *GNU Terry Pratchett*
 """
 from numpy import nan
-from pandas import concat, read_csv
+from pandas import concat, DataFrame, read_csv
 
 from misc import extract_settings_luca
 from regions import Create_regions
@@ -213,12 +213,16 @@ class ScampPerformanceSSOs:
         self.save = True
         self.tmp_d = redo_tmp_d()
 
+        stats = {}
+
         for mag_ in self.prfs_d['mags']:
-            print('mag {}'.format(mag_))
             self.mag = mag_
             stats_d = self.check_pm_distribution()
-            print(stats_d)
-            # self.get_stats(input_sources_d)
+            stats[mag_] = stats_d
+
+        for mag_ in self.prfs_d['mags']:
+            df = DataFrame(stats[mag_])
+            df.to_csv('{}.csv'.format(mag_))
 
         self.plot()
 
