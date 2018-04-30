@@ -222,7 +222,7 @@ class ScampPerformanceSSOs:
             stats[mag_] = stats_d
 
         for mag_ in self.prfs_d['mags']:
-            print(stats[mag_].keys)
+            print(stats[mag_].keys())
             print(patata)
             df = DataFrame(stats[mag_])
             df.to_csv('{}.csv'.format(mag_))
