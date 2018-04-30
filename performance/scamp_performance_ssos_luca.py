@@ -456,6 +456,16 @@ class ScampPerformanceSSOs:
                         p_mag = 20.5
                     elif mag_ == '21-22':
                         p_mag = 21.5
+                    elif mag_ == '22-23':
+                        p_mag = 22.5
+                    elif mag_ == '23-24':
+                        p_mag = 23.5
+                    elif mag_ == '24-25':
+                        p_mag = 24.5
+                    elif mag_ == '25-26':
+                        p_mag = 25.5
+                    elif mag_ == '26-27':
+                        p_mag = 26.5
 
                     plt.scatter(p_mag, pm_, c=f_pur, cmap=cm.jet,
                                 vmin=0., vmax=1.)
