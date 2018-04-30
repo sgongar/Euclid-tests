@@ -440,7 +440,7 @@ class ScampPerformanceSSOs:
 
         :return:
         """
-        with PdfPages('total.pdf') as pdf:
+        with PdfPages('completeness.pdf') as pdf:
             fig = plt.figure(figsize=(16.53, 11.69), dpi=100)
             ax = fig.add_subplot(1, 1, 1)
 
@@ -449,9 +449,44 @@ class ScampPerformanceSSOs:
                     print(mag_, pm_)
                     out_df = self.out_df[self.out_df['mag_bin'].isin([mag_])]
                     out_df = out_df[out_df['i_pm'].isin([pm_])]
+                    f_com = float(out_df['f_com'])
+
+                    print(f_com)
+
+                    if mag_ == '20-21':
+                        p_mag = 20.5
+                    elif mag_ == '21-22':
+                        p_mag = 21.5
+                    elif mag_ == '22-23':
+                        p_mag = 22.5
+                    elif mag_ == '23-24':
+                        p_mag = 23.5
+                    elif mag_ == '24-25':
+                        p_mag = 24.5
+                    elif mag_ == '25-26':
+                        p_mag = 25.5
+                    elif mag_ == '26-27':
+                        p_mag = 26.5
+
+                    plt.scatter(p_mag, pm_, c=f_com, cmap=cm.jet,
+                                vmin=0., vmax=4.)
+            ax.set_ylim(0, 4)
+
+            plt.grid(True)
+            pdf.savefig()
+
+        with PdfPages('purity.pdf') as pdf:
+            fig = plt.figure(figsize=(16.53, 11.69), dpi=100)
+            ax = fig.add_subplot(1, 1, 1)
+
+            for mag_ in self.prfs_d['mags']:
+                for pm_ in self.prfs_d['pms']:
+                    print(mag_, pm_)
+                    out_df = self.out_df[
+                        self.out_df['mag_bin'].isin([mag_])]
+                    out_df = out_df[out_df['i_pm'].isin([pm_])]
                     f_pur = float(out_df['f_pur'])
 
-                    print(f_pur)
                     if mag_ == '20-21':
                         p_mag = 20.5
                     elif mag_ == '21-22':
@@ -473,7 +508,6 @@ class ScampPerformanceSSOs:
 
             plt.grid(True)
             pdf.savefig()
-
 
 
 # class TotalScampPerformanceSSOs:
