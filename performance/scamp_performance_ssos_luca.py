@@ -468,8 +468,9 @@ class ScampPerformanceSSOs:
                     elif mag_ == '26-27':
                         p_mag = 26.5
 
-                    plt.scatter(p_mag, pm_, c=f_com, cmap=cm.gray,
+                    plt.scatter(p_mag, pm_, c=f_com, cmap=cm.copper,
                                 vmin=0., vmax=1.)
+                    plt.colorbar()
 
             ax.set_yscale('log')
 
@@ -504,8 +505,9 @@ class ScampPerformanceSSOs:
                     elif mag_ == '26-27':
                         p_mag = 26.5
 
-                    plt.scatter(p_mag, pm_, c=f_pur, cmap=cm.gray,
+                    plt.scatter(p_mag, pm_, c=f_pur, cmap=cm.copper,
                                 vmin=0., vmax=1.)
+                    plt.colorbar()
 
             ax.set_yscale('log')
 
