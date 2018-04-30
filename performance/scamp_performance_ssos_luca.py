@@ -14,6 +14,7 @@ Todo:
 
 *GNU Terry Pratchett*
 """
+from matplotlib import cm
 from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
 from numpy import nan
@@ -447,6 +448,10 @@ class ScampPerformanceSSOs:
             for mag_ in self.prfs_d['mags']:
                 for pm_ in self.prfs_d['pms']:
                     print(mag_, pm_)
+                    out_df = self.out_df[self.out_df['i_mag'].isin([mag_])]
+                    out_df = out_df[out_df[out_df['i_pm'].isin([pm_])]]
+                    print(out_df)
+                    
 
             # ax.plot(self.out_df, 'bs')
             # ax.plot(self.true, [2] * len(self.true), 'rs')
