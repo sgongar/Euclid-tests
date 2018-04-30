@@ -471,6 +471,7 @@ class ScampPerformanceSSOs:
                     plt.scatter(p_mag, pm_, c=f_com, cmap=cm.Reds,
                                 vmin=0., vmax=1.)
             ax.set_ylim(0, 4)
+            ax.set_yscale('log')
 
             plt.grid(True)
             pdf.savefig()
@@ -507,6 +508,7 @@ class ScampPerformanceSSOs:
                     plt.scatter(p_mag, pm_, c=f_pur, cmap=cm.jet,
                                 vmin=0., vmax=1.)
             ax.set_ylim(0, 4)
+            ax.set_yscale('log')
 
             plt.grid(True)
             pdf.savefig()
