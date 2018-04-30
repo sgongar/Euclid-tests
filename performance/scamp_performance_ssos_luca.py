@@ -214,14 +214,10 @@ class ScampPerformanceSSOs:
         self.save = True
         self.tmp_d = redo_tmp_d()
 
-        stats = {}
-
         for mag_ in self.prfs_d['mags']:
             self.mag = mag_
             stats_d = self.check_pm_distribution()
-            stats[mag_] = stats_d
 
-        for mag_ in self.prfs_d['mags']:
             i_pm_l = []
             n_se_l = []
             n_false_l = []
@@ -234,13 +230,13 @@ class ScampPerformanceSSOs:
             for pm_ in self.prfs_d['pms']:
                 print(pm_)
                 i_pm_l.append(pm_)
-                n_se_l.append(stats[mag_][pm_]['n_se'])
-                n_false_l.append(stats[mag_][pm_]['n_false'])
-                n_true_l.append(stats[mag_][pm_]['n_true'])
-                n_meas_l.append(stats[mag_][pm_]['n_meas'])
-                f_pur_l.append(stats[mag_][pm_]['f_pur'])
-                f_dr_l.append(stats[mag_][pm_]['f_pur'])
-                f_com_l.append(stats[mag_][pm_]['f_com'])
+                n_se_l.append(stats_d[mag_][pm_]['n_se'])
+                n_false_l.append(stats_d[mag_][pm_]['n_false'])
+                n_true_l.append(stats_d[mag_][pm_]['n_true'])
+                n_meas_l.append(stats_d[mag_][pm_]['n_meas'])
+                f_pur_l.append(stats_d[mag_][pm_]['f_pur'])
+                f_dr_l.append(stats_d[mag_][pm_]['f_pur'])
+                f_com_l.append(stats_d[mag_][pm_]['f_com'])
 
             i_pm_s = Series(i_pm_l, name='i_pm')
             n_se_s = Series(n_se_l, name='n_se')
