@@ -49,28 +49,32 @@ def compute_factors(stats_d, tmp_d):
     for mag_ in prfs_d['mags']:
         for pm_ in prfs_d['pms']:
             n_meas = tmp_d[mag_][pm_]['right'] + tmp_d[mag_][pm_]['false']
-            stats_d[mag_][pm_]['n_meas'].append(n_meas)
+            # stats_d[mag_][pm_]['n_meas'].append(n_meas)
+            stats_d[mag_][pm_]['n_meas'] = n_meas
             n_false = tmp_d[mag_][pm_]['false']
-            stats_d[mag_][pm_]['n_false'].append(n_false)
+            # stats_d[mag_][pm_]['n_false'].append(n_false)
+            stats_d[mag_][pm_]['n_false'] = n_false
             n_se = tmp_d[mag_][pm_]['right']
-            stats_d[mag_][pm_]['n_se'].append(n_se)
+            # stats_d[mag_][pm_]['n_se'].append(n_se)
+            stats_d[mag_][pm_]['n_se'] = n_se
             n_true = tmp_d[mag_][pm_]['total']
-            stats_d[mag_][pm_]['n_true'].append(n_true)
+            # stats_d[mag_][pm_]['n_true'].append(n_true)
+            stats_d[mag_][pm_]['n_true'] = n_true
             # Factors computation
             try:
-                f_dr = n_meas / n_true
+                f_dr = float(n_meas) / float(n_true)
                 f_dr = float("{0:.2f}".format(f_dr))
                 stats_d[mag_][pm_]['f_dr'] = f_dr
             except ZeroDivisionError:
                 stats_d[mag_][pm_]['f_dr'] = nan
             try:
-                f_pur = n_se / n_meas
+                f_pur = float(n_se) / float(n_meas)
                 f_pur = float("{0:.2f}".format(f_pur))
                 stats_d[mag_][pm_]['f_pur'] = f_pur
             except ZeroDivisionError:
                 stats_d[mag_][pm_]['f_pur'] = nan
             try:
-                f_com = n_se / n_true
+                f_com = float(n_se) / float(n_true)
                 f_com = float("{0:.2f}".format(f_com))
                 stats_d[mag_][pm_]['f_com'] = f_com
             except ZeroDivisionError:
