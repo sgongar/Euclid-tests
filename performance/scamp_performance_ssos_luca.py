@@ -452,8 +452,12 @@ class ScampPerformanceSSOs:
                     f_pur = float(out_df['f_pur'])
 
                     print(f_pur)
+                    if mag_ == '20-21':
+                        p_mag = 20.5
+                    elif mag_ == '21-22':
+                        p_mag = 21.5
 
-                    plt.scatter(mag_, pm_, c=f_pur, cmap=cm.jet,
+                    plt.scatter(p_mag, pm_, c=f_pur, cmap=cm.jet,
                                 vmin=0., vmax=1.)
             ax.set_ylim(0, 4)
 
