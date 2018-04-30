@@ -440,18 +440,22 @@ class ScampPerformanceSSOs:
 
         :return:
         """
+        tmp_mag = []
+        tmp_pm = []
+        tmp_f_com = []
+
         with PdfPages('completeness.pdf') as pdf:
             fig = plt.figure(figsize=(16.53, 11.69), dpi=100)
             ax = fig.add_subplot(1, 1, 1)
 
             for mag_ in self.prfs_d['mags']:
                 for pm_ in self.prfs_d['pms']:
-                    print(mag_, pm_)
+                    # print(mag_, pm_)
                     out_df = self.out_df[self.out_df['mag_bin'].isin([mag_])]
                     out_df = out_df[out_df['i_pm'].isin([pm_])]
                     f_com = float(out_df['f_com'])
 
-                    print('f_com {}'.format(f_com))
+                    # print('f_com {}'.format(f_com))
 
                     if mag_ == '20-21':
                         p_mag = 20.5
@@ -468,6 +472,10 @@ class ScampPerformanceSSOs:
                     elif mag_ == '26-27':
                         p_mag = 26.5
 
+                    tmp_mag.append(p_mag)
+                    tmp_pm.append(pm_)
+                    tmp_f_com.append(f_com)
+
                     plt.scatter(p_mag, pm_, c=f_com, cmap=cm.copper,
                                 vmin=0., vmax=1.)
 
@@ -477,18 +485,22 @@ class ScampPerformanceSSOs:
             plt.grid(True)
             pdf.savefig()
 
+        print(tmp_mag)
+        print(tmp_pm)
+        print(tmp_f_com)
+
         with PdfPages('purity.pdf') as pdf:
             fig = plt.figure(figsize=(16.53, 11.69), dpi=100)
             ax = fig.add_subplot(1, 1, 1)
 
             for mag_ in self.prfs_d['mags']:
                 for pm_ in self.prfs_d['pms']:
-                    print(mag_, pm_)
+                    # print(mag_, pm_)
                     out_df = self.out_df[self.out_df['mag_bin'].isin([mag_])]
                     out_df = out_df[out_df['i_pm'].isin([pm_])]
                     f_pur = float(out_df['f_pur'])
 
-                    print('f_pur {}'.format(f_pur))
+                    # print('f_pur {}'.format(f_pur))
 
                     if mag_ == '20-21':
                         p_mag = 20.5
