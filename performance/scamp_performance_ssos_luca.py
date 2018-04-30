@@ -443,6 +443,7 @@ class ScampPerformanceSSOs:
         tmp_mag = []
         tmp_pm = []
         tmp_f_com = []
+        tmp_f_pur = []
 
         with PdfPages('completeness.pdf') as pdf:
             fig = plt.figure(figsize=(16.53, 11.69), dpi=100)
@@ -485,10 +486,6 @@ class ScampPerformanceSSOs:
             plt.grid(True)
             pdf.savefig()
 
-        print(tmp_mag)
-        print(tmp_pm)
-        print(tmp_f_com)
-
         with PdfPages('purity.pdf') as pdf:
             fig = plt.figure(figsize=(16.53, 11.69), dpi=100)
             ax = fig.add_subplot(1, 1, 1)
@@ -517,6 +514,8 @@ class ScampPerformanceSSOs:
                     elif mag_ == '26-27':
                         p_mag = 26.5
 
+                    tmp_f_pur.append(f_pur)
+
                     plt.scatter(p_mag, pm_, c=f_pur, cmap=cm.copper,
                                 vmin=0., vmax=1.)
 
@@ -525,6 +524,11 @@ class ScampPerformanceSSOs:
             plt.colorbar()
             plt.grid(True)
             pdf.savefig()
+
+        print(tmp_mag)
+        print(tmp_pm)
+        print(tmp_f_com)
+        print(tmp_f_pur)
 
 # class TotalScampPerformanceSSOs:
 #
