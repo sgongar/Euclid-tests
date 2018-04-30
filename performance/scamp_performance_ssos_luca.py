@@ -14,6 +14,8 @@ Todo:
 
 *GNU Terry Pratchett*
 """
+from matplotlib.backends.backend_pdf import PdfPages
+import matplotlib.pyplot as plt
 from numpy import nan
 from pandas import concat, read_csv, Series
 
@@ -42,6 +44,7 @@ def compute_factors(stats_d, tmp_d):
     f_com = f_dr * f_pur = N_se / N_true
 
     :param stats_d:
+    :param tmp_d:
     :return:
     """
     prfs_d = extract_settings_luca()
@@ -229,7 +232,6 @@ class ScampPerformanceSSOs:
             stats_d = self.check_pm_distribution()
 
             for pm_ in self.prfs_d['pms']:
-                print(pm_)
                 i_mag_l.append(self.mag)
                 i_pm_l.append(pm_)
                 n_se_l.append(stats_d[mag_][pm_]['n_se'])
@@ -250,9 +252,9 @@ class ScampPerformanceSSOs:
         f_pur_s = Series(f_pur_l, name='f_pur')
         f_com_s = Series(f_com_l, name='f_com')
 
-        df = concat([i_mag_s, i_pm_s, n_se_s, n_false_s, n_true_s,
-                     n_meas_s, f_dr_s, f_pur_s, f_com_s], axis=1)
-        df.to_csv('total.csv')
+        self.out_df = concat([i_mag_s, i_pm_s, n_se_s, n_false_s, n_true_s,
+                              n_meas_s, f_dr_s, f_pur_s, f_com_s], axis=1)
+        self.out_df.to_csv('total.csv')
 
         self.plot()
 
@@ -438,7 +440,20 @@ class ScampPerformanceSSOs:
 
         :return:
         """
-        print('hello')
+        with PdfPages('total.pdf') as pdf:
+            fig = plt.figure(figsize=(16.53, 11.69), dpi=100)
+            ax = fig.add_subplot(1, 1, 1)
+
+            for mag_ in self.prfs_d['mags']:
+                for pm_ in self.prfs_d['pms']:
+                    print(mag_, pm_)
+
+            # ax.plot(self.out_df, 'bs')
+            # ax.plot(self.true, [2] * len(self.true), 'rs')
+
+            plt.grid(True)
+            pdf.savefig()
+
 
 
 # class TotalScampPerformanceSSOs:
