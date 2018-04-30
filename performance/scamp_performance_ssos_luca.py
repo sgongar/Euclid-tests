@@ -225,6 +225,8 @@ class ScampPerformanceSSOs:
             print(stats[mag_].keys())
             df = DataFrame(stats[mag_])
             print(df.columns)
+            for key_ in stats[mag_].keys():
+                print(stats[mag_][key_])
             df.to_csv('{}.csv'.format(mag_))
 
         self.plot()
