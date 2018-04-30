@@ -476,6 +476,7 @@ class ScampPerformanceSSOs:
             plt.grid(True)
             pdf.savefig()
 
+        """
         with PdfPages('purity.pdf') as pdf:
             fig = plt.figure(figsize=(16.53, 11.69), dpi=100)
             ax = fig.add_subplot(1, 1, 1)
@@ -483,8 +484,7 @@ class ScampPerformanceSSOs:
             for mag_ in self.prfs_d['mags']:
                 for pm_ in self.prfs_d['pms']:
                     print(mag_, pm_)
-                    out_df = self.out_df[
-                        self.out_df['mag_bin'].isin([mag_])]
+                    out_df = self.out_df[self.out_df['mag_bin'].isin([mag_])]
                     out_df = out_df[out_df['i_pm'].isin([pm_])]
                     f_pur = float(out_df['f_pur'])
 
@@ -505,14 +505,14 @@ class ScampPerformanceSSOs:
                     elif mag_ == '26-27':
                         p_mag = 26.5
 
-                    plt.scatter(p_mag, pm_, c=f_pur, cmap=cm.jet,
+                    plt.scatter(p_mag, pm_, c=f_pur, cmap=cm.Reds,
                                 vmin=0., vmax=1.)
             ax.set_ylim(0, 4)
             ax.set_yscale('log')
 
             plt.grid(True)
             pdf.savefig()
-
+        """
 
 # class TotalScampPerformanceSSOs:
 #
