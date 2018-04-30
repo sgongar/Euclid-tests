@@ -468,7 +468,7 @@ class ScampPerformanceSSOs:
                     elif mag_ == '26-27':
                         p_mag = 26.5
 
-                    plt.scatter(p_mag, pm_, c=f_com, cmap=cm.jet,
+                    plt.scatter(p_mag, pm_, c=f_com, cmap=cm.Reds,
                                 vmin=0., vmax=1.)
             ax.set_ylim(0, 4)
 
