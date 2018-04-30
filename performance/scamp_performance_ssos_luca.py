@@ -433,7 +433,6 @@ class ScampPerformanceSSOs:
         stats_d = redo_stats_d()
         stats_d = compute_factors(stats_d, self.tmp_d)
 
-        # return stats_d[self.mag]
         return stats_d
 
     def plot(self):
@@ -448,10 +447,12 @@ class ScampPerformanceSSOs:
             for mag_ in self.prfs_d['mags']:
                 for pm_ in self.prfs_d['pms']:
                     print(mag_, pm_)
-                    out_df = self.out_df[self.out_df['i_mag'].isin([mag_])]
+                    out_df = self.out_df[self.out_df['mag_bin'].isin([mag_])]
                     out_df = out_df[out_df[out_df['i_pm'].isin([pm_])]]
-                    print(out_df)
-                    
+                    f_pur = out_df['f_pur']
+                    print(f_pur, type(f_pur))
+
+                    # cs = plt.scatter(mag_, pm_, c=f_pur, cmap=cm.jet, vmin=0., vmax=1.)
 
             # ax.plot(self.out_df, 'bs')
             # ax.plot(self.true, [2] * len(self.true), 'rs')
