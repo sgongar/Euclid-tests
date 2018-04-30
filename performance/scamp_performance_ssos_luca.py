@@ -427,7 +427,8 @@ class ScampPerformanceSSOs:
         stats_d = redo_stats_d()
         stats_d = compute_factors(stats_d, self.tmp_d)
 
-        return stats_d[self.mag]
+        # return stats_d[self.mag]
+        return stats_d
 
     def plot(self):
         """
