@@ -448,7 +448,7 @@ class ScampPerformanceSSOs:
                 for pm_ in self.prfs_d['pms']:
                     print(mag_, pm_)
                     out_df = self.out_df[self.out_df['mag_bin'].isin([mag_])]
-                    out_df = out_df[out_df[out_df['i_pm'].isin([pm_])]]
+                    out_df = out_df[out_df['i_pm'].isin([pm_])]
                     f_pur = out_df['f_pur']
                     print(f_pur, type(f_pur))
 
