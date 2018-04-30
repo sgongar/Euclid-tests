@@ -2,9 +2,6 @@
 # -*- coding: utf-8 -*-
 
 """Python script for performance
-calcula los factores!
-Obtiene los valores de median, mean y demas de ssos. Tira de las fuentes
-agrupadas por scamp
 
 Versions:
 - 0.1
@@ -13,7 +10,7 @@ Todo:
     * Improve log messages - create logger instance
     * Get out check_source -> new file
     * Multi-threading support
-    * Get number of input sources for each situation
+    * Get number of input sources for each situation - automatically
 
 *GNU Terry Pratchett*
 """
@@ -400,7 +397,7 @@ class ScampPerformanceSSOs:
         stats_d = redo_stats_d()
         stats_d = compute_factors(stats_d, self.tmp_d)
 
-        return stats_d
+        return stats_d[self.mag]
 
     def plot(self):
         """
