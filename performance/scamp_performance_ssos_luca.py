@@ -451,6 +451,8 @@ class ScampPerformanceSSOs:
                     out_df = out_df[out_df['i_pm'].isin([pm_])]
                     f_pur = float(out_df['f_pur'])
 
+                    print(f_pur)
+
                     plt.scatter(mag_, pm_, c=f_pur, cmap=cm.jet,
                                 vmin=0., vmax=1.)
             ax.set_ylim(0, 4)
