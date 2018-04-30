@@ -449,13 +449,10 @@ class ScampPerformanceSSOs:
                     print(mag_, pm_)
                     out_df = self.out_df[self.out_df['mag_bin'].isin([mag_])]
                     out_df = out_df[out_df['i_pm'].isin([pm_])]
-                    f_pur = out_df['f_pur']
-                    print(f_pur, type(f_pur))
+                    f_pur = float(out_df['f_pur'])
 
-                    # cs = plt.scatter(mag_, pm_, c=f_pur, cmap=cm.jet, vmin=0., vmax=1.)
-
-            # ax.plot(self.out_df, 'bs')
-            # ax.plot(self.true, [2] * len(self.true), 'rs')
+                    plt.scatter(mag_, pm_, c=f_pur, cmap=cm.jet,
+                                vmin=0., vmax=1.)
 
             plt.grid(True)
             pdf.savefig()
