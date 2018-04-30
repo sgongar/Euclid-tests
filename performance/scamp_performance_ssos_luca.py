@@ -15,7 +15,7 @@ Todo:
 *GNU Terry Pratchett*
 """
 from numpy import nan
-from pandas import concat, DataFrame, read_csv
+from pandas import concat, read_csv, Series
 
 from misc import extract_settings_luca
 from regions import Create_regions
@@ -222,21 +222,34 @@ class ScampPerformanceSSOs:
             stats[mag_] = stats_d
 
         for mag_ in self.prfs_d['mags']:
+            n_se_l = []
+            n_false_l = []
+            n_true_l = []
             n_meas_l = []
-            n_false = []
-            n_se = []
-            n_true = []
-            f_dr = []
-            f_pur = []
-            f_com = []
+            f_pur_l = []
+            f_dr_l = []
+            f_com_l = []
 
             for pm_ in self.prfs_d['pms']:
                 print(pm_)
-                print('f_com {}'.format(stats[mag_][pm_]['f_com']))
+                n_se_l.append(stats[mag_][pm_]['n_se'])
+                n_false_l.append(stats[mag_][pm_]['n_false'])
+                n_true_l.append(stats[mag_][pm_]['n_true'])
+                n_meas_l.append(stats[mag_][pm_]['n_meas'])
+                f_pur_l.append(stats[mag_][pm_]['f_pur'])
+                f_dr_l.append(stats[mag_][pm_]['f_pur'])
+                f_com_l.append(stats[mag_][pm_]['f_com'])
 
-            print(stats[mag_].keys())
-            df = DataFrame(stats[mag_])
-            print(df.columns)
+            n_se_s = Series(n_se_l, name='n_se')
+            n_false_s = Series(n_false_l, name='n_false')
+            n_true_s = Series(n_true_l, name='n_true')
+            n_meas_s = Series(n_meas_l, name='n_meas')
+            f_dr_s = Series(f_dr_l, name='f_dr')
+            f_pur_s = Series(f_pur_l, name='f_pur')
+            f_com_s = Series(f_com_l, name='f_com')
+
+            df = concat([n_se_s, n_false_s, n_true_s, n_meas_s,
+                         f_dr_s, f_pur_s, f_com_s], axis=1)
             df.to_csv('{}.csv'.format(mag_))
 
         self.plot()
