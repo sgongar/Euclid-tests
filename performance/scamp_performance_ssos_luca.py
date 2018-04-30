@@ -453,6 +453,7 @@ class ScampPerformanceSSOs:
 
                     plt.scatter(mag_, pm_, c=f_pur, cmap=cm.jet,
                                 vmin=0., vmax=1.)
+            ax.set_ylim(0, 4)
 
             plt.grid(True)
             pdf.savefig()
