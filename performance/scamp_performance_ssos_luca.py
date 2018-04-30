@@ -223,8 +223,8 @@ class ScampPerformanceSSOs:
 
         for mag_ in self.prfs_d['mags']:
             print(stats[mag_].keys())
-            print(patata)
             df = DataFrame(stats[mag_])
+            print(df.columns)
             df.to_csv('{}.csv'.format(mag_))
 
         self.plot()
