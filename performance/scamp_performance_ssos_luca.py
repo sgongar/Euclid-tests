@@ -222,6 +222,7 @@ class ScampPerformanceSSOs:
             stats[mag_] = stats_d
 
         for mag_ in self.prfs_d['mags']:
+            i_pm_l = []
             n_se_l = []
             n_false_l = []
             n_true_l = []
@@ -232,6 +233,7 @@ class ScampPerformanceSSOs:
 
             for pm_ in self.prfs_d['pms']:
                 print(pm_)
+                i_pm_l.append(pm_)
                 n_se_l.append(stats[mag_][pm_]['n_se'])
                 n_false_l.append(stats[mag_][pm_]['n_false'])
                 n_true_l.append(stats[mag_][pm_]['n_true'])
@@ -240,6 +242,7 @@ class ScampPerformanceSSOs:
                 f_dr_l.append(stats[mag_][pm_]['f_pur'])
                 f_com_l.append(stats[mag_][pm_]['f_com'])
 
+            i_pm_s = Series(i_pm_l, name='i_pm')
             n_se_s = Series(n_se_l, name='n_se')
             n_false_s = Series(n_false_l, name='n_false')
             n_true_s = Series(n_true_l, name='n_true')
@@ -248,7 +251,7 @@ class ScampPerformanceSSOs:
             f_pur_s = Series(f_pur_l, name='f_pur')
             f_com_s = Series(f_com_l, name='f_com')
 
-            df = concat([n_se_s, n_false_s, n_true_s, n_meas_s,
+            df = concat([i_pm_s, n_se_s, n_false_s, n_true_s, n_meas_s,
                          f_dr_s, f_pur_s, f_com_s], axis=1)
             df.to_csv('{}.csv'.format(mag_))
 
