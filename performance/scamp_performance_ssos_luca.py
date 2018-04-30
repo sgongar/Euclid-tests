@@ -470,7 +470,6 @@ class ScampPerformanceSSOs:
 
                     plt.scatter(p_mag, pm_, c=f_com, cmap=cm.copper,
                                 vmin=0., vmax=1.)
-                    plt.colorbar()
 
             ax.set_yscale('log')
 
