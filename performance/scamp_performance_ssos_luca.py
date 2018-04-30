@@ -451,7 +451,7 @@ class ScampPerformanceSSOs:
                     out_df = out_df[out_df['i_pm'].isin([pm_])]
                     f_com = float(out_df['f_com'])
 
-                    print(f_com)
+                    print('f_com {}'.format(f_com))
 
                     if mag_ == '20-21':
                         p_mag = 20.5
@@ -469,7 +469,7 @@ class ScampPerformanceSSOs:
                         p_mag = 26.5
 
                     plt.scatter(p_mag, pm_, c=f_com, cmap=cm.jet,
-                                vmin=0., vmax=4.)
+                                vmin=0., vmax=1.)
             ax.set_ylim(0, 4)
 
             plt.grid(True)
@@ -486,6 +486,8 @@ class ScampPerformanceSSOs:
                         self.out_df['mag_bin'].isin([mag_])]
                     out_df = out_df[out_df['i_pm'].isin([pm_])]
                     f_pur = float(out_df['f_pur'])
+
+                    print('f_pur {}'.format(f_pur))
 
                     if mag_ == '20-21':
                         p_mag = 20.5
