@@ -222,8 +222,17 @@ class ScampPerformanceSSOs:
             stats[mag_] = stats_d
 
         for mag_ in self.prfs_d['mags']:
-            for key_ in stats[mag_].keys():
-                print('f_com {}'.format(stats[mag_][key_]['f_com']))
+            n_meas_l = []
+            n_false = []
+            n_se = []
+            n_true = []
+            f_dr = []
+            f_pur = []
+            f_com = []
+
+            for pm_ in self.prfs_d['pms']:
+                print(pm_)
+                print('f_com {}'.format(stats[mag_][pm_]['f_com']))
 
             print(stats[mag_].keys())
             df = DataFrame(stats[mag_])
