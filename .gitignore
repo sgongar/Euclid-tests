@@ -7,6 +7,10 @@ pipeline/__pycache__/
 ### pycharm IDE ###
 .idea/*
 
+### RStudio IDE ###
+regressions/.RData
+regressions/.Rhistory
+
 ### virtualenv ###
 .venv/*
 pipeline/.venv/*
@@ -22,15 +26,6 @@ pipeline/reports/*
 ### Catalogs ###
 pipeline/*.csv
 
-### Output ###
-pipeline/results/merged_*.cat
-pipeline/results/full_*.cat
-pipeline/results/filt_*.csv
-pipeline/results/catalogs/2*
-
-### Stats ###
-pipeline/stats_tests/deblend*
-
 ### Temporal ###
 pipeline/tmp/*.csv
 pipeline/tmp/*.reg
@@ -41,6 +36,3 @@ pipeline/logs/*
 ### Plots ###
 pipeline/plots/*
 performance/output/*
-
-### Local backup ###
-old/
