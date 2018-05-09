@@ -4,6 +4,9 @@ pipeline/__pycache__/
 *.py[cod]
 *$py.class
 
+### logs & tests ###
+install.txt
+
 ### pycharm IDE ###
 .idea/*
 
@@ -14,6 +17,7 @@ regressions/.Rhistory
 ### virtualenv ###
 .venv/*
 pipeline/.venv/*
+regressions/.venv/*
 
 ### Swarp files ###
 pipeline/swarp.xml
@@ -36,3 +40,4 @@ pipeline/logs/*
 ### Plots ###
 pipeline/plots/*
 performance/output/*
+.Rproj.user

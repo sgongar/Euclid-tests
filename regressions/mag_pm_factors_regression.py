@@ -1,7 +1,8 @@
 # !/usr/bin/python
 # -*- coding: utf-8 -*-
 
-"""
+""" Plots the output of the regression between mag/pm against purity and
+    completeness factor.
 
 Versions:
 - 0.1: First version. Plotting functions for completeness and purity factors

@@ -1,6 +1,22 @@
-#!/usr/bin/python
+# !/usr/bin/python
 # -*- coding: utf-8 -*-
 
+""" Plots the output of the regression between mag/pm against purity and
+    completeness factor.
+
+Versions:
+- 0.1: First version. Plotting functions for completeness and purity factors
+       are working. Creates two pdf files, one for each factor.
+
+Todo:
+    * Create a logger instance for this particular script.
+    * Reshape scales in order to improve legibility. (v 0.2)
+    * Add new factor values of new s-pline fit. (v 0.2)
+    * Unit testing!
+
+*GNU Terry Pratchett*
+"""
+import csv
 
 from matplotlib import pyplot
 from matplotlib.backends.backend_pdf import PdfPages
@@ -299,7 +315,7 @@ def mag_iso_vs_b_image_plot():
 
     :return:
     """
-    dir_ = '/home/sgongora/Documents/CarpetaCompartida/full_stats_'
+    dir_ = '/home/sgongora/Dev/Euclid-tests/performance/output/stats_'
     data_dirs = ['{}ssos'.format(dir_), '{}galaxies'.format(dir_),
                  '{}stars'.format(dir_)]
 
@@ -308,6 +324,7 @@ def mag_iso_vs_b_image_plot():
 
     with PdfPages('mag_iso_vs_b_image.pdf') as pdf:
         for idx, data_dir in enumerate(data_dirs):
+            print(data_dir)
             # reads b_image
             b_image = []  # Total b_image values
             b_image_d = {}
@@ -326,7 +343,7 @@ def mag_iso_vs_b_image_plot():
                 for column_ in b_image_df.columns[:-3]:
                     list_to_append = b_image_df[column_].tolist()
                     list_to_append = [x for x in list_to_append if type(x) != float]
-                    list_to_append = [x for x in list_to_append if 'mean' not in x]
+                    list_to_append = [x for x in list_to_append if 'm' not in x]
                     list_to_append = [float(x) for x in list_to_append]
                     for element_ in list_to_append:
                         b_image.append(element_)
@@ -338,7 +355,7 @@ def mag_iso_vs_b_image_plot():
                 for column_ in mag_iso_df.columns[:-3]:
                     list_to_append = mag_iso_df[column_].tolist()
                     list_to_append = [x for x in list_to_append if type(x) != float]
-                    list_to_append = [x for x in list_to_append if 'mean' not in x]
+                    list_to_append = [x for x in list_to_append if 'm' not in x]
                     list_to_append = [float(x) for x in list_to_append]
                     for element_ in list_to_append:
                         mag_iso.append(element_)
@@ -351,7 +368,7 @@ def mag_iso_vs_b_image_plot():
                 for column_ in errb_image_df.columns[:-3]:
                     list_to_append = errb_image_df[column_].tolist()
                     list_to_append = [x for x in list_to_append if type(x) != float]
-                    list_to_append = [x for x in list_to_append if 'mean' not in x]
+                    list_to_append = [x for x in list_to_append if 'm' not in x]
                     list_to_append = [float(x) for x in list_to_append]
                     for element_ in list_to_append:
                         errb_image.append(element_)
@@ -363,11 +380,23 @@ def mag_iso_vs_b_image_plot():
                 for column_ in magerr_iso_df.columns[:-3]:
                     list_to_append = magerr_iso_df[column_].tolist()
                     list_to_append = [x for x in list_to_append if type(x) != float]
-                    list_to_append = [x for x in list_to_append if 'mean' not in x]
+                    list_to_append = [x for x in list_to_append if 'm' not in x]
                     list_to_append = [float(x) for x in list_to_append]
                     for element_ in list_to_append:
                         magerr_iso.append(element_)
+
             if idx == 0:
+                test_dict = {'mag_iso': mag_iso, 'b_image': b_image}
+                with open('b_mag.csv', 'wb') as f_:  # Just use 'w' mode in 3.x
+                    w = csv.DictWriter(f_, test_dict.keys())
+                    w.writeheader()
+                    w.writerow(test_dict)
+
+                print('mag_iso {}'.format(mag_iso))
+                print('b_image {}'.format(b_image))
+
+                print(patata)
+
                 test_fit = polyfit(mag_iso, b_image, 2)
 
                 linear = Model(f)
@@ -376,7 +405,6 @@ def mag_iso_vs_b_image_plot():
                 myodr = ODR(mydata, linear, beta0=[test_fit[0], test_fit[1]])
 
                 myoutput = myodr.run()
-                # myoutput.pprint()
 
                 lower, upper, x = predband(array(mag_iso), array(b_image),
                                            myoutput.beta[0], myoutput.beta[1])
@@ -385,49 +413,32 @@ def mag_iso_vs_b_image_plot():
                 upper_fit = polyfit(x, upper, 1)
                 lower_fit = polyfit(x, lower, 1)
 
-            plot_size = [16.53, 11.69]
-            plot_dpi = 100
-            fig = pyplot.figure(figsize=plot_size, dpi=plot_dpi)
-            ax_1 = fig.add_subplot(1, 1, 1)
+                plot_size = [16.53, 11.69]
+                plot_dpi = 100
+                fig = pyplot.figure(figsize=plot_size, dpi=plot_dpi)
+                ax_1 = fig.add_subplot(1, 1, 1)
 
-            """
-            for idx_color, mag_ in enumerate(['20-21', '21-22', '22-23', '23-24',
-                                              '24-25', '25-26', '26-27']):
-                ax_1.plot(mag_iso_d[mag_], b_image_d[mag_],
-                          colors[idx_color])
-            """
-            ax_1.plot(mag_iso, b_image, colors[idx])
-            ax_1.plot([19, 27], [19 * myoutput.beta[0] + myoutput.beta[1],
-                                 27 * myoutput.beta[0] + myoutput.beta[1]])
-            ax_1.plot([19, 27], [19 * upper_fit[0] + upper_fit[1],
-                                 27 * upper_fit[0] + upper_fit[1]])
-            ax_1.plot([19, 27], [19 * lower_fit[0] + lower_fit[1],
-                                 27 * lower_fit[0] + lower_fit[1]])
-            ax_1.set_ylabel('b_image')
-            ax_1.set_xlabel('mag_iso')
-            ax_1.set_xlim(20, 28)
-            ax_1.set_ylim(0.5, 4.5)
-            ax_1.set_title('{}'.format(names[idx]))
-            ax_1.grid(True)
+                """
+                for idx_color, mag_ in enumerate(['20-21', '21-22', '22-23', '23-24',
+                                                  '24-25', '25-26', '26-27']):
+                    ax_1.plot(mag_iso_d[mag_], b_image_d[mag_],
+                              colors[idx_color])
+                """
+                ax_1.plot(mag_iso, b_image, colors[idx])
+                ax_1.plot([19, 27], [19 * myoutput.beta[0] + myoutput.beta[1],
+                                     27 * myoutput.beta[0] + myoutput.beta[1]])
+                ax_1.plot([19, 27], [19 * upper_fit[0] + upper_fit[1],
+                                     27 * upper_fit[0] + upper_fit[1]])
+                ax_1.plot([19, 27], [19 * lower_fit[0] + lower_fit[1],
+                                     27 * lower_fit[0] + lower_fit[1]])
+                ax_1.set_ylabel('b_image')
+                ax_1.set_xlabel('mag_iso')
+                ax_1.set_xlim(20, 28)
+                ax_1.set_ylim(0.5, 4.5)
+                ax_1.set_title('{}'.format(names[idx]))
+                ax_1.grid(True)
 
-            pdf.savefig()
-
-    """
-    fig = pyplot.figure(figsize=plot_size, dpi=plot_dpi)
-    ax_1 = fig.add_subplot(1, 1, 1)
-    ax_1.plot(mag_iso, b_image, 'bs')
-    ax_1.plot([19, 27], [19 * myoutput.beta[0] + myoutput.beta[1],
-                         27 * myoutput.beta[0] + myoutput.beta[1]])
-    ax_1.plot([19, 27], [19 * upper_fit[0] + upper_fit[1],
-                         27 * upper_fit[0] + upper_fit[1]])
-    ax_1.plot([19, 27], [19 * lower_fit[0] + lower_fit[1],
-                         27 * lower_fit[0] + lower_fit[1]])
-    ax_1.set_ylabel('b_image')
-    ax_1.set_xlabel('mag_iso')
-    ax_1.grid(True)
-
-    pyplot.show()
-    """
+                pdf.savefig()
 
     return fit, lower_fit, upper_fit, b_image, mag_iso
 
@@ -631,7 +642,7 @@ if __name__ == "__main__":
     b_image = True
     a_image_vs_b_image = False
 
-    data_dir = '/home/sgongora/Documents/CarpetaCompartida/full_stats_galaxies'
+    data_dir = '/home/sgongora/Dev/Euclid-tests/performance/output/stats_ssos'
 
     if flux:
         (fit, lower_fit, upper_fit,
