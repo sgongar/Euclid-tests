@@ -77,8 +77,7 @@ class SextractorSC3:
                                                 cat_name)
 
                     sex_p = Process(target=self.sextractor_thread,
-                                    args=(sex_input, sex_output,
-                                          self.analysis_d))
+                                    args=(sex_input, sex_output,))
                     sex_j.append(sex_p)
                     sex_p.start()
 
@@ -99,11 +98,10 @@ class SextractorSC3:
 
     def sextractor_thread(self, sextractor_file, sextractor_output):
         """ runs sextractor on a single file
-        todo - improve docstring
 
         :param sextractor_file: file to be 'sextracted'
         :param sextractor_output: catalog to be created by sextractor
-        :return: if everything goes alright
+        :return: True if everything goes alright
         """
 
         s_1 = 'sex -c {} {}'.format(self.prfs_d['conf_sex'], sextractor_file)
