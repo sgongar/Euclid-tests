@@ -339,7 +339,7 @@ def extract_settings_sc3():
     @return prfs_d: a dictionary which contains all valuable data
     """
     cf = ConfigParser()
-    cf.read(".settings_ELViS.ini")
+    cf.read(".settings_SC3.ini")
 
     prfs_d = {}
     os_version = get_os()
@@ -412,10 +412,6 @@ def extract_settings_elvis():
 
     prfs_d = {}
     os_version = get_os()
-
-    print(cf)
-
-    print('os {}'.format(os_version))
 
     if os_version == 'centos':
         prfs_d['version'] = confmap(cf, "Version")['centos_version']
