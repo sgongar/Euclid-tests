@@ -33,6 +33,7 @@ pipeline/*.csv
 ### Temporal ###
 pipeline/tmp/*.csv
 pipeline/tmp/*.reg
+*.cmake
 
 ### Logs ###
 pipeline/logs/*

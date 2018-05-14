@@ -339,7 +339,76 @@ def extract_settings_sc3():
     @return prfs_d: a dictionary which contains all valuable data
     """
     cf = ConfigParser()
-    cf.read(".settings_SC3.ini")
+    cf.read(".settings_ELViS.ini")
+
+    prfs_d = {}
+    os_version = get_os()
+
+    if os_version == 'centos':
+        prfs_d['version'] = confmap(cf, "Version")['centos_version']
+    elif os_version == 'cab':
+        prfs_d['version'] = confmap(cf, "Version")['cab_version']
+    else:
+        raise BadSettings('Operative system not chosen')
+
+    if os_version == 'centos':
+        prfs_d['home'] = confmap(cf, "HomeDirs")['centos_home']
+    elif os_version == 'cab':
+        prfs_d['home'] = confmap(cf, "HomeDirs")['cab_home']
+    else:
+        raise BadSettings('Operative system not chosen')
+
+    prfs_d['fits_dir'] = confmap(cf, "ImagesDirs")['fits_dir']
+    prfs_d['fits_dir'] = '{}{}'.format(prfs_d['version'], prfs_d['fits_dir'])
+
+    # todo - comment!
+    prfs_d['output_cats'] = confmap(cf, "CatsDirs")['output_cats']
+    prfs_d['output_cats'] = prfs_d['version'] + prfs_d['output_cats']
+    # todo - comment!
+    prfs_d['references'] = confmap(cf, "CatsDirs")['references']
+    prfs_d['references'] = prfs_d['version'] + prfs_d['references']
+    # todo - comment!
+    prfs_d['filtered'] = confmap(cf, "CatsDirs")['filtered']
+    prfs_d['filtered'] = prfs_d['version'] + prfs_d['filtered']
+
+    prfs_d['time_1'] = confmap(cf, "ImagesTime")['time_1']  # 1st dither time
+    prfs_d['time_2'] = confmap(cf, "ImagesTime")['time_2']  # 2nd dither time
+    prfs_d['time_3'] = confmap(cf, "ImagesTime")['time_3']  # 3nd dither time
+    prfs_d['time_4'] = confmap(cf, "ImagesTime")['time_4']  # 4th dither time
+
+    outputdirs_list = ['conf_scamp', 'conf_sex', 'params_sex', 'neural_sex',
+                       'params_cat', 'logger_config']
+    for conf_ in outputdirs_list:
+        prfs_d[conf_] = confmap(cf, "ConfigDirs")[conf_]
+        prfs_d[conf_] = prfs_d['home'] + prfs_d[conf_]
+
+    prfs_d['detections'] = int(confmap(cf, "Misc")['detections'])
+    prfs_d['pm_low'] = float(confmap(cf, "Misc")['pm_low'])
+    prfs_d['pm_up'] = float(confmap(cf, "Misc")['pm_up'])
+    prfs_d['pm_sn'] = float(confmap(cf, "Misc")['pm_sn'])
+    pms = confmap(cf, "Misc")['pms']
+    pms = pms.replace(",", " ")
+    prfs_d['pms'] = [float(x) for x in pms.split()]
+    prfs_d['r_fit'] = confmap(cf, "Misc")['r_fit']
+    prfs_d['cores_number'] = confmap(cf, "Misc")['cores_number']
+    if prfs_d['cores_number'] == '0':
+        prfs_d['cores_number'] = int(str(cpu_count()))
+        # TODO should leave free at least 20% of processors
+    else:
+        prfs_d['cores_number'] = int(prfs_d['cores_number'])
+    prfs_d['tolerance'] = float(confmap(cf, "Misc")['tolerance'])
+
+    return prfs_d
+
+
+def extract_settings_elvis():
+    """ creates a dictionary with all the configuration parameters
+        at this moment configuration file location is fixed at main directory
+
+    @return prfs_d: a dictionary which contains all valuable data
+    """
+    cf = ConfigParser()
+    cf.read(".settings_ELViS.ini")
 
     prfs_d = {}
     os_version = get_os()
@@ -614,6 +683,7 @@ def pm_compute(logger, merged_df, full_df):
         full_p_db = full_df[full_df['SOURCE_NUMBER'].isin([source])]
 
         for idx in full_p_db['SOURCE_NUMBER']:
+            print(idx)
             pmalpha_l.append(pmalpha.iloc[idx_merged])
             pmdelta_l.append(pmdelta.iloc[idx_merged])
             pmealpha_l.append(pmealpha.iloc[idx_merged])
@@ -706,6 +776,7 @@ def confidence_filter(db, r):
         for dimension in [ra, dec]:
             x = np.array(epoch)
             y = np.array(dimension)
+            sigma = []
             if dimension == ra:
                 sigma = db.loc[db['SOURCE_NUMBER'] == source,
                                'ERRA_WORLD'].tolist()
@@ -902,21 +973,21 @@ def speeds_range(prfs_d, confidence):
     return speeds_dict
 
 
-def cats_coherence(cats):
-    """
-
-    :param cats:
-    :return:
-    """
-    step = -9  # For now it is harcoded
-
-    diff = np.diff(cats)
-    repeat = np.repeat(step, len(cats) - 1)
-
-    if np.array_equal(diff, repeat) and len(diff) >= 2:
-        return True
-    else:
-        return False
+# def cats_coherence(cats):
+#     """
+#
+#     :param cats:
+#     :return:
+#     """
+#     step = -9  # For now it is harcoded
+#
+#     diff = np.diff(cats)
+#     repeat = np.repeat(step, len(cats) - 1)
+#
+#     if np.array_equal(diff, repeat) and len(diff) >= 2:
+#         return True
+#     else:
+#         return False
 
 
 def measure_distance(x2, x1, y2, y1):
