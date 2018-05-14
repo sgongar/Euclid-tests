@@ -55,7 +55,7 @@ class SextractorSC3:
         :return:
         """
         self.logger.info('Starting sextractor process for fits images')
-        start_sextractor = time()  # Sextractor process begins here
+        start_sex = time()  # Sextractor process begins here
 
         fits_files = listdir(self.prfs_d['fits_dir'])
         active_sex = []
@@ -89,11 +89,11 @@ class SextractorSC3:
             except IndexError:
                 print('Extraction finished')
 
-        end_sextractor = time()  # Sextractor process ends here
+        end_sex = time()  # Sextractor process ends here
 
         "the code you want to test stays here"
-        sextractor_time = end_sextractor - start_sextractor
-        self.logger('Sextractor process takes {}s'.format(sextractor_time))
+        sex_time = end_sex - start_sex
+        self.logger.debug('Sextractor process takes {}s'.format(sex_time))
 
         return True
 
