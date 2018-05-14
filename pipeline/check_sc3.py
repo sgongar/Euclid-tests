@@ -12,7 +12,6 @@ Todo:
     *
 
 *GNU Terry Pratchett*
-
 """
 from itertools import product
 from multiprocessing import Process
@@ -22,8 +21,8 @@ from images_management_sc3 import extract_images, extract_flags
 from misc import setting_logger, extract_settings_sc3
 from misc import create_configurations, get_fits_sc3
 from misc import create_sextractor_dict, create_scamp_dict
-from sextractor_aux import SextractorSC3
-from scamp_aux import ScampSC3
+from sextractor_aux_sc3 import SextractorSC3
+from scamp_aux_sc3 import ScampSC3
 from scamp_filter_sc3 import ScampFilterSC3
 from cosmic_sc3 import Cosmic
 
