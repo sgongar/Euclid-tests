@@ -83,7 +83,7 @@ def get_fits_sc3():
     return fits_list
 
 
-def get_fits_elvis():
+def get_fpa_elvis():
     """
 
     :return:
@@ -91,10 +91,10 @@ def get_fits_elvis():
     prfs_d = extract_settings_elvis()
     fits_list = []
 
-    files = listdir('{}'.format(prfs_d['fits_dir']))
+    files = listdir('{}'.format(prfs_d['fpas_dir']))
     for file_ in files:
         if file_[-5:] == '.fits':
-            fits_list.append('{}/{}'.format(prfs_d['fits_dir'], file_))
+            fits_list.append(file_)
 
     return fits_list
 
