@@ -96,20 +96,20 @@ def create_ccd(quadrants, key_):
     for i in range(0, len(quadrants), 1):
         img = np.zeros([4132, 4096])
         # Quadrant E
-        if i == 1:
+        if i == 0:
             img[:2066, :2048] = quadrants[i].data[:, prex:-ovrx]
             #
             # Correct reference pixel coordinate
             hdr = quadrants[i].header
             hdr.set('CRPIX1', hdr['CRPIX1'] - prex)
         # Quadrant F
-        if i == 3:
+        if i == 1:
             img[:2066, 2048:] = quadrants[i].data[:, ovrx:-prex]
         # Quadrant G
-        if i == 5:
+        if i == 2:
             img[2066:, :2048] = quadrants[i].data[:, prex:-ovrx]
         # Quadrant H
-        if i == 7:
+        if i == 3:
             img[2066:, 2048:] = quadrants[i].data[:, ovrx:-prex]
             #
             # Save to FITS file
