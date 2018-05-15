@@ -67,7 +67,6 @@ def create_ccds(proc, fits_dir, fpa_dir, fpa_file):
             """
             quadrants_l.append(hdu_list[idx].header)
             quadrants_l.append(hdu_list[idx].data)
-            print('data {}'.format(type(hdu_list[idx].data)))
 
         quadrant_name = 'CCD_{}_d{}'.format(coords, dither)
         quadrants_d[quadrant_name] = quadrants_l
@@ -76,6 +75,6 @@ def create_ccds(proc, fits_dir, fpa_dir, fpa_file):
     for key_ in quadrants_d.keys():
         print(key_)
         for quadrant_ in range(0, len(quadrants_d[key_]), 1):
-            print(proc, key_, type(quadrants_d[key_][quadrant]))
+            print(proc, key_, quadrants_d[key_][quadrant])
 
     # return quadrants_d
