@@ -93,7 +93,6 @@ def get_fits_elvis():
 
     files = listdir('{}'.format(prfs_d['fits_dir']))
     for file_ in files:
-        print('file_ {}'.format(file_))
         if file_[-5:] == '.fits':
             fits_list.append('{}/{}'.format(prfs_d['fits_dir'], file_))
 
