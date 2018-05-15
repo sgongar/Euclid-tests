@@ -54,12 +54,6 @@ def extract_quadrants(fits_file):
     for order, idx in enumerate(images_idxs):
         for quadrant in range(1, 5, 1):
             coords = get_position(order)
-            print(fits_file)
-            print(fits_file[5:6])
-            print('CCD_{}_q{}_d{}.fits'.format(coords, quadrant,
-                                               fits_file[-6:-5]))
-            """
-            fits.writeto('CCD_{}_q{}_d{}.fits'.format(coords, quadrant,
-                                                      fits_file[-6:-5]),
-                         hdu_list[idx].data, header=hdu_list[idx].header)
-            """
+            name = 'CCD_{}_q{}_d{}.fits'.format(coords, quadrant,
+                                                fits_file[-6:-5])
+            fits.writeto(name, hdu_list[idx].data, header=hdu_list[idx].header)
