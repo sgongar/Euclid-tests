@@ -22,6 +22,7 @@ Todo:
 
 from os import listdir
 from subprocess import Popen
+from time import time
 
 from multiprocessing import Process
 
@@ -29,31 +30,36 @@ from misc import extract_settings_elvis
 
 
 __author__ = "Samuel Gongora-Garcia"
-__copyright__ = "Copyright 2017"
+__copyright__ = "Copyright 2018"
 __credits__ = ["Samuel Gongora-Garcia"]
-__version__ = "0.2"
+__version__ = "0.1"
 __maintainer__ = "Samuel Gongora-Garcia"
 __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
 
 
-class SextractorSC3:
+class SextractorELViS:
 
     def __init__(self, logger, analysis_d):
         """
 
+        :param logger:
+        :param analysis_d:
         """
+        self.logger = logger
+        self.analysis_d = analysis_d
         self.prfs_d = extract_settings_elvis()
-        self.sextractor_process(logger, analysis_d)
+        self.sextractor_process()
 
-    def sextractor_process(self, logger, analysis_d):
+    def sextractor_process(self):
         """
 
         :param logger:
         :param analysis_d:
         :return:
         """
-        logger.info('Starting sextractor process for fits images')
+        self.logger.info('Starting sextractor process for fits images')
+        start_sex = time()  # Sextractor process begins here
 
         fits_files = listdir(self.prfs_d['fits_dir'])
         active_sex = []
@@ -75,7 +81,7 @@ class SextractorSC3:
                                                 cat_name)
 
                     sex_p = Process(target=self.sextractor_thread,
-                                    args=(sex_input, sex_output, analysis_d))
+                                    args=(sex_input, sex_output))
                     sex_j.append(sex_p)
                     sex_p.start()
 
@@ -86,10 +92,15 @@ class SextractorSC3:
             except IndexError:
                 print('Extraction finished')
 
+        end_sex = time()  # Sextractor process ends here
+
+        "the code you want to test stays here"
+        sex_time = end_sex - start_sex
+        self.logger.debug('Sextractor process takes {}s'.format(sex_time))
+
         return True
 
-    def sextractor_thread(self, sextractor_file, sextractor_output,
-                          analysis_d):
+    def sextractor_thread(self, sextractor_file, sextractor_output):
         """ runs sextractor on a single file
         todo - improve docstring
 
@@ -103,12 +114,12 @@ class SextractorSC3:
         s_2 = ' -CATALOG_NAME {}'.format(sextractor_output)
         s_3 = ' -PARAMETERS_NAME {}'.format(self.prfs_d['params_sex'])
         s_4 = ' -STARNNW_NAME {}'.format(self.prfs_d['neural_sex'])
-        s_5 = ' -DETECT_MINAREA {}'.format(analysis_d['detect_minarea'])
-        s_6 = ' -DETECT_THRESH {}'.format(analysis_d['detect_thresh'])
-        s_7 = ' -ANALYSIS_THRESH {}'.format(analysis_d['analysis_thresh'])
-        s_8 = ' -DEBLEND_NTHRESH {}'.format(analysis_d['deblend_nthresh'])
-        s_9 = ' -DEBLEND_MINCONT {}'.format(analysis_d['deblend_mincount'])
-        s_10 = ' -FILTER_NAME {}'.format(analysis_d['filter'])
+        s_5 = ' -DETECT_MINAREA {}'.format(self.analysis_d['detect_minarea'])
+        s_6 = ' -DETECT_THRESH {}'.format(self.analysis_d['detect_thresh'])
+        s_7 = ' -ANALYSIS_THRESH {}'.format(self.analysis_d['analysis_thresh'])
+        s_8 = ' -DEBLEND_NTHRESH {}'.format(self.analysis_d['deblend_nthresh'])
+        s_9 = ' -DEBLEND_MINCONT {}'.format(self.analysis_d['deblend_mincount'])
+        s_10 = ' -FILTER_NAME {}'.format(self.analysis_d['filter'])
 
         cmd_3 = s_1 + s_2 + s_3 + s_4 + s_5 + s_6 + s_7 + s_8 + s_9 + s_10
 
