@@ -128,7 +128,7 @@ class Check:
         active_quadrant = []
         quadrants_j = []
         # Launch processes
-        for proc in range(0, len(fits_list), 1):
+        for proc in range(0, 1, 1):
             quadrant_p = Process(target=create_ccds,
                                  args=(self.logger, proc,
                                        self.prfs_d['fits_dir'],
