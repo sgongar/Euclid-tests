@@ -42,7 +42,7 @@ def get_position(order):
 
 def extract_quadrants(fits_dir, fpa_dir, fpa_file):
     """
-    
+
     :param fits_dir:
     :param fpa_dir:
     :param fpa_file:

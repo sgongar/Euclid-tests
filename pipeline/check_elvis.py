@@ -19,7 +19,7 @@ from multiprocessing import Process
 from sys import argv
 
 from images_management_elvis import extract_quadrants
-from misc import setting_logger, extract_settings_sc3
+from misc import setting_logger, extract_settings_elvis
 from misc import create_configurations, get_fpa_elvis
 from misc import create_sextractor_dict, create_scamp_dict
 from sextractor_aux_elvis import SextractorELViS
@@ -58,7 +58,7 @@ class Check:
         """
 
         """
-        self.prfs_d = extract_settings_sc3()
+        self.prfs_d = extract_settings_elvis()
         self.logger = setting_logger(self.prfs_d)
 
         # Scamp configurations.
