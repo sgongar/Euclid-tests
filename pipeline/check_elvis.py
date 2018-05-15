@@ -77,9 +77,9 @@ class Check:
         # if argv[1] == '-catalog':
         #     if not self.catalog():
         #         raise Exception
-        # elif argv[1] == '-split':
-        #     if not self.split():
-        #         raise Exception
+        elif argv[1] == '-split':
+            if not self.split():
+                raise Exception
         elif argv[1] == '-sextractor':
             if not self.sextractor():
                 raise Exception
