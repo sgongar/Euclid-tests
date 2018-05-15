@@ -18,17 +18,17 @@ from itertools import product
 from multiprocessing import Process
 from sys import argv
 
-from images_management_sc3 import extract_images, extract_flags
+from images_management_elvis import extract_quadrants
 from misc import setting_logger, extract_settings_sc3
-from misc import create_configurations, get_fits_sc3
+from misc import create_configurations, get_fits_elvis
 from misc import create_sextractor_dict, create_scamp_dict
 from sextractor_aux_elvis import SextractorELViS
-from scamp_aux import ScampSC3
-from scamp_filter_sc3 import ScampFilterSC3
-from cosmic_sc3 import Cosmic
+from scamp_aux_elvis import ScampELViS
+from scamp_filter_elvis import ScampFilterELViS
+from cosmic_elvis import CosmicELViS
 
 __author__ = "Samuel Góngora García"
-__copyright__ = "Copyright 2017"
+__copyright__ = "Copyright 2018"
 __credits__ = ["Samuel Góngora García"]
 __version__ = "0.1"
 __maintainer__ = "Samuel Góngora García"
@@ -71,9 +71,9 @@ class Check:
         if argv[1] == '-full':
             if not self.full_pipeline():
                 raise Exception
-        # if argv[1] == '-clean':
-        #     if not self.clean():
-        #         raise Exception
+        if argv[1] == '-clean':
+            if not self.clean():
+                raise Exception
         # if argv[1] == '-catalog':
         #     if not self.catalog():
         #         raise Exception
@@ -115,26 +115,28 @@ class Check:
     #     # Merges header and data
     #     # Saves file
 
-    # def split(self):
-    #     """
-    #
-    #     :return:
-    #     """
-    #     fits_list = get_fits_sc3()
-    #
-    #     for fits_ in fits_list:
-    #         extract_images(fits_)
-    #         extract_flags(fits_)
-    #         # extract_rms (?)
-    #
-    #     return True
+    def split(self):
+        """
+
+        :return:
+        """
+        self.logger.debug('Extracts quadrants from original file')
+        fits_list = get_fits_elvis()
+
+        for fits_ in fits_list:
+            print(fits_)
+            # extract_quadrants(fits_)
+
+        self.logger.debug('Creates CCD images from original quadrants')
+
+        return True
 
     def clean(self):
         """
 
         :return: True if everything goes alright
         """
-        Cosmic()
+        CosmicELViS()
 
         return True
 
@@ -201,7 +203,7 @@ class Check:
 
                 scmp_cf = '{}_{}_{}_{}'.format(conf_[1][0], conf_[1][1],
                                                conf_[1][2], conf_[1][3])
-                filt_p = Process(target=ScampFilterSC3,
+                filt_p = Process(target=ScampFilterELViS,
                                  args=(self.logger, scmp_cf, sex_d,))
                 filt_j.append(filt_p)
                 filt_p.start()

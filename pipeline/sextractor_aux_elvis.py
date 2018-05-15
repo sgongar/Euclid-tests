@@ -54,14 +54,12 @@ class SextractorELViS:
     def sextractor_process(self):
         """
 
-        :param logger:
-        :param analysis_d:
         :return:
         """
         self.logger.info('Starting sextractor process for fits images')
         start_sex = time()  # Sextractor process begins here
 
-        fits_files = listdir(self.prfs_d['fits_dir'])
+        fits_files = listdir(self.prfs_d['fits_dir'])  # filter by *.fits
         active_sex = []
 
         for image_idx in range(0, len(fits_files),
@@ -106,7 +104,6 @@ class SextractorELViS:
 
         :param sextractor_file: file to be 'sextracted'
         :param sextractor_output: catalog to be created by sextractor
-        :param analysis_d: parameters dict
         :return: if everything goes alright
         """
 

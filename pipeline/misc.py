@@ -83,6 +83,22 @@ def get_fits_sc3():
     return fits_list
 
 
+def get_fits_elvis():
+    """
+
+    :return:
+    """
+    prfs_d = extract_settings_elvis()
+    fits_list = []
+
+    files = listdir('{}'.format(prfs_d['fits_dir']))
+    for file_ in files:
+        if file_[-5:] == '.fits':
+            fits_list.append('{}/{}'.format(prfs_d['fits_dir'], file_))
+
+    return fits_list
+
+
 def get_fits_d(mag_, dither):
     """
 

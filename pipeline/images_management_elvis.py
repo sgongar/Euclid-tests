@@ -21,7 +21,7 @@ __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
 
 
-def extract_images(fits_file):
+def extract_quadrants(fits_file):
     """
 
     :param fits_file:
@@ -32,18 +32,4 @@ def extract_images(fits_file):
 
     for order, idx in enumerate(images_idxs):
         fits.writeto('{}_{}.fits'.format(fits_file[:-5], order),
-                     hdu_list[idx].data, header=hdu_list[idx].header)
-
-
-def extract_flags(fits_file):
-    """
-
-    :param fits_file:
-    :return:
-    """
-    images_idxs = np.arange(3, 109, 3)
-    hdu_list = fits.open(fits_file)
-
-    for order, idx in enumerate(images_idxs):
-        fits.writeto('{}_f{}.fits'.format(fits_file[:-5], order),
                      hdu_list[idx].data, header=hdu_list[idx].header)
