@@ -124,6 +124,7 @@ class Check:
         fits_list = get_fits_elvis()
 
         for fits_ in fits_list:
+            print(fits_)
             extract_quadrants(fits_)
 
         self.logger.debug('Creates CCD images from original quadrants')
