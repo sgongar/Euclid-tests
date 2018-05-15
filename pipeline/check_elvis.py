@@ -135,7 +135,7 @@ class Check:
         # Launch processes
         for proc in range(0, len(fits_list), 1):
             quadrant_p = Process(target=extract_quadrants,
-                                 args=(self.prfs_d['fits_dir'],
+                                 args=(proc, self.prfs_d['fits_dir'],
                                        self.prfs_d['fpas_dir'],
                                        fits_list[proc],))
             quadrants_j.append(quadrant_p)

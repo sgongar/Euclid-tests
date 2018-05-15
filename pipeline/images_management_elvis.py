@@ -40,7 +40,7 @@ def get_position(order):
     return coords
 
 
-def extract_quadrants(fits_dir, fpa_dir, fpa_file):
+def extract_quadrants(proc, fits_dir, fpa_dir, fpa_file):
     """
 
     :param fits_dir:
@@ -71,6 +71,7 @@ def extract_quadrants(fits_dir, fpa_dir, fpa_file):
         quadrant_name = 'CCD_{}_d{}'.format(coords, dither)
         quadrants_d[quadrant_name] = quadrants_l
 
-    print(quadrants_d.keys())
+    print(proc)
+    print(quadrants_d)
 
     # return quadrants_d
