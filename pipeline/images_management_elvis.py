@@ -77,7 +77,8 @@ def create_ccds(logger, proc, fits_dir, fpa_dir, fpa_file):
         quadrants_d[quadrant_name] = quadrants_l
 
         for quadrant_ in quadrants_d[quadrant_name]:
-            print(quadrant_.header['EXTNAME'])
+
+            print(quadrant_name, quadrant_.header['EXTNAME'])
 
     """
     for key_ in quadrants_d.keys():
