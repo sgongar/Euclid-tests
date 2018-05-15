@@ -100,7 +100,7 @@ def create_ccd(logger, quadrants, key_):
     img = np.zeros([4132, 4096])
     for i in range(0, len(quadrants), 1):
         # Quadrant E
-        if i == 0:
+        if i == 3:
             print(i, quadrants[i].header['EXTNAME'])
             img[:2066, :2048] = quadrants[i].data[:, prex:-ovrx]
             #
@@ -108,15 +108,15 @@ def create_ccd(logger, quadrants, key_):
             hdr = quadrants[i].header
             hdr.set('CRPIX1', hdr['CRPIX1'] - prex)
         # Quadrant F
-        if i == 1:
+        if i == 2:
             print(i, quadrants[i].header['EXTNAME'])
             img[:2066, 2048:] = quadrants[i].data[:, ovrx:-prex]
         # Quadrant G
-        if i == 2:
+        if i == 0:
             print(i, quadrants[i].header['EXTNAME'])
             img[2066:, :2048] = quadrants[i].data[:, prex:-ovrx]
         # Quadrant H
-        if i == 3:
+        if i == 1:
             print(i, quadrants[i].header['EXTNAME'])
             img[2066:, 2048:] = quadrants[i].data[:, ovrx:-prex]
             #
