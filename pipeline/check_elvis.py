@@ -125,7 +125,7 @@ class Check:
 
         for fits_ in fits_list:
             print(fits_)
-            extract_quadrants(fits_)
+            extract_quadrants(self.prfs_d['fits_dir'], fits_)
 
         self.logger.debug('Creates CCD images from original quadrants')
 

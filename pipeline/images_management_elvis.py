@@ -40,9 +40,10 @@ def get_position(order):
     return coords
 
 
-def extract_quadrants(fits_file):
+def extract_quadrants(fits_dir, fits_file):
     """
 
+    :param fits_dir:
     :param fits_file:
     :return:
     """
@@ -54,6 +55,6 @@ def extract_quadrants(fits_file):
             print('order {} - quadrant {} - dither {}'.format(order, quadrant,
                                                               fits_file[-6:-5]))
             coords = get_position(order)
-            name = 'CCD_{}_q{}_d{}.fits'.format(coords, quadrant,
-                                                fits_file[-6:-5])
+            name = '{}/CCD_{}_q{}_d{}.fits'.format(fits_dir, coords, quadrant,
+                                                   fits_file[-6:-5])
             fits.writeto(name, hdu_list[idx].data, header=hdu_list[idx].header)
