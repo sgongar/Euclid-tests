@@ -27,13 +27,13 @@ def get_position(order):
     :param order:
     :return:
     """
-    order_d = {0: [1, 6], 1: [2, 6], 2: [3, 6], 3: [4, 6], 4: [5, 6], 5: [6, 6],
-               6: [1, 5], 7: [2, 5], 8: [3, 5], 9: [4, 5], 10: [5, 5],
-               11: [6, 5], 12: [1, 4], 13: [2, 4], 14: [3, 4], 15: [4, 4],
-               16: [5, 4], 17: [6, 4], 18: [1, 3], 19: [2, 3], 20: [3, 3],
-               21: [4, 3], 22: [5, 3], 23: [6, 3], 24: [1, 2], 25: [2, 2],
-               26: [3, 2], 27: [4, 2], 28: [5, 2], 29: [6, 2], 30: [1, 1],
-               31: [2, 1], 32: [3, 1], 33: [4, 1], 34: [5, 1], 35: [6, 1]}
+    order_d = {0: [1, 6], 1: [1, 5], 2: [1, 4], 3: [1, 3], 4: [1, 2], 5: [1, 1],
+               6: [2, 6], 7: [2, 5], 8: [2, 4], 9: [2, 3], 10: [2, 2],
+               11: [2, 1], 12: [3, 6], 13: [3, 5], 14: [3, 4], 15: [3, 3],
+               16: [3, 2], 17: [3, 1], 18: [4, 6], 19: [4, 5], 20: [4, 4],
+               21: [4, 3], 22: [4, 2], 23: [4, 1], 24: [5, 6], 25: [5, 5],
+               26: [5, 4], 27: [5, 3], 28: [5, 2], 29: [5, 1], 30: [6, 6],
+               31: [6, 5], 32: [6, 4], 33: [6, 3], 34: [6, 2], 35: [6, 1]}
 
     coords = 'x{}_y{}'.format(order_d[order][0], order_d[order][1])
 
@@ -101,6 +101,7 @@ def create_ccd(logger, quadrants, key_):
     for i in range(0, len(quadrants), 1):
         # Quadrant E
         if i == 0:
+            print(i, quadrants[i].header['EXTNAME'])
             img[:2066, :2048] = quadrants[i].data[:, prex:-ovrx]
             #
             # Correct reference pixel coordinate
@@ -108,12 +109,15 @@ def create_ccd(logger, quadrants, key_):
             hdr.set('CRPIX1', hdr['CRPIX1'] - prex)
         # Quadrant F
         if i == 1:
+            print(i, quadrants[i].header['EXTNAME'])
             img[:2066, 2048:] = quadrants[i].data[:, ovrx:-prex]
         # Quadrant G
         if i == 2:
+            print(i, quadrants[i].header['EXTNAME'])
             img[2066:, :2048] = quadrants[i].data[:, prex:-ovrx]
         # Quadrant H
         if i == 3:
+            print(i, quadrants[i].header['EXTNAME'])
             img[2066:, 2048:] = quadrants[i].data[:, ovrx:-prex]
             #
             # Save to FITS file
