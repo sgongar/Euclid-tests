@@ -40,7 +40,7 @@ def get_position(order):
     return coords
 
 
-def extract_quadrants(proc, fits_dir, fpa_dir, fpa_file):
+def create_ccds(proc, fits_dir, fpa_dir, fpa_file):
     """
 
     :param fits_dir:
@@ -72,6 +72,7 @@ def extract_quadrants(proc, fits_dir, fpa_dir, fpa_file):
         quadrants_d[quadrant_name] = quadrants_l
 
     print(proc)
-    print(quadrants_d)
+    for key_ in quadrants_d.keys():
+        print(quadrants_d[key_].keys())
 
     # return quadrants_d
