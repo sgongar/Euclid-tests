@@ -445,6 +445,8 @@ def extract_settings_elvis():
 
     prfs_d['fits_dir'] = confmap(cf, "ImagesDirs")['fits_dir']
     prfs_d['fits_dir'] = '{}{}'.format(prfs_d['version'], prfs_d['fits_dir'])
+    prfs_d['fpas_dir'] = confmap(cf, "ImagesDirs")['fpas_dir']
+    prfs_d['fpas_dir'] = '{}{}'.format(prfs_d['version'], prfs_d['fpas_dir'])
 
     # todo - comment!
     prfs_d['output_cats'] = confmap(cf, "CatsDirs")['output_cats']
