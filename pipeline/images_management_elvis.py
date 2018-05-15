@@ -55,7 +55,7 @@ def extract_quadrants(fits_file):
         for quadrant in range(1, 5, 1):
             coords = get_position(order)
             print('CCD_{}_q{}_d{}.fits'.format(coords, quadrant,
-                                               fits_file[-6:-5]))
+                                               fits_file[5:6]))
             """
             fits.writeto('CCD_{}_q{}_d{}.fits'.format(coords, quadrant,
                                                       fits_file[-6:-5]),
