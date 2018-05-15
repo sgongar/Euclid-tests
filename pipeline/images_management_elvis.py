@@ -40,18 +40,19 @@ def get_position(order):
     return coords
 
 
-def extract_quadrants(fits_dir, fits_file):
+def extract_quadrants(fits_dir, fpa_dir, fpa_file):
     """
-
+    
     :param fits_dir:
-    :param fits_file:
-    :return: quadrants_d
+    :param fpa_dir:
+    :param fpa_file:
+    :return:
     """
     quadrants_d = {}
-    dither = fits_file[-6:-5]
+    dither = fpa_file[-6:-5]
 
     images_idxs = np.arange(1, 144, 4)
-    hdu_list = fits.open(fits_file)
+    hdu_list = fits.open('{}/{}'.format(fpa_dir, fpa_file))
 
     for order, idx in enumerate(images_idxs):
         coords = get_position(order)

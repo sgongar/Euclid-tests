@@ -126,6 +126,7 @@ class Check:
         quadrants_d = {}
         for idx, fits_ in enumerate(fits_list):
             quadrants_d[idx + 1] = extract_quadrants(self.prfs_d['fits_dir'],
+                                                     self.prfs_d['fpas_dir'],
                                                      fits_)
             print(quadrants_d[idx + 1])
 
