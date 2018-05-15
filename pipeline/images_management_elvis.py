@@ -54,6 +54,8 @@ def extract_quadrants(fits_file):
     for order, idx in enumerate(images_idxs):
         for quadrant in range(1, 5, 1):
             coords = get_position(order)
+            print(fits_file)
+            print(fits_file[5:6])
             print('CCD_{}_q{}_d{}.fits'.format(coords, quadrant,
                                                fits_file[5:6]))
             """
