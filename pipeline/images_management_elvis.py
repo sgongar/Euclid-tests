@@ -45,16 +45,29 @@ def extract_quadrants(fits_dir, fits_file):
 
     :param fits_dir:
     :param fits_file:
-    :return:
+    :return: quadrants_d
     """
+    quadrants_d = {}
+    dither = fits_file[-6:-5]
+
     images_idxs = np.arange(1, 144, 4)
     hdu_list = fits.open(fits_file)
 
     for order, idx in enumerate(images_idxs):
+        coords = get_position(order)
+        quadrants_l = []
+
         for quadrant in range(1, 5, 1):
+            """
             print('order {} - quadrant {} - dither {}'.format(order, quadrant,
-                                                              fits_file[-6:-5]))
-            coords = get_position(order)
-            name = '{}/CCD_{}_q{}_d{}.fits'.format(fits_dir, coords, quadrant,
-                                                   fits_file[-6:-5])
-            fits.writeto(name, hdu_list[idx].data, header=hdu_list[idx].header)
+                                                              dither))
+            name = 'CCD_{}_q{}_d{}.fits'.format(fits_dir, coords, quadrant,
+                                                fits_file[-6:-5])
+            """
+            quadrants_l.append(hdu_list[idx].header)
+            quadrants_l.append(hdu_list[idx].data)
+
+        quadrant_name = 'CCD_{}_d{}'.format(coords, dither)
+        quadrants_d[quadrant_name] = quadrants_l
+
+    return quadrants_d

@@ -20,7 +20,7 @@ from sys import argv
 
 from images_management_elvis import extract_quadrants
 from misc import setting_logger, extract_settings_sc3
-from misc import create_configurations, get_fits_elvis
+from misc import create_configurations, get_fpa_elvis
 from misc import create_sextractor_dict, create_scamp_dict
 from sextractor_aux_elvis import SextractorELViS
 from scamp_aux_elvis import ScampELViS
@@ -121,11 +121,13 @@ class Check:
         :return:
         """
         self.logger.debug('Extracts quadrants from original file')
-        fits_list = get_fits_elvis()
+        fits_list = get_fpa_elvis()
 
-        for fits_ in fits_list:
-            print(fits_)
-            extract_quadrants(self.prfs_d['fits_dir'], fits_)
+        quadrants_d = {}
+        for idx, fits_ in enumerate(fits_list):
+            quadrants_d[idx + 1] = extract_quadrants(self.prfs_d['fits_dir'],
+                                                     fits_)
+            print(quadrants_d[idx + 1])
 
         self.logger.debug('Creates CCD images from original quadrants')
 
