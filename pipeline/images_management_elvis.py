@@ -40,9 +40,11 @@ def get_position(order):
     return coords
 
 
-def create_ccds(proc, fits_dir, fpa_dir, fpa_file):
+def create_ccds(logger, proc, fits_dir, fpa_dir, fpa_file):
     """
 
+    :param logger:
+    :param proc:
     :param fits_dir:
     :param fpa_dir:
     :param fpa_file:
@@ -73,18 +75,19 @@ def create_ccds(proc, fits_dir, fpa_dir, fpa_file):
 
     for key_ in quadrants_d.keys():
         for quadrant_ in range(0, len(quadrants_d[key_]), 1):
-            create_ccd(quadrants_d[key_], key_)
+            create_ccd(logger, quadrants_d[key_], key_)
 
 
-def create_ccd(quadrants, key_):
+def create_ccd(logger, quadrants, key_):
     """
 
+    :param logger:
     :param quadrants:
+    :param key_:
     :return:
     """
-    print(key_)
+    logger.debug('Creates file {}'.format(key_))
 
-    # hdus = fits.open(args.inputFile)
     prex = quadrants[0].header['PRESCANX']
     ovrx = quadrants[0].header['OVRSCANX']
     try:
@@ -93,8 +96,8 @@ def create_ccd(quadrants, key_):
         ovry = 0
 
     # Code for injected lines, when they will be implemented in ELViS
+    img = np.zeros([4132, 4096])
     for i in range(0, len(quadrants), 1):
-        img = np.zeros([4132, 4096])
         # Quadrant E
         if i == 0:
             img[:2066, :2048] = quadrants[i].data[:, prex:-ovrx]

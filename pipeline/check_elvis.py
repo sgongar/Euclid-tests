@@ -17,6 +17,7 @@ Todo:
 from itertools import product
 from multiprocessing import Process
 from sys import argv
+from time import time
 
 from images_management_elvis import create_ccds
 from misc import setting_logger, extract_settings_elvis
@@ -121,6 +122,7 @@ class Check:
         :return:
         """
         self.logger.debug('Creates CCD images from original quadrants')
+        start_split = time()
 
         fits_list = get_fpa_elvis()
         active_quadrant = []
@@ -128,7 +130,8 @@ class Check:
         # Launch processes
         for proc in range(0, len(fits_list), 1):
             quadrant_p = Process(target=create_ccds,
-                                 args=(proc, self.prfs_d['fits_dir'],
+                                 args=(self.logger, proc,
+                                       self.prfs_d['fits_dir'],
                                        self.prfs_d['fpas_dir'],
                                        fits_list[proc],))
             quadrants_j.append(quadrant_p)
@@ -139,6 +142,10 @@ class Check:
             active_quadrant = list([job.is_alive() for job in quadrants_j])
             pass
 
+        end_split = time()
+        split_time = end_split - start_split
+        self.logger('Split process takes {}s'.format(split_time))
+
         return True
 
     def clean(self):
@@ -146,7 +153,15 @@ class Check:
 
         :return: True if everything goes alright
         """
+        self.logger.debug('Cleans CCDs images from cosmic rays')
+        start_clean = time()
+
         CosmicELViS()
+
+        end_clean = time()
+
+        clean_time = end_clean - start_clean
+        self.logger.debug('Clean process takes {}s'.format(clean_time))
 
         return True
 
