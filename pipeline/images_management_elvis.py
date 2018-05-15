@@ -73,17 +73,49 @@ def create_ccds(proc, fits_dir, fpa_dir, fpa_file):
 
     for key_ in quadrants_d.keys():
         for quadrant_ in range(0, len(quadrants_d[key_]), 1):
-            create_ccd(quadrants_d[key_])
-
-    # return quadrants_d
+            create_ccd(quadrants_d[key_], key_)
 
 
-def create_ccd(quadrants):
+def create_ccd(quadrants, key_):
     """
 
     :param quadrants:
     :return:
     """
-    print(type(quadrants))
+    print(key_)
+
+    # hdus = fits.open(args.inputFile)
+    prex = quadrants[0].header['PRESCANX']
+    ovrx = quadrants[0].header['OVRSCANX']
+    try:
+        ovry = quadrants[0].header['OVRSCANY']
+    except:
+        ovry = 0
+
+    # Code for injected lines, when they will be implemented in ELViS
+    for i in range(1, len(quadrants), 2):
+        img = np.zeros([4132, 4096])
+        # Quadrant E
+        if i == 1:
+            img[:2066, :2048] = quadrants[i].data[:, prex:-ovrx]
+            #
+            # Correct reference pixel coordinate
+            hdr = quadrants[i].header
+            hdr.set('CRPIX1', hdr['CRPIX1'] - prex)
+        # Quadrant F
+        if i == 3:
+            img[:2066, 2048:] = quadrants[i].data[:, ovrx:-prex]
+        # Quadrant G
+        if i == 5:
+            img[2066:, :2048] = quadrants[i].data[:, prex:-ovrx]
+        # Quadrant H
+        if i == 7:
+            img[2066:, 2048:] = quadrants[i].data[:, ovrx:-prex]
+            #
+            # Save to FITS file
+            outputfits = fits.HDUList()
+            outputfits.append(fits.PrimaryHDU())
+            outputfits.append(fits.ImageHDU(data=img, header=hdr))
+            outputfits.writeto('{}.fits'.format(key_), overwrite=True)
 
     return True
