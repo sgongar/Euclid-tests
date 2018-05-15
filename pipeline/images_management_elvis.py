@@ -65,8 +65,8 @@ def create_ccds(proc, fits_dir, fpa_dir, fpa_file):
             name = 'CCD_{}_q{}_d{}.fits'.format(fits_dir, coords, quadrant,
                                                 fits_file[-6:-5])
             """
-            quadrants_l.append(hdu_list[idx].header)
-            quadrants_l.append(hdu_list[idx].data)
+            quadrants_l.append(hdu_list[idx])
+            # quadrants_l.append(hdu_list[idx].data)
 
         quadrant_name = 'CCD_{}_d{}'.format(coords, dither)
         quadrants_d[quadrant_name] = quadrants_l
@@ -93,7 +93,7 @@ def create_ccd(quadrants, key_):
         ovry = 0
 
     # Code for injected lines, when they will be implemented in ELViS
-    for i in range(1, len(quadrants), 2):
+    for i in range(0, len(quadrants), 1):
         img = np.zeros([4132, 4096])
         # Quadrant E
         if i == 1:
