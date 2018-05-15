@@ -75,6 +75,16 @@ def create_ccds(proc, fits_dir, fpa_dir, fpa_file):
     for key_ in quadrants_d.keys():
         print(key_)
         for quadrant_ in range(0, len(quadrants_d[key_]), 1):
-            print(proc, key_, quadrants_d[key_][quadrant])
+            print(quadrant_)
+            print(proc, key_, type(quadrants_d[key_][quadrant_]))
 
     # return quadrants_d
+
+def create_ccd(quadrants):
+    """
+
+    :param quadrants:
+    :return:
+    """
+
+    return True
