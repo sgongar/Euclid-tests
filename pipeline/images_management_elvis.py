@@ -30,7 +30,7 @@ def extract_quadrants(fits_file):
     images_idxs = np.arange(1, 109, 3)
     hdu_list = fits.open(fits_file)
 
-    print(hdu_list)
+    print(len(hdu_list))
 
     """
     for order, idx in enumerate(images_idxs):
