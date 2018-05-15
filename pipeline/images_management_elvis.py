@@ -27,13 +27,11 @@ def extract_quadrants(fits_file):
     :param fits_file:
     :return:
     """
-    images_idxs = np.arange(1, 109, 3)
+    images_idxs = np.arange(1, 144, 4)
     hdu_list = fits.open(fits_file)
 
-    print(len(hdu_list))
-
-    """
     for order, idx in enumerate(images_idxs):
-        fits.writeto('{}_{}.fits'.format(fits_file[:-5], order),
-                     hdu_list[idx].data, header=hdu_list[idx].header)
-    """
+        for quadrant in range(1, 5, 1):
+            fits.writeto('{}_{}_{}.fits'.format(fits_file[:-5],
+                                                quadrant, order),
+                         hdu_list[idx].data, header=hdu_list[idx].header)
