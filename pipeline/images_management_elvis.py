@@ -71,4 +71,6 @@ def extract_quadrants(fits_dir, fpa_dir, fpa_file):
         quadrant_name = 'CCD_{}_d{}'.format(coords, dither)
         quadrants_d[quadrant_name] = quadrants_l
 
-    return quadrants_d
+    print(quadrants_d.keys())
+
+    # return quadrants_d

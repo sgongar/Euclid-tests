@@ -123,12 +123,41 @@ class Check:
         self.logger.debug('Extracts quadrants from original file')
         fits_list = get_fpa_elvis()
 
-        quadrants_d = {}
-        for idx, fits_ in enumerate(fits_list):
-            quadrants_d[idx + 1] = extract_quadrants(self.prfs_d['fits_dir'],
-                                                     self.prfs_d['fpas_dir'],
-                                                     fits_)
-            print(quadrants_d[idx + 1])
+        # quadrants_d = {}
+        # for idx, fits_ in enumerate(fits_list):
+        #     quadrants_d[idx + 1] = extract_quadrants(self.prfs_d['fits_dir'],
+        #                                              self.prfs_d['fpas_dir'],
+        #                                              fits_)
+        #     print(quadrants_d[idx + 1])
+
+        active_quadrant = []
+        quadrants_j = []
+        # Launch processes
+        for proc in range(0, len(fits_list), 1):
+            quadrant_p = Process(target=extract_quadrants,
+                                 args=(self.prfs_d['fits_dir'],
+                                       self.prfs_d['fpas_dir'],
+                                       fits_list[proc],))
+            quadrants_j.append(quadrant_p)
+            quadrant_p.start()
+
+            active_quadrant = list([job.is_alive() for job in quadrants_j])
+        while True in active_quadrant:
+            active_quadrant = list([job.is_alive() for job in quadrants_j])
+            pass
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         self.logger.debug('Creates CCD images from original quadrants')
 
