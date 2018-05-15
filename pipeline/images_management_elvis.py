@@ -74,6 +74,7 @@ def create_ccds(proc, fits_dir, fpa_dir, fpa_file):
     print(proc)
     for key_ in quadrants_d.keys():
         print(key_)
-        print(quadrants_d[key_])
+        for quadrant_ in range(0, len(quadrants_d[key_]), 1):
+            print(proc, key_, type(quadrant_))
 
     # return quadrants_d
