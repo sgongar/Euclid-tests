@@ -53,6 +53,8 @@ def extract_quadrants(fits_file):
 
     for order, idx in enumerate(images_idxs):
         for quadrant in range(1, 5, 1):
+            print('order {} - quadrant {} - dither {}'.format(order, quadrant,
+                                                              fits_file[-6:-5]))
             coords = get_position(order)
             name = 'CCD_{}_q{}_d{}.fits'.format(coords, quadrant,
                                                 fits_file[-6:-5])
