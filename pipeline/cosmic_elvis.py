@@ -73,7 +73,7 @@ class CosmicELViS:
                                          sepmed=True, cleantype='meanmask',
                                          fsmode='median', psfmodel='gauss',
                                          psffwhm=0.18, psfsize=7, psfk=None,
-                                         psfbeta=4.765, verbose=True)
+                                         psfbeta=4.765, verbose=False)
 
         fits.writeto('{}/{}'.format(self.prfs_d['fits_dir'], fits_file),
                      cleaned_array, header, clobber=True)
