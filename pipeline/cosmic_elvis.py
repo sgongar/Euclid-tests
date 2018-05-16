@@ -23,8 +23,13 @@ from misc import extract_settings_elvis
 
 class CosmicELViS:
 
-    def __init__(self):
+    def __init__(self, logger):
+        """
+
+        :param logger:
+        """
         self.prfs_d = extract_settings_elvis()
+        self.logger = logger
 
         active_cosmic = []
         fits_files = listdir(self.prfs_d['fits_dir'])
@@ -35,7 +40,6 @@ class CosmicELViS:
                 cosmic_j = []
                 for proc in range(0, self.prfs_d['cores_number'], 1):
                     idx = cosmic_idx + proc  # index
-                    print(idx, len(fits_files))
                     fits_file = fits_files[idx]
                     cosmic_p = Process(target=self.cosmic_thread,
                                        args=(fits_file,))
@@ -53,7 +57,11 @@ class CosmicELViS:
 
     def cosmic_thread(self, fits_file):
         """
+
+        :param fits_file:
+        :return:
         """
+        self.logger.debug('Cleans image {}'.format(fits_file))
         data_, header = fits.getdata('{}/{}'.format(self.prfs_d['fits_dir'],
                                                     fits_file),
                                      header=True)

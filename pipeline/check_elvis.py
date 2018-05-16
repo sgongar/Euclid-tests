@@ -156,7 +156,7 @@ class Check:
         self.logger.debug('Cleans CCDs images from cosmic rays')
         start_clean = time()
 
-        CosmicELViS()
+        CosmicELViS(self.logger)
 
         end_clean = time()
 
