@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 
-"""Script principal del paquete.
+"""
 
 Versions:
 - 0.1: Initial release. Splited from check.py

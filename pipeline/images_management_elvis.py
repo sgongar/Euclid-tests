@@ -106,25 +106,17 @@ def create_ccd(logger, quadrants, key_):
     # Code for injected lines, when they will be implemented in ELViS
     img = np.zeros([4132, 4096])
     for i in range(0, len(quadrants), 1):
-        # Quadrant E
-        if i == 3:
-            print(i, quadrants[i].header['EXTNAME'])
+        if i == 0:
             img[:2066, :2048] = quadrants[i].data[:, prex:-ovrx]
             #
             # Correct reference pixel coordinate
             hdr = quadrants[i].header
             hdr.set('CRPIX1', hdr['CRPIX1'] - prex)
-        # Quadrant F
-        if i == 2:
-            print(i, quadrants[i].header['EXTNAME'])
-            img[:2066, 2048:] = quadrants[i].data[:, ovrx:-prex]
-        # Quadrant G
-        if i == 0:
-            print(i, quadrants[i].header['EXTNAME'])
-            img[2066:, :2048] = quadrants[i].data[:, prex:-ovrx]
-        # Quadrant H
         if i == 1:
-            print(i, quadrants[i].header['EXTNAME'])
+            img[:2066, 2048:] = quadrants[i].data[:, ovrx:-prex]
+        if i == 2:
+            img[2066:, :2048] = quadrants[i].data[:, prex:-ovrx]
+        if i == 3:
             img[2066:, 2048:] = quadrants[i].data[:, ovrx:-prex]
             #
             # Save to FITS file
