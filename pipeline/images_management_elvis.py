@@ -68,23 +68,16 @@ def create_ccds(logger, proc, fits_dir, fpa_dir, fpa_file):
             name = 'CCD_{}_q{}_d{}.fits'.format(fits_dir, coords, quadrant,
                                                 fits_file[-6:-5])
             """
-            print(idx + quadrant, coords, hdu_list[idx + quadrant].header['EXTNAME'])
             quadrants_l.append(hdu_list[idx + quadrant])  # Base image (0) +
                                                           # quadrant
-            # quadrants_l.append(hdu_list[idx].data)
 
         quadrant_name = 'CCD_{}_d{}'.format(coords, dither)
         quadrants_d[quadrant_name] = quadrants_l
 
-        for quadrant_ in quadrants_d[quadrant_name]:
-
-            print(quadrant_name, quadrant_.header['EXTNAME'])
-
-    """
     for key_ in quadrants_d.keys():
         for quadrant_ in range(0, len(quadrants_d[key_]), 1):
             create_ccd(logger, quadrants_d[key_], key_)
-    """
+
 
 def create_ccd(logger, quadrants, key_):
     """
