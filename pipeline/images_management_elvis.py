@@ -78,7 +78,7 @@ def create_ccds(logger, proc, fits_dir, fpa_dir, fpa_file):
         create_ccd(logger, fits_dir, quadrants_d[key_], key_)
 
 
-def create_ccd(logger, quadrants, key_):
+def create_ccd(logger, fits_dir, quadrants, key_):
     """
 
     :param logger:

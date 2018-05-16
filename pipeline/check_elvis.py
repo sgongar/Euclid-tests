@@ -144,7 +144,7 @@ class Check:
 
         end_split = time()
         split_time = end_split - start_split
-        self.logger('Split process takes {}s'.format(split_time))
+        self.logger.debug('Split process takes {}s'.format(split_time))
 
         return True
 
