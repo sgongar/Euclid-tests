@@ -170,6 +170,8 @@ class Check:
 
         :return: True if everything goes alright
         """
+        self.logger.debug('Cleans CCDs images from cosmic rays')
+
         mode = {'type': 'sextractor'}
         confs, total_confs = create_configurations(mode)
 

@@ -92,7 +92,6 @@ class SextractorELViS:
 
         end_sex = time()  # Sextractor process ends here
 
-        "the code you want to test stays here"
         sex_time = end_sex - start_sex
         self.logger.debug('Sextractor process takes {}s'.format(sex_time))
 
