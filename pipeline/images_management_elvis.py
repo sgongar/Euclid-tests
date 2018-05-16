@@ -75,8 +75,7 @@ def create_ccds(logger, proc, fits_dir, fpa_dir, fpa_file):
         quadrants_d[quadrant_name] = quadrants_l
 
     for key_ in quadrants_d.keys():
-        for quadrant_ in range(0, len(quadrants_d[key_]), 1):
-            create_ccd(logger, quadrants_d[key_], key_)
+        create_ccd(logger, quadrants_d[key_], key_)
 
 
 def create_ccd(logger, quadrants, key_):
