@@ -75,7 +75,7 @@ def create_ccds(logger, proc, fits_dir, fpa_dir, fpa_file):
         quadrants_d[quadrant_name] = quadrants_l
 
     for key_ in quadrants_d.keys():
-        create_ccd(logger, quadrants_d[key_], key_)
+        create_ccd(logger, fits_dir, quadrants_d[key_], key_)
 
 
 def create_ccd(logger, quadrants, key_):
@@ -96,7 +96,7 @@ def create_ccd(logger, quadrants, key_):
         ovry = 0
 
     # Code for injected lines, when they will be implemented in ELViS
-    img = np.zeros([4132, 4096])
+    img = np.zeros([4132, 4096], np.int16)
     for i in range(0, len(quadrants), 1):
         if i == 0:
             img[:2066, :2048] = quadrants[i].data[:, prex:-ovrx]
@@ -115,6 +115,7 @@ def create_ccd(logger, quadrants, key_):
             outputfits = fits.HDUList()
             outputfits.append(fits.PrimaryHDU())
             outputfits.append(fits.ImageHDU(data=img, header=hdr))
-            outputfits.writeto('{}.fits'.format(key_), overwrite=True)
+            outputfits.writeto('{}/{}.fits'.format(fits_dir, key_),
+                               overwrite=True)
 
     return True
