@@ -96,6 +96,10 @@ class Check:
 
         :return:
         """
+        if not self.split():
+            raise Exception
+        if not self.clean():
+            raise Exception
         if not self.sextractor():
             raise Exception
         # if not self.scamp():
@@ -124,16 +128,16 @@ class Check:
         self.logger.debug('Creates CCD images from original quadrants')
         start_split = time()
 
-        fits_list = get_fpa_elvis()
+        fpa_list = get_fpa_elvis()
         active_quadrant = []
         quadrants_j = []
         # Launch processes
-        for proc in range(0, 1, 1):
+        for proc in range(0, len(fpa_list), 1):
             quadrant_p = Process(target=create_ccds,
                                  args=(self.logger, proc,
                                        self.prfs_d['fits_dir'],
                                        self.prfs_d['fpas_dir'],
-                                       fits_list[proc],))
+                                       fpa_list[proc],))
             quadrants_j.append(quadrant_p)
             quadrant_p.start()
 
