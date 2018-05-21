@@ -813,6 +813,8 @@ def confidence_filter(db, r):
 def setting_logger(prfs_d):
     """ sets-up a logger object ready to be used
 
+    TODO improve logger definition
+
     @return logger:
     """
     print(prfs_d['logger_config'])
@@ -837,7 +839,7 @@ def setting_logger(prfs_d):
 def clear_data(logger, prfs_d, catalogues):
     """ Clear old fits and jpeg images. Removes catalogue files too.
 
-    TODO count folders number to improve clear data algorithm
+    TODO it is still useful?
 
     @param logger: a logger object
     @param prfs_d:
@@ -890,47 +892,6 @@ def clear_data(logger, prfs_d, catalogues):
             logger.error('final regions cannot be removed')
 
     return True
-
-
-def save_data(logger, prfs_d, conf_n):
-    """
-
-    @param logger:
-    @param prfs_d:
-    @param conf_n:
-    """
-
-    # Gets sextracted catalogs allocation from catalogs folder
-    o_cats = []
-    o_cat_files = listdir(prfs_d['output_cats'])
-    for cat in o_cat_files:
-        if cat[-4:] == '.cat':
-            o_cats.append(cat)
-
-    # Gets scamp' catalogus from scamp's output allocation
-    s_cats = []
-    s_cat_files = listdir(prfs_d['results_dir'])
-    for cat in s_cat_files:
-        if cat[-4:] == '.cat':
-            s_cats.append(cat)
-
-    # Creates a new folder for backup data
-    backup_dir = prfs_d['home'] + '/pipeline/backup/' + str(conf_n) + '/'
-    logger.debug('creating new dir {}'.format(backup_dir))
-    try:
-        mkdir(backup_dir)
-    except OSError:
-        logger.debug('dir {} was already created'.format(backup_dir))
-
-    # copy catalogs sextracted to backup location
-    for cat in o_cats:
-        logger.debug('moving sextracted catalog {}'.format(cat))
-        rename(prfs_d['output_cats'] + '/' + cat, backup_dir + cat)
-
-    # copy scamp' catalogs to backup location
-    for cat in s_cats:
-        logger.debug('moving scamp catalog {}'.format(cat))
-        rename(prfs_d['results_dir'] + '/' + cat, backup_dir + cat)
 
 
 def compare_floats(f1, f2, allowed_error):

@@ -5,17 +5,20 @@
 """
 
 Versions:
-- 0.1: Initial release. Splited from check.py
+- 0.1: Initial release. Split from check.py
        Recreated for ELViS analysis pipeline.
+- 0.1.1: Restart method added. Now can removes old data before a new analysis.
 
 Todo:
-    *
+    * Unit tests.
+    * Different scamp/sextractor configurations
 
 *GNU Terry Pratchett*
 
 """
 from itertools import product
 from multiprocessing import Process
+from os import listdir, remove
 from sys import argv
 from time import time
 
@@ -31,7 +34,7 @@ from cosmic_elvis import CosmicELViS
 __author__ = "Samuel Góngora García"
 __copyright__ = "Copyright 2018"
 __credits__ = ["Samuel Góngora García"]
-__version__ = "0.1"
+__version__ = "0.1.1"
 __maintainer__ = "Samuel Góngora García"
 __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
@@ -99,10 +102,12 @@ class Check:
 
         :return:
         """
+        if not self.restart():
+            raise Exception
         if not self.split():
             raise Exception
-        if not self.clean():
-            raise Exception
+        # if not self.clean():
+        #     raise Exception
         if not self.sextractor():
             raise Exception
         if not self.scamp():
@@ -248,8 +253,20 @@ class Check:
 
         :return:
         """
+        self.logger.info('Removes old catalogue files')
+        for cat_ in listdir(self.prfs_d['fits_dir']):
+            remove('{}/{}'.format(self.prfs_d['fits_dir'], cat_))
+
+        self.logger.info('Removes old filtered catalogues')
+        for filt_ in listdir(self.prfs_d['filtered']):
+            remove('{}/{}'.format(self.prfs_d['filtered'], filt_))
+
+        self.logger.info("Removes old scamp's catalogues")
+        for scamp_ in listdir(self.prfs_d['output_cats']):
+            remove('{}/{}'.format(self.prfs_d['output_cats'], scamp_))
 
         return True
+
 
 if __name__ == '__main__':
     check_process = Check()

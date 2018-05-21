@@ -15,7 +15,7 @@ from pandas import concat, DataFrame, Series, read_csv
 from numpy import isclose, logical_and, genfromtxt, float64, sqrt
 
 from cats_management import rebase_catalogue, rewriting_catalogue
-from misc import setting_logger, extract_settings, save_data
+from misc import setting_logger, extract_settings
 from misc import all_same, compare_floats
 from regions import Create_regions
 
@@ -743,8 +743,6 @@ if __name__ == '__main__':
             while True in active_rebase:
                 active_rebase = list([job.is_alive() for job in rebase_j])
                 pass
-        elif argv[1] == '-move':
-            save_data(logger, prfs_d, 1)
         elif argv[1] == '-check':
             check(logger, prfs_d)
         elif argv[1] == '-full_cats':
