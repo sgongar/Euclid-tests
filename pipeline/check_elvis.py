@@ -69,27 +69,30 @@ class Check:
         mode = {'type': 'sextractor'}
         self.sex_confs, sex_confs_n = create_configurations(mode)
 
+        # t = timeit.Timer(lambda: self.split()).timeit()
+        # print(t)
+
         if argv[1] == '-full':
             if not self.full_pipeline():
                 raise Exception
-        if argv[1] == '-clean':
+        elif argv[1] == '-clean':
             if not self.clean():
                 raise Exception
-        # if argv[1] == '-catalog':
-        #     if not self.catalog():
-        #         raise Exception
         elif argv[1] == '-split':
             if not self.split():
                 raise Exception
         elif argv[1] == '-sextractor':
             if not self.sextractor():
                 raise Exception
-        # elif argv[1] == '-scamp':
-        #     if not self.scamp():
-        #         raise Exception
-        # elif argv[1] == '-filter':
-        #     if not self.filt():
-        #         raise Exception
+        elif argv[1] == '-scamp':
+            if not self.scamp():
+                raise Exception
+        elif argv[1] == '-filter':
+            if not self.filt():
+                raise Exception
+        elif argv[1] == '-restart':
+            if not self.restart():
+                raise Exception
 
     def full_pipeline(self):
         """
@@ -102,30 +105,19 @@ class Check:
             raise Exception
         if not self.sextractor():
             raise Exception
-        # if not self.scamp():
-        #     raise Exception
-        # if not self.filt():
-        #     raise Exception
+        if not self.scamp():
+            raise Exception
+        if not self.filt():
+            raise Exception
 
         return True
-
-    # def catalog(self):
-    #     """
-    #
-    #     :return:
-    #     """
-    #     # Opens input_catalog
-    #
-    #     # Gets simplified header
-    #     # Merges header and data
-    #     # Saves file
 
     def split(self):
         """
 
         :return:
         """
-        self.logger.debug('Creates CCD images from original quadrants')
+        self.logger.info('Creates CCD images from original quadrants')
         start_split = time()
 
         fpa_list = get_fpa_elvis()
@@ -148,7 +140,7 @@ class Check:
 
         end_split = time()
         split_time = end_split - start_split
-        self.logger.debug('Split process takes {}s'.format(split_time))
+        self.logger.info('Split process takes {}s'.format(split_time))
 
         return True
 
@@ -157,7 +149,7 @@ class Check:
 
         :return: True if everything goes alright
         """
-        self.logger.debug('Cleans CCDs images from cosmic rays')
+        self.logger.info('Cleans CCDs images from cosmic rays')
         start_clean = time()
 
         CosmicELViS(self.logger)
@@ -165,7 +157,7 @@ class Check:
         end_clean = time()
 
         clean_time = end_clean - start_clean
-        self.logger.debug('Clean process takes {}s'.format(clean_time))
+        self.logger.info('Clean process takes {}s'.format(clean_time))
 
         return True
 
@@ -189,27 +181,34 @@ class Check:
 
         return True
 
-    # def scamp(self):
-    #     """ todo - improve docstring
-    #         todo - improve return
-    #     Tip. scamp already parallelize its own process so there is no need
-    #     to implement any multiprocess.
-    #
-    #     :return:
-    #     """
-    #     mode = {'type': 'sextractor'}
-    #     confs_sex, total_confs = create_configurations(mode)
-    #
-    #     for idx_scmp, conf_scmp in enumerate(self.scamp_confs):
-    #         # todo - check if everything is alright
-    #         scmp_d, scmp_cf = scamp_f_name(idx_scmp)
-    #         for idx_sex, conf_sex in enumerate(confs_sex):
-    #             analysis_d, len_dicts = create_sextractor_dict(idx_sex,
-    #                                                            False)
-    #             if not ScampSC3(self.logger, scmp_d):
-    #                 raise Exception  # todo improve Exception
-    #
-    #     return True
+    def scamp(self):
+        """ todo - improve docstring
+            todo - improve return
+        Tip. scamp already parallelize its own process so there is no need
+        to implement any multiprocess.
+
+        :return:
+        """
+        mode = {'type': 'sextractor'}
+        confs_sex, total_confs = create_configurations(mode)
+
+        for idx_scmp, conf_scmp in enumerate(self.scamp_confs):
+            # todo - check if everything is alright
+            self.logger.info('Cleans CCDs images from cosmic rays')
+            start_scamp_process = time()
+
+            scmp_d, scmp_cf = scamp_f_name(idx_scmp)
+            for idx_sex, conf_sex in enumerate(confs_sex):
+                if not ScampELViS(self.logger, scmp_d):
+                    raise Exception  # todo improve Exception
+
+            end_scamp_process = time()
+
+            scamp_process_time = end_scamp_process - start_scamp_process
+            txt = 'Scamp single process takes {}s'.format(scamp_process_time)
+            self.logger.info(txt)
+
+        return True
 
     def filt(self):
         """ todo - improve docstring
@@ -244,6 +243,13 @@ class Check:
 
         return True
 
+    def restart(self):
+        """
+
+        :return:
+        """
+
+        return True
 
 if __name__ == '__main__':
     check_process = Check()

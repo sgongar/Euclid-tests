@@ -78,7 +78,6 @@ class SextractorELViS:
                     sex_output = '{}/{}'.format(self.prfs_d['fits_dir'],
                                                 cat_name)
 
-                    print('input {}'.format(sex_input))
                     sex_p = Process(target=self.sextractor_thread,
                                     args=(sex_input, sex_output))
                     sex_j.append(sex_p)

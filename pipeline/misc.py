@@ -473,9 +473,6 @@ def extract_settings_elvis():
     prfs_d['pm_low'] = float(confmap(cf, "Misc")['pm_low'])
     prfs_d['pm_up'] = float(confmap(cf, "Misc")['pm_up'])
     prfs_d['pm_sn'] = float(confmap(cf, "Misc")['pm_sn'])
-    pms = confmap(cf, "Misc")['pms']
-    pms = pms.replace(",", " ")
-    prfs_d['pms'] = [float(x) for x in pms.split()]
     prfs_d['r_fit'] = confmap(cf, "Misc")['r_fit']
     prfs_d['cores_number'] = confmap(cf, "Misc")['cores_number']
     if prfs_d['cores_number'] == '0':
@@ -697,7 +694,6 @@ def pm_compute(logger, merged_df, full_df):
         full_p_db = full_df[full_df['SOURCE_NUMBER'].isin([source])]
 
         for idx in full_p_db['SOURCE_NUMBER']:
-            print(idx)
             pmalpha_l.append(pmalpha.iloc[idx_merged])
             pmdelta_l.append(pmdelta.iloc[idx_merged])
             pmealpha_l.append(pmealpha.iloc[idx_merged])
@@ -1120,6 +1116,24 @@ def check_source(o_df, o_alpha, o_delta):
 
 
 def check_source_sc3(o_df, o_alpha, o_delta):
+    """
+
+    :param o_df:
+    :param o_alpha:
+    :param o_delta:
+    :return:
+    """
+    prfs_d = extract_settings_sc3()
+
+    o_df = o_df[o_df['ALPHA_J2000'] + prfs_d['tolerance'] > o_alpha]
+    o_df = o_df[o_alpha > o_df['ALPHA_J2000'] - prfs_d['tolerance']]
+    o_df = o_df[o_df['DELTA_J2000'] + prfs_d['tolerance'] > o_delta]
+    o_df = o_df[o_delta > o_df['DELTA_J2000'] - prfs_d['tolerance']]
+
+    return o_df
+
+
+def check_source_elvis(o_df, o_alpha, o_delta):
     """
 
     :param o_df:

@@ -1072,7 +1072,7 @@ def rewriting_catalogue(logger, prfs_d, cat_table, mag):
     new_cat = prfs_d['output_cats'] + '/catalogue_{}.cat'.format(mag)
     logger.debug('writing cat {}/catalogue_{}.cat'.format(prfs_d['output_cats'],
                                                           mag))
-    catalogue.writeto(new_cat, clobber=True)
+    catalogue.writeto(new_cat, overwrite=True)
 
     return True
 

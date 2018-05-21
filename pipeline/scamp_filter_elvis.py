@@ -2,12 +2,16 @@
 # -*- coding: utf-8 -*-
 
 """
+For now intermediate versions are stored in physical memory, this will not
+be longer needed in the future but in this moment could be useful for
+pipeline development reasons.
+
+
 Versions:
 - 0.1: Initial release.
 
 Todo:
     * Improve documentation
-    * Speed-up areas process
 
 *GNU Terry Pratchett*
 """
@@ -18,8 +22,8 @@ from astropy.table import Table
 from numpy import mean, median
 from pandas import concat, read_csv, Series
 
-from misc import pm_compute, extract_settings_sc3, check_source_sc3
-from misc import b_filter, create_folder, get_dither, confidence_filter
+from misc import pm_compute, extract_settings_elvis
+from misc import check_source_elvis, confidence_filter
 
 __author__ = "Samuel Góngora García"
 __copyright__ = "Copyright 2018"
@@ -40,19 +44,19 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
         :param scmp_cf:
         :param sex_d:
         """
-        print('scamp_filter')
         # Filter variables
         self.class_star_limit = 0.97
         self.proper_motion = 1.5
         self.proper_motion_dects = 1.5
 
         # Analysis variables
-        self.prfs_d = extract_settings_sc3()
+        self.prfs_d = extract_settings_elvis()
         self.logger = logger
 
         self.save = True
 
         # Filtered catalog dir
+        self.filter_dir = self.prfs_d['filtered']
         self.filt_n = 'filt_'
         self.filter_o_n = '{}/{}'.format(self.prfs_d['filtered'], self.filt_n)
 
@@ -63,14 +67,13 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
         # Saves _3.csv
         full_df = self.get_areas(full_df)
 
-        """
         # full_db = read_csv('{}_3.csv'.format(self.filter_o_n), index_col=0)
         self.slow_df, self.fast_df = self.filter_class(full_df)
         if self.save:
             self.save_message('4s')
-            self.slow_db.to_csv('{}_4s.csv'.format(self.filter_o_n))
+            self.slow_df.to_csv('{}_4s.csv'.format(self.filter_o_n))
             # self.save_message('4f')
-            self.fast_db.to_csv('{}_4f.csv'.format(self.filter_o_n))
+            self.fast_df.to_csv('{}_4f.csv'.format(self.filter_o_n))
 
         filter_j = []
         for pipeline in ['slow', 'fast']:
@@ -83,30 +86,31 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
             active_filter = list([job.is_alive() for job in filter_j])
             pass
         # Merges catalogs
-        slow_db = read_csv('{}_6s.csv'.format(self.filter_o_n), index_col=0)
-        fast_db = read_csv('{}_6f.csv'.format(self.filter_o_n), index_col=0)
+        slow_df = read_csv('{}_6s.csv'.format(self.filter_o_n), index_col=0)
+        fast_df = read_csv('{}_6f.csv'.format(self.filter_o_n), index_col=0)
 
-        full_db = concat([slow_db, fast_db])
+        full_db = concat([slow_df, fast_df])
 
-        slow_db = full_db[full_db['PM'] < self.proper_motion_dects]
+        slow_df = full_db[full_db['PM'] < self.proper_motion_dects]
         try:
-            slow_db = self.filter_detections(slow_db, 3)
+            slow = True
             if self.save:
                 self.save_message('7s')
-                slow_db.to_csv('{}_7s.csv'.format(self.filter_o_n))
+                slow_df.to_csv('{}_7s.csv'.format(self.filter_o_n))
         except ValueError:
             slow = False
 
-        fast_db = full_db[full_db['PM'] > self.proper_motion_dects]
-        fast_db = self.filter_detections(fast_db, 1)
+        fast_df = full_db[full_db['PM'] > self.proper_motion_dects]
         if self.save:
             self.save_message('7f')
-            fast_db.to_csv('{}_7f.csv'.format(self.filter_o_n))
+            fast_df.to_csv('{}_7f.csv'.format(self.filter_o_n))
 
         if slow:
-            full_db = concat([slow_db, fast_db])
+            full_db = concat([slow_df, fast_df])
         else:
-            full_db = fast_db
+            full_db = fast_df
+
+        full_db, merged_db = self.filter_detections(full_db, merged_db, 3)
 
         if self.save:
             self.save_message('8')
@@ -117,7 +121,6 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
         if self.save:
             self.save_message('9')
             full_db.to_csv('{}_9.csv'.format(self.filter_o_n))
-        """
 
     def save_message(self, order):
         """
@@ -126,7 +129,7 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
         :return:
         """
         self.logger.debug('Saves data to: ')
-        # self.logger.debug('Dir: {}'.format(self.filter_dir))
+        self.logger.debug('Dir: {}'.format(self.filter_dir))
         self.logger.debug('Name: {}_{}.csv'.format(self.filt_n, order))
 
     def get_cat(self, cat_n):
@@ -135,170 +138,15 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
         :param cat_n:
         :return: cat_file
         """
-        """
-        dither = ['1', '2', '3', '4']
-        cat_part_2 = '000000-0000000'
-        cat_times = ['20170630T011437.3Z', ]
+        cats = ['empty_cat']
 
-        for d in dither:
-            cats_final.append('{}-{}-{}__{}.cat'.format(cat_part_1, d,
-                                                        cat_part_2,
-                                                        cat_times[idx_time]))
-        """
-        cat_part_1 = 'EUC_VIS_SWL-DET-00'
+        for x_ in range(1, 7, 1):
+            for y_ in range(1, 7, 1):
+                for d_ in range(1, 5, 1):
+                    cat_name = 'CCD_x{}_y{}_d{}.cat'.format(x_, y_, d_)
+                    cats.append(cat_name)
 
-        cats_final = []
-        cats_partial = ['', '1-000000-0000000__20170630T011437.3Z_00.00_0',
-                        '1-000000-0000000__20170630T011437.3Z_00.00_10',
-                        '1-000000-0000000__20170630T011437.3Z_00.00_11',
-                        '1-000000-0000000__20170630T011437.3Z_00.00_12',
-                        '1-000000-0000000__20170630T011437.3Z_00.00_13',
-                        '1-000000-0000000__20170630T011437.3Z_00.00_14',
-                        '1-000000-0000000__20170630T011437.3Z_00.00_15',
-                        '1-000000-0000000__20170630T011437.3Z_00.00_16',
-                        '1-000000-0000000__20170630T011437.3Z_00.00_17',
-                        '1-000000-0000000__20170630T011437.3Z_00.00_18',
-                        '1-000000-0000000__20170630T011437.3Z_00.00_19',
-                        '1-000000-0000000__20170630T011437.3Z_00.00_1',
-                        '1-000000-0000000__20170630T011437.3Z_00.00_20',
-                        '1-000000-0000000__20170630T011437.3Z_00.00_21',
-                        '1-000000-0000000__20170630T011437.3Z_00.00_22',
-                        '1-000000-0000000__20170630T011437.3Z_00.00_23',
-                        '1-000000-0000000__20170630T011437.3Z_00.00_24',
-                        '1-000000-0000000__20170630T011437.3Z_00.00_25',
-                        '1-000000-0000000__20170630T011437.3Z_00.00_26',
-                        '1-000000-0000000__20170630T011437.3Z_00.00_27',
-                        '1-000000-0000000__20170630T011437.3Z_00.00_28',
-                        '1-000000-0000000__20170630T011437.3Z_00.00_29',
-                        '1-000000-0000000__20170630T011437.3Z_00.00_2',
-                        '1-000000-0000000__20170630T011437.3Z_00.00_30',
-                        '1-000000-0000000__20170630T011437.3Z_00.00_31',
-                        '1-000000-0000000__20170630T011437.3Z_00.00_32',
-                        '1-000000-0000000__20170630T011437.3Z_00.00_33',
-                        '1-000000-0000000__20170630T011437.3Z_00.00_34',
-                        '1-000000-0000000__20170630T011437.3Z_00.00_35',
-                        '1-000000-0000000__20170630T011437.3Z_00.00_3',
-                        '1-000000-0000000__20170630T011437.3Z_00.00_4',
-                        '1-000000-0000000__20170630T011437.3Z_00.00_5',
-                        '1-000000-0000000__20170630T011437.3Z_00.00_6',
-                        '1-000000-0000000__20170630T011437.3Z_00.00_7',
-                        '1-000000-0000000__20170630T011437.3Z_00.00_8',
-                        '1-000000-0000000__20170630T011437.3Z_00.00_9',
-                        '2-000000-0000000__20170630T011642.0Z_00.00_0',
-                        '2-000000-0000000__20170630T011642.0Z_00.00_10',
-                        '2-000000-0000000__20170630T011642.0Z_00.00_11',
-                        '2-000000-0000000__20170630T011642.0Z_00.00_12',
-                        '2-000000-0000000__20170630T011642.0Z_00.00_13',
-                        '2-000000-0000000__20170630T011642.0Z_00.00_14',
-                        '2-000000-0000000__20170630T011642.0Z_00.00_15',
-                        '2-000000-0000000__20170630T011642.0Z_00.00_16',
-                        '2-000000-0000000__20170630T011642.0Z_00.00_17',
-                        '2-000000-0000000__20170630T011642.0Z_00.00_18',
-                        '2-000000-0000000__20170630T011642.0Z_00.00_19',
-                        '2-000000-0000000__20170630T011642.0Z_00.00_1',
-                        '2-000000-0000000__20170630T011642.0Z_00.00_20',
-                        '2-000000-0000000__20170630T011642.0Z_00.00_21',
-                        '2-000000-0000000__20170630T011642.0Z_00.00_22',
-                        '2-000000-0000000__20170630T011642.0Z_00.00_23',
-                        '2-000000-0000000__20170630T011642.0Z_00.00_24',
-                        '2-000000-0000000__20170630T011642.0Z_00.00_25',
-                        '2-000000-0000000__20170630T011642.0Z_00.00_26',
-                        '2-000000-0000000__20170630T011642.0Z_00.00_27',
-                        '2-000000-0000000__20170630T011642.0Z_00.00_28',
-                        '2-000000-0000000__20170630T011642.0Z_00.00_29',
-                        '2-000000-0000000__20170630T011642.0Z_00.00_2',
-                        '2-000000-0000000__20170630T011642.0Z_00.00_30',
-                        '2-000000-0000000__20170630T011642.0Z_00.00_31',
-                        '2-000000-0000000__20170630T011642.0Z_00.00_32',
-                        '2-000000-0000000__20170630T011642.0Z_00.00_33',
-                        '2-000000-0000000__20170630T011642.0Z_00.00_34',
-                        '2-000000-0000000__20170630T011642.0Z_00.00_35',
-                        '2-000000-0000000__20170630T011642.0Z_00.00_3',
-                        '2-000000-0000000__20170630T011642.0Z_00.00_4',
-                        '2-000000-0000000__20170630T011642.0Z_00.00_5',
-                        '2-000000-0000000__20170630T011642.0Z_00.00_6',
-                        '2-000000-0000000__20170630T011642.0Z_00.00_7',
-                        '2-000000-0000000__20170630T011642.0Z_00.00_8',
-                        '2-000000-0000000__20170630T011642.0Z_00.00_9',
-                        '3-000000-0000000__20170630T011848.6Z_00.00_0',
-                        '3-000000-0000000__20170630T011848.6Z_00.00_10',
-                        '3-000000-0000000__20170630T011848.6Z_00.00_11',
-                        '3-000000-0000000__20170630T011848.6Z_00.00_12',
-                        '3-000000-0000000__20170630T011848.6Z_00.00_13',
-                        '3-000000-0000000__20170630T011848.6Z_00.00_14',
-                        '3-000000-0000000__20170630T011848.6Z_00.00_15',
-                        '3-000000-0000000__20170630T011848.6Z_00.00_16',
-                        '3-000000-0000000__20170630T011848.6Z_00.00_17',
-                        '3-000000-0000000__20170630T011848.6Z_00.00_18',
-                        '3-000000-0000000__20170630T011848.6Z_00.00_19',
-                        '3-000000-0000000__20170630T011848.6Z_00.00_1',
-                        '3-000000-0000000__20170630T011848.6Z_00.00_20',
-                        '3-000000-0000000__20170630T011848.6Z_00.00_21',
-                        '3-000000-0000000__20170630T011848.6Z_00.00_22',
-                        '3-000000-0000000__20170630T011848.6Z_00.00_23',
-                        '3-000000-0000000__20170630T011848.6Z_00.00_24',
-                        '3-000000-0000000__20170630T011848.6Z_00.00_25',
-                        '3-000000-0000000__20170630T011848.6Z_00.00_26',
-                        '3-000000-0000000__20170630T011848.6Z_00.00_27',
-                        '3-000000-0000000__20170630T011848.6Z_00.00_28',
-                        '3-000000-0000000__20170630T011848.6Z_00.00_29',
-                        '3-000000-0000000__20170630T011848.6Z_00.00_2',
-                        '3-000000-0000000__20170630T011848.6Z_00.00_30',
-                        '3-000000-0000000__20170630T011848.6Z_00.00_31',
-                        '3-000000-0000000__20170630T011848.6Z_00.00_32',
-                        '3-000000-0000000__20170630T011848.6Z_00.00_33',
-                        '3-000000-0000000__20170630T011848.6Z_00.00_34',
-                        '3-000000-0000000__20170630T011848.6Z_00.00_35',
-                        '3-000000-0000000__20170630T011848.6Z_00.00_3',
-                        '3-000000-0000000__20170630T011848.6Z_00.00_4',
-                        '3-000000-0000000__20170630T011848.6Z_00.00_5',
-                        '3-000000-0000000__20170630T011848.6Z_00.00_6',
-                        '3-000000-0000000__20170630T011848.6Z_00.00_7',
-                        '3-000000-0000000__20170630T011848.6Z_00.00_8',
-                        '3-000000-0000000__20170630T011848.6Z_00.00_9',
-                        '4-000000-0000000__20170630T012050.1Z_00.00_0',
-                        '4-000000-0000000__20170630T012050.1Z_00.00_10',
-                        '4-000000-0000000__20170630T012050.1Z_00.00_11',
-                        '4-000000-0000000__20170630T012050.1Z_00.00_12',
-                        '4-000000-0000000__20170630T012050.1Z_00.00_13',
-                        '4-000000-0000000__20170630T012050.1Z_00.00_14',
-                        '4-000000-0000000__20170630T012050.1Z_00.00_15',
-                        '4-000000-0000000__20170630T012050.1Z_00.00_16',
-                        '4-000000-0000000__20170630T012050.1Z_00.00_17',
-                        '4-000000-0000000__20170630T012050.1Z_00.00_18',
-                        '4-000000-0000000__20170630T012050.1Z_00.00_19',
-                        '4-000000-0000000__20170630T012050.1Z_00.00_1',
-                        '4-000000-0000000__20170630T012050.1Z_00.00_20',
-                        '4-000000-0000000__20170630T012050.1Z_00.00_21',
-                        '4-000000-0000000__20170630T012050.1Z_00.00_22',
-                        '4-000000-0000000__20170630T012050.1Z_00.00_23',
-                        '4-000000-0000000__20170630T012050.1Z_00.00_24',
-                        '4-000000-0000000__20170630T012050.1Z_00.00_25',
-                        '4-000000-0000000__20170630T012050.1Z_00.00_26',
-                        '4-000000-0000000__20170630T012050.1Z_00.00_27',
-                        '4-000000-0000000__20170630T012050.1Z_00.00_28',
-                        '4-000000-0000000__20170630T012050.1Z_00.00_29',
-                        '4-000000-0000000__20170630T012050.1Z_00.00_2',
-                        '4-000000-0000000__20170630T012050.1Z_00.00_30',
-                        '4-000000-0000000__20170630T012050.1Z_00.00_31',
-                        '4-000000-0000000__20170630T012050.1Z_00.00_32',
-                        '4-000000-0000000__20170630T012050.1Z_00.00_33',
-                        '4-000000-0000000__20170630T012050.1Z_00.00_34',
-                        '4-000000-0000000__20170630T012050.1Z_00.00_35',
-                        '4-000000-0000000__20170630T012050.1Z_00.00_3',
-                        '4-000000-0000000__20170630T012050.1Z_00.00_4',
-                        '4-000000-0000000__20170630T012050.1Z_00.00_5',
-                        '4-000000-0000000__20170630T012050.1Z_00.00_6',
-                        '4-000000-0000000__20170630T012050.1Z_00.00_7',
-                        '4-000000-0000000__20170630T012050.1Z_00.00_8',
-                        '4-000000-0000000__20170630T012050.1Z_00.00_9']
-
-        for cat_ in cats_partial:
-            cats_final.append('{}{}.cat'.format(cat_part_1, cat_))
-
-        cat_file = cats_final[cat_n]
-
-        return cat_file
+        return cats[cat_n]
 
     def scamp_filter(self):
         """
@@ -306,8 +154,6 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
         :return:
         """
         self.logger.info("Filtering scamp's output")
-
-        # create_folder(self.logger, self.filter_dir)
 
         # Getting full catalog
         # Full catalog name
@@ -330,7 +176,7 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
 
         # Just for logging reasons
         self.logger.debug('Opens merged catalog')
-        self.logger.debug('Dir: {}'.format(self.prfs_d['references']))
+        self.logger.debug('Dir: {}'.format(self.prfs_d['output_cats']))
         self.logger.debug('Name: merged_1.cat')  # Be careful, hardcoded!
         merged_cat = fits.open(mrgd_n)  # Opens merged catalog
         self.logger.debug('Converts merged Astropy catalog to Pandas format')
@@ -343,6 +189,7 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
         self.logger.debug('Removes 0 catalog detections')
         full_db = full_db.loc[~full_db['CATALOG_NUMBER'].isin([0])]
 
+        # Filter by 3 or more detections
         full_db, merged_db = self.filter_detections(full_db, merged_db, 3)
 
         if self.save:
@@ -359,35 +206,6 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
         :param full_db:
         :return: full_db
         """
-        """
-        # Computing pm
-        sub_list_size = len(unique_sources) / self.prfs_d['cores_number']
-
-        sub_list_l = []
-        for idx_sub_list in range(0, self.prfs_d['cores_number'], 1):
-            if idx_sub_list != (self.prfs_d['cores_number'] - 1):
-                idx_down = sub_list_size * idx_sub_list
-                idx_up = sub_list_size * (idx_sub_list + 1)
-                sub_list_l.append(unique_sources[idx_down:idx_up])
-            else:
-                idx_down = sub_list_size * idx_sub_list
-                sub_list_l.append(unique_sources[idx_down:])
-
-        areas_j = []
-        for idx_l in range(0, self.prfs_d['cores_number'], 1):
-            areas_p = Process(target=self.get_areas_thread,
-                              args=(dict_keys, stats_keys, extra_keys, keys_l,
-                                    sub_list_l[idx_l], filter_cat, idx_l,
-                                    cat_d,))
-            areas_j.append(areas_p)
-            areas_p.start()
-
-        active_areas = list([job.is_alive() for job in areas_j])
-        while True in active_areas:
-            active_areas = list([job.is_alive() for job in areas_j])
-            pass
-        """
-
         self.logger.debug('Computes proper motion')
         full_db = pm_compute(self.logger, merged_db, full_db)
         if self.save:
@@ -416,30 +234,30 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
 
         :return:
         """
-        slow_db = self.slow_db[self.slow_db['PM'] < self.proper_motion]
+        slow_df = self.slow_df[self.slow_df['PM'] < self.proper_motion]
         if self.save:
             self.save_message('5s')
-            slow_db.to_csv('{}_5s.csv'.format(self.filter_o_n))
+            slow_df.to_csv('{}_5s.csv'.format(self.filter_o_n))
 
-        slow_db = self.filter_b(slow_db)
-        slow_db = slow_db[slow_db['A_IMAGE'] < 2]
+        slow_df = self.filter_b(slow_df)
+        slow_df = slow_df[slow_df['A_IMAGE'] < 2]
         if self.save:
             self.save_message('6s')
-            slow_db.to_csv('{}_6s.csv'.format(self.filter_o_n))
+            slow_df.to_csv('{}_6s.csv'.format(self.filter_o_n))
 
     def fast_pipeline(self):
         """
 
         :return:
         """
-        fast_db = self.fast_db[self.fast_db['PM'] > self.proper_motion]
+        fast_df = self.fast_df[self.fast_df['PM'] > self.proper_motion]
         if self.save:
             self.save_message('5f')
-            fast_db.to_csv('{}_5f.csv'.format(self.filter_o_n))
-        fast_db = self.filter_coherence(fast_db)
+            fast_df.to_csv('{}_5f.csv'.format(self.filter_o_n))
+        fast_df = self.filter_coherence(fast_df)
         if self.save:
             self.save_message('6f')
-            fast_db.to_csv('{}_6f.csv'.format(self.filter_o_n))
+            fast_df.to_csv('{}_6f.csv'.format(self.filter_o_n))
 
     def get_areas(self, full_df):
         """
@@ -512,7 +330,7 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
                                                 cat_file))
 
             ccd_df = Table(cat_data[2].data)
-            self.logger.debug('CCD catalog {} to Pandas'.format(cat_n))
+            # self.logger.debug('CCD catalog {} to Pandas'.format(cat_n))
             cat_d[cat_n] = ccd_df.to_pandas()
 
         areas_j = []
@@ -536,6 +354,7 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
                             index_col=0)
             csv_list.append(csv_)
 
+        print(full_df.columns)
         full_df = concat(csv_list)
 
         if self.save:
@@ -568,6 +387,7 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
         for key_ in stats_keys:
             tmp_d[key_] = []
 
+        cat_n_l = []
         # Loops over unique sources of filtered file
         for idx, source_ in enumerate(unique_sources_thread):
             source_d = {'A_IMAGE': [], 'B_IMAGE': [], 'ERRA_IMAGE': [],
@@ -580,9 +400,10 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
                 o_alpha = row.ALPHA_J2000
                 o_delta = row.DELTA_J2000
                 cat_n = row.CATALOG_NUMBER
+                cat_n_l.append(cat_n)
                 # self.logger.debug('opening CCD catalog {}'.format(cat_file))
 
-                cat_df = check_source_sc3(cat_d[cat_n], o_alpha, o_delta)
+                cat_df = check_source_elvis(cat_d[cat_n], o_alpha, o_delta)
                 if cat_df.empty:
                     # FIXME problemas entre sextractor y scamp
                     # Como el objeto no esta en las imagenes originales de
@@ -718,17 +539,17 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
             full_db.to_csv('{}_3_{}.csv'.format(self.filter_o_n, idx_l),
                            columns=dict_keys)
 
-    def filter_class(self, full_db):
+    def filter_class(self, full_df):
         """
 
         :param full_db:
         :return:
         """
         self.logger.debug('Runs class star filter')
-        slow_db = full_db[full_db['MEAN_CLASS_STAR'] > self.class_star_limit]
-        fast_db = full_db[full_db['MEAN_CLASS_STAR'] < self.class_star_limit]
+        slow_df = full_df[full_df['MEAN_CLASS_STAR'] > self.class_star_limit]
+        fast_df = full_df[full_df['MEAN_CLASS_STAR'] < self.class_star_limit]
 
-        return slow_db, fast_db
+        return slow_df, fast_df
 
     def filter_b(self, full_db):
         """
