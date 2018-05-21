@@ -3,12 +3,13 @@
 
 """ Creates a catalog from sextracted catalogs from single CCDs images.
 
-output -> 1. Catalog is good enough.
+output -> 1. Catalog is good enough. (?)
 
 Versions:
 - 0.1: Initial release. Split from check.py
        Recreated for ELViS analysis pipeline.
 - 0.2: Single input catalogue and multiple input catalogues added.
+- 0.3: Check method for catalogue creation added.
 
 Information:
 - cat: -> hdu_list catalogue
@@ -19,6 +20,7 @@ Todo:
     * Get out columns definition. Too long for a single function.
     * Creates units tests.
     * Improve variable nomenclature.
+    * Explanations are still not so easy to understand.
 
 *GNU Terry Pratchett*
 
@@ -100,6 +102,8 @@ def check_cats(prfs_d, fpa_cat):
             else:
                 pass
 
+    # This final number represents how many sources of created catalogue are
+    # present in CCDs catalogues
     print('Final sources number {}'.format(total_sources))
 
 
