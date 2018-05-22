@@ -1,13 +1,12 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
-
 """
 
 Versions:
 - 0.1: Initial release. Split from check.py
        Recreated for ELViS analysis pipeline.
 - 0.1.1: Restart method added. Now can removes old data before a new analysis.
+- 0.1.2: Changes times from CCDs files. Function 'change_times'.
 
 Todo:
     * Unit tests.
@@ -29,12 +28,13 @@ from misc import create_sextractor_dict, create_scamp_dict
 from sextractor_aux_elvis import SextractorELViS
 from scamp_aux_elvis import ScampELViS
 from scamp_filter_elvis import ScampFilterELViS
+from times_elvis import change_times
 from cosmic_elvis import CosmicELViS
 
 __author__ = "Samuel Góngora García"
 __copyright__ = "Copyright 2018"
 __credits__ = ["Samuel Góngora García"]
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 __maintainer__ = "Samuel Góngora García"
 __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
@@ -105,6 +105,8 @@ class Check:
         if not self.restart():
             raise Exception
         if not self.split():
+            raise Exception
+        if not change_times():
             raise Exception
         # if not self.clean():
         #     raise Exception
