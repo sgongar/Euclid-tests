@@ -15,13 +15,14 @@ Todo:
     * Improve log messages
     * Improve usability
 """
-
-from astropy.io import fits
-from astropy.wcs import WCS
 from multiprocessing import cpu_count
 from ConfigParser import ConfigParser
 from os import listdir
 from platform import platform
+from logging import getLogger, config
+
+from astropy.io import fits
+from astropy.wcs import WCS
 
 from errors import BadSettings
 
@@ -32,6 +33,31 @@ __version__ = "0.1"
 __maintainer__ = "Samuel Góngora García"
 __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
+
+
+def setting_logger(prfs_d, logger_name):
+    """ sets-up a logger object ready to be used
+
+    TODO improve logger definition
+
+    @return logger:
+    """
+    config.fileConfig(prfs_d['logger_config'])
+
+    # TODO implement logger level setting
+    """
+    if argv[4] == '-INFO':
+        logger = getLogger("main_process").setLevel(INFO)
+    elif argv[4] == '-DEBUG':
+        logger = getLogger("main_process").setLevel(DEBUG)
+    else:
+        raise Exception
+    """
+    logger = getLogger(logger_name)
+    logger.info("Pipeline started")
+    # logger.FileHandler('spam.log')
+
+    return logger
 
 
 def get_cats(dither):
@@ -53,6 +79,33 @@ def get_cats(dither):
             cats_out.append(file_)
 
     return cats_out
+
+
+def get_cat(ccd):
+    """ returns catalog from ccd name
+
+    :param ccd:
+    :return:
+    """
+    cats = []
+    idx = 0
+
+    for x_ in range(1, 7, 1):
+        for y_ in range(1, 7, 1):
+            for d_ in range(1, 5, 1):
+                cat_name = 'x{}_y{}'.format(x_, y_, d_)
+                cats.append([cat_name, d_, idx])
+
+                idx += 1
+
+    ccd_position = ccd[4:9]
+    dither_n = ccd[11:12]
+
+    for cat_ in cats:
+        if str(ccd_position) == cat_[0] and int(dither_n) == cat_[1]:
+            cat_n = cat_[2]
+
+    return cat_n
 
 
 def get_fits_limits(fits_image):

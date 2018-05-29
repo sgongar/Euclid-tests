@@ -48,7 +48,7 @@ class ScampELViS:
 
         scmp_1 = 'scamp -c {}'.format(self.prfs_d['conf_scamp'])
         scmp_2 = ' {}/*.cat'.format(self.prfs_d['fits_dir'])
-        scmp_3 = ' -ASTREFCAT_NAME {}/cat.cat'.format(self.prfs_d['references'])
+        scmp_3 = ' -ASTREFCAT_NAME {}/stars_catalogue.cat'.format(self.prfs_d['references'])
         scmp_4 = ' -PIXSCALE_MAXERR {}'.format(self.scmp_d['pixscale_maxerr'])
         scmp_5 = ' -POSANGLE_MAXERR {}'.format(self.scmp_d['posangle_maxerr'])
         scmp_6 = ' -POSITION_MAXERR {}'.format(self.scmp_d['position_maxerr'])

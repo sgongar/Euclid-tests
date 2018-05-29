@@ -72,9 +72,6 @@ class Check:
         mode = {'type': 'sextractor'}
         self.sex_confs, sex_confs_n = create_configurations(mode)
 
-        # t = timeit.Timer(lambda: self.split()).timeit()
-        # print(t)
-
         if argv[1] == '-full':
             if not self.full_pipeline():
                 raise Exception

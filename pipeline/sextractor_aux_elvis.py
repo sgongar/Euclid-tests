@@ -117,9 +117,9 @@ class SextractorELViS:
         s_9 = ' -DEBLEND_MINCONT {}'.format(self.analysis_d['deblend_mincount'])
         s_10 = ' -FILTER_NAME {}'.format(self.analysis_d['filter'])
 
-        cmd_3 = s_1 + s_2 + s_3 + s_4 + s_5 + s_6 + s_7 + s_8 + s_9 + s_10
+        cmd = s_1 + s_2 + s_3 + s_4 + s_5 + s_6 + s_7 + s_8 + s_9 + s_10
 
-        sextractor_p = Popen(cmd_3, shell=True)
+        sextractor_p = Popen(cmd, shell=True)
         sextractor_p.wait()
 
         return True

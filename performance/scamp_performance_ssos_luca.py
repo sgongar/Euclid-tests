@@ -118,7 +118,7 @@ def redo_stats_d():
 
 def redo_tmp_d():
     """ Creates a dictionary
-    todo - solve total problem!
+    TODO - Automatic number!
 
     :return: tmp_d
     """
