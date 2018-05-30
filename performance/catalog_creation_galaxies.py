@@ -286,7 +286,7 @@ def write_galaxies_catalog(catalogs):
     test_coadd_cat[2] = tb_hdu
     test_coadd_cat[2].header['EXTNAME'] = 'LDAC_OBJECTS'
 
-    newcat_name = '{}/galaxies_catalogue.cat'.format(prfs_dict['fits_dir'])
+    newcat_name = '{}/galaxies_catalogue.cat'.format(prfs_dict['references'])
     test_coadd_cat.writeto(newcat_name, overwrite=True)
 
 

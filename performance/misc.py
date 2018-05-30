@@ -108,6 +108,27 @@ def get_cat(ccd):
     return cat_n
 
 
+def get_fits(dither):
+    """
+
+    :return:
+    """
+    prfs_d = extract_settings_elvis()
+    fits_list = []
+
+    files = listdir('{}/'.format(prfs_d['fits_dir']))
+    for file_ in files:
+        if file_[-5:] == '.fits':
+            fits_list.append(file_)
+
+    fits_out = []
+    for file_ in fits_list:
+        if file_[-6:-5] == str(dither):
+            fits_out.append(file_)
+
+    return fits_out
+
+
 def get_fits_limits(fits_image):
     """ todo - to another new file?
 
@@ -126,8 +147,11 @@ def get_fits_limits(fits_image):
 
     below_ra, below_dec = w.all_pix2world(0, 0, 0)
 
-    limits = {'below_ra': float(above_ra), 'above_ra': float(below_ra),
-              'below_dec': float(below_dec), 'above_dec': float(above_dec)}
+    ra = [above_ra, below_ra]
+    dec = [above_dec, below_dec]
+
+    limits = {'below_ra': float(min(ra)), 'above_ra': float(max(ra)),
+              'below_dec': float(min(dec)), 'above_dec': float(max(dec))}
 
     # check position
     # sometimes some values could be higher when are tagged as "lowest"

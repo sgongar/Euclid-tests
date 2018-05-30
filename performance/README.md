@@ -2,7 +2,8 @@
 
 ### scamp_performance_ssos_luca
 
-### scamp_performance_total_luca
+### scamp_performance_total_elvis
+Obtiene los valores de A, B y demas.
 
 ### sextractor_performance_luca
 

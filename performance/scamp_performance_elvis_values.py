@@ -1,7 +1,17 @@
 # !/usr/bin/python
 # -*- coding: utf-8 -*-
 
-"""
+""" Gets
+    - 'median_a_image'
+    - 'median_erra_image'
+    - 'median_b_image'
+    - 'median_errb_image'
+    - 'median_class_star'
+    - 'ellipticity'
+    - 'median_mag_iso'
+    - 'median_magerr_iso'
+    - 'median_flux_iso'
+    from scamp's output. Saves them to different csv files.
 
 Versions:
 - 0.1
@@ -181,41 +191,41 @@ class TotalScampPerformance:
 
         :return: input_dict
         """
-        # For now we only have data for dither 1
-        input_df = {1: {}, 2: {}, 3: {}, 4: {}}
-
-        columns = ['ALPHA_J2000', 'DELTA_J2000', 'pm', 'pa',
-                   'mag', 'mag', 'mag', 'mag']
-        input_cat = read_csv('{}/SSO_Cat.txt'.format(self.prfs_d['references']),
-                             delim_whitespace=True, header=None,
-                             names=columns)
-        print('Opens SSO catalogue {}'.format('{}/SSO_Cat.txt'.format(self.prfs_d['references'])))
-        input_cat = input_cat[['ALPHA_J2000', 'DELTA_J2000', 'pm', 'mag']]
-
-        # Merge output
-        reject_l = {1: [], 2: [], 3: [], 4:[]}
-
-        for d in range(1, 2, 1):
-            cat_name = '{}/coadd_{}.cat'.format(self.prfs_d['references'], d)
-            print('Opens reference catalogue {}'.format(cat_name))
-            coadd_cat = fits.open(cat_name)
-            cat_data = Table(coadd_cat[2].data).to_pandas()
-
-            for idx_source, source_ in enumerate(cat_data['NUMBER']):
-                source_df = cat_data[cat_data['NUMBER'].isin([source_])]
-                alpha = source_df['ALPHA_J2000'].iloc[0]
-                delta = source_df['DELTA_J2000'].iloc[0]
-
-                test_df = check_source(input_cat, alpha, delta)
-
-                if test_df.empty is not True:
-                    reject_l[d].append(source_)
-
-            print('Removing SSOs from catalog')
-            input_df[d]['SSOs'] = cat_data[cat_data['NUMBER'].isin(reject_l)]
-            fixed_data = cat_data[~cat_data['NUMBER'].isin(reject_l)]
-            input_df[d]['stars'] = fixed_data[fixed_data['CLASS_STAR'] > 0.95]
-            input_df[d]['galaxies'] = fixed_data[fixed_data['CLASS_STAR'] < 0.95]
+        # # For now we only have data for dither 1
+        # input_df = {1: {}, 2: {}, 3: {}, 4: {}}
+        #
+        # columns = ['ALPHA_J2000', 'DELTA_J2000', 'pm', 'pa',
+        #            'mag', 'mag', 'mag', 'mag']
+        # input_cat = read_csv('{}/SSO_Cat.txt'.format(self.prfs_d['references']),
+        #                      delim_whitespace=True, header=None,
+        #                      names=columns)
+        # print('Opens SSO catalogue {}'.format('{}/SSO_Cat.txt'.format(self.prfs_d['references'])))
+        # input_cat = input_cat[['ALPHA_J2000', 'DELTA_J2000', 'pm', 'mag']]
+        #
+        # # Merge output
+        # reject_l = {1: [], 2: [], 3: [], 4:[]}
+        #
+        # for d in range(1, 2, 1):
+        #     cat_name = '{}/coadd_{}.cat'.format(self.prfs_d['references'], d)
+        #     print('Opens reference catalogue {}'.format(cat_name))
+        #     coadd_cat = fits.open(cat_name)
+        #     cat_data = Table(coadd_cat[2].data).to_pandas()
+        #
+        #     for idx_source, source_ in enumerate(cat_data['NUMBER']):
+        #         source_df = cat_data[cat_data['NUMBER'].isin([source_])]
+        #         alpha = source_df['ALPHA_J2000'].iloc[0]
+        #         delta = source_df['DELTA_J2000'].iloc[0]
+        #
+        #         test_df = check_source(input_cat, alpha, delta)
+        #
+        #         if test_df.empty is not True:
+        #             reject_l[d].append(source_)
+        #
+        #     print('Removing SSOs from catalog')
+        #     input_df[d]['SSOs'] = cat_data[cat_data['NUMBER'].isin(reject_l)]
+        #     fixed_data = cat_data[~cat_data['NUMBER'].isin(reject_l)]
+        #     input_df[d]['stars'] = fixed_data[fixed_data['CLASS_STAR'] > 0.95]
+        #     input_df[d]['galaxies'] = fixed_data[fixed_data['CLASS_STAR'] < 0.95]
 
         return input_df
 
