@@ -22,6 +22,8 @@ from platform import platform
 from logging import getLogger, config
 
 from astropy.io import fits
+from astropy.coordinates import SkyCoord
+from astropy.units import degree
 from astropy.wcs import WCS
 
 from errors import BadSettings
@@ -147,6 +149,11 @@ def get_fits_limits(fits_image):
 
     below_ra, below_dec = w.all_pix2world(0, 0, 0)
 
+    c = SkyCoord(ra=[above_ra, below_ra] * degree,
+                 dec=[above_dec, below_dec] * degree)
+
+    print(c)
+    print(patata)
     ra = [above_ra, below_ra]
     dec = [above_dec, below_dec]
 

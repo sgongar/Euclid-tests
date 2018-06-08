@@ -8,7 +8,8 @@ Versions:
        Recreated for ELViS analysis pipeline.
 - 0.2: Single input catalogue and multiple input catalogues added.
 - 0.3: Check method for catalogue creation added.
-- 0.4: Easiest way implemented.
+- 0.4: Easiest way implemented. Rewritten.
+- 0.5: Now can saves catalogues by dither.
 
 Information:
 - cat: -> hdu_list catalogue
@@ -35,12 +36,13 @@ from astropy.table import Table
 from numpy import median
 from pandas import concat, DataFrame, read_csv
 
+from images_management_elvis import get_borders
 from misc import get_cat, get_cats, extract_settings_elvis
 
 __author__ = "Samuel Góngora García"
 __copyright__ = "Copyright 2018"
 __credits__ = ["Samuel Góngora García"]
-__version__ = "0.4"
+__version__ = "0.5"
 __maintainer__ = "Samuel Góngora García"
 __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
@@ -213,7 +215,7 @@ def create_catalog():
     if save:
         stars_df.to_csv('stars.csv')
 
-    return cats
+    return stars_df
 
 
 def create_stars_catalog_thread(idx_l, sub_list, inputs_d, full_d):
@@ -260,84 +262,39 @@ def create_stars_catalog_thread(idx_l, sub_list, inputs_d, full_d):
         cat_df.to_csv('stars_{}.csv'.format(idx_l))
 
 
-def create_galaxies_catalog_thread(idx_l, sub_list, inputs_d, full_d):
+def write_stars_catalog():
     """
 
-    :param idx_l:
-    :param sub_list:
-    :param inputs_d:
-    :param full_d:
     :return:
     """
-    save = True
-
-    cat_d = create_empty_catalog_dict()
-    total_thread = len(sub_list)
-    stdout.write('total galaxies {} of thread {}\n'.format(total_thread,
-                                                           idx_l))
-    for idx, galaxy in enumerate(sub_list):
-        galaxies_df = inputs_d['stars']
-        source_df = galaxies_df[galaxies_df['IDX'].isin([galaxy])]
-        alpha = source_df['ra'].iloc[0]
-        delta = source_df['dec'].iloc[0]
-
-        dither_n = 0
-        source_d = create_empty_catalog_dict()
-        for dither in range(1, 5, 1):
-            o_df = check_source(full_d[dither], alpha, delta)
-            if o_df.empty is not True:
-                dither_n += 1
-                # Returns the index of the closest found source
-                index = check_distance(o_df, alpha, delta)
-                o_df = o_df.iloc[[index]]
-                for key_ in source_d.keys():
-                    source_d[key_].append(o_df[key_].iloc[0])
-
-        if len(source_d['NUMBER']) != 0:
-            for key_ in source_d.keys():
-                median_value = median(source_d[key_])
-                cat_d[key_].append(median_value)
-
-    cat_df = DataFrame(cat_d)
-    if save:
-        cat_df.to_csv('galaxies_{}.csv'.format(idx_l))
-
-
-def write_stars_catalog(catalogs):
-    """
-
-    :param catalogs:
-    :return:
-    """
-    stars_df_data = catalogs['stars']
     # Stars catalogue creation
     test_cat_name = '{}/full_coadd.cat'.format(prfs_dict['references'])
     test_coadd_cat = fits.open(test_cat_name)
 
     # Source number
     # c1 = fits.Column(name='NUMBER', format='1J', disp='I10',
-    #                  array=stars_df_data['NUMBER'])
+    #                  array=stars_df['NUMBER'])
     # Kron-like elliptical aperture magnitude
     c1 = fits.Column(name='MAG_AUTO', format='1E', unit='mag',
-                     disp='F8.4', array=stars_df_data['MAG_AUTO'])
+                     disp='F8.4', array=stars_df['MAG_AUTO'])
     # RMS error for AUTO magnitude
     c2 = fits.Column(name='MAGERR_AUTO', format='1E', unit='mag',
-                     disp='F8.4', array=stars_df_data['MAGERR_AUTO'])
+                     disp='F8.4', array=stars_df['MAGERR_AUTO'])
     # Barycenter position along world x axis
     c3 = fits.Column(name='X_WORLD', format='1D', unit='deg', disp='E18.10',
-                     array=stars_df_data['X_WORLD'])
+                     array=stars_df['X_WORLD'])
     # Barycenter position along world y axis
     c4 = fits.Column(name='Y_WORLD', format='1D', unit='deg', disp='E18.10',
-                     array=stars_df_data['Y_WORLD'])
+                     array=stars_df['Y_WORLD'])
     # World RMS position error along major axis
     c5 = fits.Column(name='ERRA_WORLD', format='1E', unit='deg',
-                     disp='G12.7', array=stars_df_data['ERRA_WORLD'])
+                     disp='G12.7', array=stars_df['ERRA_WORLD'])
     # World RMS position error along minor axis
     c6 = fits.Column(name='ERRB_WORLD', format='1E', unit='deg',
-                     disp='G12.7', array=stars_df_data['ERRB_WORLD'])
+                     disp='G12.7', array=stars_df['ERRB_WORLD'])
     # Error ellipse pos.angle(CCW / world - x)
     c7 = fits.Column(name='ERRTHETA_WORLD', format='1E', unit='deg',
-                     disp='F6.2', array=stars_df_data['ERRTHETA_WORLD'])
+                     disp='F6.2', array=stars_df['ERRTHETA_WORLD'])
 
     col_defs = fits.ColDefs([c1, c2, c3, c4, c5, c6, c7])
 
@@ -350,55 +307,8 @@ def write_stars_catalog(catalogs):
     test_coadd_cat.writeto(newcat_name, overwrite=True)
 
 
-# def write_galaxies_catalog(catalogs):
-#     """
-#
-#     :param catalogs:
-#     :return:
-#     """
-#     stars_df_data = catalogs['galaxies']
-#     # Galaxies catalogue creation
-#     test_cat_name = '{}/full_coadd.cat'.format(prfs_dict['references'])
-#     test_coadd_cat = fits.open(test_cat_name)
-#
-#     # Source number
-#     # c1 = fits.Column(name='NUMBER', format='1J', disp='I10',
-#     #                  array=stars_df_data['NUMBER'])
-#     # Kron-like elliptical aperture magnitude
-#     c1 = fits.Column(name='MAG_AUTO', format='1E', unit='mag',
-#                      disp='F8.4', array=stars_df_data['MAG_AUTO'])
-#     # RMS error for AUTO magnitude
-#     c2 = fits.Column(name='MAGERR_AUTO', format='1E', unit='mag',
-#                      disp='F8.4', array=stars_df_data['MAGERR_AUTO'])
-#     # Barycenter position along world x axis
-#     c3 = fits.Column(name='X_WORLD', format='1D', unit='deg', disp='E18.10',
-#                      array=stars_df_data['X_WORLD'])
-#     # Barycenter position along world y axis
-#     c4 = fits.Column(name='Y_WORLD', format='1D', unit='deg', disp='E18.10',
-#                      array=stars_df_data['Y_WORLD'])
-#     # World RMS position error along major axis
-#     c5 = fits.Column(name='ERRA_WORLD', format='1E', unit='deg',
-#                      disp='G12.7', array=stars_df_data['ERRA_WORLD'])
-#     # World RMS position error along minor axis
-#     c6 = fits.Column(name='ERRB_WORLD', format='1E', unit='deg',
-#                      disp='G12.7', array=stars_df_data['ERRB_WORLD'])
-#     # Error ellipse pos.angle(CCW / world - x)
-#     c7 = fits.Column(name='ERRTHETA_WORLD', format='1E', unit='deg',
-#                      disp='F6.2', array=stars_df_data['ERRTHETA_WORLD'])
-#
-#     col_defs = fits.ColDefs([c1, c2, c3, c4, c5, c6, c7])
-#
-#     tb_hdu = fits.BinTableHDU.from_columns(col_defs)
-#
-#     test_coadd_cat[2] = tb_hdu
-#     test_coadd_cat[2].header['EXTNAME'] = 'LDAC_OBJECTS'
-#
-#     newcat_name = '{}/galaxies_catalogue.cat'.format(prfs_dict['fits_dir'])
-#     test_coadd_cat.writeto(newcat_name, overwrite=True)
-
-
 if __name__ == "__main__":
     prfs_dict = extract_settings_elvis()
 
-    cats = create_catalog()
-    write_stars_catalog(cats)
+    stars_df = create_catalog()
+    write_stars_catalog()

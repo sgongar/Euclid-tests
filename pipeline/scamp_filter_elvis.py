@@ -354,7 +354,6 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
                             index_col=0)
             csv_list.append(csv_)
 
-        print(full_df.columns)
         full_df = concat(csv_list)
 
         if self.save:
@@ -394,6 +393,12 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
                         'ERRB_IMAGE': [], 'CLASS_STAR': [],
                         'FLUX_ISO': [], 'FLUXERR_ISO': [], 'FLUX_RADIUS': [],
                         'MAG_ISO': [], 'MAGERR_ISO': [], 'ELLIPTICITY': []}
+            for key_ in keys_l:
+                source_d[key_] = []
+
+            for key_ in extra_keys:
+                source_d[key_] = []
+
             o_df = filter_cat[filter_cat['SOURCE_NUMBER'].isin([source_])]
             length_source = o_df['SOURCE_NUMBER'].size
             right_source = 0
@@ -419,10 +424,11 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
                 else:
                     right_source += 1
                     # print('cat not empty')
+
                     for idx_k, key_ in enumerate(keys_l):
-                        tmp_d[key_].append(row[idx_k + 1])
+                        source_d[key_].append(row[idx_k + 1])
                     for idx_k, key_ in enumerate(extra_keys):
-                        tmp_d[key_].append(cat_df[key_].iloc[0])
+                        source_d[key_].append(cat_df[key_].iloc[0])
 
                     source_d['A_IMAGE'].append(cat_df['A_IMAGE'].iloc[0])
                     source_d['B_IMAGE'].append(cat_df['B_IMAGE'].iloc[0])
@@ -435,76 +441,6 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
                     source_d['MAG_ISO'].append(cat_df['MAG_ISO'].iloc[0])
                     source_d['MAGERR_ISO'].append(cat_df['MAGERR_ISO'].iloc[0])
                     source_d['ELLIPTICITY'].append(cat_df['ELLIPTICITY'].iloc[0])
-
-            # if 'nan' in source_d['A_IMAGE']:
-            #     mean_a_image = 'nan'
-            #     median_a_image = 'nan'
-            # else:
-            #     mean_a_image = mean(source_d['A_IMAGE'])
-            #     median_a_image = median(source_d['A_IMAGE'])
-            #
-            # if 'nan' in source_d['B_IMAGE']:
-            #     mean_b_image = 'nan'
-            #     median_b_image = 'nan'
-            # else:
-            #     mean_b_image = mean(source_d['B_IMAGE'])
-            #     median_b_image = median(source_d['B_IMAGE'])
-            #
-            # if 'nan' in source_d['ERRA_IMAGE']:
-            #     mean_erra_image = 'nan'
-            #     median_erra_image = 'nan'
-            # else:
-            #     mean_erra_image = mean(source_d['ERRA_IMAGE'])
-            #     median_erra_image = median(source_d['ERRA_IMAGE'])
-            #
-            # if 'nan' in source_d['ERRB_IMAGE']:
-            #     mean_errb_image = 'nan'
-            #     median_errb_image = 'nan'
-            # else:
-            #     mean_errb_image = mean(source_d['ERRB_IMAGE'])
-            #     median_errb_image = median(source_d['ERRB_IMAGE'])
-            #
-            # if 'nan' in source_d['CLASS_STAR']:
-            #     mean_class_star = 'nan'
-            #     median_class_star = 'nan'
-            # else:
-            #     mean_class_star = mean(source_d['CLASS_STAR'])
-            #     median_class_star = median(source_d['CLASS_STAR'])
-            #
-            # if 'nan' in source_d['FLUX_ISO']:
-            #     mean_flux_iso = 'nan'
-            #     median_flux_iso = 'nan'
-            # else:
-            #     mean_flux_iso = mean(source_d['FLUX_ISO'])
-            #     median_flux_iso = median(source_d['FLUX_ISO'])
-            #
-            # if 'nan' in source_d['FLUXERR_ISO']:
-            #     mean_fluxerr_iso = 'nan'
-            #     median_fluxerr_iso = 'nan'
-            # else:
-            #     mean_fluxerr_iso = mean(source_d['FLUXERR_ISO'])
-            #     median_fluxerr_iso = median(source_d['FLUXERR_ISO'])
-            #
-            # if 'nan' in source_d['MAG_ISO']:
-            #     mean_mag_iso = 'nan'
-            #     median_mag_iso = 'nan'
-            # else:
-            #     mean_mag_iso = mean(source_d['MAG_ISO'])
-            #     median_mag_iso = median(source_d['MAG_ISO'])
-            #
-            # if 'nan' in source_d['MAGERR_ISO']:
-            #     mean_magerr_iso = 'nan'
-            #     median_magerr_iso = 'nan'
-            # else:
-            #     mean_magerr_iso = mean(source_d['MAGERR_ISO'])
-            #     median_magerr_iso = median(source_d['MAGERR_ISO'])
-            #
-            # if 'nan' in source_d['ELLIPTICITY']:
-            #     mean_ellipticity = 'nan'
-            #     median_ellipticiy = 'nan'
-            # else:
-            #     mean_ellipticity = mean(source_d['ELLIPTICITY'])
-            #     median_ellipticiy = median(source_d['ELLIPTICITY'])
 
             if length_source == right_source:
                 mean_a_image = mean(source_d['A_IMAGE'])
@@ -539,6 +475,45 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
 
                 # Saves mean and median values from sources
                 for i_stats in range(0, len(o_df['SOURCE_NUMBER']), 1):
+                    tmp_d['SOURCE_NUMBER'].append(source_d['SOURCE_NUMBER'][i_stats])
+                    tmp_d['CATALOG_NUMBER'].append(source_d['CATALOG_NUMBER'][i_stats])
+                    tmp_d['ASTR_INSTRUM'].append(source_d['ASTR_INSTRUM'][i_stats])
+                    tmp_d['PHOT_INSTRUM'].append(source_d['PHOT_INSTRUM'][i_stats])
+                    tmp_d['X_IMAGE'].append(source_d['X_IMAGE'][i_stats])
+                    tmp_d['Y_IMAGE'].append(source_d['Y_IMAGE'][i_stats])
+                    tmp_d['ERRA_IMAGE'].append(source_d['ERRA_IMAGE'][i_stats])
+                    tmp_d['ERRB_IMAGE'].append(source_d['ERRB_IMAGE'][i_stats])
+                    tmp_d['ERRTHETA_IMAGE'].append(source_d['ERRTHETA_IMAGE'][i_stats])
+                    tmp_d['ALPHA_J2000'].append(source_d['ALPHA_J2000'][i_stats])
+                    tmp_d['DELTA_J2000'].append(source_d['DELTA_J2000'][i_stats])
+                    tmp_d['ERRA_WORLD'].append(source_d['ERRA_WORLD'][i_stats])
+                    tmp_d['ERRB_WORLD'].append(source_d['ERRB_WORLD'][i_stats])
+                    tmp_d['ERRTHETA_WORLD'].append(source_d['ERRTHETA_WORLD'][i_stats])
+                    tmp_d['EPOCH'].append(source_d['EPOCH'][i_stats])
+                    tmp_d['MAG'].append(source_d['MAG'][i_stats])
+                    tmp_d['MAGERR'].append(source_d['MAGERR'][i_stats])
+                    tmp_d['FLAGS_EXTRACTION'].append(source_d['FLAGS_EXTRACTION'][i_stats])
+                    tmp_d['FLAGS_SCAMP'].append(source_d['FLAGS_SCAMP'][i_stats])
+                    tmp_d['FLAGS_IMA'].append(source_d['FLAGS_IMA'][i_stats])
+                    tmp_d['PM'].append(source_d['PM'][i_stats])
+                    tmp_d['PMERR'].append(source_d['PMERR'][i_stats])
+                    tmp_d['PMALPHA'].append(source_d['PMALPHA'][i_stats])
+                    tmp_d['PMDELTA'].append(source_d['PMDELTA'][i_stats])
+                    tmp_d['PMALPHAERR'].append(source_d['PMALPHAERR'][i_stats])
+                    tmp_d['PMDELTAERR'].append(source_d['PMDELTAERR'][i_stats])
+                    tmp_d['A_IMAGE'].append(source_d['A_IMAGE'][i_stats])
+                    tmp_d['B_IMAGE'].append(source_d['B_IMAGE'][i_stats])
+                    tmp_d['THETA_IMAGE'].append(source_d['THETA_IMAGE'][i_stats])
+                    tmp_d['ISOAREA_IMAGE'].append(source_d['ISOAREA_IMAGE'][i_stats])
+                    tmp_d['FWHM_IMAGE'].append(source_d['FWHM_IMAGE'][i_stats])
+                    tmp_d['FLUX_ISO'].append(source_d['FLUX_ISO'][i_stats])
+                    tmp_d['FLUXERR_ISO'].append(source_d['FLUXERR_ISO'][i_stats])
+                    tmp_d['FLUX_RADIUS'].append(source_d['FLUX_RADIUS'][i_stats])
+                    tmp_d['MAG_ISO'].append(source_d['MAG_ISO'][i_stats])
+                    tmp_d['MAGERR_ISO'].append(source_d['MAGERR_ISO'][i_stats])
+                    tmp_d['ELONGATION'].append(source_d['ELONGATION'][i_stats])
+                    tmp_d['ELLIPTICITY'].append(source_d['ELLIPTICITY'][i_stats])
+                    tmp_d['CLASS_STAR'].append(source_d['CLASS_STAR'][i_stats])
                     tmp_d['MEDIAN_A_IMAGE'].append(median_a_image)
                     tmp_d['MEDIAN_B_IMAGE'].append(median_b_image)
                     tmp_d['MEDIAN_ERRA_IMAGE'].append(median_erra_image)
@@ -561,13 +536,14 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
                     tmp_d['MEAN_MAGERR_ISO'].append(mean_magerr_iso)
                     tmp_d['MEAN_ELLIPTICITY'].append(mean_ellipticity)
             else:
+                # Wrong source
                 pass
 
         series_l = []
         series_d = {}
         for key_ in tmp_d.keys():
             series_d[key_] = Series(tmp_d[key_], name=key_)
-            print('idx {} - size {}'.format(idx_l, len(series_d[key_])))
+            # print('idx {} - size {}'.format(idx_l, len(series_d[key_])))
             series_l.append(series_d[key_])
 
         full_db = concat(series_l, axis=1)
@@ -731,7 +707,7 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
             else:
                 rejected.append(source_)
 
-        full_db = full_db[full_db['SOURCE_NUMBER'].isin(accepted)]
+        # full_db = full_db[full_db['SOURCE_NUMBER'].isin(accepted)]
 
         if self.save:
             self.save_message('6s_{}'.format(idx_l))

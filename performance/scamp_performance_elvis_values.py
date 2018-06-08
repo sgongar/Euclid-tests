@@ -126,20 +126,21 @@ def create_output_dicts():
     return output_d
 
 
-def check_source(o_df, i_alpha, i_delta):
+def check_source(o_df, i_alpha, i_delta, keys):
     """
 
     :param o_df:
     :param i_alpha:
     :param i_delta:
+    :param keys:
     :return:
     """
     prfs_d = extract_settings_elvis()
 
-    o_df = o_df[o_df['ALPHA_J2000'] + prfs_d['tolerance'] > i_alpha]
-    o_df = o_df[i_alpha > o_df['ALPHA_J2000'] - prfs_d['tolerance']]
-    o_df = o_df[o_df['DELTA_J2000'] + prfs_d['tolerance'] > i_delta]
-    o_df = o_df[i_delta > o_df['DELTA_J2000'] - prfs_d['tolerance']]
+    o_df = o_df[o_df[keys[0]] + prfs_d['tolerance'] > i_alpha]
+    o_df = o_df[i_alpha > o_df[keys[0]] - prfs_d['tolerance']]
+    o_df = o_df[o_df[keys[1]] + prfs_d['tolerance'] > i_delta]
+    o_df = o_df[i_delta > o_df[keys[1]] - prfs_d['tolerance']]
 
     return o_df
 
@@ -164,13 +165,12 @@ class TotalScampPerformance:
         input_df = self.gets_data()  # Gets data from catalogs
         self.splits_data(filt_cat, input_df)  # Splits due type
 
-        print(self.data_d.keys())
-        print(type(self.data_d['ssos']))
-
+        """
         # Saves data
         for key_ in ['ssos', 'stars', 'galaxies']:
             out_df = DataFrame(self.data_d[key_])
             out_df.to_csv('{}.csv'.format(key_))
+        """
 
     def gets_filtered_catalog(self):
         """
@@ -192,40 +192,15 @@ class TotalScampPerformance:
         :return: input_dict
         """
         # # For now we only have data for dither 1
-        # input_df = {1: {}, 2: {}, 3: {}, 4: {}}
-        #
-        # columns = ['ALPHA_J2000', 'DELTA_J2000', 'pm', 'pa',
-        #            'mag', 'mag', 'mag', 'mag']
-        # input_cat = read_csv('{}/SSO_Cat.txt'.format(self.prfs_d['references']),
-        #                      delim_whitespace=True, header=None,
-        #                      names=columns)
-        # print('Opens SSO catalogue {}'.format('{}/SSO_Cat.txt'.format(self.prfs_d['references'])))
-        # input_cat = input_cat[['ALPHA_J2000', 'DELTA_J2000', 'pm', 'mag']]
-        #
-        # # Merge output
-        # reject_l = {1: [], 2: [], 3: [], 4:[]}
-        #
-        # for d in range(1, 2, 1):
-        #     cat_name = '{}/coadd_{}.cat'.format(self.prfs_d['references'], d)
-        #     print('Opens reference catalogue {}'.format(cat_name))
-        #     coadd_cat = fits.open(cat_name)
-        #     cat_data = Table(coadd_cat[2].data).to_pandas()
-        #
-        #     for idx_source, source_ in enumerate(cat_data['NUMBER']):
-        #         source_df = cat_data[cat_data['NUMBER'].isin([source_])]
-        #         alpha = source_df['ALPHA_J2000'].iloc[0]
-        #         delta = source_df['DELTA_J2000'].iloc[0]
-        #
-        #         test_df = check_source(input_cat, alpha, delta)
-        #
-        #         if test_df.empty is not True:
-        #             reject_l[d].append(source_)
-        #
-        #     print('Removing SSOs from catalog')
-        #     input_df[d]['SSOs'] = cat_data[cat_data['NUMBER'].isin(reject_l)]
-        #     fixed_data = cat_data[~cat_data['NUMBER'].isin(reject_l)]
-        #     input_df[d]['stars'] = fixed_data[fixed_data['CLASS_STAR'] > 0.95]
-        #     input_df[d]['galaxies'] = fixed_data[fixed_data['CLASS_STAR'] < 0.95]
+        input_df = {1: {}, 2: {}, 3: {}, 4: {}}
+
+        for key_ in input_df.keys():
+            ssos_cat = 'cat_clean_ssos_{}.csv'.format(key_)
+            input_df[key_]['SSOs'] = read_csv(ssos_cat, index_col=0)
+            stars_cat = 'stars.csv'
+            input_df[key_]['stars'] = read_csv(stars_cat, index_col=0)
+            galaxies_cat = 'galaxies.csv'
+            input_df[key_]['galaxies'] = read_csv(galaxies_cat, index_col=0)
 
         return input_df
 
@@ -239,56 +214,60 @@ class TotalScampPerformance:
         :param input_df:
         :return:
         """
-        # out_d = {}
-
         # Unique sources (?)
         unique_sources = list(set(filt_cat['SOURCE_NUMBER'].tolist()))
 
         print('Creating new catalogues from filtered catalogue due type')
+        print('Total sources: {}'.format(filt_cat['SOURCE_NUMBER'].size))
         for source_ in unique_sources:
             source_df = filt_cat[filt_cat['SOURCE_NUMBER'].isin([source_])]
 
             for i, row in enumerate(source_df.itertuples(), 1):
                 dither_n = get_dither(int(row.CATALOG_NUMBER))
-                if dither_n == 1:
-                    # Checks object type
-                    alpha = source_df['ALPHA_J2000'].iloc[0]
-                    delta = source_df['DELTA_J2000'].iloc[0]
-                    test_sso = check_source(input_df[dither_n]['SSOs'],
-                                            alpha, delta)
-                    test_star = check_source(input_df[dither_n]['stars'],
-                                             alpha, delta)
-                    test_galaxy = check_source(input_df[dither_n]['galaxies'],
-                                               alpha, delta)
-                    if test_sso.empty is not True:
-                        key_ = 'ssos'
-                    elif test_star.empty is not True:
-                        key_ = 'stars'
-                    elif test_galaxy.empty is not True:
-                        key_ = 'galaxies'
-                    else:
-                        key_ = 'lost'
+                # Checks object type
+                alpha = source_df['ALPHA_J2000'].iloc[0]
+                delta = source_df['DELTA_J2000'].iloc[0]
+                keys = ['ALPHA_J2000', 'DELTA_J2000']
+                test_sso = check_source(input_df[dither_n]['SSOs'],
+                                        alpha, delta, keys)
+                keys = ['X_WORLD', 'Y_WORLD']
+                test_star = check_source(input_df[dither_n]['stars'],
+                                         alpha, delta, keys)
 
-                    a_image = row.MEDIAN_A_IMAGE
-                    self.data_d[key_]['median_a_image'].append(a_image)
-                    erra_image = row.MEDIAN_ERRA_IMAGE
-                    self.data_d[key_]['median_erra_image'].append(erra_image)
-                    b_image = row.MEDIAN_B_IMAGE
-                    self.data_d[key_]['median_b_image'].append(b_image)
-                    errb_image = row.MEDIAN_ERRB_IMAGE
-                    self.data_d[key_]['median_errb_image'].append(errb_image)
-                    class_star = row.MEDIAN_CLASS_STAR
-                    self.data_d[key_]['median_class_star'].append(class_star)
-                    ellipticity = row.ELLIPTICITY
-                    self.data_d[key_]['ellipticity'].append(ellipticity)
-                    mag_iso = row.MEDIAN_MAG_ISO
-                    self.data_d[key_]['median_mag_iso'].append(mag_iso)
-                    magerr_iso = row.MEDIAN_MAGERR_ISO
-                    self.data_d[key_]['median_magerr_iso'].append(magerr_iso)
-                    flux_iso = row.MEDIAN_FLUX_ISO
-                    self.data_d[key_]['median_flux_iso'].append(flux_iso)
+                keys = ['X_WORLD', 'Y_WORLD']
+                test_galaxy = check_source(input_df[dither_n]['galaxies'],
+                                           alpha, delta, keys)
+                if test_sso.empty is not True:
+                    key_ = 'ssos'
+                elif test_star.empty is not True:
+                    key_ = 'stars'
+                elif test_galaxy.empty is not True:
+                    key_ = 'galaxies'
+                else:
+                    key_ = 'lost'
 
-        print(self.data_d)
+                a_image = row.MEDIAN_A_IMAGE
+                self.data_d[key_]['median_a_image'].append(a_image)
+                erra_image = row.MEDIAN_ERRA_IMAGE
+                self.data_d[key_]['median_erra_image'].append(erra_image)
+                b_image = row.MEDIAN_B_IMAGE
+                self.data_d[key_]['median_b_image'].append(b_image)
+                errb_image = row.MEDIAN_ERRB_IMAGE
+                self.data_d[key_]['median_errb_image'].append(errb_image)
+                class_star = row.MEDIAN_CLASS_STAR
+                self.data_d[key_]['median_class_star'].append(class_star)
+                ellipticity = row.ELLIPTICITY
+                self.data_d[key_]['ellipticity'].append(ellipticity)
+                mag_iso = row.MEDIAN_MAG_ISO
+                self.data_d[key_]['median_mag_iso'].append(mag_iso)
+                magerr_iso = row.MEDIAN_MAGERR_ISO
+                self.data_d[key_]['median_magerr_iso'].append(magerr_iso)
+                flux_iso = row.MEDIAN_FLUX_ISO
+                self.data_d[key_]['median_flux_iso'].append(flux_iso)
+
+        for type_key in self.data_d.keys():
+            data_df = DataFrame(self.data_d[type_key])
+            data_df.to_csv('cat_{}.csv'.format(type_key))
 
 
 class PlotTotalScampPerformance:
@@ -304,25 +283,47 @@ class PlotTotalScampPerformance:
                              'median_mag_iso', 'median_flux_iso']
         self.data_d = {}
 
-        self.read_data()
+        objects = ['cat_ssos', 'cat_stars', 'cat_galaxies']
+        for object_ in objects:
+            self.read_data(object_)
+
         self.plot()
 
-    def read_data(self):
-        for key_ in self.keys_to_plot:
-            self.data_d[key_] = read_csv('{}.csv'.format(key_), index_col=0)
+    def read_data(self, object_):
+        """
+
+        :param object_:
+        :return:
+        """
+        self.data_d[object_] = read_csv('{}.csv'.format(object_), index_col=0)
 
     def plot(self):
-        fig = plt.figure(figsize=(16.53, 11.69), dpi=self.dpi)
-        ax = fig.add_subplot(1, 1, 1)
+        """
 
-        # mag_iso vs. median_b_image
-        # SSOs first
+        :return:
+        """
+        for key_ in self.data_d.keys():
+            pdf_name = '{}.pdf'.format(key_)
+            data_d = self.data_d[key_]
 
-        # Stars second
+            with PdfPages(pdf_name) as pdf:
+                # MAG_ISO Galaxies
+                fig_1 = plt.figure(figsize=(16.53, 11.69), dpi=self.dpi)
+                ax_1 = fig_1.add_subplot(1, 1, 1)
+                ax_1.set_title('MAG_ISO - Galaxies')
 
-        # Galaxies third
-        pass
+                ax_1.scatter(data_d['median_b_image'],
+                             data_d['median_a_image'],
+                             label='a_image', c='b')
+
+                ax_1.legend(loc=4)
+                ax_1.grid(True)
+
+                pdf.savefig()  # saves figure
+                plt.clf()  # clear current figure
+                plt.close(fig_1)  # removes figure
 
 
 if __name__ == "__main__":
-    TotalScampPerformance()
+    # TotalScampPerformance()
+    PlotTotalScampPerformance()

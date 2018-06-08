@@ -19,6 +19,9 @@ Todo:
 """
 from math import cos, sin
 
+from astropy.units import degree
+from astropy.coordinates import SkyCoord
+from numpy import pi
 from pandas import concat, DataFrame, read_csv, Series
 
 from images_management_elvis import get_borders
@@ -31,6 +34,25 @@ __version__ = "0.1"
 __maintainer__ = "Samuel Góngora García"
 __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
+
+
+def check_source(o_df, i_alpha, i_delta, keys):
+    """
+
+    :param o_df:
+    :param i_alpha:
+    :param i_delta:
+    :param keys:
+    :return:
+    """
+    prfs_d = extract_settings_elvis()
+
+    o_df = o_df[o_df[keys[0]] + prfs_d['tolerance'] > i_alpha]
+    o_df = o_df[i_alpha > o_df[keys[0]] - prfs_d['tolerance']]
+    o_df = o_df[o_df[keys[1]] + prfs_d['tolerance'] > i_delta]
+    o_df = o_df[i_delta > o_df[keys[1]] - prfs_d['tolerance']]
+
+    return o_df
 
 
 def create_empty_catalog_dict():
@@ -82,10 +104,6 @@ def propagate_dithers():
         ssos_d['SOURCE'].append(idx_source)
         dither_source = 1
         ssos_d['DITHER'].append(dither_source)
-        alpha_source = source_df['ALPHA_J2000'].iloc[0]
-        ssos_d['ALPHA_J2000'].append(alpha_source)
-        delta_source = source_df['DELTA_J2000'].iloc[0]
-        ssos_d['DELTA_J2000'].append(delta_source)
         pm_source = source_df['PM'].iloc[0]
         ssos_d['PM'].append(pm_source)
         pa_source = source_df['PA'].iloc[0]
@@ -93,16 +111,31 @@ def propagate_dithers():
         mag_source = source_df['MAG'].iloc[0]
         ssos_d['MAG'].append(mag_source)
 
+        dither_time = (565.0 / 2) / 3600.0
+        alpha_source = source_df['ALPHA_J2000'].iloc[0]
+        alpha_increment_per_hour = cos(
+            float(pa_source * pi / 180.0)) * float(pm_source)
+        alpha_increment_per_dither = alpha_increment_per_hour * dither_time
+        alpha_source = alpha_source + (alpha_increment_per_dither / 3600.0)
+        ssos_d['ALPHA_J2000'].append(alpha_source)
+        delta_source = source_df['DELTA_J2000'].iloc[0]
+        delta_increment_per_hour = sin(
+            float(pa_source * pi / 180.0)) * float(pm_source)
+        delta_increment_per_dither = delta_increment_per_hour * dither_time
+        delta_source = delta_source + (delta_increment_per_dither / 3600.0)
+        ssos_d['DELTA_J2000'].append(delta_source)
+
         for dither_source in range(2, 5, 1):
             # dither_time is equal to fraction of hour
-            dither_time = 0.27861
+            dither_time = 1003.0/3600.0
+
             idx += 1
-            alpha_increment_per_hour = cos(float(pa_source)) * float(pm_source)
-            alpha_increment_per_dither = alpha_increment_per_hour / dither_time
-            alpha_source = alpha_source + (alpha_increment_per_dither / 3600)
-            delta_increment_per_hour = sin(float(pa_source)) * float(pm_source)
-            delta_increment_per_dither = delta_increment_per_hour / dither_time
-            delta_source = delta_source + (delta_increment_per_dither / 3600)
+            alpha_increment_per_hour = cos(float(pa_source*pi/180.0)) * float(pm_source)
+            alpha_increment_per_dither = alpha_increment_per_hour * dither_time
+            alpha_source = alpha_source + (alpha_increment_per_dither / 3600.0)
+            delta_increment_per_hour = sin(float(pa_source*pi/180.0)) * float(pm_source)
+            delta_increment_per_dither = delta_increment_per_hour * dither_time
+            delta_source = delta_source + (delta_increment_per_dither / 3600.0)
 
             ssos_d['IDX'].append(idx)
             ssos_d['SOURCE'].append(idx_source)
@@ -115,14 +148,16 @@ def propagate_dithers():
 
         idx += 1
 
+    """
     for key_ in ssos_d.keys():
         print(key_, len(ssos_d[key_]))
-
+    """
     sso_cat = DataFrame(ssos_d)
 
     return sso_cat
 
 
+# This is wrong! New SSOs catalog is coming!
 def filter_by_position(sso_df):
     """
 
@@ -133,29 +168,42 @@ def filter_by_position(sso_df):
     borders_d = get_borders()
     right_sources = []
 
-    unique_sources = list(set(sso_df['IDX']))
+    unique_sources = list(set(sso_df['SOURCE']))
 
     for idx_source_, source_ in enumerate(unique_sources):
-        source_df = sso_df[sso_df['IDX'].isin([source_])]
+        source_df = sso_df[sso_df['SOURCE'].isin([source_])]
         for idx_dither_, row in enumerate(source_df.itertuples(), 1):
             alpha = row.ALPHA_J2000
             delta = row.DELTA_J2000
+            source_coords = SkyCoord(ra=alpha * degree, dec=delta * degree,
+                                     equinox='J2021.5')
+            source_coords_ecliptic = source_coords.barycentrictrueecliptic
+            lon_e = float(source_coords_ecliptic.lon.degree)
+            lat_e = float(source_coords_ecliptic.lat.degree)
             for ccd_ in borders_d[idx_dither_].keys():
                 borders = borders_d[idx_dither_][ccd_]
-                alpha_comp = borders['below_ra'] < alpha < borders['above_ra']
-                delta_comp = borders['below_dec'] < delta < borders['above_dec']
-                comp = alpha_comp and delta_comp
+                lon_comp = borders['below_lon'] < lon_e < borders['above_lon']
+                lat_comp = borders['below_lat'] < lat_e < borders['above_lat']
+                comp = lon_comp and lat_comp
 
                 if comp:
                     right_sources.append(row.IDX)
 
     if save:
         sso_df.to_csv('cat_ssos.csv')
+    for dither_ in range(1, 5, 1):
+        catalog = sso_df[sso_df['DITHER'].isin([dither_])]
+        catalog.to_csv('cat_ssos_{}.csv'.format(dither_))
 
+    # Removes non visible sources
     sso_clean_df = sso_df[sso_df['IDX'].isin(right_sources)]
-
     if save:
         sso_clean_df.to_csv('cat_clean_ssos.csv')
+    for dither_ in range(1, 5, 1):
+        clean_catalog = sso_clean_df[sso_clean_df['DITHER'].isin([dither_])]
+        clean_catalog.to_csv('cat_clean_ssos_{}.csv'.format(dither_))
+
+    print(patata)
 
 
 def create_regions():
