@@ -152,8 +152,6 @@ def get_fits_limits(fits_image):
     c = SkyCoord(ra=[above_ra, below_ra] * degree,
                  dec=[above_dec, below_dec] * degree)
 
-    print(c)
-    print(patata)
     ra = [above_ra, below_ra]
     dec = [above_dec, below_dec]
 
@@ -163,6 +161,29 @@ def get_fits_limits(fits_image):
     # check position
     # sometimes some values could be higher when are tagged as "lowest"
     return limits
+
+
+def get_cats_elvis_d(dither):
+    """
+
+    :param mag_:
+    :param dither:
+    :return:
+    """
+    prfs_d = extract_settings_elvis()
+    fits_list = []
+
+    files = listdir('{}'.format(prfs_d['fits_dir']))
+    for file_ in files:
+        if file_[-4:] == '.cat':
+            fits_list.append(file_)
+
+    list_out = []
+    for file_ in fits_list:
+        if file_[-5:-4] == str(dither):
+            list_out.append(file_)
+
+    return list_out
 
 
 def get_fits_d(mag_, dither):

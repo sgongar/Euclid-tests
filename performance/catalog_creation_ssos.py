@@ -203,8 +203,6 @@ def filter_by_position(sso_df):
         clean_catalog = sso_clean_df[sso_clean_df['DITHER'].isin([dither_])]
         clean_catalog.to_csv('cat_clean_ssos_{}.csv'.format(dither_))
 
-    print(patata)
-
 
 def create_regions():
     """

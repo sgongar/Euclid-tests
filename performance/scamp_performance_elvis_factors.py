@@ -166,8 +166,9 @@ def get_norm_speed(o_pm):
 
     :return:
     """
-    pms = [0.1, 0.3, 1.0, 3.0, 10.0]
-    speeds_d = speeds_range(pms, 50)
+    pms = [1.25, 3.75, 6.25, 8.75]
+    speeds_d = {1.25: [0, 2.5], 3.75: [2.5, 5],
+                6.25: [5, 7.5], 8.75: [7.5, 10]}
 
     pm_norm = 0
     for key_ in speeds_d.keys():
@@ -204,12 +205,13 @@ def splits_by_mag_bin():
     total_d = {}
     # opens input_catalog
     cat_ssos = read_csv('cat_clean_ssos.csv', index_col=0)
-    test = False
+    test = True
 
     mags = [[20, 21], [21, 22], [22, 23],
-            [23, 24], [24, 25], [25, 26]]
-    pms = [0.1, 0.3, 1.0, 3.0, 10.0]
-    pms_range = speeds_range(pms, 50)
+            [23, 24], [24, 25], [25, 26], [26, 27]]
+    pms = [1.25, 3.75, 6.25, 8.75]
+    pms_range = {1.25: [0, 2.5], 3.75: [2.5, 5],
+                 6.25: [5, 7.5], 8.75: [7.5, 10]}
 
     total_d['17-18'] = {}
     total_d['17-18'][0] = 0
@@ -225,10 +227,6 @@ def splits_by_mag_bin():
     total_d['19-20'][0] = 0
     for pm_ in pms:
         total_d['19-20'][pm_] = 0
-
-    if test:
-        total_df = DataFrame(total_d)
-        total_df.to_csv('test_input_clean_ssos.csv')
 
     for mag_ in mags:
         mag_bin_cat = cat_ssos[cat_ssos['MAG'] < mag_[1]]
@@ -246,12 +244,12 @@ def splits_by_mag_bin():
                 total_d['{}-{}'.format(mag_[0], mag_[1])][pm_] = total_sources
             except ValueError:
                 total_d['{}-{}'.format(mag_[0], mag_[1])][pm_] = 0
-
+    """
     total_d['26-27'] = {}
     total_d['26-27'][0] = 0
     for pm_ in pms:
         total_d['26-27'][pm_] = 0
-
+    """
     if test:
         total_df = DataFrame(total_d)
         total_df.to_csv('test_input_clean_ssos.csv')
@@ -279,7 +277,7 @@ def redo_data_d():
     data_d = {}
     mags = [[17, 18], [18, 19], [19, 20], [20, 21], [21, 22],
             [22, 23], [23, 24], [24, 25], [25, 26], [26, 27]]
-    pms = [0.1, 0.3, 1.0, 3.0, 10.0]
+    pms = [1.25, 3.75, 6.25, 8.75]
     for mag_ in mags:
         mag_bin = '{}-{}'.format(mag_[0], mag_[1])
         data_d[mag_bin] = {}
@@ -400,7 +398,7 @@ class FactorsScampPerformance:
 
         idxs = ['17-18', '18-19', '19-20', '20-21', '21-22',
                 '22-23', '23-24', '24-25', '25-26', '26-27']
-        pms = [0, 0.1, 0.3, 1.0, 3.0, 10.0]
+        pms = [0, 1.25, 3.75, 6.25, 8.75]
         stats_d = {'idx': idxs}
         for pm_ in pms:
             stats_d['right-{}'.format(pm_)] = []
@@ -414,11 +412,10 @@ class FactorsScampPerformance:
 
         stats_df = DataFrame(stats_d,
                              columns=['idx', 'right-0', 'false-0', 'total-0',
-                                      'right-0.1', 'false-0.1', 'total-0.1',
-                                      'right-0.3', 'false-0.3', 'total-0.3',
-                                      'right-1.0', 'false-1.0', 'total-1.0',
-                                      'right-3.0', 'false-3.0', 'total-3.0',
-                                      'right-10.0', 'false-10.0', 'total-10.0'])
+                                      'right-1.25', 'false-1.25', 'total-1.25',
+                                      'right-3.75', 'false-3.75', 'total-3.75',
+                                      'right-6.25', 'false-6.25', 'total-6.25',
+                                      'right-8.75', 'false-8.75', 'total-8.75'])
         stats_df = stats_df.set_index('idx')
         stats_df.to_csv('stats.csv')
 
