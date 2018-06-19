@@ -118,7 +118,7 @@ def save_factors(factors_d):
     :return:
     """
     for mag_ in factors_d.keys():
-        factors_d[mag_].to_csv('stats_{}'.format(mag_))
+        print(factors_d[mag_])
 
     return True
 
