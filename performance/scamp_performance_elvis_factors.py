@@ -2,16 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """ Gets
-    - 'median_a_image'
-    - 'median_erra_image'
-    - 'median_b_image'
-    - 'median_errb_image'
-    - 'median_class_star'
-    - 'ellipticity'
-    - 'median_mag_iso'
-    - 'median_magerr_iso'
-    - 'median_flux_iso'
-    from scamp's output. Saves them to different csv files.
+   - factors from magnitude bins
 
 Versions:
 - 0.1
@@ -51,7 +42,7 @@ __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
 
 
-def compute_factors(stats_d, tmp_d):
+def compute_factors(factors_d, stats_df):
     """
     N_meas: number of all detected sources(including false detections)
     N_se: number of simulated sources recovered by source extraction
@@ -69,42 +60,67 @@ def compute_factors(stats_d, tmp_d):
     """
     prfs_d = extract_settings_luca()
 
-    for mag_ in prfs_d['mags']:
-        for pm_ in prfs_d['pms']:
-            n_meas = tmp_d[mag_][pm_]['right'] + tmp_d[mag_][pm_]['false']
-            # stats_d[mag_][pm_]['n_meas'].append(n_meas)
-            stats_d[mag_][pm_]['n_meas'] = n_meas
-            n_false = tmp_d[mag_][pm_]['false']
-            # stats_d[mag_][pm_]['n_false'].append(n_false)
-            stats_d[mag_][pm_]['n_false'] = n_false
-            n_se = tmp_d[mag_][pm_]['right']
-            # stats_d[mag_][pm_]['n_se'].append(n_se)
-            stats_d[mag_][pm_]['n_se'] = n_se
-            n_true = tmp_d[mag_][pm_]['total']
-            # stats_d[mag_][pm_]['n_true'].append(n_true)
-            stats_d[mag_][pm_]['n_true'] = n_true
-            # Factors computation
-            try:
-                f_dr = float(n_meas) / float(n_true)
-                f_dr = float("{0:.2f}".format(f_dr))
-                stats_d[mag_][pm_]['f_dr'] = f_dr
-            except ZeroDivisionError:
-                stats_d[mag_][pm_]['f_dr'] = nan
-            try:
-                f_pur = float(n_se) / float(n_meas)
-                f_pur = float("{0:.2f}".format(f_pur))
-                stats_d[mag_][pm_]['f_pur'] = f_pur
-            except ZeroDivisionError:
-                stats_d[mag_][pm_]['f_pur'] = nan
-            try:
-                f_com = float(n_se) / float(n_true)
-                f_com = float("{0:.2f}".format(f_com))
-                stats_d[mag_][pm_]['f_com'] = f_com
-            except ZeroDivisionError:
-                stats_d[mag_][pm_]['f_com'] = nan
+    mags = [[14, 15], [15, 16], [16, 17], [17, 18], [18, 19],
+            [19, 20], [20, 21], [21, 22], [22, 23], [23, 24],
+            [24, 25], [25, 26], [26, 27], [27, 28]]
+    pms = ['right-0', 'false-0', 'total-0',
+           'right-0.1', 'false-0.1', 'total-0.1',
+           'right-0.3', 'false-0.3', 'total-0.3',
+           'right-1.0', 'false-1.0', 'total-1.0',
+           'right-3.0', 'false-3.0', 'total-3.0',
+           'right-10.0', 'false-10.0', 'total-10.0']
+    pm_list = [0.1, 0.3, 1.0, 3.0, 10.0]
+    idxs_pm = [[4, 5, 6], [7, 8, 9], [10, 11, 12],
+               [13, 14, 15], [16, 17, 18]]
+    for idx_mag, data in enumerate(stats_df.itertuples(), 1):
+        # Loop over the different magnitudes
+        if 6 < idx_mag < 13:  # Only gets values from magnitudes [20, 26]
+            mag_ = data[0]  # Gets magnitude value
+            for idx_pm, pm_values in enumerate(idxs_pm): # each sublist is a different pm
+                pm_ = pm_list[idx_pm]
+                print(mag_, pm_)
+                print(pm_values)
+                n_se = data[pm_values[0]]
+                factors_d[mag_][pm_] = n_se
+                n_false = data[pm_values[1]]
+                factors_d[mag_][pm_] = n_false
+                n_meas = n_se + n_false
+                n_total = data[pm_values[2]]
+                print(pm_, n_se, n_false, n_meas, n_total)
+                print(' ')
 
-    return stats_d
-
+                """
+                # stats_d[mag_][pm_]['n_meas'].append(n_meas)
+                stats_d[mag_][pm_]['n_meas'] = n_meas
+                # stats_d[mag_][pm_]['n_false'].append(n_false)
+                stats_d[mag_][pm_]['n_false'] = n_false
+                # stats_d[mag_][pm_]['n_se'].append(n_se)
+                stats_d[mag_][pm_]['n_se'] = n_se
+                n_true = tmp_d[mag_][pm_]['total']
+                # stats_d[mag_][pm_]['n_true'].append(n_true)
+                stats_d[mag_][pm_]['n_true'] = n_true
+                # Factors computation
+                try:
+                    f_dr = float(n_meas) / float(n_true)
+                    f_dr = float("{0:.2f}".format(f_dr))
+                    stats_d[mag_][pm_]['f_dr'] = f_dr
+                except ZeroDivisionError:
+                    stats_d[mag_][pm_]['f_dr'] = nan
+                try:
+                    f_pur = float(n_se) / float(n_meas)
+                    f_pur = float("{0:.2f}".format(f_pur))
+                    stats_d[mag_][pm_]['f_pur'] = f_pur
+                except ZeroDivisionError:
+                    stats_d[mag_][pm_]['f_pur'] = nan
+                try:
+                    f_com = float(n_se) / float(n_true)
+                    f_com = float("{0:.2f}".format(f_com))
+                    stats_d[mag_][pm_]['f_com'] = f_com
+                except ZeroDivisionError:
+                    stats_d[mag_][pm_]['f_com'] = nan
+                """
+        else:
+            pass
 
 def get_dither(catalog_n):
     """
@@ -137,22 +153,23 @@ def check_source(o_df, i_alpha, i_delta, keys):
     """
     prfs_d = extract_settings_elvis()
 
-    o_df = o_df[o_df[keys[0]] + prfs_d['tolerance']*2 > i_alpha]
-    o_df = o_df[i_alpha > o_df[keys[0]] - prfs_d['tolerance']*2]
-    o_df = o_df[o_df[keys[1]] + prfs_d['tolerance']*2 > i_delta]
-    o_df = o_df[i_delta > o_df[keys[1]] - prfs_d['tolerance']*2]
+    o_df = o_df[o_df[keys[0]] + prfs_d['tolerance']*4 > i_alpha]
+    o_df = o_df[i_alpha > o_df[keys[0]] - prfs_d['tolerance']*4]
+    o_df = o_df[o_df[keys[1]] + prfs_d['tolerance']*4 > i_delta]
+    o_df = o_df[i_delta > o_df[keys[1]] - prfs_d['tolerance']*4]
 
     return o_df
 
 
-def speeds_range(pms, confidence):
+def speeds_range(confidence):
     """ given a confidence value returns a dict with speeds
 
-    @param pms:
     @param confidence:
 
     @return speeds_dict:
     """
+    prfs_d = extract_settings_elvis()
+    pms = prfs_d['pms']
     speeds_dict = {}
     for pm_ in pms:
         speeds_dict[pm_] = [pm_ - pm_ * confidence / 100.0,
@@ -166,9 +183,7 @@ def get_norm_speed(o_pm):
 
     :return:
     """
-    pms = [1.25, 3.75, 6.25, 8.75]
-    speeds_d = {1.25: [0, 2.5], 3.75: [2.5, 5],
-                6.25: [5, 7.5], 8.75: [7.5, 10]}
+    speeds_d = speeds_range(confidence=50)
 
     pm_norm = 0
     for key_ in speeds_d.keys():
@@ -186,8 +201,9 @@ def get_norm_mag(o_mag):
     :param o_mag:
     :return: mag_bin
     """
-    mags = [[17, 18], [18, 19], [19, 20], [20, 21], [21, 22],
-            [22, 23], [23, 24], [24, 25], [25, 26], [26, 27]]
+    mags = [[14, 15], [15, 16], [16, 17], [17, 18], [18, 19], [19, 20],
+            [20, 21], [21, 22], [22, 23], [23, 24], [24, 25], [25, 26],
+            [26, 27], [27, 28]]
 
     mag_bin = ''
     for mag_ in mags:
@@ -204,14 +220,28 @@ def splits_by_mag_bin():
     """
     total_d = {}
     # opens input_catalog
-    cat_ssos = read_csv('cat_clean_ssos.csv', index_col=0)
+    cat_ssos = read_csv('cats/cat_clean_ssos.csv', index_col=0)
     test = True
 
-    mags = [[20, 21], [21, 22], [22, 23],
-            [23, 24], [24, 25], [25, 26], [26, 27]]
-    pms = [1.25, 3.75, 6.25, 8.75]
-    pms_range = {1.25: [0, 2.5], 3.75: [2.5, 5],
-                 6.25: [5, 7.5], 8.75: [7.5, 10]}
+    mags = [[20, 21], [21, 22], [22, 23], [23, 24],
+            [24, 25], [25, 26], [26, 27], [27, 28]]
+    pms = [0.1, 0.3, 1.0, 3.0, 10.0]
+    pms_range = speeds_range(50)
+
+    total_d['14-15'] = {}
+    total_d['14-15'][0] = 0
+    for pm_ in pms:
+        total_d['14-15'][pm_] = 0
+
+    total_d['15-16'] = {}
+    total_d['15-16'][0] = 0
+    for pm_ in pms:
+        total_d['15-16'][pm_] = 0
+
+    total_d['16-17'] = {}
+    total_d['16-17'][0] = 0
+    for pm_ in pms:
+        total_d['16-17'][pm_] = 0
 
     total_d['17-18'] = {}
     total_d['17-18'][0] = 0
@@ -229,14 +259,14 @@ def splits_by_mag_bin():
         total_d['19-20'][pm_] = 0
 
     for mag_ in mags:
-        mag_bin_cat = cat_ssos[cat_ssos['MAG'] < mag_[1]]
-        mag_bin_cat = mag_bin_cat[mag_bin_cat['MAG'] > mag_[0]]
+        mag_bin_cat = cat_ssos[cat_ssos['ABMAG'] < mag_[1]]
+        mag_bin_cat = mag_bin_cat[mag_bin_cat['ABMAG'] > mag_[0]]
         total_d['{}-{}'.format(mag_[0], mag_[1])] = {}
         total_d['{}-{}'.format(mag_[0], mag_[1])][0] = 0
         for pm_ in pms:
             # gets proper motion bin
-            pm_bin_cat = mag_bin_cat[mag_bin_cat['PM'] < pms_range[pm_][1]]
-            pm_bin_cat = pm_bin_cat[pm_bin_cat['PM'] > pms_range[pm_][0]]
+            pm_bin_cat = mag_bin_cat[mag_bin_cat['VEL'] < pms_range[pm_][1]]
+            pm_bin_cat = pm_bin_cat[pm_bin_cat['VEL'] > pms_range[pm_][0]]
             try:
                 pm_bin_cat = concat(g for _, g in pm_bin_cat.groupby('SOURCE')
                                     if len(g) >= 3)
@@ -244,24 +274,6 @@ def splits_by_mag_bin():
                 total_d['{}-{}'.format(mag_[0], mag_[1])][pm_] = total_sources
             except ValueError:
                 total_d['{}-{}'.format(mag_[0], mag_[1])][pm_] = 0
-    """
-    total_d['26-27'] = {}
-    total_d['26-27'][0] = 0
-    for pm_ in pms:
-        total_d['26-27'][pm_] = 0
-    """
-    if test:
-        total_df = DataFrame(total_d)
-        total_df.to_csv('test_input_clean_ssos.csv')
-    """
-    print(total_d.keys())
-    for key_ in total_d.keys():
-        print('key_', key_)
-        print(type(total_d[key_]))
-        print(total_d[key_])
-        total_df = DataFrame(total_d[key_])
-        total_df.to_csv('total_{}.csv'.format(key_))
-    """
 
     return total_d
 
@@ -272,12 +284,14 @@ def redo_data_d():
 
     :return: tmp_d
     """
+    prfs_d = extract_settings_elvis()
     total_d = splits_by_mag_bin()
 
     data_d = {}
-    mags = [[17, 18], [18, 19], [19, 20], [20, 21], [21, 22],
-            [22, 23], [23, 24], [24, 25], [25, 26], [26, 27]]
-    pms = [1.25, 3.75, 6.25, 8.75]
+    mags = [[14, 15], [15, 16], [16, 17], [17, 18], [18, 19], [19, 20],
+            [20, 21], [21, 22], [22, 23], [23, 24], [24, 25], [25, 26],
+            [26, 27], [27, 28]]
+    pms = prfs_d['pms']
     for mag_ in mags:
         mag_bin = '{}-{}'.format(mag_[0], mag_[1])
         data_d[mag_bin] = {}
@@ -290,6 +304,27 @@ def redo_data_d():
     return data_d
 
 
+def redo_factors_d():
+    """ Creates a dictionary
+    TODO - Automatic number!
+
+    :return: factors_d
+    """
+    prfs_d = extract_settings_elvis()
+
+    factors_d = {}
+    mags = [[20, 21], [21, 22], [22, 23], [23, 24],
+            [24, 25], [25, 26], [26, 27]]
+    pms = prfs_d['pms']
+    for mag_ in mags:
+        mag_bin = '{}-{}'.format(mag_[0], mag_[1])
+        factors_d[mag_bin] = {}
+        for pm_ in pms:
+            factors_d[mag_bin][pm_] = {'f_pur': 0.0, 'f_dr': 0.0, 'f_com': 0.0}
+
+    return factors_d
+
+
 class FactorsScampPerformance:
 
     def __init__(self):
@@ -300,6 +335,7 @@ class FactorsScampPerformance:
         self.filter_p_number = 9  # First one with enough data for statistics
         self.prfs_d = extract_settings_elvis()
         self.data_d = redo_data_d()
+        factors_d = redo_factors_d()
 
         self.save = True
 
@@ -308,7 +344,9 @@ class FactorsScampPerformance:
 
         filt_cat = self.gets_filtered_catalog()  # Gets data from filtered
         input_df = self.gets_data()  # Gets data from catalogs
-        self.extract_stats(filt_cat, input_df)  # Splits due type
+        stats_df = self.extract_stats(filt_cat, input_df)  # Splits due type
+        stats_df.to_csv('stats.csv')
+        compute_factors(factors_d, stats_df)
 
     def gets_filtered_catalog(self):
         """
@@ -334,11 +372,11 @@ class FactorsScampPerformance:
 
         for key_ in input_df.keys():
             # ssos_cat = 'cat_ssos_{}.csv'.format(key_)
-            ssos_cat = 'cat_ssos_{}.csv'.format(key_)
+            ssos_cat = 'cats/cat_ssos_{}.csv'.format(key_)
             input_df[key_]['SSOs'] = read_csv(ssos_cat, index_col=0)
-            stars_cat = 'stars.csv'
+            stars_cat = 'tmp_stars/stars.csv'
             input_df[key_]['stars'] = read_csv(stars_cat, index_col=0)
-            galaxies_cat = 'galaxies.csv'
+            galaxies_cat = 'tmp_galaxies/galaxies.csv'
             input_df[key_]['galaxies'] = read_csv(galaxies_cat, index_col=0)
 
         return input_df
@@ -351,25 +389,27 @@ class FactorsScampPerformance:
         :return:
         """
         # Unique sources (?)
+        prfs_d = extract_settings_elvis()
         unique_sources = list(set(filt_cat['SOURCE_NUMBER'].tolist()))
 
         print('Creating new catalogues from filtered catalogue due type')
         print('Total sources: {}'.format(filt_cat['SOURCE_NUMBER'].size))
-        for source_ in unique_sources:
+        for idx_source_, source_ in enumerate(unique_sources):
+            print(idx_source_)
             source_df = filt_cat[filt_cat['SOURCE_NUMBER'].isin([source_])]
             # Takes the first value of MAG Series
             i_mag_bin = get_norm_mag(source_df['MEDIAN_MAG_ISO'].iloc[0])
             # Takes the first value of PM Series
             i_pm_norm = get_norm_speed(source_df['PM'].iloc[0])
+            alpha = source_df['ALPHA_J2000'].iloc[0]
+            delta = source_df['DELTA_J2000'].iloc[0]
 
             source_d = {'source': [], 'pm': [], 'mag': []}
             right_detections = 0
             for i, row in enumerate(source_df.itertuples(), 1):
                 dither_n = get_dither(int(row.CATALOG_NUMBER))
                 # Checks object type
-                alpha = source_df['ALPHA_J2000'].iloc[0]
-                delta = source_df['DELTA_J2000'].iloc[0]
-                keys = ['ALPHA_J2000', 'DELTA_J2000']
+                keys = ['RA', 'DEC']  # Catalogue version 2
                 test_sso = check_source(input_df[dither_n]['SSOs'],
                                         alpha, delta, keys)
                 if test_sso.empty is not True:
@@ -389,16 +429,18 @@ class FactorsScampPerformance:
                 # print(' ')
                 self.data_d[i_mag_bin][i_pm_norm]['false'] += 1
 
-        mags = [[17, 18], [18, 19], [19, 20], [20, 21], [21, 22],
-                [22, 23], [23, 24], [24, 25], [25, 26], [26, 27]]
+        mags = [[14, 15], [15, 16], [16, 17], [17, 18], [18, 19],
+                [19, 20], [20, 21], [21, 22], [22, 23], [23, 24],
+                [24, 25], [25, 26], [26, 27], [27, 28]]
         for mag_ in mags:
             mag_bin = '{}-{}'.format(mag_[0], mag_[1])
             data_df = DataFrame(self.data_d[mag_bin])
             data_df.to_csv('stats_{}.csv'.format(mag_bin))
 
-        idxs = ['17-18', '18-19', '19-20', '20-21', '21-22',
-                '22-23', '23-24', '24-25', '25-26', '26-27']
-        pms = [0, 1.25, 3.75, 6.25, 8.75]
+        idxs = ['14-15', '15-16', '16-17', '17-18', '18-19',
+                '19-20', '20-21', '21-22', '22-23', '23-24',
+                '24-25', '25-26', '26-27', '27-28']
+        pms = prfs_d['pms']
         stats_d = {'idx': idxs}
         for pm_ in pms:
             stats_d['right-{}'.format(pm_)] = []
@@ -412,12 +454,15 @@ class FactorsScampPerformance:
 
         stats_df = DataFrame(stats_d,
                              columns=['idx', 'right-0', 'false-0', 'total-0',
-                                      'right-1.25', 'false-1.25', 'total-1.25',
-                                      'right-3.75', 'false-3.75', 'total-3.75',
-                                      'right-6.25', 'false-6.25', 'total-6.25',
-                                      'right-8.75', 'false-8.75', 'total-8.75'])
+                                      'right-0.1', 'false-0.1', 'total-0.1',
+                                      'right-0.3', 'false-0.3', 'total-0.3',
+                                      'right-1.0', 'false-1.0', 'total-1.0',
+                                      'right-3.0', 'false-3.0', 'total-3.0',
+                                      'right-10.0', 'false-10.0', 'total-10.0'])
         stats_df = stats_df.set_index('idx')
         stats_df.to_csv('stats.csv')
+
+        return stats_df
 
 
 if __name__ == "__main__":

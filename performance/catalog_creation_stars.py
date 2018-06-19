@@ -29,6 +29,7 @@ Todo:
 """
 from math import hypot
 from multiprocessing import Process
+from subprocess import Popen
 from sys import stdout
 
 from astropy.io import fits
@@ -38,6 +39,7 @@ from pandas import concat, DataFrame, read_csv
 
 from images_management_elvis import get_borders
 from misc import get_cat, get_cats, extract_settings_elvis
+from misc import create_scamp_dict, create_sextractor_dict
 
 __author__ = "Samuel Góngora García"
 __copyright__ = "Copyright 2018"
@@ -46,6 +48,22 @@ __version__ = "0.5"
 __maintainer__ = "Samuel Góngora García"
 __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
+
+
+def scamp_f_name(idx):
+    """
+
+    :param idx:
+    :return: scmp_d, scmp_cf
+    """
+    scmp_d, len_confs = create_scamp_dict(idx)
+
+    scmp_cf = '{}_{}_{}_{}'.format(scmp_d['crossid_radius'],
+                                   scmp_d['pixscale_maxerr'],
+                                   scmp_d['posangle_maxerr'],
+                                   scmp_d['position_maxerr'])
+
+    return scmp_d, scmp_cf
 
 
 def check_distance(o_df, alpha, delta):
@@ -206,14 +224,14 @@ def create_catalog():
     # Merges catalogs
     stars_list = []
     for idx_csv in range(0, 18, 1):
-        stars_ = read_csv('stars_{}.csv'.format(idx_csv), index_col=0)
+        stars_ = read_csv('tmp_stars/stars_{}.csv'.format(idx_csv), index_col=0)
         stars_list.append(stars_)
 
     stars_df = concat(stars_list)
     cats['stars'] = stars_df
 
     if save:
-        stars_df.to_csv('stars.csv')
+        stars_df.to_csv('tmp_stars/stars.csv')
 
     return stars_df
 
@@ -259,7 +277,7 @@ def create_stars_catalog_thread(idx_l, sub_list, inputs_d, full_d):
 
     cat_df = DataFrame(cat_d)
     if save:
-        cat_df.to_csv('stars_{}.csv'.format(idx_l))
+        cat_df.to_csv('tmp_stars/stars_{}.csv'.format(idx_l))
 
 
 def write_stars_catalog():
@@ -268,10 +286,22 @@ def write_stars_catalog():
     :return:
     """
     # Stars catalogue creation
-    test_cat_name = '{}/full_coadd.cat'.format(prfs_dict['references'])
-    test_coadd_cat = fits.open(test_cat_name)
+    # todo - create full_coadd.cat
+    # todo - launch swarp
+    # todo - launch sextractor
 
-    # Source number
+    analysis_d, len_dicts = create_sextractor_dict(0, False)
+
+    try:
+        test_cat_name = '{}/coadd.cat'.format(prfs_dict['references'])
+        test_coadd_cat = fits.open(test_cat_name)
+    except IOError:
+        # Create full coadded catalogue
+        create_coadded_image()
+        extract_catalogue(analysis_d)
+        test_cat_name = '{}/coadd.cat'.format(prfs_dict['references'])
+        test_coadd_cat = fits.open(test_cat_name)
+
     # c1 = fits.Column(name='NUMBER', format='1J', disp='I10',
     #                  array=stars_df['NUMBER'])
     # Kron-like elliptical aperture magnitude
@@ -305,6 +335,43 @@ def write_stars_catalog():
 
     newcat_name = '{}/stars_catalogue.cat'.format(prfs_dict['references'])
     test_coadd_cat.writeto(newcat_name, overwrite=True)
+
+
+def create_coadded_image():
+    """
+
+    :return:
+    """
+    sw_1 = 'swarp CCD_*{}.fits'.format(prfs_dict['fits_dir'])
+
+    cmd = sw_1
+
+    swarp_p = Popen(cmd, shell=True)
+    swarp_p.wait()
+
+
+def extract_catalogue(analysis_dict):
+    """
+
+    :return:
+    """
+    coadded_fits = '{}/coadd.fits'.format(prfs_dict['fits_dir'])
+    coadded_cat = '{}/coadd.cat'.format(prfs_dict['fits_dir'])
+    sx_1 = 'sex -c {} {}'.format(prfs_dict['conf_sex'], coadded_fits)
+    sx_2 = ' -CATALOG_NAME {}'.format(coadded_cat)
+    sx_3 = ' -PARAMETERS_NAME {}'.format(prfs_dict['params_sex'])
+    sx_4 = ' -STARNNW_NAME {}'.format(prfs_dict['neural_sex'])
+    sx_5 = ' -DETECT_MINAREA {}'.format(analysis_dict['detect_minarea'])
+    sx_6 = ' -DETECT_THRESH {}'.format(analysis_dict['detect_thresh'])
+    sx_7 = ' -ANALYSIS_THRESH {}'.format(analysis_dict['analysis_thresh'])
+    sx_8 = ' -DEBLEND_NTHRESH {}'.format(analysis_dict['deblend_nthresh'])
+    sx_9 = ' -DEBLEND_MINCONT {}'.format(analysis_dict['deblend_mincount'])
+    sx_10 = ' -FILTER_NAME {}'.format(analysis_dict['filter'])
+
+    cmd = sx_1 + sx_2 + sx_3 + sx_4 + sx_5 + sx_6 + sx_7 + sx_8 + sx_9 + sx_10
+
+    sextractor_p = Popen(cmd, shell=True)
+    sextractor_p.wait()
 
 
 if __name__ == "__main__":

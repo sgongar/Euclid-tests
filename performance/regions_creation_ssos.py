@@ -41,8 +41,7 @@ def create_regions():
         cat_list = get_cats_elvis_d(dither_)
         for cat_ in cat_list:
             catalog = fits.open('{}/{}'.format(prfs_d['fits_dir'], cat_))
-            catalog_data = Table(catalog[2].data)
-            catalog_data = catalog_data.to_pandas()
+            catalog_data = Table(catalog[2].data).to_pandas()
 
             alpha_list = Series(catalog_data['ALPHA_J2000'].tolist(),
                                 name='ALPHA_J2000')

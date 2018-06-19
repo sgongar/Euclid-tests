@@ -325,5 +325,5 @@ class PlotTotalScampPerformance:
 
 
 if __name__ == "__main__":
-    # TotalScampPerformance()
-    PlotTotalScampPerformance()
+    TotalScampPerformance()
+    # PlotTotalScampPerformance()

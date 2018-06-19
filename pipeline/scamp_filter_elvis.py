@@ -735,14 +735,14 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
         """
         self.logger.debug('Filter by detections number')
         # De momento lo quito
-        # full_db = concat(g for _, g in full_db.groupby("SOURCE_NUMBER")
-        #                  if len(g) >= int(detections))
+        full_db = concat(g for _, g in full_db.groupby("SOURCE_NUMBER")
+                         if len(g) >= int(detections))
         # Filter by astrometry
-        merged_db = merged_db[merged_db['NPOS_OK'] >= int(detections)]
+        # merged_db = merged_db[merged_db['NPOS_OK'] >= int(detections)]
         # Filter by photometry
-        merged_db = merged_db[merged_db['NMAG'] >= int(detections)]
+        # merged_db = merged_db[merged_db['NMAG'] >= int(detections)]
 
-        source_list = merged_db['SOURCE_NUMBER'].tolist()
-        full_db = full_db[full_db['SOURCE_NUMBER'].isin(source_list)]
+        # source_list = merged_db['SOURCE_NUMBER'].tolist()
+        # full_db = full_db[full_db['SOURCE_NUMBER'].isin(source_list)]
 
         return full_db, merged_db

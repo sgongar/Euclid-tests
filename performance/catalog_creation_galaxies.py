@@ -188,14 +188,15 @@ def create_catalog():
     # Merges catalogs
     galaxies_list = []
     for idx_csv in range(0, 18, 1):
-        galaxies_ = read_csv('galaxies_{}.csv'.format(idx_csv), index_col=0)
+        galaxies_ = read_csv('tmp_galaxies/galaxies_{}.csv'.format(idx_csv),
+                             index_col=0)
         galaxies_list.append(galaxies_)
 
     galaxies_df = concat(galaxies_list)
     cats['galaxies'] = galaxies_df
 
     if save:
-        galaxies_df.to_csv('galaxies.csv')
+        galaxies_df.to_csv('tmp_galaxies/galaxies.csv')
 
     return cats
 
@@ -240,7 +241,7 @@ def create_galaxies_catalog_thread(idx_l, sub_list, inputs_d, full_d):
 
     cat_df = DataFrame(cat_d)
     if save:
-        cat_df.to_csv('galaxies_{}.csv'.format(idx_l))
+        cat_df.to_csv('tmp_galaxies/galaxies_{}.csv'.format(idx_l))
 
 
 def write_galaxies_catalog(catalogs):
@@ -251,7 +252,7 @@ def write_galaxies_catalog(catalogs):
     """
     galaxies_df_data = catalogs['galaxies']
     # Galaxies catalogue creation
-    test_cat_name = '{}/full_coadd.cat'.format(prfs_dict['references'])
+    test_cat_name = '{}/coadd.cat'.format(prfs_dict['references'])
     test_coadd_cat = fits.open(test_cat_name)
 
     # Source number

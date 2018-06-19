@@ -37,6 +37,117 @@ __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
 
 
+def create_sextractor_dict(conf_num, cat_conf):
+    """
+
+    @param conf_num:
+    @param cat_conf:
+
+    @return analysis_d:
+    """
+
+    if cat_conf:
+        configurations = [2, 0.1, 5, 4, 'models/gauss_2.0_5x5.conv']
+        len_conf = 1
+    else:
+        mode = {'type': 'sextractor'}  # harcoded
+        configurations, len_conf = create_configurations(mode)
+
+    analysis_l = []
+
+    if type(configurations[0]) is list:
+        for configuration in range(len(configurations)):
+            temp_list = [configurations[configuration][0],
+                         configurations[configuration][1],
+                         configurations[configuration][2],
+                         configurations[configuration][2],
+                         configurations[configuration][3],
+                         configurations[configuration][4]]
+            analysis_l.append(temp_list)
+        analysis_d = {'deblend_nthresh': analysis_l[conf_num][0],
+                      'deblend_mincount': analysis_l[conf_num][1],
+                      'detect_thresh': analysis_l[conf_num][2],
+                      'analysis_thresh': analysis_l[conf_num][3],
+                      'detect_minarea': analysis_l[conf_num][4],
+                      'filter': analysis_l[conf_num][5]}
+    else:
+        analysis_d = {'deblend_nthresh': configurations[0],
+                      'deblend_mincount': configurations[1],
+                      'detect_thresh': configurations[2],
+                      'analysis_thresh': configurations[2],
+                      'detect_minarea': configurations[3],
+                      'filter': configurations[4]}
+
+    return analysis_d, len_conf
+
+
+def create_configurations(mode):
+    """ creates a list of configuration lists merging
+        different input parameters
+    :param mode: can be 'sextractor' or 'scamp'
+    :return:
+    """
+    if mode['type'] == 'sextractor':
+        l_deblending = [30]
+        l_mincount = [0.01]
+        l_threshold = [1.5]
+
+        l_area = [4]
+        l_filter_name = ['models/gauss_2.0_5x5.conv']
+
+        configurations = []
+        for deblending in l_deblending:
+            for mincount in l_mincount:
+                for threshold in l_threshold:
+                    for area in l_area:
+                        for filt in l_filter_name:
+                            configurations.append([deblending, mincount,
+                                                   threshold, area, filt])
+        configurations_len = len(configurations)
+        return configurations, configurations_len
+
+    elif mode['type'] == 'scamp':
+        l_crossid_radius = [10]  # [10] seconds
+        l_pixscale_maxerr = [1.1]  # [1.2] scale-factor
+        l_posangle_maxerr = [0.5]  # [0.5, 2.5] degrees
+        l_position_maxerr = [0.04]
+
+        configurations = []
+
+        for crossid in l_crossid_radius:
+            for pixscale in l_pixscale_maxerr:
+                for posangle in l_posangle_maxerr:
+                    for position in l_position_maxerr:
+                        configurations.append([crossid, pixscale,
+                                               posangle, position])
+
+        configurations_len = len(configurations)
+
+        return configurations, configurations_len
+
+
+def create_scamp_dict(conf_num):
+    """
+
+    :param conf_num:
+    :return:
+    """
+
+    scamp_list = []
+    mode = {'type': 'scamp'}
+    configurations, len_conf = create_configurations(mode)
+
+    for conf in configurations:
+        temp_list = [conf[0], conf[1], conf[2], conf[3]]
+        scamp_list.append(temp_list)
+    scamp_dict = {'crossid_radius': scamp_list[conf_num][0],
+                  'pixscale_maxerr': scamp_list[conf_num][1],
+                  'posangle_maxerr': scamp_list[conf_num][2],
+                  'position_maxerr': scamp_list[conf_num][3]}
+
+    return scamp_dict, len_conf
+
+
 def setting_logger(prfs_d, logger_name):
     """ sets-up a logger object ready to be used
 
