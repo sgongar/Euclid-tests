@@ -78,14 +78,15 @@ def compute_factors(factors_d, stats_df):
             mag_ = data[0]  # Gets magnitude value
             for idx_pm, pm_values in enumerate(idxs_pm): # each sublist is a different pm
                 pm_ = pm_list[idx_pm]
-                print(mag_, pm_)
-                print(pm_values)
                 n_se = data[pm_values[0]]
                 factors_d[mag_][pm_] = n_se
                 n_false = data[pm_values[1]]
                 factors_d[mag_][pm_] = n_false
                 n_meas = n_se + n_false
                 n_true = data[pm_values[2]]
+
+                print(factors_d[mag_][pm_])
+                print(type(factors_d[mag_][pm_]))
 
                 try:
                     f_dr = float(n_meas) / float(n_true)
