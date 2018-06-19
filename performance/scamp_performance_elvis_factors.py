@@ -79,14 +79,13 @@ def compute_factors(factors_d, stats_df):
             for idx_pm, pm_values in enumerate(idxs_pm): # each sublist is a different pm
                 pm_ = pm_list[idx_pm]
                 n_se = data[pm_values[0]]
-                factors_d[mag_][pm_] = n_se
+                factors_d[mag_][pm_]['n_se'] = n_se
                 n_false = data[pm_values[1]]
-                factors_d[mag_][pm_] = n_false
+                factors_d[mag_][pm_]['n_false'] = n_false
                 n_meas = n_se + n_false
+                factors_d[mag_][pm_]['n_meas'] = n_meas
                 n_true = data[pm_values[2]]
-
-                print(factors_d[mag_][pm_])
-                print(type(factors_d[mag_][pm_]))
+                factors_d[mag_][pm_]['n_true'] = n_true
 
                 try:
                     f_dr = float(n_meas) / float(n_true)
@@ -309,7 +308,8 @@ def redo_factors_d():
         mag_bin = '{}-{}'.format(mag_[0], mag_[1])
         factors_d[mag_bin] = {}
         for pm_ in pms:
-            factors_d[mag_bin][pm_] = {'f_pur': 0.0, 'f_dr': 0.0, 'f_com': 0.0}
+            factors_d[mag_bin][pm_] = {'f_pur': 0.0, 'f_dr': 0.0, 'f_com': 0.0,
+                                       'n_se': 0, 'n_false': 0, 'n_meas': 0, 'n_true': 0}
 
     return factors_d
 
