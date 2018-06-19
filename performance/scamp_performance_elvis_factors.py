@@ -117,8 +117,13 @@ def save_factors(factors_d):
     :param factors_d:
     :return:
     """
+    pm_list = [0.1, 0.3, 1.0, 3.0, 10.0]
     for mag_ in factors_d.keys():
-        print(factors_d[mag_])
+        mag_df = factors_d[mag_]
+        for pm_ in pm_list:
+            print(pm_)
+            print(mag_df[pm_])
+            print(' ')
 
     return True
 
