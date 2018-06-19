@@ -117,14 +117,19 @@ def save_factors(factors_d):
     :param factors_d:
     :return:
     """
+    tmp_d = {'idx': [], 'mag': [], 'pm': [], 'n_se': [],
+             'n_false': [], 'n_meas': [], 'n_true': [],
+             'f_pur': [], 'f_dr': [], 'f_com': []}
     pm_list = [0.1, 0.3, 1.0, 3.0, 10.0]
+    idx = 0
     for mag_ in factors_d.keys():
         mag_df = factors_d[mag_]
-        tmp_d = {'idx': [], 'n_se': [], 'n_false': [], 'n_meas': [],
-                 'n_true': [], 'f_pur': [], 'f_dr': [], 'f_com': []}
+
         for pm_ in pm_list:
             pm_df = mag_df[pm_]
-            tmp_d['idx'].append(pm_)
+            tmp_d['idx'].append(idx)
+            tmp_d['mag'].append(mag_)
+            tmp_d['pm'].append(pm_)
             tmp_d['n_se'].append(pm_df['n_se'])
             tmp_d['n_false'].append(pm_df['n_false'])
             tmp_d['n_meas'].append(pm_df['n_meas'])
@@ -133,8 +138,12 @@ def save_factors(factors_d):
             tmp_d['f_dr'].append(pm_df['f_dr'])
             tmp_d['f_com'].append(pm_df['f_com'])
 
-        tmp_df = DataFrame(tmp_d)
-        tmp_df.to_csv('stats_{}.csv'.format(mag_))
+            idx += 1
+
+    tmp_df = DataFrame(tmp_d, columns=['idx', 'mag', 'pm', 'n_se',
+                                       'n_false', 'n_meas', 'n_true',
+                                       'f_pur', 'f_dr', 'f_com'])
+    tmp_df.to_csv('stats.csv')
 
     return True
 
