@@ -120,10 +120,21 @@ def save_factors(factors_d):
     pm_list = [0.1, 0.3, 1.0, 3.0, 10.0]
     for mag_ in factors_d.keys():
         mag_df = factors_d[mag_]
+        tmp_d = {'idx': [], 'n_se': [], 'n_false': [], 'n_meas': [],
+                 'n_true': [], 'f_pur': [], 'f_dr': [], 'f_com': []}
         for pm_ in pm_list:
-            print(pm_)
-            print(mag_df[pm_])
-            print(' ')
+            pm_df = mag_df[pm_]
+            tmp_d['idx'].append(pm_)
+            tmp_d['n_se'].append(pm_df['n_se'])
+            tmp_d['n_false'].append(pm_df['n_false'])
+            tmp_d['n_meas'].append(pm_df['n_meas'])
+            tmp_d['n_true'].append(pm_df['n_true'])
+            tmp_d['f_pur'].append(pm_df['f_pur'])
+            tmp_d['f_dr'].append(pm_df['f_dr'])
+            tmp_d['f_com'].append(pm_df['f_com'])
+
+        tmp_df = DataFrame(tmp_d)
+        tmp_df.to_csv('stats_{}.csv'.format(mag_))
 
     return True
 
