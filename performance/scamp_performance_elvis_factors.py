@@ -143,7 +143,8 @@ def save_factors(factors_d):
     tmp_df = DataFrame(tmp_d, columns=['idx', 'mag', 'pm', 'n_se',
                                        'n_false', 'n_meas', 'n_true',
                                        'f_pur', 'f_dr', 'f_com'])
-    tmp_df.to_csv('stats.csv', index='idx')
+    tmp_df.set_index('idx')
+    tmp_df.to_csv('stats.csv')
 
     return True
 
