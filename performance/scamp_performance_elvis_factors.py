@@ -58,17 +58,17 @@ def compute_factors(factors_d, stats_df):
     :param tmp_d:
     :return:
     """
-    prfs_d = extract_settings_luca()
-
-    mags = [[14, 15], [15, 16], [16, 17], [17, 18], [18, 19],
-            [19, 20], [20, 21], [21, 22], [22, 23], [23, 24],
-            [24, 25], [25, 26], [26, 27], [27, 28]]
-    pms = ['right-0', 'false-0', 'total-0',
-           'right-0.1', 'false-0.1', 'total-0.1',
-           'right-0.3', 'false-0.3', 'total-0.3',
-           'right-1.0', 'false-1.0', 'total-1.0',
-           'right-3.0', 'false-3.0', 'total-3.0',
-           'right-10.0', 'false-10.0', 'total-10.0']
+    # prfs_d = extract_settings_luca()
+    #
+    # mags = [[14, 15], [15, 16], [16, 17], [17, 18], [18, 19],
+    #         [19, 20], [20, 21], [21, 22], [22, 23], [23, 24],
+    #         [24, 25], [25, 26], [26, 27], [27, 28]]
+    # pms = ['right-0', 'false-0', 'total-0',
+    #        'right-0.1', 'false-0.1', 'total-0.1',
+    #        'right-0.3', 'false-0.3', 'total-0.3',
+    #        'right-1.0', 'false-1.0', 'total-1.0',
+    #        'right-3.0', 'false-3.0', 'total-3.0',
+    #        'right-10.0', 'false-10.0', 'total-10.0']
     pm_list = [0.1, 0.3, 1.0, 3.0, 10.0]
     idxs_pm = [[4, 5, 6], [7, 8, 9], [10, 11, 12],
                [13, 14, 15], [16, 17, 18]]
@@ -108,7 +108,20 @@ def compute_factors(factors_d, stats_df):
         else:
             pass
 
-    print(factors_d)
+    return factors_d
+
+
+def save_factors(factors_d):
+    """
+
+    :param factors_d:
+    :return:
+    """
+    for mag_ in factors_d.keys():
+        factors_d[mag_].to_csv('stats_{}'.format(mag_))
+
+    return True
+
 
 def get_dither(catalog_n):
     """
@@ -334,8 +347,8 @@ class FactorsScampPerformance:
         filt_cat = self.gets_filtered_catalog()  # Gets data from filtered
         input_df = self.gets_data()  # Gets data from catalogs
         stats_df = self.extract_stats(filt_cat, input_df)  # Splits due type
-        stats_df.to_csv('stats.csv')
-        compute_factors(factors_d, stats_df)
+        factors_d = compute_factors(factors_d, stats_df)
+        save_factors(factors_d)
 
     def gets_filtered_catalog(self):
         """
