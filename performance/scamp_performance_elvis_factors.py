@@ -348,8 +348,7 @@ class FactorsScampPerformance:
         input_df = self.gets_data()  # Gets data from catalogs
         stats_df = self.extract_stats(filt_cat, input_df)  # Splits due type
         factors_d = compute_factors(factors_d, stats_df)
-        print(factors_d)
-        # save_factors(factors_d)
+        save_factors(factors_d)
 
     def gets_filtered_catalog(self):
         """
