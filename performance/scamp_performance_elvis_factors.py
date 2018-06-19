@@ -85,42 +85,30 @@ def compute_factors(factors_d, stats_df):
                 n_false = data[pm_values[1]]
                 factors_d[mag_][pm_] = n_false
                 n_meas = n_se + n_false
-                n_total = data[pm_values[2]]
-                print(pm_, n_se, n_false, n_meas, n_total)
-                print(' ')
+                n_true = data[pm_values[2]]
 
-                """
-                # stats_d[mag_][pm_]['n_meas'].append(n_meas)
-                stats_d[mag_][pm_]['n_meas'] = n_meas
-                # stats_d[mag_][pm_]['n_false'].append(n_false)
-                stats_d[mag_][pm_]['n_false'] = n_false
-                # stats_d[mag_][pm_]['n_se'].append(n_se)
-                stats_d[mag_][pm_]['n_se'] = n_se
-                n_true = tmp_d[mag_][pm_]['total']
-                # stats_d[mag_][pm_]['n_true'].append(n_true)
-                stats_d[mag_][pm_]['n_true'] = n_true
-                # Factors computation
                 try:
                     f_dr = float(n_meas) / float(n_true)
                     f_dr = float("{0:.2f}".format(f_dr))
-                    stats_d[mag_][pm_]['f_dr'] = f_dr
+                    factors_d[mag_][pm_]['f_dr'] = f_dr
                 except ZeroDivisionError:
-                    stats_d[mag_][pm_]['f_dr'] = nan
+                    factors_d[mag_][pm_]['f_dr'] = nan
                 try:
                     f_pur = float(n_se) / float(n_meas)
                     f_pur = float("{0:.2f}".format(f_pur))
-                    stats_d[mag_][pm_]['f_pur'] = f_pur
+                    factors_d[mag_][pm_]['f_pur'] = f_pur
                 except ZeroDivisionError:
-                    stats_d[mag_][pm_]['f_pur'] = nan
+                    factors_d[mag_][pm_]['f_pur'] = nan
                 try:
                     f_com = float(n_se) / float(n_true)
                     f_com = float("{0:.2f}".format(f_com))
-                    stats_d[mag_][pm_]['f_com'] = f_com
+                    factors_d[mag_][pm_]['f_com'] = f_com
                 except ZeroDivisionError:
-                    stats_d[mag_][pm_]['f_com'] = nan
-                """
+                    factors_d[mag_][pm_]['f_com'] = nan
         else:
             pass
+
+    print(factors_d)
 
 def get_dither(catalog_n):
     """
