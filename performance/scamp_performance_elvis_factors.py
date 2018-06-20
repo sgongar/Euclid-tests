@@ -447,8 +447,8 @@ class FactorsScampPerformance:
                     source_d['pm'].append(row.PM)
                     source_d['mag'].append(row.MEDIAN_MAG_ISO)
                 else:
-                    false_positives[row.DITHER]['RA'].append(alpha)
-                    false_positives[row.DITHER]['DEC'].append(delta)
+                    false_positives[dither_n]['RA'].append(alpha)
+                    false_positives[dither_n]['DEC'].append(delta)
 
             if right_detections >= 2:
                 o_mag_bin = get_norm_mag(source_d['mag'][0])
