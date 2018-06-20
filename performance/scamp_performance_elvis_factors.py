@@ -122,7 +122,9 @@ def save_factors(factors_d):
              'f_pur': [], 'f_dr': [], 'f_com': []}
     pm_list = [0.1, 0.3, 1.0, 3.0, 10.0]
     idx = 0
-    for mag_ in factors_d.keys():
+    mags = [[20, 21], [21, 22], [22, 23], [23, 24],
+            [24, 25], [25, 26], [26, 27]]
+    for mag_ in mags:
         mag_df = factors_d[mag_]
 
         for pm_ in pm_list:
@@ -176,10 +178,10 @@ def check_source(o_df, i_alpha, i_delta, keys):
     """
     prfs_d = extract_settings_elvis()
 
-    o_df = o_df[o_df[keys[0]] + prfs_d['tolerance']*4 > i_alpha]
-    o_df = o_df[i_alpha > o_df[keys[0]] - prfs_d['tolerance']*4]
-    o_df = o_df[o_df[keys[1]] + prfs_d['tolerance']*4 > i_delta]
-    o_df = o_df[i_delta > o_df[keys[1]] - prfs_d['tolerance']*4]
+    o_df = o_df[o_df[keys[0]] + prfs_d['tolerance']*2 > i_alpha]
+    o_df = o_df[i_alpha > o_df[keys[0]] - prfs_d['tolerance']*2]
+    o_df = o_df[o_df[keys[1]] + prfs_d['tolerance']*2 > i_delta]
+    o_df = o_df[i_delta > o_df[keys[1]] - prfs_d['tolerance']*2]
 
     return o_df
 
@@ -356,7 +358,7 @@ class FactorsScampPerformance:
         presentes en filt 3 obtenidos o no
 
         """
-        self.filter_p_number = 9  # First one with enough data for statistics
+        self.filter_p_number = 3  # First one with enough data for statistics
         self.prfs_d = extract_settings_elvis()
         self.data_d = redo_data_d()
         factors_d = redo_factors_d()
@@ -416,21 +418,24 @@ class FactorsScampPerformance:
         prfs_d = extract_settings_elvis()
         unique_sources = list(set(filt_cat['SOURCE_NUMBER'].tolist()))
 
+        # False positives dictionary
+        false_positives = {1: {'RA': [], 'DEC': []}, 2: {'RA': [], 'DEC': []},
+                           3: {'RA': [], 'DEC': []}, 4: {'RA': [], 'DEC': []}}
+
         print('Creating new catalogues from filtered catalogue due type')
         print('Total sources: {}'.format(filt_cat['SOURCE_NUMBER'].size))
         for idx_source_, source_ in enumerate(unique_sources):
-            print(idx_source_)
             source_df = filt_cat[filt_cat['SOURCE_NUMBER'].isin([source_])]
             # Takes the first value of MAG Series
             i_mag_bin = get_norm_mag(source_df['MEDIAN_MAG_ISO'].iloc[0])
             # Takes the first value of PM Series
             i_pm_norm = get_norm_speed(source_df['PM'].iloc[0])
-            alpha = source_df['ALPHA_J2000'].iloc[0]
-            delta = source_df['DELTA_J2000'].iloc[0]
 
             source_d = {'source': [], 'pm': [], 'mag': []}
             right_detections = 0
             for i, row in enumerate(source_df.itertuples(), 1):
+                alpha = row.ALPHA_J2000
+                delta = row.DELTA_J2000
                 dither_n = get_dither(int(row.CATALOG_NUMBER))
                 # Checks object type
                 keys = ['RA', 'DEC']  # Catalogue version 2
@@ -442,24 +447,22 @@ class FactorsScampPerformance:
                     source_d['pm'].append(row.PM)
                     source_d['mag'].append(row.MEDIAN_MAG_ISO)
 
-            if right_detections >= 3:
+            if right_detections >= 2:
                 o_mag_bin = get_norm_mag(source_d['mag'][0])
                 o_pm_norm = get_norm_speed(source_d['pm'][0])
                 self.data_d[o_mag_bin][o_pm_norm]['right'] += 1
             else:
-                # print(source_df['MEDIAN_MAG_ISO'].iloc[0])
-                # print(i_mag_bin, i_pm_norm)
-                # print(self.data_d[i_mag_bin][i_pm_norm])
-                # print(' ')
                 self.data_d[i_mag_bin][i_pm_norm]['false'] += 1
 
         mags = [[14, 15], [15, 16], [16, 17], [17, 18], [18, 19],
                 [19, 20], [20, 21], [21, 22], [22, 23], [23, 24],
                 [24, 25], [25, 26], [26, 27], [27, 28]]
+        """
         for mag_ in mags:
             mag_bin = '{}-{}'.format(mag_[0], mag_[1])
             data_df = DataFrame(self.data_d[mag_bin])
             data_df.to_csv('stats_{}.csv'.format(mag_bin))
+        """
 
         idxs = ['14-15', '15-16', '16-17', '17-18', '18-19',
                 '19-20', '20-21', '21-22', '22-23', '23-24',
@@ -484,7 +487,6 @@ class FactorsScampPerformance:
                                       'right-3.0', 'false-3.0', 'total-3.0',
                                       'right-10.0', 'false-10.0', 'total-10.0'])
         stats_df = stats_df.set_index('idx')
-        stats_df.to_csv('stats.csv')
 
         return stats_df
 

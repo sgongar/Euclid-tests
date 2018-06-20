@@ -101,10 +101,10 @@ class FactorsScampPerformance:
         input_df = read_csv('cats/cat_clean_ssos.csv', index_col=0)
         filt_cat = self.gets_filtered_catalog()  # Gets data from filtered
 
-        # cats_d = self.extract_cats()
-        # self.extract_stats_ccds(cats_d, input_df)
+        cats_d = self.extract_cats()
+        self.extract_stats_ccds(cats_d, input_df)
 
-        self.extract_stats_filt(filt_cat, input_df)
+        # self.extract_stats_filt(filt_cat, input_df)
 
         """
         self.data_d = redo_data_d()
@@ -161,23 +161,41 @@ class FactorsScampPerformance:
         total = 0
         ok = 0
 
+        test_dict = {1: {'RA': [], 'DEC': []}, 2: {'RA': [], 'DEC': []},
+                     3: {'RA': [], 'DEC': []}, 4: {'RA': [], 'DEC': []}}
+
         print('total {}'.format(len(unique_sources)))
         for idx_source_, source_ in enumerate(unique_sources):
             print('idx {}'.format(idx_source_))
             source_df = input_df[input_df['SOURCE'].isin([source_])]
+
+            # Loops over CCD catalogues
             for i, row in enumerate(source_df.itertuples(), 1):
                 total += 1
                 dither_df = source_df[source_df['DITHER'].isin([row.DITHER])]
                 i_alpha = float(dither_df['RA'].iloc[0])
                 i_delta = float(dither_df['DEC'].iloc[0])
+
+                test = True
                 for cat_ in cats_d[row.DITHER]:
                     out_df = check_source(cats_d[row.DITHER][cat_], i_alpha, i_delta,
                                           keys=['ALPHA_J2000', 'DELTA_J2000'])
 
                     if out_df.empty is not True:
                         ok += 1
-                    else:
-                        print()
+                        test = False
+
+                if test:
+                    test_dict[row.DITHER]['RA'].append(i_alpha)
+                    test_dict[row.DITHER]['DEC'].append(i_delta)
+
+        for dither_ in range(1, 5, 1):
+            alpha_list = Series(test_dict[dither_]['RA'], name='ALPHA_J2000')
+            delta_list = Series(test_dict[dither_]['DEC'], name='DELTA_J2000')
+
+            positions_table = concat([alpha_list, delta_list], axis=1)
+            positions_table.to_csv('dither_{}.reg'.format(dither_),
+                                   index=False, header=False, sep=" ")
 
         print('total {}'.format(total))
         print('ok {}'.format(ok))
@@ -201,6 +219,7 @@ class FactorsScampPerformance:
 
         for source_ in unique_sources:
             source_df = input_df[input_df['SOURCE'].isin([source_])]
+            print(source_df.columns)
             for i, row in enumerate(source_df.itertuples(), 1):
                 dither_df = source_df[source_df['DITHER'].isin([row.DITHER])]
                 i_alpha = float(dither_df['RA'].iloc[0])
