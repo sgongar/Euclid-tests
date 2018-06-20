@@ -446,6 +446,9 @@ class FactorsScampPerformance:
                     source_d['source'].append(row.SOURCE_NUMBER)
                     source_d['pm'].append(row.PM)
                     source_d['mag'].append(row.MEDIAN_MAG_ISO)
+                else:
+                    false_positives[row.DITHER]['RA'].append(alpha)
+                    false_positives[row.DITHER]['DEC'].append(delta)
 
             if right_detections >= 2:
                 o_mag_bin = get_norm_mag(source_d['mag'][0])
@@ -453,6 +456,17 @@ class FactorsScampPerformance:
                 self.data_d[o_mag_bin][o_pm_norm]['right'] += 1
             else:
                 self.data_d[i_mag_bin][i_pm_norm]['false'] += 1
+
+        for dither_ in range(1, 5, 1):
+            alpha_list = Series(false_positives[dither_]['RA'],
+                                name='ALPHA_J2000')
+            delta_list = Series(false_positives[dither_]['DEC'],
+                                name='DELTA_J2000')
+
+            false_positives = concat([alpha_list, delta_list], axis=1)
+            cat_name ='false_positives/false_{}.reg'.format(dither_)
+            false_positives.to_csv(cat_name, index=False,
+                                   header=False, sep=" ")
 
         mags = [[14, 15], [15, 16], [16, 17], [17, 18], [18, 19],
                 [19, 20], [20, 21], [21, 22], [22, 23], [23, 24],
