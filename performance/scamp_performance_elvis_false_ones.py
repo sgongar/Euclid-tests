@@ -151,18 +151,19 @@ def get_dither(catalog_n):
     """
 
     :param catalog_n:
-    :return: dither_n
+    :return: cat_list
     """
-    dither_n = 0
+    cats_dict = {}
+    for i in range(1, 5, 1):
+        cats_dict[i] = []
 
-    if catalog_n <= 36:
-        dither_n = 1
-    elif 36 < catalog_n <= 72:
-        dither_n = 2
-    elif 72 < catalog_n <= 108:
-        dither_n = 3
-    elif 108 < catalog_n <= 144:
-        dither_n = 4
+    for cat_ccd in range(0, 144, 4):
+        for cat_dither in range(1, 5, 1):
+            cats_dict[cat_dither].append(cat_dither + cat_ccd)
+
+    for dither_ in cats_dict.keys():
+        if catalog_n in cats_dict[dither_]:
+            dither_n = dither_
 
     return dither_n
 
