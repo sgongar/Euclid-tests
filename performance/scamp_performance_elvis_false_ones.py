@@ -348,7 +348,7 @@ class FalsePositivesScampPerformance:
         filter_n = 'filt__{}.csv'.format(self.filter_p_number)
         filter_o_n = '{}/{}'.format(self.prfs_d['filtered'], filter_n)
 
-        self.logger.debug('Opens filtered catalogue {}'.format(filter_o_n))
+        print('Opens filtered catalogue {}'.format(filter_o_n))
         filtered_cat = read_csv('{}'.format(filter_o_n), index_col=0)
 
         return filtered_cat
