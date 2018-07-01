@@ -395,7 +395,6 @@ class FalsePositivesScampPerformance:
         print('Total sources: {}'.format(filt_cat['SOURCE_NUMBER'].size))
         for idx_source_, source_ in enumerate(unique_sources):
             source_df = filt_cat[filt_cat['SOURCE_NUMBER'].isin([source_])]
-            print(source_df)
             # Takes the first value of MAG Series
             o_mag_bin = get_norm_mag(source_df['MEDIAN_MAG_ISO'].iloc[0])
             # Takes the first value of PM Series
@@ -405,8 +404,6 @@ class FalsePositivesScampPerformance:
                 alpha = row.ALPHA_J2000
                 delta = row.DELTA_J2000
                 dither_n = get_dither(int(row.CATALOG_NUMBER))
-                print('dither {} - catalog {}'.format(dither_n,
-                                                      row.CATALOG_NUMBER))
                 # Checks object type
                 keys = ['RA', 'DEC']  # Catalogue version 2
                 test_sso = check_source(input_df[dither_n]['SSOs'],
@@ -418,9 +415,7 @@ class FalsePositivesScampPerformance:
                     false_positives[dither_n]['DEC'].append(delta)
                     false_positives[dither_n]['MAG'].append(o_mag_bin)
                     false_positives[dither_n]['PM'].append(o_pm_norm)
-            from time import sleep
-            sleep(4)
-            print(' ')
+
         for dither_ in false_positives.keys():
             # Create regions
             alpha_list = false_positives[dither_]['RA']
