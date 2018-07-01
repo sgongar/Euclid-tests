@@ -405,6 +405,7 @@ class FalsePositivesScampPerformance:
                 delta = row.DELTA_J2000
                 dither_n = get_dither(int(row.CATALOG_NUMBER))
                 print(dither_n)
+                print(row.CATALOG_NUMBER)
                 # Checks object type
                 keys = ['RA', 'DEC']  # Catalogue version 2
                 test_sso = check_source(input_df[dither_n]['SSOs'],
