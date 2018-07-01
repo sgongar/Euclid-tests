@@ -394,6 +394,9 @@ class FalsePositivesScampPerformance:
         print('Total sources: {}'.format(filt_cat['SOURCE_NUMBER'].size))
         for idx_source_, source_ in enumerate(unique_sources):
             source_df = filt_cat[filt_cat['SOURCE_NUMBER'].isin([source_])]
+            print(source_df)
+            from time import sleep
+            sleep(2)
             # Takes the first value of MAG Series
             o_mag_bin = get_norm_mag(source_df['MEDIAN_MAG_ISO'].iloc[0])
             # Takes the first value of PM Series
@@ -403,7 +406,6 @@ class FalsePositivesScampPerformance:
                 alpha = row.ALPHA_J2000
                 delta = row.DELTA_J2000
                 dither_n = get_dither(int(row.CATALOG_NUMBER))
-                print(source_, dither_n)
                 # Checks object type
                 keys = ['RA', 'DEC']  # Catalogue version 2
                 test_sso = check_source(input_df[dither_n]['SSOs'],
