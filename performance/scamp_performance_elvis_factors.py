@@ -54,8 +54,8 @@ def compute_factors(factors_d, stats_df):
     f_pur = N_se / N_meas = N_se / (N_se + N_false)
     f_com = f_dr * f_pur = N_se / N_true
 
-    :param stats_d:
-    :param tmp_d:
+    :param factors_d:
+    :param stats_df:
     :return:
     """
     # prfs_d = extract_settings_luca()
@@ -151,18 +151,19 @@ def get_dither(catalog_n):
     """
 
     :param catalog_n:
-    :return: dither_n
+    :return: cat_list
     """
-    dither_n = 0
+    cats_dict = {}
+    for i in range(1, 5, 1):
+        cats_dict[i] = []
 
-    if catalog_n <= 36:
-        dither_n = 1
-    elif 36 < catalog_n <= 72:
-        dither_n = 2
-    elif 72 < catalog_n <= 108:
-        dither_n = 3
-    elif 108 < catalog_n <= 144:
-        dither_n = 4
+    for cat_ccd in range(0, 144, 4):
+        for cat_dither in range(1, 5, 1):
+            cats_dict[cat_dither].append(cat_dither + cat_ccd)
+
+    for dither_ in cats_dict.keys():
+        if catalog_n in cats_dict[dither_]:
+            dither_n = dither_
 
     return dither_n
 
@@ -186,39 +187,27 @@ def check_source(o_df, i_alpha, i_delta, keys):
     return o_df
 
 
-def speeds_range(confidence):
-    """ given a confidence value returns a dict with speeds
-
-    @param confidence:
-
-    @return speeds_dict:
-    """
-    prfs_d = extract_settings_elvis()
-    pms = prfs_d['pms']
-    speeds_dict = {}
-    for pm_ in pms:
-        speeds_dict[pm_] = [pm_ - pm_ * confidence / 100.0,
-                            pm_ + pm_ * confidence / 100.0]
-
-    return speeds_dict
-
-
 def get_norm_speed(o_pm):
     """
 
     :return:
     """
-    speeds_d = speeds_range(confidence=50)
+    speeds_d = {0.01: [0.005, 0.015], 0.03: [0.015, 0.05],
+                0.1: [0.05, 0.15], 0.3: [0.15, 0.5],
+                1.0: [0.5, 1.5], 3.0: [1.5, 5],
+                10.0: [5.0, 15.0], 30.0: [15.0, 50]}
 
-    pm_norm = 0
-    for key_ in speeds_d.keys():
-        low = speeds_d[key_][0]
-        high = speeds_d[key_][1]
-        if low < o_pm < high:
-            pm_norm = key_
+    if o_pm < 0.005:
+        pm_norm = 0
+    else:
+        # pm_norm = 0
+        for key_ in speeds_d.keys():
+            low = speeds_d[key_][0]
+            high = speeds_d[key_][1]
+            if low < o_pm <= high:
+                pm_norm = key_
 
     return pm_norm
-
 
 def get_norm_mag(o_mag):
     """
@@ -243,15 +232,18 @@ def splits_by_mag_bin():
 
     :return: total_d
     """
+    prfs_d = extract_settings_elvis()
     total_d = {}
     # opens input_catalog
     cat_ssos = read_csv('cats/cat_clean_ssos.csv', index_col=0)
-    test = True
 
     mags = [[20, 21], [21, 22], [22, 23], [23, 24],
             [24, 25], [25, 26], [26, 27], [27, 28]]
-    pms = [0.1, 0.3, 1.0, 3.0, 10.0]
-    pms_range = speeds_range(50)
+    pms = prfs_d['pms']
+    pms_range = {0.01: [0.005, 0.015], 0.03: [0.015, 0.05],
+                 0.1: [0.05, 0.15], 0.3: [0.15, 0.5],
+                 1.0: [0.5, 1.5], 3.0: [1.5, 5],
+                 10.0: [5.0, 15.0], 30.0: [15.0, 50]}
 
     total_d['14-15'] = {}
     total_d['14-15'][0] = 0
@@ -346,7 +338,8 @@ def redo_factors_d():
         factors_d[mag_bin] = {}
         for pm_ in pms:
             factors_d[mag_bin][pm_] = {'f_pur': 0.0, 'f_dr': 0.0, 'f_com': 0.0,
-                                       'n_se': 0, 'n_false': 0, 'n_meas': 0, 'n_true': 0}
+                                       'n_se': 0, 'n_false': 0, 'n_meas': 0,
+                                       'n_true': 0}
 
     return factors_d
 
@@ -358,7 +351,7 @@ class FactorsScampPerformance:
         presentes en filt 3 obtenidos o no
 
         """
-        self.filter_p_number = 3  # First one with enough data for statistics
+        self.filter_p_number = 9  # First one with enough data for statistics
         self.prfs_d = extract_settings_elvis()
         self.data_d = redo_data_d()
         factors_d = redo_factors_d()
@@ -397,8 +390,8 @@ class FactorsScampPerformance:
         input_df = {1: {}, 2: {}, 3: {}, 4: {}}
 
         for key_ in input_df.keys():
-            # ssos_cat = 'cat_ssos_{}.csv'.format(key_)
-            ssos_cat = 'cats/cat_ssos_{}.csv'.format(key_)
+            # Uses clean ones instead total ones
+            ssos_cat = 'cats/cat_clean_ssos_{}.csv'.format(key_)
             input_df[key_]['SSOs'] = read_csv(ssos_cat, index_col=0)
             stars_cat = 'tmp_stars/stars.csv'
             input_df[key_]['stars'] = read_csv(stars_cat, index_col=0)
@@ -427,9 +420,9 @@ class FactorsScampPerformance:
         for idx_source_, source_ in enumerate(unique_sources):
             source_df = filt_cat[filt_cat['SOURCE_NUMBER'].isin([source_])]
             # Takes the first value of MAG Series
-            i_mag_bin = get_norm_mag(source_df['MEDIAN_MAG_ISO'].iloc[0])
+            o_mag_bin = get_norm_mag(source_df['MEDIAN_MAG_ISO'].iloc[0])
             # Takes the first value of PM Series
-            i_pm_norm = get_norm_speed(source_df['PM'].iloc[0])
+            o_pm_norm = get_norm_speed(source_df['PM'].iloc[0])
 
             source_d = {'source': [], 'pm': [], 'mag': []}
             right_detections = 0
@@ -444,29 +437,30 @@ class FactorsScampPerformance:
                 if test_sso.empty is not True:
                     right_detections += 1
                     source_d['source'].append(row.SOURCE_NUMBER)
-                    source_d['pm'].append(row.PM)
+                    pm_norm = get_norm_speed(float(test_sso['VEL'].iloc[0]))
+                    source_d['pm'].append(pm_norm)  # order by input not output
                     source_d['mag'].append(row.MEDIAN_MAG_ISO)
                 else:
                     false_positives[dither_n]['RA'].append(alpha)
                     false_positives[dither_n]['DEC'].append(delta)
 
             if right_detections >= 2:
-                o_mag_bin = get_norm_mag(source_d['mag'][0])
-                o_pm_norm = get_norm_speed(source_d['pm'][0])
-                self.data_d[o_mag_bin][o_pm_norm]['right'] += 1
+                i_mag_bin = get_norm_mag(source_d['mag'][0])
+                i_pm_norm = get_norm_speed(source_d['pm'][0])
+                self.data_d[i_mag_bin][i_pm_norm]['right'] += 1
             else:
-                self.data_d[i_mag_bin][i_pm_norm]['false'] += 1
+                self.data_d[o_mag_bin][o_pm_norm]['false'] += 1
 
-        for dither_ in range(1, 5, 1):
-            alpha_list = Series(false_positives[dither_]['RA'],
-                                name='ALPHA_J2000')
-            delta_list = Series(false_positives[dither_]['DEC'],
-                                name='DELTA_J2000')
+        for dither_ in false_positives.keys():
+            # print(false_positives[dither_]['RA'])
+            alpha_list = false_positives[dither_]['RA']
+            alpha_serie = Series(alpha_list, name='ALPHA_J2000')
+            delta_list = false_positives[dither_]['DEC']
+            delta_serie = Series(delta_list, name='DELTA_J2000')
 
-            false_positives = concat([alpha_list, delta_list], axis=1)
-            cat_name ='false_positives/false_{}.reg'.format(dither_)
-            false_positives.to_csv(cat_name, index=False,
-                                   header=False, sep=" ")
+            output = concat([alpha_serie, delta_serie], axis=1)
+            cat_name = 'false_positives/false_{}.reg'.format(dither_)
+            output.to_csv(cat_name, index=False, header=False, sep=" ")
 
         mags = [[14, 15], [15, 16], [16, 17], [17, 18], [18, 19],
                 [19, 20], [20, 21], [21, 22], [22, 23], [23, 24],

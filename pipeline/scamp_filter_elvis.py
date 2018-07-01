@@ -46,8 +46,8 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
         """
         # Filter variables
         self.class_star_limit = 0.97
-        self.proper_motion = 1.5
-        self.proper_motion_dects = 1.5
+        self.proper_motion = 1.25
+        self.proper_motion_dects = 1.25
 
         # Analysis variables
         self.prfs_d = extract_settings_elvis()
@@ -66,7 +66,10 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
         full_df = self.compute_pm(merged_db, full_db)
         # Saves _3.csv
         full_df = self.get_areas(full_df)
+        # full_df = full_df[full_df['MEAN_CLASS_STAR'] > self.class_star_limit]
+        full_df = self.filter_coherence(full_df)
 
+        """
         # full_db = read_csv('{}_3.csv'.format(self.filter_o_n), index_col=0)
         self.slow_df, self.fast_df = self.filter_class(full_df)
         if self.save:
@@ -111,16 +114,16 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
             full_db = fast_df
 
         full_db, merged_db = self.filter_detections(full_db, merged_db, 3)
-
+        
         if self.save:
             self.save_message('8')
             full_db.to_csv('{}_8.csv'.format(self.filter_o_n))
-
-        full_db = full_db[full_db['PM'] > 0.001]
+        """
+        full_df = full_df[full_df['PM'] > 0.01]
 
         if self.save:
             self.save_message('9')
-            full_db.to_csv('{}_9.csv'.format(self.filter_o_n))
+            full_df.to_csv('{}_9.csv'.format(self.filter_o_n))
 
     def save_message(self, order):
         """
@@ -376,27 +379,48 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
         :param cat_d:
         :return:
         """
+        tmp_d_keys = ['SOURCE_NUMBER', 'CATALOG_NUMBER', 'EXTENSION',
+                      'ASTR_INSTRUM', 'PHOT_INSTRUM', 'X_IMAGE', 'Y_IMAGE',
+                      'ERRA_IMAGE', 'ERRB_IMAGE', 'ERRTHETA_IMAGE',
+                      'ALPHA_J2000', 'DELTA_J2000', 'ERRA_WORLD', 'ERRB_WORLD',
+                      'ERRTHETA_WORLD', 'EPOCH', 'MAG', 'MAGERR',
+                      'FLAGS_EXTRACTION', 'FLAGS_SCAMP', 'FLAGS_IMA', 'PM',
+                      'PMERR', 'PMALPHA', 'PMDELTA', 'PMALPHAERR',
+                      'PMDELTAERR', 'THETA_IMAGE', 'ISOAREA_IMAGE',
+                      'FWHM_IMAGE', 'ELONGATION', 'CLASS_STAR', 'A_IMAGE',
+                      'B_IMAGE', 'ERRA_IMAGE', 'ERRB_IMAGE', 'CLASS_STAR',
+                      'FLUX_ISO', 'FLUXERR_ISO', 'FLUX_RADIUS', 'MAG_ISO',
+                      'MAGERR_ISO', 'ELLIPTICITY', 'MEDIAN_A_IMAGE',
+                      'MEDIAN_B_IMAGE', 'MEDIAN_ERRA_IMAGE',
+                      'MEDIAN_ERRB_IMAGE', 'MEDIAN_CLASS_STAR',
+                      'MEDIAN_FLUX_ISO', 'MEDIAN_FLUXERR_ISO',
+                      'MEDIAN_MAG_ISO', 'MEDIAN_MAGERR_ISO',
+                      'MEDIAN_ELLIPTICITY', 'MEAN_A_IMAGE', 'MEAN_B_IMAGE',
+                      'MEAN_ERRA_IMAGE', 'MEAN_ERRB_IMAGE', 'MEAN_CLASS_STAR',
+                      'MEAN_FLUX_ISO', 'MEAN_FLUXERR_ISO','MEAN_MAG_ISO',
+                      'MEAN_MAGERR_ISO', 'MEAN_ELLIPTICITY']
         tmp_d = {}
-        for key_ in keys_l:
-            tmp_d[key_] = []
-
-        for key_ in extra_keys:
-            tmp_d[key_] = []
-
-        for key_ in stats_keys:
+        for key_ in tmp_d_keys:
             tmp_d[key_] = []
 
         cat_n_l = []
         # Loops over unique sources of filtered file
         for idx, source_ in enumerate(unique_sources_thread):
-            source_d = {'A_IMAGE': [], 'B_IMAGE': [], 'ERRA_IMAGE': [],
-                        'ERRB_IMAGE': [], 'CLASS_STAR': [],
-                        'FLUX_ISO': [], 'FLUXERR_ISO': [], 'FLUX_RADIUS': [],
-                        'MAG_ISO': [], 'MAGERR_ISO': [], 'ELLIPTICITY': []}
-            for key_ in keys_l:
-                source_d[key_] = []
-
-            for key_ in extra_keys:
+            source_d_keys = ['SOURCE_NUMBER', 'CATALOG_NUMBER', 'EXTENSION',
+                             'ASTR_INSTRUM', 'PHOT_INSTRUM', 'X_IMAGE',
+                             'Y_IMAGE', 'ERRA_IMAGE', 'ERRB_IMAGE',
+                             'ERRTHETA_IMAGE', 'ALPHA_J2000', 'DELTA_J2000',
+                             'ERRA_WORLD', 'ERRB_WORLD', 'ERRTHETA_WORLD',
+                             'EPOCH', 'MAG', 'MAGERR', 'FLAGS_EXTRACTION',
+                             'FLAGS_SCAMP', 'FLAGS_IMA', 'PM', 'PMERR',
+                             'PMALPHA', 'PMDELTA', 'PMALPHAERR', 'PMDELTAERR',
+                             'THETA_IMAGE', 'ISOAREA_IMAGE', 'FWHM_IMAGE',
+                             'ELONGATION', 'CLASS_STAR', 'A_IMAGE', 'B_IMAGE',
+                             'ERRA_IMAGE', 'ERRB_IMAGE', 'CLASS_STAR',
+                             'FLUX_ISO', 'FLUXERR_ISO', 'FLUX_RADIUS',
+                             'MAG_ISO', 'MAGERR_ISO', 'ELLIPTICITY']
+            source_d = {}
+            for key_ in source_d_keys:
                 source_d[key_] = []
 
             o_df = filter_cat[filter_cat['SOURCE_NUMBER'].isin([source_])]
@@ -424,12 +448,38 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
                 else:
                     right_source += 1
                     # print('cat not empty')
-
-                    for idx_k, key_ in enumerate(keys_l):
-                        source_d[key_].append(row[idx_k + 1])
-                    for idx_k, key_ in enumerate(extra_keys):
-                        source_d[key_].append(cat_df[key_].iloc[0])
-
+                    source_d['SOURCE_NUMBER'].append(row.SOURCE_NUMBER)
+                    source_d['CATALOG_NUMBER'].append(row.CATALOG_NUMBER)
+                    source_d['EXTENSION'].append(row.EXTENSION)
+                    source_d['ASTR_INSTRUM'].append(row.ASTR_INSTRUM)
+                    source_d['PHOT_INSTRUM'].append(row.PHOT_INSTRUM)
+                    source_d['X_IMAGE'].append(row.X_IMAGE)
+                    source_d['Y_IMAGE'].append(row.Y_IMAGE)
+                    source_d['ERRA_IMAGE'].append(row.ERRA_IMAGE)
+                    source_d['ERRB_IMAGE'].append(row.ERRB_IMAGE)
+                    source_d['ERRTHETA_IMAGE'].append(row.ERRTHETA_IMAGE)
+                    source_d['ALPHA_J2000'].append(row.ALPHA_J2000)
+                    source_d['DELTA_J2000'].append(row.DELTA_J2000)
+                    source_d['ERRA_WORLD'].append(row.ERRA_WORLD)
+                    source_d['ERRB_WORLD'].append(row.ERRB_WORLD)
+                    source_d['ERRTHETA_WORLD'].append(row.ERRTHETA_WORLD)
+                    source_d['EPOCH'].append(row.EPOCH)
+                    source_d['MAG'].append(row.MAG)
+                    source_d['MAGERR'].append(row.MAGERR)
+                    source_d['FLAGS_EXTRACTION'].append(row.FLAGS_EXTRACTION)
+                    source_d['FLAGS_SCAMP'].append(row.FLAGS_SCAMP)
+                    source_d['FLAGS_IMA'].append(row.FLAGS_IMA)
+                    source_d['PM'].append(row.PM)
+                    source_d['PMERR'].append(row.PMERR)
+                    source_d['PMALPHA'].append(row.PMALPHA)
+                    source_d['PMDELTA'].append(row.PMDELTA)
+                    source_d['PMALPHAERR'].append(row.PMALPHAERR)
+                    source_d['PMDELTAERR'].append(row.PMDELTAERR)
+                    source_d['THETA_IMAGE'].append(cat_df['THETA_IMAGE'].iloc[0])
+                    source_d['ISOAREA_IMAGE'].append(cat_df['ISOAREA_IMAGE'].iloc[0])
+                    source_d['FWHM_IMAGE'].append(cat_df['FWHM_IMAGE'].iloc[0])
+                    source_d['ELONGATION'].append(cat_df['ELONGATION'].iloc[0])
+                    source_d['CLASS_STAR'].append(cat_df['CLASS_STAR'].iloc[0])
                     source_d['A_IMAGE'].append(cat_df['A_IMAGE'].iloc[0])
                     source_d['B_IMAGE'].append(cat_df['B_IMAGE'].iloc[0])
                     source_d['ERRA_IMAGE'].append(cat_df['ERRA_IMAGE'].iloc[0])
@@ -477,6 +527,7 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
                 for i_stats in range(0, len(o_df['SOURCE_NUMBER']), 1):
                     tmp_d['SOURCE_NUMBER'].append(source_d['SOURCE_NUMBER'][i_stats])
                     tmp_d['CATALOG_NUMBER'].append(source_d['CATALOG_NUMBER'][i_stats])
+                    tmp_d['EXTENSION'].append(source_d['EXTENSION'][i_stats])
                     tmp_d['ASTR_INSTRUM'].append(source_d['ASTR_INSTRUM'][i_stats])
                     tmp_d['PHOT_INSTRUM'].append(source_d['PHOT_INSTRUM'][i_stats])
                     tmp_d['X_IMAGE'].append(source_d['X_IMAGE'][i_stats])
@@ -524,7 +575,6 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
                     tmp_d['MEDIAN_MAG_ISO'].append(median_mag_iso)
                     tmp_d['MEDIAN_MAGERR_ISO'].append(median_magerr_iso)
                     tmp_d['MEDIAN_ELLIPTICITY'].append(median_ellipticiy)
-
                     tmp_d['MEAN_A_IMAGE'].append(mean_a_image)
                     tmp_d['MEAN_B_IMAGE'].append(mean_b_image)
                     tmp_d['MEAN_ERRA_IMAGE'].append(mean_erra_image)
@@ -721,7 +771,7 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
         :return: full_db
         """
         self.logger.debug('Runs coherence motion filter')
-        full_db = confidence_filter(full_db, 0.97)
+        full_db = confidence_filter(full_db, 0.90)  # was 0.97
 
         return full_db
 

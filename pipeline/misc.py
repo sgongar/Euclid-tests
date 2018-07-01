@@ -698,17 +698,19 @@ def pm_compute(logger, merged_df, full_df):
             pmdelta_l.append(pmdelta.iloc[idx_merged])
             pmealpha_l.append(pmealpha.iloc[idx_merged])
             pmedelta_l.append(pmedelta.iloc[idx_merged])
+            if pm.iloc[idx_merged] < 0:
+                print(pm.iloc[idx_merged])
             pm_l.append(pm.iloc[idx_merged])
             pme_l.append(pme.iloc[idx_merged])
 
     # Series creation
-    pmalpha_s = Series(pmalpha_l, name='PMALPHA_J2000', dtype=float)
-    pmdelta_s = Series(pmdelta_l, name='PMDELTA_J2000', dtype=float)
-    pmealpha_s = Series(pmealpha_l, name='PMALPHAERR_J2000', dtype=float)
-    pmedelta_s = Series(pmedelta_l, name='PMDELTAERR_J2000', dtype=float)
+    pmalpha_s = Series(pmalpha_l, name='PMALPHA', dtype=float)
+    pmdelta_s = Series(pmdelta_l, name='PMDELTA', dtype=float)
+    pmealpha_s = Series(pmealpha_l, name='PMALPHAERR', dtype=float)
+    pmedelta_s = Series(pmedelta_l, name='PMDELTAERR', dtype=float)
 
     pm_s = Series(pm_l, name='PM', dtype=float)
-    pme_s = Series(pme_l, name='PME', dtype=float)
+    pme_s = Series(pme_l, name='PMERR', dtype=float)
 
     df = concat([full_df['SOURCE_NUMBER'].reset_index(),
                  full_df['CATALOG_NUMBER'].reset_index(),
@@ -803,7 +805,7 @@ def confidence_filter(db, r):
                 passed.append(source)
 
     # Passed if both dimension have required rsquared
-    passed = [p for p in passed if passed.count(p) >= 2]
+    passed = [p for p in passed if passed.count(p) >= 1]
     passed = list(set(passed))
     db = db[db['SOURCE_NUMBER'].isin(passed)]
 

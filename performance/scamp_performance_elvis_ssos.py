@@ -1,24 +1,13 @@
 # !/usr/bin/python
 # -*- coding: utf-8 -*-
 
-""" Gets
-    - 'median_a_image'
-    - 'median_erra_image'
-    - 'median_b_image'
-    - 'median_errb_image'
-    - 'median_class_star'
-    - 'ellipticity'
-    - 'median_mag_iso'
-    - 'median_magerr_iso'
-    - 'median_flux_iso'
-    from scamp's output. Saves them to different csv files.
+""" Extracts SSOs regions from CCDs or filtered catalogs
 
 Versions:
 - 0.1
 
 Todo:
     * Improve log messages
-    * Get out check_source
 
 *GNU Terry Pratchett*
 """

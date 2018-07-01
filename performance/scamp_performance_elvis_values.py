@@ -22,6 +22,9 @@ Todo:
 
 *GNU Terry Pratchett*
 """
+from multiprocessing import Process
+from os import getcwd, remove
+
 from astropy.io import fits
 from astropy.table import Table
 from matplotlib.backends.backend_pdf import PdfPages
@@ -59,6 +62,24 @@ def get_dither(catalog_n):
     return dither_n
 
 
+"""
+Index([u'SOURCE_NUMBER', u'CATALOG_NUMBER', u'EXTENSION', u'ASTR_INSTRUM',
+       u'PHOT_INSTRUM', u'X_IMAGE', u'Y_IMAGE', u'ISOAREA_IMAGE', u'A_IMAGE',
+       u'MEDIAN_A_IMAGE', u'MEAN_A_IMAGE', u'ERRA_IMAGE', u'MEDIAN_ERRA_IMAGE',
+       u'MEAN_ERRA_IMAGE', u'B_IMAGE', u'MEDIAN_B_IMAGE', u'MEAN_B_IMAGE',
+       u'ERRB_IMAGE', u'MEDIAN_ERRB_IMAGE', u'MEAN_ERRB_IMAGE', u'THETA_IMAGE',
+       u'ERRTHETA_IMAGE', u'ALPHA_J2000', u'DELTA_J2000', u'ERRA_WORLD',
+       u'ERRB_WORLD', u'ERRTHETA_WORLD', u'EPOCH', u'FWHM_IMAGE',
+       u'CLASS_STAR', u'MEDIAN_CLASS_STAR', u'MEAN_CLASS_STAR', u'FLUX_ISO',
+       u'MEDIAN_FLUX_ISO', u'MEAN_FLUX_ISO', u'FLUXERR_ISO',
+       u'MEDIAN_FLUXERR_ISO', u'MEAN_FLUXERR_ISO', u'FLUX_RADIUS',
+       u'ELONGATION', u'ELLIPTICITY', u'MEDIAN_ELLIPTICITY',
+       u'MEAN_ELLIPTICITY', u'MAG', u'MAGERR', u'MAG_ISO',
+       u'MEAN_MAG_ISO', u'MAGERR_ISO', u'MEDIAN_MAGERR_ISO',
+       u'MEAN_MAGERR_ISO', u'FLAGS_EXTRACTION', u'FLAGS_SCAMP', u'FLAGS_IMA'],
+"""
+
+
 def create_output_dicts():
     # prfs_d = extract_settings_elvis()
 
@@ -67,7 +88,8 @@ def create_output_dicts():
               'median_b_image': [], 'median_errb_image': [],
               'median_class_star': [],
               'ellipticity': [], 'median_mag_iso': [],
-              'median_magerr_iso': [], 'median_flux_iso': []}
+              'median_magerr_iso': [], 'median_flux_iso': [],
+              'pm': [], 'pmerr': [], 'fwhm_image': []}
     # for idx in range(0, len(prfs_d['pms']), 1):
     #     ssos_d['median_mag_iso'].append([])
     #     ssos_d['median_magerr_iso'].append([])
@@ -82,9 +104,9 @@ def create_output_dicts():
 
     stars_d = {'median_a_image': [], 'median_erra_image': [],
                'median_b_image': [], 'median_errb_image': [],
-               'median_class_star': [],
-               'ellipticity': [], 'median_mag_iso': [],
-               'median_magerr_iso': [], 'median_flux_iso': []}
+               'median_class_star': [], 'ellipticity': [],
+               'median_mag_iso': [], 'median_magerr_iso': [],
+               'median_flux_iso': [], 'pm': [], 'pmerr': [], 'fwhm_image': []}
     # for idx in range(0, len(prfs_d['pms']), 1):
     #     stars_d['median_mag_iso'].append([])
     #     stars_d['median_magerr_iso'].append([])
@@ -99,9 +121,10 @@ def create_output_dicts():
 
     galaxies_d = {'median_a_image': [], 'median_erra_image': [],
                   'median_b_image': [], 'median_errb_image': [],
-                  'median_class_star': [],
-                  'ellipticity': [], 'median_mag_iso': [],
-                  'median_magerr_iso': [], 'median_flux_iso': []}
+                  'median_class_star': [], 'ellipticity': [],
+                  'median_mag_iso': [], 'median_magerr_iso': [],
+                  'median_flux_iso': [], 'pm': [], 'pmerr': [],
+                  'fwhm_image': []}
     # for idx in range(0, len(prfs_d['pms']), 1):
     #     galaxies_d['median_mag_iso'].append([])
     #     galaxies_d['median_magerr_iso'].append([])
@@ -118,7 +141,8 @@ def create_output_dicts():
               'median_b_image': [], 'median_errb_image': [],
               'median_class_star': [],
               'ellipticity': [], 'median_mag_iso': [],
-              'median_magerr_iso': [], 'median_flux_iso': []}
+              'median_magerr_iso': [], 'median_flux_iso': [],
+              'pm': [], 'pmerr': [], 'fwhm_image': []}
 
     output_d = {'ssos': ssos_d, 'stars': stars_d, 'galaxies': galaxies_d,
                 'lost': lost_d}
@@ -163,14 +187,48 @@ class TotalScampPerformance:
 
         filt_cat = self.gets_filtered_catalog()  # Gets data from filtered
         input_df = self.gets_data()  # Gets data from catalogs
-        self.splits_data(filt_cat, input_df)  # Splits due type
 
-        """
-        # Saves data
-        for key_ in ['ssos', 'stars', 'galaxies']:
-            out_df = DataFrame(self.data_d[key_])
-            out_df.to_csv('{}.csv'.format(key_))
-        """
+        unique_sources = list(set(filt_cat['SOURCE_NUMBER'].tolist()))
+        sub_list_size = len(unique_sources) / self.prfs_d['cores_number']
+
+        sub_list_l = []
+        for idx_sub_list in range(0, self.prfs_d['cores_number'], 1):
+            if idx_sub_list != (self.prfs_d['cores_number'] - 1):
+                idx_down = sub_list_size * idx_sub_list
+                idx_up = sub_list_size * (idx_sub_list + 1)
+                sub_list_l.append(unique_sources[idx_down:idx_up])
+            else:
+                idx_down = sub_list_size * idx_sub_list
+                sub_list_l.append(unique_sources[idx_down:])
+
+        areas_j = []
+        for idx_l in range(0, self.prfs_d['cores_number'], 1):
+            areas_p = Process(target=self.splits_data,
+                              args=(idx_l, sub_list_l[idx_l],
+                                    filt_cat, input_df,))
+            areas_j.append(areas_p)
+            areas_p.start()
+
+        active_areas = list([job.is_alive() for job in areas_j])
+        while True in active_areas:
+            active_areas = list([job.is_alive() for job in areas_j])
+            pass
+
+        # Merges catalogues
+        for key_ in ['stars', 'galaxies', 'ssos', 'lost']:
+            csv_list = []
+            for idx_csv in range(0, self.prfs_d['cores_number'], 1):
+                csv_ = read_csv('cat_{}_{}.csv'.format(idx_csv, key_),
+                                index_col=0)
+                csv_list.append(csv_)
+
+            full_df = concat(csv_list)
+            full_df.to_csv('full_cats/cat_{}.csv'.format(key_))
+
+        # Removes old catalogues
+        for key_ in ['stars', 'galaxies', 'ssos', 'lost']:
+            for idx_csv in range(0, self.prfs_d['cores_number'], 1):
+                remove('{}/cat_{}_{}.csv'.format(getcwd(), idx_csv, key_))
 
     def gets_filtered_catalog(self):
         """
@@ -195,30 +253,29 @@ class TotalScampPerformance:
         input_df = {1: {}, 2: {}, 3: {}, 4: {}}
 
         for key_ in input_df.keys():
-            ssos_cat = 'cat_clean_ssos_{}.csv'.format(key_)
+            ssos_cat = 'cats/cat_clean_ssos_{}.csv'.format(key_)
             input_df[key_]['SSOs'] = read_csv(ssos_cat, index_col=0)
-            stars_cat = 'stars.csv'
+            stars_cat = 'tmp_stars/stars.csv'
             input_df[key_]['stars'] = read_csv(stars_cat, index_col=0)
-            galaxies_cat = 'galaxies.csv'
+            galaxies_cat = 'tmp_galaxies/galaxies.csv'
             input_df[key_]['galaxies'] = read_csv(galaxies_cat, index_col=0)
 
         return input_df
 
-    def splits_data(self, filt_cat, input_df):
+    def splits_data(self, idx_l, unique_sources, filt_cat, input_df):
         """ Splits filtered catalogue due object type.
         This method creates a dictionary with three different keys.
         Each one (SSOs, stars, galaxies) it is a Dataframe with all valuable
         data.
 
+        :param unique_sources:
         :param filt_cat:
         :param input_df:
         :return:
         """
-        # Unique sources (?)
-        unique_sources = list(set(filt_cat['SOURCE_NUMBER'].tolist()))
-
         print('Creating new catalogues from filtered catalogue due type')
-        print('Total sources: {}'.format(filt_cat['SOURCE_NUMBER'].size))
+        print('Total sources: {} of thread: {}'.format(len(unique_sources),
+                                                       idx_l))
         for source_ in unique_sources:
             source_df = filt_cat[filt_cat['SOURCE_NUMBER'].isin([source_])]
 
@@ -227,7 +284,7 @@ class TotalScampPerformance:
                 # Checks object type
                 alpha = source_df['ALPHA_J2000'].iloc[0]
                 delta = source_df['DELTA_J2000'].iloc[0]
-                keys = ['ALPHA_J2000', 'DELTA_J2000']
+                keys = ['RA', 'DEC']
                 test_sso = check_source(input_df[dither_n]['SSOs'],
                                         alpha, delta, keys)
                 keys = ['X_WORLD', 'Y_WORLD']
@@ -264,10 +321,16 @@ class TotalScampPerformance:
                 self.data_d[key_]['median_magerr_iso'].append(magerr_iso)
                 flux_iso = row.MEDIAN_FLUX_ISO
                 self.data_d[key_]['median_flux_iso'].append(flux_iso)
+                pm = row.PM
+                self.data_d[key_]['pm'].append(pm)
+                pmerr = row.PMERR
+                self.data_d[key_]['pmerr'].append(pmerr)
+                fwhm_image = row.FWHM_IMAGE
+                self.data_d[key_]['fwhm_image'].append(fwhm_image)
 
         for type_key in self.data_d.keys():
             data_df = DataFrame(self.data_d[type_key])
-            data_df.to_csv('cat_{}.csv'.format(type_key))
+            data_df.to_csv('cat_{}_{}.csv'.format(idx_l, type_key))
 
 
 class PlotTotalScampPerformance:

@@ -1349,7 +1349,7 @@ class PlotError:
                 # Creates image
                 dither = self.fits_files[idx][-6:-5]
                 i_regs = '{}/dither_{}.reg'.format(self.prfs_d['dithers_out'],
-                                                    dither)
+                                                   dither)
                 if idx == 0:
                     p_alpha = 0
                     p_delta = 0
