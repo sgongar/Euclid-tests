@@ -42,3 +42,7 @@ pipeline/logs/*
 pipeline/plots/*
 performance/output/*
 .Rproj.user
+
+
+### Images ###
+performance/*fits
