@@ -386,10 +386,14 @@ class FalsePositivesScampPerformance:
         unique_sources = list(set(filt_cat['SOURCE_NUMBER'].tolist()))
 
         # False positives dictionary
-        false_positives = {1: {'RA': [], 'DEC': [], 'MAG': [], 'PM': []},
-                           2: {'RA': [], 'DEC': [], 'MAG': [], 'PM': []},
-                           3: {'RA': [], 'DEC': [], 'MAG': [], 'PM': []},
-                           4: {'RA': [], 'DEC': [], 'MAG': [], 'PM': []}}
+        false_positives = {1: {'RA': [], 'DEC': [], 'MAG': [],
+                               'PM': [], 'CLASS': []},
+                           2: {'RA': [], 'DEC': [], 'MAG': [],
+                               'PM': [], 'CLASS': []},
+                           3: {'RA': [], 'DEC': [], 'MAG': [],
+                               'PM': [], 'CLASS': []},
+                           4: {'RA': [], 'DEC': [], 'MAG': [],
+                               'PM': [], 'CLASS': []}}
 
         print('Creating new catalogues from filtered catalogue due type')
         print('Total sources: {}'.format(filt_cat['SOURCE_NUMBER'].size))
@@ -399,6 +403,8 @@ class FalsePositivesScampPerformance:
             o_mag_bin = get_norm_mag(source_df['MEDIAN_MAG_ISO'].iloc[0])
             # Takes the first value of PM Series
             o_pm_norm = get_norm_speed(source_df['PM'].iloc[0])
+            # Takes the median value of CLASS_STAR
+            o_class_star = source_df['CLASS_STAR'].iloc[0]
 
             for i, row in enumerate(source_df.itertuples(), 1):
                 alpha = row.ALPHA_J2000
@@ -415,9 +421,10 @@ class FalsePositivesScampPerformance:
                     false_positives[dither_n]['DEC'].append(delta)
                     false_positives[dither_n]['MAG'].append(o_mag_bin)
                     false_positives[dither_n]['PM'].append(o_pm_norm)
+                    false_positives[dither_n]['CLASS'].append(o_class_star)
 
+        # Regions creation
         for dither_ in false_positives.keys():
-            # Create regions
             alpha_list = false_positives[dither_]['RA']
             alpha_serie = Series(alpha_list, name='ALPHA_J2000')
             delta_list = false_positives[dither_]['DEC']
@@ -435,6 +442,45 @@ class FalsePositivesScampPerformance:
                                                                     dither_)
                 output_pm.to_csv(cat_name, index=False, header=False, sep=" ")
 
+        # Catalogue creation
+        dither_total_list = []
+        alpha_total_list = []
+        delta_total_list = []
+        mag_total_list = []
+        pm_total_list = []
+        class_total_list = []
+        for dither_ in false_positives.keys():
+            alpha_list = false_positives[dither_]['RA']
+            for alpha_ in alpha_list:
+                dither_total_list.append(dither_)
+                alpha_total_list.append(alpha_)
+            delta_list = false_positives[dither_]['DEC']
+            for delta_ in delta_list:
+                delta_total_list.append(delta_)
+            mag_list = false_positives[dither_]['MAG']
+            for mag_ in mag_list:
+                mag_total_list.append(mag_)
+            pm_list = false_positives[dither_]['PM']
+            for pm_ in pm_list:
+                pm_total_list.append(pm_)
+            class_list = false_positives[dither_]['CLASS']
+            for class_ in class_list:
+                class_total_list.append(class_)
+
+        dither_serie = Series(dither_total_list, name='DITHER')
+        alpha_serie = Series(alpha_total_list, name='ALPHA_J2000')
+        delta_serie = Series(delta_total_list, name='DELTA_J2000')
+        mag_serie = Series(mag_total_list, name='MAG_ISO')
+        pm_serie = Series(pm_total_list, name='PM')
+        class_serie = Series(class_total_list, name='CLASS_STAR')
+
+        output = concat([dither_serie, alpha_serie, delta_serie,
+                         mag_serie, pm_serie, class_serie], axis=1)
+        for pm_ in [0.01, 0.03, 0.1, 0.3, 1.0, 3.0, 10.0, 30.0]:
+                output_pm = output[output['PM'].isin([pm_])]
+                cat_name = 'false_positives/false_{}.csv'.format(pm_)
+                output_pm.to_csv(cat_name)
+        
 
 if __name__ == "__main__":
     FalsePositivesScampPerformance()

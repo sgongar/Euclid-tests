@@ -87,25 +87,24 @@ class FactorsScampPerformance:
         """
         self.filter_p_number = 3  # First one with enough data for statistics
         self.prfs_d = extract_settings_elvis()
+
+        ccds = False
+        filtered = False
+        scamp = True
+
         input_df = read_csv('cats/cat_clean_ssos.csv', index_col=0)
         filt_cat = self.gets_filtered_catalog()  # Gets data from filtered
 
-        cats_d = self.extract_cats()
-        self.extract_stats_ccds(cats_d, input_df)
-
-        # self.extract_stats_filt(filt_cat, input_df)
-
-        """
-        self.data_d = redo_data_d()
-
-        self.save = True
-
-        logger_name = 'scamp_performance'  # Set as desired
-        self.logger = setting_logger(self.prfs_d, logger_name)
-
-        input_df = self.gets_data()  # Gets data from catalogs
-        self.extract_stats(filt_cat, input_df)  # Splits due type
-        """
+        if ccds:
+            cats_d = self.extract_cats()
+            self.extract_stats_ccds(cats_d, input_df)
+        elif filtered:
+            self.extract_stats_filt(filt_cat, input_df)
+        elif scamp:
+            scamp_
+            self.extract_stats_scamp(input_df)
+        else:
+            pass
 
     def extract_cats(self):
         """
@@ -203,8 +202,8 @@ class FactorsScampPerformance:
         no = 0
         filt_cat_size = filt_cat['SOURCE_NUMBER'].size
         total_input_size = input_df['SOURCE'].size
-        print('total {}'.format(total_input_size))
-        print('filt {}'.format(filt_cat_size))
+        print('sources in input catalogue: {}'.format(total_input_size))
+        print('sources in filtered catalogue {}'.format(filt_cat_size))
 
         for source_ in unique_sources:
             source_df = input_df[input_df['SOURCE'].isin([source_])]
@@ -221,10 +220,8 @@ class FactorsScampPerformance:
                 else:
                     ok += 1
 
-        print('ok {}'.format(ok))
-        print('no {}'.format(no))
-
-        # print(unique_sources)
+        print('detected: {}'.format(ok))
+        print('not detected: {}'.format(no))
 
 
 if __name__ == "__main__":
