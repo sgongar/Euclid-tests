@@ -606,7 +606,7 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
     def filter_class(self, full_df):
         """
 
-        :param full_db:
+        :param full_df:
         :return:
         """
         self.logger.debug('Runs class star filter')
@@ -645,38 +645,6 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
                      'MEDIAN_MAGERR_ISO', 'MEAN_MAGERR_ISO',
                      'FLAGS_EXTRACTION', 'FLAGS_SCAMP', 'FLAGS_IMA', 'PM',
                      'PMERR', 'PMALPHA', 'PMDELTA', 'PMALPHAERR', 'PMDELTAERR']
-
-
-
-        # 0.5, hasta 0.3
-        # filter_params = {'central_fit': [-0.14273233, 4.56113342],
-        #                  'lower_fit': [-0.14288414, 4.49851371],
-        #                  'upper_fit': [-0.14258053, 4.62375314]}
-
-        # 0.4 hasta 0.1
-        # filter_params = {'central_fit': [-0.14417005, 4.59286226],
-        #                  'lower_fit': [-0.14411595, 4.53657401],
-        #                  'upper_fit': [-0.14422416, 4.64915051]}
-
-        # 0.4 hasta 0.3 mags = [21-25]
-        # filter_params = {'central_fit': [-0.13489287, 4.39921033],
-        #                  'lower_fit': [-0.13488375, 4.31335665],
-        #                  'upper_fit': [-0.134902, 4.485064]}
-
-        # 0.4 hasta 1 mags = [21-25]
-        # filter_params = {'central_fit': [-0.1352622, 4.41103641],
-        #                  'lower_fit': [-0.13525472, 4.32794007],
-        #                  'upper_fit': [-0.13526968, 4.49413276]}
-
-        # 0.4 hasta 1 mags = [21-27] not lineal response
-        # a-b relation without error
-        # original sextractor configuration
-        # filter_params = {'central_b_fit': [-0.13816623, 4.47217154],
-        #                  'lower_b_fit': [-0.1381669, 4.38973617],
-        #                  'upper_b_fit': [-0.13816556, 4.55460691],
-        #                  'central_a_fit': [0.93667408, 0.2035752],
-        #                  'lower_a_fit': [0.93665283, 0.01074982],
-        #                  'upper_a_fit': [0.93669534, 0.39640057]}
 
         # 0.4 hasta 1 mags = [21-23] lineal response
         # a-b relation without error

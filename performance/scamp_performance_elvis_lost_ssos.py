@@ -319,7 +319,6 @@ class ScampPerformanceLostOnes:
 
         for idx_source_, source_ in enumerate(unique_sources):
             source_df = total_df[total_df['SOURCE'].isin([source_])]
-            sleep(2)
 
             for idx_column_, column_ in enumerate(source_df.itertuples(), 1):
                 alpha = column_.RA

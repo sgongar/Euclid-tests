@@ -88,9 +88,9 @@ class FactorsScampPerformance:
         self.filter_p_number = 3  # First one with enough data for statistics
         self.prfs_d = extract_settings_elvis()
 
-        ccds = False
+        ccds = True
         filtered = False
-        scamp = True
+        scamp = False
 
         input_df = read_csv('cats/cat_clean_ssos.csv', index_col=0)
         filt_cat = self.gets_filtered_catalog()  # Gets data from filtered
@@ -101,8 +101,8 @@ class FactorsScampPerformance:
         elif filtered:
             self.extract_stats_filt(filt_cat, input_df)
         elif scamp:
-            scamp_
-            self.extract_stats_scamp(input_df)
+            pass
+            # self.extract_stats_scamp(input_df)
         else:
             pass
 

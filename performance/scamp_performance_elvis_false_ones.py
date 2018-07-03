@@ -332,6 +332,16 @@ class FalsePositivesScampPerformance:
         self.prfs_d = extract_settings_elvis()
         self.data_d = redo_data_d()
 
+        # False positives dictionary
+        self.false_positives = {1: {'RA': [], 'DEC': [], 'MAG': [],
+                                    'PM': [], 'CLASS': []},
+                                2: {'RA': [], 'DEC': [], 'MAG': [],
+                                    'PM': [], 'CLASS': []},
+                                3: {'RA': [], 'DEC': [], 'MAG': [],
+                                    'PM': [], 'CLASS': []},
+                                4: {'RA': [], 'DEC': [], 'MAG': [],
+                                    'PM': [], 'CLASS': []}}
+
         self.save = True
 
         logger_name = 'scamp_performance'  # Set as desired
@@ -385,16 +395,6 @@ class FalsePositivesScampPerformance:
         prfs_d = extract_settings_elvis()
         unique_sources = list(set(filt_cat['SOURCE_NUMBER'].tolist()))
 
-        # False positives dictionary
-        false_positives = {1: {'RA': [], 'DEC': [], 'MAG': [],
-                               'PM': [], 'CLASS': []},
-                           2: {'RA': [], 'DEC': [], 'MAG': [],
-                               'PM': [], 'CLASS': []},
-                           3: {'RA': [], 'DEC': [], 'MAG': [],
-                               'PM': [], 'CLASS': []},
-                           4: {'RA': [], 'DEC': [], 'MAG': [],
-                               'PM': [], 'CLASS': []}}
-
         print('Creating new catalogues from filtered catalogue due type')
         print('Total sources: {}'.format(filt_cat['SOURCE_NUMBER'].size))
         for idx_source_, source_ in enumerate(unique_sources):
@@ -417,21 +417,21 @@ class FalsePositivesScampPerformance:
                 if test_sso.empty is not True:
                     pass
                 else:
-                    false_positives[dither_n]['RA'].append(alpha)
-                    false_positives[dither_n]['DEC'].append(delta)
-                    false_positives[dither_n]['MAG'].append(o_mag_bin)
-                    false_positives[dither_n]['PM'].append(o_pm_norm)
-                    false_positives[dither_n]['CLASS'].append(o_class_star)
+                    self.false_positives[dither_n]['RA'].append(alpha)
+                    self.false_positives[dither_n]['DEC'].append(delta)
+                    self.false_positives[dither_n]['MAG'].append(o_mag_bin)
+                    self.false_positives[dither_n]['PM'].append(o_pm_norm)
+                    self.false_positives[dither_n]['CLASS'].append(o_class_star)
 
         # Regions creation
-        for dither_ in false_positives.keys():
-            alpha_list = false_positives[dither_]['RA']
+        for dither_ in self.false_positives.keys():
+            alpha_list = self.false_positives[dither_]['RA']
             alpha_serie = Series(alpha_list, name='ALPHA_J2000')
-            delta_list = false_positives[dither_]['DEC']
+            delta_list = self.false_positives[dither_]['DEC']
             delta_serie = Series(delta_list, name='DELTA_J2000')
-            mag_list = false_positives[dither_]['MAG']
+            mag_list = self.false_positives[dither_]['MAG']
             mag_serie = Series(mag_list, name='MAG_ISO')
-            pm_list = false_positives[dither_]['PM']
+            pm_list = self.false_positives[dither_]['PM']
             pm_serie = Series(pm_list, name='PM')
 
             output = concat([alpha_serie, delta_serie,
@@ -449,21 +449,21 @@ class FalsePositivesScampPerformance:
         mag_total_list = []
         pm_total_list = []
         class_total_list = []
-        for dither_ in false_positives.keys():
-            alpha_list = false_positives[dither_]['RA']
+        for dither_ in self.false_positives.keys():
+            alpha_list = self.false_positives[dither_]['RA']
             for alpha_ in alpha_list:
                 dither_total_list.append(dither_)
                 alpha_total_list.append(alpha_)
-            delta_list = false_positives[dither_]['DEC']
+            delta_list = self.false_positives[dither_]['DEC']
             for delta_ in delta_list:
                 delta_total_list.append(delta_)
-            mag_list = false_positives[dither_]['MAG']
+            mag_list = self.false_positives[dither_]['MAG']
             for mag_ in mag_list:
                 mag_total_list.append(mag_)
-            pm_list = false_positives[dither_]['PM']
+            pm_list = self.false_positives[dither_]['PM']
             for pm_ in pm_list:
                 pm_total_list.append(pm_)
-            class_list = false_positives[dither_]['CLASS']
+            class_list = self.false_positives[dither_]['CLASS']
             for class_ in class_list:
                 class_total_list.append(class_)
 
