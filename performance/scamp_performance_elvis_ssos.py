@@ -157,7 +157,6 @@ class FactorsScampPerformance:
             # Loops over CCD catalogues
             for i, row in enumerate(source_df.itertuples(), 1):
                 dither_df = source_df[source_df['DITHER'].isin([row.DITHER])]
-                print('dither {}'.format(row.DITHER))
                 i_alpha = float(dither_df['RA'].iloc[0])
                 i_delta = float(dither_df['DEC'].iloc[0])
 
@@ -177,7 +176,8 @@ class FactorsScampPerformance:
                         pm_df = check_source(filt_cat, alpha, delta,
                                              keys=['ALPHA_J2000',
                                                    'DELTA_J2000'])
-                        print(pm_df['PM'].size)
+                        if pm_df['PM'].size > 4:
+                            print(pm_df)
                         a_image = out_df['A_IMAGE'].iloc[0]
                         b_image = out_df['B_IMAGE'].iloc[0]
                         class_star = out_df['CLASS_STAR'].iloc[0]
