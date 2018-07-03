@@ -171,17 +171,19 @@ class FactorsScampPerformance:
                                           keys=['ALPHA_J2000', 'DELTA_J2000'])
 
                     if out_df.empty is not True:
+                        a_image = float(out_df['A_IMAGE'].iloc[0])
+                        b_image = float(out_df['B_IMAGE'].iloc[0])
+                        class_star = float(out_df['CLASS_STAR'].iloc[0])
                         alpha = float(out_df['ALPHA_J2000'].iloc[0])
                         delta = float(out_df['DELTA_J2000'].iloc[0])
                         pm_df = check_source(filt_cat, alpha, delta,
                                              keys=['ALPHA_J2000',
                                                    'DELTA_J2000'])
-                        if pm_df['PM'].size > 4:
-                            print(pm_df)
-                        a_image = out_df['A_IMAGE'].iloc[0]
-                        b_image = out_df['B_IMAGE'].iloc[0]
-                        class_star = out_df['CLASS_STAR'].iloc[0]
-                        test = True
+                        if pm_df is not True:
+                            test = True
+                            pm = float(pm_df['PM'].iloc[0])
+                        else:
+                            test = False
 
                 if test:
                     test_dict['PM'].append(pm)
