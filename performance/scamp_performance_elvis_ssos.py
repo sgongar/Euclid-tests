@@ -161,6 +161,7 @@ class FactorsScampPerformance:
             for i, row in enumerate(source_df.itertuples(), 1):
                 total += 1
                 dither_df = source_df[source_df['DITHER'].isin([row.DITHER])]
+                print('dither {}'.format(row.DITHER))
                 i_alpha = float(dither_df['RA'].iloc[0])
                 i_delta = float(dither_df['DEC'].iloc[0])
 
