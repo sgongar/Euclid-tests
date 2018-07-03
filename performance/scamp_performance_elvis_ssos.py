@@ -177,7 +177,7 @@ class FactorsScampPerformance:
                         pm_df = check_source(filt_cat, alpha, delta,
                                              keys=['ALPHA_J2000',
                                                    'DELTA_J2000'])
-                        print(pm_df)
+                        print(pm_df['PM'].size)
                         a_image = out_df['A_IMAGE'].iloc[0]
                         b_image = out_df['B_IMAGE'].iloc[0]
                         class_star = out_df['CLASS_STAR'].iloc[0]
