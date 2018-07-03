@@ -181,6 +181,7 @@ class FactorsScampPerformance:
                                                    'DELTA_J2000'])
                         if pm_df is not True:
                             test = True
+                            print(pm_df)
                             pm = float(pm_df['PM'].iloc[0])
                         else:
                             test = False
