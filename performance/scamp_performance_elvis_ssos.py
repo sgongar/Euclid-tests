@@ -97,7 +97,7 @@ class FactorsScampPerformance:
 
         if ccds:
             cats_d = self.extract_cats()
-            self.extract_stats_ccds(cats_d, input_df)
+            self.extract_stats_ccds(cats_d, input_df, filt_cat)
         elif filtered:
             self.extract_stats_filt(filt_cat, input_df)
         elif scamp:
@@ -136,21 +136,18 @@ class FactorsScampPerformance:
 
         return filtered_cat
 
-    def extract_stats_ccds(self, cats_d, input_df):
+    def extract_stats_ccds(self, cats_d, input_df, filt_cat):
         """
 
         :param cats_d:
         :param input_df:
+        :param filt_cat:
         :return:
         """
         # Unique sources (?)
         unique_sources = list(set(input_df['SOURCE'].tolist()))
 
-        total = 0
-        ok = 0
-
-        test_dict = {1: {'RA': [], 'DEC': []}, 2: {'RA': [], 'DEC': []},
-                     3: {'RA': [], 'DEC': []}, 4: {'RA': [], 'DEC': []}}
+        test_dict = {'PM': [], 'A_IMAGE': [], 'B_IMAGE': [], 'CLASS_STAR': []}
 
         print('total {}'.format(len(unique_sources)))
         for idx_source_, source_ in enumerate(unique_sources):
@@ -159,36 +156,47 @@ class FactorsScampPerformance:
 
             # Loops over CCD catalogues
             for i, row in enumerate(source_df.itertuples(), 1):
-                total += 1
                 dither_df = source_df[source_df['DITHER'].isin([row.DITHER])]
                 print('dither {}'.format(row.DITHER))
                 i_alpha = float(dither_df['RA'].iloc[0])
                 i_delta = float(dither_df['DEC'].iloc[0])
 
-                test = True
+                pm = ''
+                a_image = ''
+                b_image = ''
+                class_star = ''
+                test = False
                 for cat_ in cats_d[row.DITHER]:
-                    out_df = check_source(cats_d[row.DITHER][cat_], i_alpha, i_delta,
+                    out_df = check_source(cats_d[row.DITHER][cat_],
+                                          i_alpha, i_delta,
                                           keys=['ALPHA_J2000', 'DELTA_J2000'])
 
                     if out_df.empty is not True:
-                        ok += 1
-                        print(out_df['B_IMAGE'].iloc[0])
-                        test = False
+                        alpha = float(out_df['ALPHA_J2000'].iloc[0])
+                        delta = float(out_df['DELTA_J2000'].iloc[0])
+                        pm_df = check_source(filt_cat, alpha, delta,
+                                             keys=['ALPHA_J2000',
+                                                   'DELTA_J2000'])
+                        print(pm_df)
+                        a_image = out_df['A_IMAGE'].iloc[0]
+                        b_image = out_df['B_IMAGE'].iloc[0]
+                        class_star = out_df['CLASS_STAR'].iloc[0]
+                        test = True
 
                 if test:
-                    test_dict[row.DITHER]['RA'].append(i_alpha)
-                    test_dict[row.DITHER]['DEC'].append(i_delta)
+                    test_dict['PM'].append(pm)
+                    test_dict['A_IMAGE'].append(a_image)
+                    test_dict['B_IMAGE'].append(b_image)
+                    test_dict['CLASS_STAR'].append(class_star)
 
-        for dither_ in range(1, 5, 1):
-            alpha_list = Series(test_dict[dither_]['RA'], name='ALPHA_J2000')
-            delta_list = Series(test_dict[dither_]['DEC'], name='DELTA_J2000')
+        pm_list = Series(test_dict['PM'], name='PM')
+        a_image_list = Series(test_dict['A_IMAGE'], name='A_IMAGE')
+        b_image_list = Series(test_dict['B_IMAGE'], name='B_IMAGE')
+        class_star_list = Series(test_dict['CLASS_STAR'], name='CLASS_STAR')
 
-            positions_table = concat([alpha_list, delta_list], axis=1)
-            positions_table.to_csv('dither_{}.reg'.format(dither_),
-                                   index=False, header=False, sep=" ")
-
-        print('total {}'.format(total))
-        print('ok {}'.format(ok))
+        positions_table = concat([pm_list, a_image_list,
+                                  b_image_list, class_star_list], axis=1)
+        positions_table.to_csv('catalogue.csv')
 
     def extract_stats_filt(self, filt_cat, input_df):
         """
