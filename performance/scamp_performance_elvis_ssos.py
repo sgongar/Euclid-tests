@@ -172,7 +172,7 @@ class FactorsScampPerformance:
 
                     if out_df.empty is not True:
                         ok += 1
-                        print(out_df)
+                        print(out_df['B_IMAGE'])
                         test = False
 
                 if test:
