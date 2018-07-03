@@ -172,6 +172,7 @@ class FactorsScampPerformance:
 
                     if out_df.empty is not True:
                         ok += 1
+                        print(out_df)
                         test = False
 
                 if test:
