@@ -69,6 +69,11 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
         # full_df = full_df[full_df['MEAN_CLASS_STAR'] > self.class_star_limit]
         full_df = self.filter_coherence(full_df)
 
+        # full_df = full_df[full_df['MEDIAN_B_IMAGE'] > 1.04]
+        # full_df = full_df[full_df['MEDIAN_B_IMAGE'] < 2]
+
+        full_df = self.filter_b(full_df)
+
         """
         # full_db = read_csv('{}_3.csv'.format(self.filter_o_n), index_col=0)
         self.slow_df, self.fast_df = self.filter_class(full_df)
@@ -646,15 +651,11 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
                      'FLAGS_EXTRACTION', 'FLAGS_SCAMP', 'FLAGS_IMA', 'PM',
                      'PMERR', 'PMALPHA', 'PMDELTA', 'PMALPHAERR', 'PMDELTAERR']
 
-        # 0.4 hasta 1 mags = [21-23] lineal response
-        # a-b relation without error
+        # pm-a-b relation without error
         # new sextractor configuration
-        filter_params = {'central_b_fit': [-0.16207364, 4.96576972],
-                         'lower_b_fit': [-0.16145345, 4.70865816],
-                         'upper_b_fit': [-0.16269382, 5.22288128],
-                         'central_a_fit': [1.01032694, 0.09742901],
-                         'lower_a_fit': [1.00744122, -0.09041792],
-                         'upper_a_fit': [1.01321265, 0.28527593]}
+        filter_params = {'lower_fit': [2.4683, -5.0093, 2.7325],
+                         'central_fit': [2.7145, -4.7978, 2.7889],
+                         'upper_fit': [2.960614, -4.5863, 2.8452]}
 
         sub_list_1_size = len(unique_sources) / 2
         sub_list_1 = unique_sources[:sub_list_1_size]
@@ -702,25 +703,23 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
             print('filter_b - thread {} - source {}'.format(idx_l, idx))
 
             o_df = full_db[full_db['SOURCE_NUMBER'].isin([source_])].iloc[0]
-            mag = float(o_df['MEDIAN_MAG_ISO'])
+            # mag = float(o_df['MEDIAN_MAG_ISO'])
 
             # b test
+            pm = float(o_df['PM'])
             b_image = float(o_df['MEDIAN_B_IMAGE'])
-            upper_b_test = (filter_params['upper_b_fit'][0] * mag) + \
-                           filter_params['upper_b_fit'][1]
-            lower_b_test = (filter_params['lower_b_fit'][0] * mag) + \
-                           filter_params['lower_b_fit'][1]
-            b_test = float(lower_b_test) < b_image < float(upper_b_test)
-
-            # a test
             a_image = float(o_df['MEDIAN_A_IMAGE'])
-            upper_a_test = (filter_params['upper_a_fit'][0] * b_image) + \
-                           filter_params['upper_a_fit'][1]
-            lower_a_test = (filter_params['lower_a_fit'][0] * b_image) + \
-                           filter_params['lower_a_fit'][1]
-            a_test = float(lower_a_test) < a_image < float(upper_a_test)
+            upper_test = filter_params['upper_fit'][0] + \
+                         (filter_params['upper_fit'][1] * b_image) + \
+                         (filter_params['upper_fit'][2] * a_image)
+            lower_test = filter_params['lower_fit'][0] + \
+                         (filter_params['lower_fit'][1] * b_image) + \
+                         (filter_params['lower_fit'][2] * a_image)
+            b_test = float(lower_test) < pm < float(upper_test)
 
-            if b_test and a_test:
+            print(upper_test, lower_test, b_test)
+
+            if b_test:
                 accepted.append(source_)
             else:
                 rejected.append(source_)

@@ -14,20 +14,9 @@ Todo:
 
 from astropy.io import fits
 from astropy.table import Table
-from matplotlib.backends.backend_pdf import PdfPages
-import matplotlib.pyplot as plt
-from pandas import concat, DataFrame, read_csv
-
-from misc import extract_settings_elvis, get_cats_elvis_d
-from sys import argv
-
-from matplotlib import cm
-from matplotlib.backends.backend_pdf import PdfPages
-import matplotlib.pyplot as plt
-from numpy import array, isnan, nan, nanmean
 from pandas import concat, DataFrame, read_csv, Series
 
-from regions import Create_regions
+from misc import extract_settings_elvis, get_cats_elvis_d
 
 
 __author__ = "Samuel Góngora García"
@@ -38,25 +27,6 @@ __maintainer__ = "Samuel Góngora García"
 __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
 
-
-def get_dither(catalog_n):
-    """
-
-    :param catalog_n:
-    :return: dither_n
-    """
-    dither_n = 0
-
-    if catalog_n <= 36:
-        dither_n = 1
-    elif 36 < catalog_n <= 72:
-        dither_n = 2
-    elif 72 < catalog_n <= 108:
-        dither_n = 3
-    elif 108 < catalog_n <= 144:
-        dither_n = 4
-
-    return dither_n
 
 
 def check_source(o_df, i_alpha, i_delta, keys):
@@ -171,19 +141,17 @@ class FactorsScampPerformance:
                                           keys=['ALPHA_J2000', 'DELTA_J2000'])
 
                     if out_df.empty is not True:
-                        a_image = float(out_df['A_IMAGE'].iloc[0])
-                        b_image = float(out_df['B_IMAGE'].iloc[0])
-                        class_star = float(out_df['CLASS_STAR'].iloc[0])
                         alpha = float(out_df['ALPHA_J2000'].iloc[0])
                         delta = float(out_df['DELTA_J2000'].iloc[0])
                         pm_df = check_source(filt_cat, alpha, delta,
                                              keys=['ALPHA_J2000',
                                                    'DELTA_J2000'])
-                        if pm_df is not True:
+                        if pm_df.empty is not True:
                             test = True
                             pm = float(pm_df['PM'].iloc[0])
-                        else:
-                            test = False
+                            a_image = float(pm_df['MEDIAN_A_IMAGE'].iloc[0])
+                            b_image = float(pm_df['MEDIAN_B_IMAGE'].iloc[0])
+                            class_star = float(pm_df['MEDIAN_CLASS_STAR'].iloc[0])
 
                 if test:
                     test_dict['PM'].append(pm)

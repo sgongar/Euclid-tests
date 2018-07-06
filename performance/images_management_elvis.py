@@ -17,17 +17,10 @@ Todo:
 *GNU Terry Pratchett*
 
 """
-from math import cos, sin
-from multiprocessing import Process
-from sys import stdout
-
 from astropy.io import fits
 from astropy.coordinates import SkyCoord
 from astropy.units import degree
 from astropy.wcs import WCS
-from astropy.table import Table
-from numpy import median
-from pandas import concat, DataFrame, read_csv, Series
 
 from misc import extract_settings_elvis, get_fits
 

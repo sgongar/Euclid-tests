@@ -42,73 +42,31 @@ __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
 
 
-def compute_factors(factors_d, stats_df):
+def extract_inputs_d():
     """
-    N_meas: number of all detected sources(including false detections)
-    N_se: number of simulated sources recovered by source extraction
-    N_true: number of simulated input sources
-    f_dr: detection rate f_pur: purity
-    f_com: completeness
 
-    f_dr = N_meas / N_true = (N_se + N_false) / N_true
-    f_pur = N_se / N_meas = N_se / (N_se + N_false)
-    f_com = f_dr * f_pur = N_se / N_true
-
-    :param factors_d:
-    :param stats_df:
     :return:
     """
-    # prfs_d = extract_settings_luca()
-    #
-    # mags = [[14, 15], [15, 16], [16, 17], [17, 18], [18, 19],
-    #         [19, 20], [20, 21], [21, 22], [22, 23], [23, 24],
-    #         [24, 25], [25, 26], [26, 27], [27, 28]]
-    # pms = ['right-0', 'false-0', 'total-0',
-    #        'right-0.1', 'false-0.1', 'total-0.1',
-    #        'right-0.3', 'false-0.3', 'total-0.3',
-    #        'right-1.0', 'false-1.0', 'total-1.0',
-    #        'right-3.0', 'false-3.0', 'total-3.0',
-    #        'right-10.0', 'false-10.0', 'total-10.0']
-    pm_list = [0.1, 0.3, 1.0, 3.0, 10.0]
-    idxs_pm = [[4, 5, 6], [7, 8, 9], [10, 11, 12],
-               [13, 14, 15], [16, 17, 18]]
-    for idx_mag, data in enumerate(stats_df.itertuples(), 1):
-        # Loop over the different magnitudes
-        if 6 < idx_mag < 13:  # Only gets values from magnitudes [20, 26]
-            mag_ = data[0]  # Gets magnitude value
-            for idx_pm, pm_values in enumerate(idxs_pm): # each sublist is a different pm
-                pm_ = pm_list[idx_pm]
-                n_se = data[pm_values[0]]
-                factors_d[mag_][pm_]['n_se'] = n_se
-                n_false = data[pm_values[1]]
-                factors_d[mag_][pm_]['n_false'] = n_false
-                n_meas = n_se + n_false
-                factors_d[mag_][pm_]['n_meas'] = n_meas
-                n_true = data[pm_values[2]]
-                factors_d[mag_][pm_]['n_true'] = n_true
+    prfs_dict = extract_settings_elvis()
+    inputs_d = {}
 
-                try:
-                    f_dr = float(n_meas) / float(n_true)
-                    f_dr = float("{0:.2f}".format(f_dr))
-                    factors_d[mag_][pm_]['f_dr'] = f_dr
-                except ZeroDivisionError:
-                    factors_d[mag_][pm_]['f_dr'] = nan
-                try:
-                    f_pur = float(n_se) / float(n_meas)
-                    f_pur = float("{0:.2f}".format(f_pur))
-                    factors_d[mag_][pm_]['f_pur'] = f_pur
-                except ZeroDivisionError:
-                    factors_d[mag_][pm_]['f_pur'] = nan
-                try:
-                    f_com = float(n_se) / float(n_true)
-                    f_com = float("{0:.2f}".format(f_com))
-                    factors_d[mag_][pm_]['f_com'] = f_com
-                except ZeroDivisionError:
-                    factors_d[mag_][pm_]['f_com'] = nan
-        else:
-            pass
+    cat_stars_loc = prfs_dict['references']
+    cat_stars = fits.open('{}/cat_stars.fits'.format(cat_stars_loc))
+    stars_data = Table(cat_stars[1].data)
+    stars_df = stars_data.to_pandas()
+    stars_idx = range(0, 28474, 1)  # hardcoded - todo!
+    stars_df['IDX'] = stars_idx
+    inputs_d['stars'] = stars_df
 
-    return factors_d
+    cat_galaxies_loc = prfs_dict['references']
+    cat_galaxies = fits.open('{}/cat_galaxies.fits'.format(cat_galaxies_loc))
+    galaxies_data = Table(cat_galaxies[1].data)
+    galaxies_df = galaxies_data.to_pandas()
+    galaxies_idx = range(0, 143766, 1)  # hardcoded - todo!
+    galaxies_df['IDX'] = galaxies_idx
+    inputs_d['galaxies'] = galaxies_df
+
+    return inputs_d
 
 
 def save_factors(factors_d):
@@ -321,6 +279,26 @@ def redo_data_d():
     return data_d
 
 
+def get_object(alpha, delta, input_d):
+    """
+
+    :param alpha:
+    :param delta:
+    :return:
+    """
+    o_df_galaxies = check_source(input_d['galaxies'], alpha, delta,
+                                 keys=['ra', 'dec'])
+    o_df_stars = check_source(input_d['stars'], alpha, delta,
+                              keys=['RA2000(Gaia)', 'DEC2000(Gaia)'])
+
+    if o_df_galaxies.empty is not True:
+        return 'galaxies'
+    elif o_df_stars.empty is not True:
+        return 'star'
+    else:
+        return 'SSO'
+
+
 class FalsePositivesScampPerformance:
 
     def __init__(self):
@@ -331,16 +309,17 @@ class FalsePositivesScampPerformance:
         self.filter_p_number = 9  # First one with enough data for statistics
         self.prfs_d = extract_settings_elvis()
         self.data_d = redo_data_d()
+        self.input_d = extract_inputs_d()
 
         # False positives dictionary
         self.false_positives = {1: {'RA': [], 'DEC': [], 'MAG': [],
-                                    'PM': [], 'CLASS': []},
+                                    'PM': [], 'CLASS': [], 'OBJECT': []},
                                 2: {'RA': [], 'DEC': [], 'MAG': [],
-                                    'PM': [], 'CLASS': []},
+                                    'PM': [], 'CLASS': [], 'OBJECT': []},
                                 3: {'RA': [], 'DEC': [], 'MAG': [],
-                                    'PM': [], 'CLASS': []},
+                                    'PM': [], 'CLASS': [], 'OBJECT': []},
                                 4: {'RA': [], 'DEC': [], 'MAG': [],
-                                    'PM': [], 'CLASS': []}}
+                                    'PM': [], 'CLASS': [], 'OBJECT': []}}
 
         self.save = True
 
@@ -422,6 +401,8 @@ class FalsePositivesScampPerformance:
                     self.false_positives[dither_n]['MAG'].append(o_mag_bin)
                     self.false_positives[dither_n]['PM'].append(o_pm_norm)
                     self.false_positives[dither_n]['CLASS'].append(o_class_star)
+                    object_type = get_object(alpha, delta, self.input_d)
+                    self.false_positives[dither_n]['OBJECT'].append(object_type)
 
         # Regions creation
         for dither_ in self.false_positives.keys():
@@ -433,9 +414,10 @@ class FalsePositivesScampPerformance:
             mag_serie = Series(mag_list, name='MAG_ISO')
             pm_list = self.false_positives[dither_]['PM']
             pm_serie = Series(pm_list, name='PM')
+            object_list = self.false_positives[dither_]['OBJECT']
+            object_serie = Series(object_list, name='OBJECT')
 
-            output = concat([alpha_serie, delta_serie,
-                             mag_serie, pm_serie], axis=1)
+            output = concat([alpha_serie, delta_serie, pm_serie], axis=1)
             for pm_ in [0.01, 0.03, 0.1, 0.3, 1.0, 3.0, 10.0, 30.0]:
                 output_pm = output[output['PM'].isin([pm_])]
                 cat_name = 'false_positives/false_{}_{}.reg'.format(pm_,
@@ -449,6 +431,7 @@ class FalsePositivesScampPerformance:
         mag_total_list = []
         pm_total_list = []
         class_total_list = []
+        object_total_list = []
         for dither_ in self.false_positives.keys():
             alpha_list = self.false_positives[dither_]['RA']
             for alpha_ in alpha_list:
@@ -466,6 +449,9 @@ class FalsePositivesScampPerformance:
             class_list = self.false_positives[dither_]['CLASS']
             for class_ in class_list:
                 class_total_list.append(class_)
+            object_list = self.false_positives[dither_]['OBJECT']
+            for object_ in object_list:
+                object_total_list.append(object_)
 
         dither_serie = Series(dither_total_list, name='DITHER')
         alpha_serie = Series(alpha_total_list, name='ALPHA_J2000')
@@ -473,9 +459,11 @@ class FalsePositivesScampPerformance:
         mag_serie = Series(mag_total_list, name='MAG_ISO')
         pm_serie = Series(pm_total_list, name='PM')
         class_serie = Series(class_total_list, name='CLASS_STAR')
+        object_serie = Series(object_total_list, name='OBJECT')
 
         output = concat([dither_serie, alpha_serie, delta_serie,
-                         mag_serie, pm_serie, class_serie], axis=1)
+                         mag_serie, pm_serie, class_serie,
+                         object_serie], axis=1)
         for pm_ in [0.01, 0.03, 0.1, 0.3, 1.0, 3.0, 10.0, 30.0]:
                 output_pm = output[output['PM'].isin([pm_])]
                 cat_name = 'false_positives/false_{}.csv'.format(pm_)

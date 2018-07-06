@@ -173,6 +173,7 @@ def filter_by_position(sso_df):
     """
     save = True
     borders_d = get_borders()
+
     right_sources = []
 
     unique_sources = list(set(sso_df['SOURCE']))
@@ -195,8 +196,6 @@ def filter_by_position(sso_df):
 
                 if comp:
                     right_sources.append(row.IDX)
-
-    print(right_sources)
 
     if save:
         sso_df.to_csv('cats/cat_ssos.csv')
@@ -245,4 +244,4 @@ if __name__ == "__main__":
     sso_df = propagate_dithers()
     filter_by_position(sso_df)  # Rejects source if is out of the bounds
 
-    create_regions()
+    # create_regions()

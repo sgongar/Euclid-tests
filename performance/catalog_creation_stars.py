@@ -175,9 +175,9 @@ def create_empty_catalog_dict():
 
     :return: cat_d
     """
-    cat_d = {'NUMBER': [], 'IDX': [], 'CATALOG_NUMBER': [], 'X_WORLD': [],
-             'Y_WORLD': [], 'MAG_AUTO': [], 'MAGERR_AUTO': [],
-             'ERRA_WORLD': [], 'ERRB_WORLD': [], 'ERRTHETA_WORLD': []}
+    cat_d = {'DITHER': [], 'CATALOG_NUMBER': [], 'X_WORLD': [], 'Y_WORLD': [],
+             'MAG_AUTO': [], 'MAGERR_AUTO': [], 'ERRA_WORLD': [],
+             'ERRB_WORLD': [], 'ERRTHETA_WORLD': []}
 
     return cat_d
 
@@ -258,29 +258,56 @@ def create_stars_catalog_thread(idx_l, sub_list, inputs_d, full_d):
         alpha = source_df['RA2000(Gaia)'].iloc[0]
         delta = source_df['DEC2000(Gaia)'].iloc[0]
 
-        dither_n = 0
         source_d = create_empty_catalog_dict()
         for dither in range(1, 5, 1):
             o_df = check_source(full_d[dither], alpha, delta)
+
             if o_df.empty is not True:
-                dither_n += 1
                 # Returns the index of the closest found source
                 index = check_distance(o_df, alpha, delta)
                 o_df = o_df.iloc[[index]]
-                for key_ in source_d.keys():
-                    source_d[key_].append(o_df[key_].iloc[0])
 
-        if len(source_d['NUMBER']) != 0:
+                source_d['DITHER'].append(dither)
+
+                catalog_number = int(o_df['CATALOG_NUMBER'].iloc[0])
+                source_d['CATALOG_NUMBER'].append(catalog_number)
+
+                x_world = float(o_df['X_WORLD'].iloc[0])
+                source_d['X_WORLD'].append(x_world)
+
+                y_world = float(o_df['Y_WORLD'].iloc[0])
+                source_d['Y_WORLD'].append(y_world)
+
+                mag_auto = float(o_df['MAG_AUTO'].iloc[0])
+                source_d['MAG_AUTO'].append(mag_auto)
+
+                magerr_auto = float(o_df['MAGERR_AUTO'].iloc[0])
+                source_d['MAGERR_AUTO'].append(magerr_auto)
+
+                erra_world = float(o_df['ERRA_WORLD'].iloc[0])
+                source_d['ERRA_WORLD'].append(erra_world)
+
+                errb_world = float(o_df['ERRB_WORLD'].iloc[0])
+                source_d['ERRB_WORLD'].append(errb_world)
+
+                errtheta_world = float(o_df['ERRTHETA_WORLD'].iloc[0])
+                source_d['ERRTHETA_WORLD'].append(errtheta_world)
+
+        if len(source_d['DITHER']) != 0:
             for key_ in source_d.keys():
-                median_value = median(source_d[key_])
-                cat_d[key_].append(median_value)
+                for value_ in source_d[key_]:
+                    cat_d[key_].append(value_)
 
-    cat_df = DataFrame(cat_d)
+    cat_df = DataFrame(cat_d, columns=['DITHER', 'CATALOG_NUMBER', 'X_WORLD',
+                                       'Y_WORLD', 'MAG_AUTO', 'MAGERR_AUTO',
+                                       'ERRA_WORLD', 'ERRB_WORLD',
+                                       'ERRTHETA_WORLD']
+)
     if save:
         cat_df.to_csv('tmp_stars/stars_{}.csv'.format(idx_l))
 
 
-def write_stars_catalog():
+def write_stars_catalog(catalogs):
     """
 
     :return:
@@ -291,6 +318,7 @@ def write_stars_catalog():
     # todo - launch sextractor
 
     analysis_d, len_dicts = create_sextractor_dict(0, False)
+    stars_df_data = catalogs['stars']
 
     try:
         test_cat_name = '{}/coadd.cat'.format(prfs_dict['references'])
@@ -306,25 +334,25 @@ def write_stars_catalog():
     #                  array=stars_df['NUMBER'])
     # Kron-like elliptical aperture magnitude
     c1 = fits.Column(name='MAG_AUTO', format='1E', unit='mag',
-                     disp='F8.4', array=stars_df['MAG_AUTO'])
+                     disp='F8.4', array=stars_df_data['MAG_AUTO'])
     # RMS error for AUTO magnitude
     c2 = fits.Column(name='MAGERR_AUTO', format='1E', unit='mag',
-                     disp='F8.4', array=stars_df['MAGERR_AUTO'])
+                     disp='F8.4', array=stars_df_data['MAGERR_AUTO'])
     # Barycenter position along world x axis
     c3 = fits.Column(name='X_WORLD', format='1D', unit='deg', disp='E18.10',
-                     array=stars_df['X_WORLD'])
+                     array=stars_df_data['X_WORLD'])
     # Barycenter position along world y axis
     c4 = fits.Column(name='Y_WORLD', format='1D', unit='deg', disp='E18.10',
-                     array=stars_df['Y_WORLD'])
+                     array=stars_df_data['Y_WORLD'])
     # World RMS position error along major axis
     c5 = fits.Column(name='ERRA_WORLD', format='1E', unit='deg',
-                     disp='G12.7', array=stars_df['ERRA_WORLD'])
+                     disp='G12.7', array=stars_df_data['ERRA_WORLD'])
     # World RMS position error along minor axis
     c6 = fits.Column(name='ERRB_WORLD', format='1E', unit='deg',
-                     disp='G12.7', array=stars_df['ERRB_WORLD'])
+                     disp='G12.7', array=stars_df_data['ERRB_WORLD'])
     # Error ellipse pos.angle(CCW / world - x)
     c7 = fits.Column(name='ERRTHETA_WORLD', format='1E', unit='deg',
-                     disp='F6.2', array=stars_df['ERRTHETA_WORLD'])
+                     disp='F6.2', array=stars_df_data['ERRTHETA_WORLD'])
 
     col_defs = fits.ColDefs([c1, c2, c3, c4, c5, c6, c7])
 
@@ -377,5 +405,5 @@ def extract_catalogue(analysis_dict):
 if __name__ == "__main__":
     prfs_dict = extract_settings_elvis()
 
-    stars_df = create_catalog()
-    write_stars_catalog()
+    cats = create_catalog()
+    write_stars_catalog(cats)
