@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import math
-import numpy as np
+from pandas import array
 import pandas as pd
 from sklearn import preprocessing, svm
 from sklearn.preprocessing import StandardScaler
@@ -26,10 +26,10 @@ df = pd.read_csv(raw_data, index_col=0)
 #                                              'Woody_Savannas', 'Savannas', 'Grasslands', 'Croplands'])
 # dummies = pd.get_dummies(cols_to_transform)
 # Join data1 and dummies using Numpy and yield as array
-X = np.array(df['B_IMAGE', 'A_IMAGE'])
+X = array(pd.DataFrame(df, columns = ['B_IMAGE', 'A_IMAGE'])
 
 # Specify the dependent variable as array
-y = np.array(df['PM'])
+y = array(df['PM'])
 
 
 lm = LinearRegression(n_jobs=-1)
