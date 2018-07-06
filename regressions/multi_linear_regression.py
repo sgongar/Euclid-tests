@@ -40,11 +40,9 @@ we have 25 % test datasets, while 75 % is used for training.
 """
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
-print (X_train.shape, y_train.shape)
-print (X_test.shape, y_test.shape)
 # First we fit a model
 model = lm.fit(X_train, y_train)
-print(model)
+print(model.summary())
 # print the coefficents
 # print("The linear cofficients", model.coef_)
 # Try to predict the y ( NPP_Predict) for the test data-features(independent variables(X_test)
