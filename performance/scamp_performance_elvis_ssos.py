@@ -148,6 +148,7 @@ class FactorsScampPerformance:
                                                    'DELTA_J2000'])
                         if pm_df.empty is not True:
                             test = True
+                            print(pm_df)
                             pm = float(pm_df['PM'].iloc[0])
                             a_image = float(pm_df['MEDIAN_A_IMAGE'].iloc[0])
                             b_image = float(pm_df['MEDIAN_B_IMAGE'].iloc[0])
