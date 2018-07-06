@@ -52,6 +52,8 @@ predictions = lm.predict(X_test)
 confidence = lm.score(X_test, y_test)
 print("This is predicted NPP2001 Values", predictions)
 print("This is the prediction accuracy", confidence)
+
+"""
 plt.legend(loc=4)
 plt.title("Actual NPP2001 vs. NPP2001_Predict", size = 10)
 plt.scatter(y_test, predictions, color='c', marker ='.')
@@ -84,3 +86,4 @@ plt.xlabel("Actual NPP2001", size = 10)
 plt.ylabel("NPP2001_Predict", size = 10)
 plt.title("Actual and Predicted NPP2001 Values using 10 Fold Cross Validation", size = 10)
 plt.show()
+"""
