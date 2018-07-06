@@ -44,14 +44,15 @@ print (X_train.shape, y_train.shape)
 print (X_test.shape, y_test.shape)
 # First we fit a model
 model = lm.fit(X_train, y_train)
+print(model)
 # print the coefficents
-print("The linear cofficients", model.coef_)
+# print("The linear cofficients", model.coef_)
 # Try to predict the y ( NPP_Predict) for the test data-features(independent variables(X_test)
 predictions = lm.predict(X_test)
 # Accuracy of the prediction
 confidence = lm.score(X_test, y_test)
-print("This is predicted NPP2001 Values", predictions)
-print("This is the prediction accuracy", confidence)
+# print("This is predicted NPP2001 Values", predictions)
+# print("This is the prediction accuracy", confidence)
 
 
 """
