@@ -17,22 +17,19 @@ import datetime
 style.use('ggplot')
 raw_data = 'catalogue.csv'
 df = pd.read_csv(raw_data, index_col=0)
-print(df.columns)
-raise Exception
+
 # Create a DataFrame for numerical features
-data1 = pd.DataFrame(df, columns=['b1_PG2001', 'SPTFPR2001', 'b1_Tmn',
-                                  'X2001WSI', 'b1_Vap', 'Elevation'])
-print(data1.shape)
+# data1 = pd.DataFrame(df, columns=['PM', 'A_IMAGE', 'B_IMAGE', 'CLASS_STAR'])
 
 # Create a DataFrame for categorical features
-cols_to_transform = pd.DataFrame(df, columns=['Forest', 'Closed_Shrublands', 'Open_Shrublands',
-                                              'Woody_Savannas', 'Savannas', 'Grasslands', 'Croplands'])
-dummies = pd.get_dummies(cols_to_transform)
+# cols_to_transform = pd.DataFrame(df, columns=['Forest', 'Closed_Shrublands', 'Open_Shrublands',
+#                                              'Woody_Savannas', 'Savannas', 'Grasslands', 'Croplands'])
+# dummies = pd.get_dummies(cols_to_transform)
 # Join data1 and dummies using Numpy and yield as array
-X = np.array(data1.join(dummies))
+X = np.array(df['B_IMAGE', 'A_IMAGE'])
 
 # Specify the dependent variable as array
-y = np.array(df['NPP2001'])
+y = np.array(df['PM'])
 
 
 lm = LinearRegression(n_jobs=-1)
