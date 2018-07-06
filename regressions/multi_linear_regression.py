@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import math
-from pandas import array
+from numpy import array
 import pandas as pd
 from sklearn import preprocessing, svm
 from sklearn.preprocessing import StandardScaler
