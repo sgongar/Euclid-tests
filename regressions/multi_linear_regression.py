@@ -15,8 +15,10 @@ from matplotlib import style
 import datetime
 
 style.use('ggplot')
-raw_data = 'mydata_2001_2377_BlueNile.csv'
-df = pd.read_csv(raw_data)
+raw_data = 'catalogue.csv'
+df = pd.read_csv(raw_data, index_col=0)
+print(df.columns)
+raise Exception
 # Create a DataFrame for numerical features
 data1 = pd.DataFrame(df, columns=['b1_PG2001', 'SPTFPR2001', 'b1_Tmn',
                                   'X2001WSI', 'b1_Vap', 'Elevation'])
