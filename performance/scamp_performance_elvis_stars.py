@@ -115,7 +115,7 @@ class FactorsScampPerformance:
         """
         # Unique sources (?)
         test_dict = {'PM': [], 'A_IMAGE': [], 'B_IMAGE': [],
-                     'CLASS_STAR': [], 'MAG_ISO': []}
+                     'CLASS_STAR': [], 'MAG_ISO': [], 'ELLIPTICITY': []}
 
         idx = 0
         print('total {}'.format(self.input_df['DITHER'].size))
@@ -129,6 +129,8 @@ class FactorsScampPerformance:
             a_image = ''
             b_image = ''
             class_star = ''
+            mag_iso = ''
+            ellipticity = ''
             test = False
             for cat_ in cats_d[row.DITHER]:
                 out_df = check_source(cats_d[row.DITHER][cat_],
@@ -148,6 +150,7 @@ class FactorsScampPerformance:
                         b_image = float(pm_df['MEDIAN_B_IMAGE'].iloc[0])
                         class_star = float(pm_df['MEDIAN_CLASS_STAR'].iloc[0])
                         mag_iso = float(pm_df['MEDIAN_MAG_ISO'].iloc[0])
+                        ellipticity = float(pm_df['MEDIAN_ELLIPTICITY'].iloc[0])
 
             if test:
                 test_dict['PM'].append(pm)
@@ -155,15 +158,18 @@ class FactorsScampPerformance:
                 test_dict['B_IMAGE'].append(b_image)
                 test_dict['CLASS_STAR'].append(class_star)
                 test_dict['MAG_ISO'].append(mag_iso)
+                test_dict['ELLIPTICITY'].append(ellipticity)
 
         pm_list = Series(test_dict['PM'], name='PM')
         a_image_list = Series(test_dict['A_IMAGE'], name='A_IMAGE')
         b_image_list = Series(test_dict['B_IMAGE'], name='B_IMAGE')
         class_star_list = Series(test_dict['CLASS_STAR'], name='CLASS_STAR')
         mag_iso_list = Series(test_dict['MAG_ISO'], name='MAG_ISO')
+        ellipticity_list = Series(test_dict['ELLIPTICITY'], name='ELLIPTICITY')
 
         positions_table = concat([pm_list, a_image_list, b_image_list,
-                                  class_star_list, mag_iso_list], axis=1)
+                                  class_star_list, mag_iso_list,
+                                  ellipticity_list], axis=1)
         positions_table.to_csv('stars_catalogue.csv')
 
 

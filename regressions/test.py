@@ -74,7 +74,7 @@ for a_image in a_image_list:
 ax.scatter(x_vals, y_vals, z_vals, c='b')
 """
 
-margin = 0.5
+margin = 0.6
 total_ = 0
 in_ = 0
 out_ = 0

@@ -26,10 +26,10 @@ df = pd.read_csv(raw_data, index_col=0)
 #                                              'Woody_Savannas', 'Savannas', 'Grasslands', 'Croplands'])
 # dummies = pd.get_dummies(cols_to_transform)
 # Join data1 and dummies using Numpy and yield as array
-X = array(pd.DataFrame(df, columns = ['B_IMAGE', 'A_IMAGE']))
+X = array(pd.DataFrame(df, columns=['B_IMAGE', 'A_IMAGE']))
 
 # Specify the dependent variable as array
-y = array(df['MAG'])
+y = array(df['MAG_ISO'])
 
 
 lm = LinearRegression(n_jobs=-1)

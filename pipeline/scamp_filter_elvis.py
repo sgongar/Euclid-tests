@@ -67,63 +67,18 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
         # Saves _3.csv
         full_df = self.get_areas(full_df)
         # full_df = full_df[full_df['MEAN_CLASS_STAR'] > self.class_star_limit]
-        full_df = self.filter_coherence(full_df)
+        # full_df = self.filter_coherence(full_df)
 
+        full_df = self.filter_class(full_df)
+
+        # Does not work!
         # full_df = full_df[full_df['MEDIAN_B_IMAGE'] > 1.04]
         # full_df = full_df[full_df['MEDIAN_B_IMAGE'] < 2]
 
-        full_df = self.filter_b(full_df)
+        # full_df = self.filter_pm(full_df)  # 6th version
+        # full_df = self.filter_mag(full_df)  # 7th version
+        full_df = self.filter_b_image(full_df)  # 8th version
 
-        """
-        # full_db = read_csv('{}_3.csv'.format(self.filter_o_n), index_col=0)
-        self.slow_df, self.fast_df = self.filter_class(full_df)
-        if self.save:
-            self.save_message('4s')
-            self.slow_df.to_csv('{}_4s.csv'.format(self.filter_o_n))
-            # self.save_message('4f')
-            self.fast_df.to_csv('{}_4f.csv'.format(self.filter_o_n))
-
-        filter_j = []
-        for pipeline in ['slow', 'fast']:
-            filter_p = Process(target=self.choose_pipeline, args=(pipeline,))
-            filter_j.append(filter_p)
-            filter_p.start()
-
-        active_filter = list([job.is_alive() for job in filter_j])
-        while True in active_filter:
-            active_filter = list([job.is_alive() for job in filter_j])
-            pass
-        # Merges catalogs
-        slow_df = read_csv('{}_6s.csv'.format(self.filter_o_n), index_col=0)
-        fast_df = read_csv('{}_6f.csv'.format(self.filter_o_n), index_col=0)
-
-        full_db = concat([slow_df, fast_df])
-
-        slow_df = full_db[full_db['PM'] < self.proper_motion_dects]
-        try:
-            slow = True
-            if self.save:
-                self.save_message('7s')
-                slow_df.to_csv('{}_7s.csv'.format(self.filter_o_n))
-        except ValueError:
-            slow = False
-
-        fast_df = full_db[full_db['PM'] > self.proper_motion_dects]
-        if self.save:
-            self.save_message('7f')
-            fast_df.to_csv('{}_7f.csv'.format(self.filter_o_n))
-
-        if slow:
-            full_db = concat([slow_df, fast_df])
-        else:
-            full_db = fast_df
-
-        full_db, merged_db = self.filter_detections(full_db, merged_db, 3)
-        
-        if self.save:
-            self.save_message('8')
-            full_db.to_csv('{}_8.csv'.format(self.filter_o_n))
-        """
         full_df = full_df[full_df['PM'] > 0.01]
 
         if self.save:
@@ -221,51 +176,6 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
             full_db.to_csv('{}_2.csv'.format(self.filter_o_n))
 
         return full_db
-
-    def choose_pipeline(self, pipeline):
-        """
-
-        :param pipeline:
-        :return:
-        """
-        if pipeline == 'slow':
-            # Starts pipeline for slow objects
-            self.slow_pipeline()
-        elif pipeline == 'fast':
-            # Stars pipeline for fast objects
-            self.fast_pipeline()
-        else:
-            raise Exception
-
-    def slow_pipeline(self):
-        """
-
-        :return:
-        """
-        slow_df = self.slow_df[self.slow_df['PM'] < self.proper_motion]
-        if self.save:
-            self.save_message('5s')
-            slow_df.to_csv('{}_5s.csv'.format(self.filter_o_n))
-
-        slow_df = self.filter_b(slow_df)
-        # slow_df = slow_df[slow_df['A_IMAGE'] < 2]
-        if self.save:
-            self.save_message('6s')
-            slow_df.to_csv('{}_6s.csv'.format(self.filter_o_n))
-
-    def fast_pipeline(self):
-        """
-
-        :return:
-        """
-        fast_df = self.fast_df[self.fast_df['PM'] > self.proper_motion]
-        if self.save:
-            self.save_message('5f')
-            fast_df.to_csv('{}_5f.csv'.format(self.filter_o_n))
-        fast_df = self.filter_coherence(fast_df)
-        if self.save:
-            self.save_message('6f')
-            fast_df.to_csv('{}_6f.csv'.format(self.filter_o_n))
 
     def get_areas(self, full_df):
         """
@@ -614,13 +524,29 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
         :param full_df:
         :return:
         """
-        self.logger.debug('Runs class star filter')
-        slow_df = full_df[full_df['MEAN_CLASS_STAR'] > self.class_star_limit]
-        fast_df = full_df[full_df['MEAN_CLASS_STAR'] < self.class_star_limit]
+        rejected = []
+        accepted = []
+        unique_sources = list(set(full_df['SOURCE_NUMBER'].tolist()))
 
-        return slow_df, fast_df
+        # Loops over unique sources of filtered file
+        for idx, source_ in enumerate(unique_sources):
+            o_df = full_df[full_df['SOURCE_NUMBER'].isin([source_])].iloc[0]
+            # mag = float(o_df['MEDIAN_MAG_ISO'])
 
-    def filter_b(self, full_db):
+            # b test
+            pm = float(o_df['PM'])
+            class_star = float(o_df['MEAN_CLASS_STAR'])
+
+            if pm < 1.0 and class_star < 0.95:
+                rejected.append(source_)
+            else:
+                accepted.append(source_)
+
+        full_df = full_df[full_df['SOURCE_NUMBER'].isin(accepted)]
+
+        return full_df
+
+    def filter_pm(self, full_db):
         """
 
         :return: full_db
@@ -664,7 +590,7 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
 
         areas_j = []
         for idx_l in range(0, 2, 1):
-            areas_p = Process(target=self.filter_b_thread,
+            areas_p = Process(target=self.filter_pm_thread,
                               args=(dict_keys, sub_list_l[idx_l], full_db,
                                     filter_params, idx_l,))
             areas_j.append(areas_p)
@@ -677,20 +603,20 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
 
         # Merges areas
         # Merges catalogs
-        list_1 = read_csv('{}_6s_0.csv'.format(self.filter_o_n), index_col=0)
-        list_2 = read_csv('{}_6s_1.csv'.format(self.filter_o_n), index_col=0)
+        list_1 = read_csv('{}_6_0.csv'.format(self.filter_o_n), index_col=0)
+        list_2 = read_csv('{}_6_1.csv'.format(self.filter_o_n), index_col=0)
 
         full_db = concat([list_1, list_2])
 
         return full_db
 
-    def filter_b_thread(self, dict_keys, unique_sources_thread, full_db,
-                        filter_params, idx_l):
+    def filter_pm_thread(self, dict_keys, unique_sources_thread, full_df,
+                         filter_params, idx_l):
         """
 
         :param dict_keys:
         :param unique_sources_thread:
-        :param full_db:
+        :param full_df:
         :param filter_params:
         :param idx_l:
         :return:
@@ -700,9 +626,9 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
 
         # Loops over unique sources of filtered file
         for idx, source_ in enumerate(unique_sources_thread):
-            print('filter_b - thread {} - source {}'.format(idx_l, idx))
+            print('filter_pm - thread {} - source {}'.format(idx_l, idx))
 
-            o_df = full_db[full_db['SOURCE_NUMBER'].isin([source_])].iloc[0]
+            o_df = full_df[full_df['SOURCE_NUMBER'].isin([source_])].iloc[0]
             # mag = float(o_df['MEDIAN_MAG_ISO'])
 
             # b test
@@ -715,20 +641,232 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
             lower_test = filter_params['lower_fit'][0] + \
                          (filter_params['lower_fit'][1] * b_image) + \
                          (filter_params['lower_fit'][2] * a_image)
-            b_test = float(lower_test) < pm < float(upper_test)
+            pm_test = float(lower_test) < pm < float(upper_test)
 
-            print(upper_test, lower_test, b_test)
+            if pm_test:
+                accepted.append(source_)
+            else:
+                rejected.append(source_)
+
+        full_df = full_df[full_df['SOURCE_NUMBER'].isin(accepted)]
+
+        if self.save:
+            self.save_message('6_{}'.format(idx_l))
+            full_df.to_csv('{}_6_{}.csv'.format(self.filter_o_n, idx_l),
+                           columns=dict_keys)
+
+    def filter_mag(self, full_df):
+        """
+
+        :return: full_df
+        """
+        self.logger.debug('Runs B_Image size filter')
+
+        # Gets unique sources from filtered file
+        unique_sources = list(set(full_df['SOURCE_NUMBER'].tolist()))
+        l_sourcs = len(unique_sources)  # Just to not break 79 characters
+        self.logger.debug('Unique sources to be analysed {}'.format(l_sourcs))
+
+        dict_keys = ['SOURCE_NUMBER', 'CATALOG_NUMBER', 'EXTENSION',
+                     'ASTR_INSTRUM', 'PHOT_INSTRUM', 'X_IMAGE', 'Y_IMAGE',
+                     'ISOAREA_IMAGE', 'A_IMAGE', 'MEDIAN_A_IMAGE',
+                     'MEAN_A_IMAGE', 'ERRA_IMAGE',  'MEDIAN_ERRA_IMAGE',
+                     'MEAN_ERRA_IMAGE', 'B_IMAGE', 'MEDIAN_B_IMAGE',
+                     'MEAN_B_IMAGE', 'ERRB_IMAGE', 'MEDIAN_ERRB_IMAGE',
+                     'MEAN_ERRB_IMAGE', 'THETA_IMAGE', 'ERRTHETA_IMAGE',
+                     'ALPHA_J2000', 'DELTA_J2000', 'ERRA_WORLD', 'ERRB_WORLD',
+                     'ERRTHETA_WORLD', 'EPOCH', 'FWHM_IMAGE', 'CLASS_STAR',
+                     'MEDIAN_CLASS_STAR', 'MEAN_CLASS_STAR', 'FLUX_ISO',
+                     'MEDIAN_FLUX_ISO', 'MEAN_FLUX_ISO', 'FLUXERR_ISO',
+                     'MEDIAN_FLUXERR_ISO', 'MEAN_FLUXERR_ISO', 'FLUX_RADIUS',
+                     'ELONGATION', 'ELLIPTICITY', 'MEDIAN_ELLIPTICITY',
+                     'MEAN_ELLIPTICITY', 'MAG', 'MAGERR', 'MAG_ISO',
+                     'MEDIAN_MAG_ISO', 'MEAN_MAG_ISO', 'MAGERR_ISO',
+                     'MEDIAN_MAGERR_ISO', 'MEAN_MAGERR_ISO',
+                     'FLAGS_EXTRACTION', 'FLAGS_SCAMP', 'FLAGS_IMA', 'PM',
+                     'PMERR', 'PMALPHA', 'PMDELTA', 'PMALPHAERR', 'PMDELTAERR']
+
+        # pm-a-b relation without error
+        # new sextractor configuration
+        filter_params = {'lower_fit': [27.381955979, -4.41139416, 0.006949],
+                         'central_fit': [28.8231115565, -4.41139416, 0.006949],
+                         'upper_fit': [30.264267134, -4.41139416, 0.006949]}
+
+        sub_list_1_size = len(unique_sources) / 2
+        sub_list_1 = unique_sources[:sub_list_1_size]
+        sub_list_2 = unique_sources[sub_list_1_size:]
+        sub_list_l = [sub_list_1, sub_list_2]
+
+        areas_j = []
+        for idx_l in range(0, 2, 1):
+            areas_p = Process(target=self.filter_mag_thread,
+                              args=(dict_keys, sub_list_l[idx_l], full_df,
+                                    filter_params, idx_l,))
+            areas_j.append(areas_p)
+            areas_p.start()
+
+        active_areas = list([job.is_alive() for job in areas_j])
+        while True in active_areas:
+            active_areas = list([job.is_alive() for job in areas_j])
+            pass
+
+        # Merges areas
+        # Merges catalogs
+        list_1 = read_csv('{}_7_0.csv'.format(self.filter_o_n), index_col=0)
+        list_2 = read_csv('{}_7_1.csv'.format(self.filter_o_n), index_col=0)
+
+        full_df = concat([list_1, list_2])
+
+        return full_df
+
+    def filter_mag_thread(self, dict_keys, unique_sources_thread, full_df,
+                          filter_params, idx_l):
+        """
+
+        :param dict_keys:
+        :param unique_sources_thread:
+        :param full_df:
+        :param filter_params:
+        :param idx_l:
+        :return:
+        """
+        accepted = []
+        rejected = []
+
+        # Loops over unique sources of filtered file
+        for idx, source_ in enumerate(unique_sources_thread):
+            print('filter_pm - thread {} - source {}'.format(idx_l, idx))
+
+            o_df = full_df[full_df['SOURCE_NUMBER'].isin([source_])].iloc[0]
+            # mag = float(o_df['MEDIAN_MAG_ISO'])
+
+            # b test
+            mag_iso = float(o_df['MEDIAN_MAG_ISO'])
+            b_image = float(o_df['MEDIAN_B_IMAGE'])
+            a_image = float(o_df['MEDIAN_A_IMAGE'])
+            upper_test = filter_params['upper_fit'][0] + \
+                         (filter_params['upper_fit'][1] * b_image) + \
+                         (filter_params['upper_fit'][2] * a_image)
+            lower_test = filter_params['lower_fit'][0] + \
+                         (filter_params['lower_fit'][1] * b_image) + \
+                         (filter_params['lower_fit'][2] * a_image)
+            mag_test = float(lower_test) < mag_iso < float(upper_test)
+
+            if mag_test:
+                accepted.append(source_)
+            else:
+                rejected.append(source_)
+
+        full_df = full_df[full_df['SOURCE_NUMBER'].isin(accepted)]
+
+        if self.save:
+            self.save_message('7_{}'.format(idx_l))
+            full_df.to_csv('{}_7_{}.csv'.format(self.filter_o_n, idx_l),
+                           columns=dict_keys)
+
+    def filter_b_image(self, full_df):
+        """
+
+        :return: full_df
+        """
+        self.logger.debug('Runs B_Image size filter')
+
+        # Gets unique sources from filtered file
+        unique_sources = list(set(full_df['SOURCE_NUMBER'].tolist()))
+        l_sourcs = len(unique_sources)  # Just to not break 79 characters
+        self.logger.debug('Unique sources to be analysed {}'.format(l_sourcs))
+
+        dict_keys = ['SOURCE_NUMBER', 'CATALOG_NUMBER', 'EXTENSION',
+                     'ASTR_INSTRUM', 'PHOT_INSTRUM', 'X_IMAGE', 'Y_IMAGE',
+                     'ISOAREA_IMAGE', 'A_IMAGE', 'MEDIAN_A_IMAGE',
+                     'MEAN_A_IMAGE', 'ERRA_IMAGE',  'MEDIAN_ERRA_IMAGE',
+                     'MEAN_ERRA_IMAGE', 'B_IMAGE', 'MEDIAN_B_IMAGE',
+                     'MEAN_B_IMAGE', 'ERRB_IMAGE', 'MEDIAN_ERRB_IMAGE',
+                     'MEAN_ERRB_IMAGE', 'THETA_IMAGE', 'ERRTHETA_IMAGE',
+                     'ALPHA_J2000', 'DELTA_J2000', 'ERRA_WORLD', 'ERRB_WORLD',
+                     'ERRTHETA_WORLD', 'EPOCH', 'FWHM_IMAGE', 'CLASS_STAR',
+                     'MEDIAN_CLASS_STAR', 'MEAN_CLASS_STAR', 'FLUX_ISO',
+                     'MEDIAN_FLUX_ISO', 'MEAN_FLUX_ISO', 'FLUXERR_ISO',
+                     'MEDIAN_FLUXERR_ISO', 'MEAN_FLUXERR_ISO', 'FLUX_RADIUS',
+                     'ELONGATION', 'ELLIPTICITY', 'MEDIAN_ELLIPTICITY',
+                     'MEAN_ELLIPTICITY', 'MAG', 'MAGERR', 'MAG_ISO',
+                     'MEDIAN_MAG_ISO', 'MEAN_MAG_ISO', 'MAGERR_ISO',
+                     'MEDIAN_MAGERR_ISO', 'MEAN_MAGERR_ISO',
+                     'FLAGS_EXTRACTION', 'FLAGS_SCAMP', 'FLAGS_IMA', 'PM',
+                     'PMERR', 'PMALPHA', 'PMDELTA', 'PMALPHAERR', 'PMDELTAERR']
+
+        # pm-a-b relation without error
+        # new sextractor configuration
+        filter_params = {'lower_fit': [4.6514109, -0.156525],
+                         'central_fit': [4.896222, -0.156525],
+                         'upper_fit': [5.1410331, -0.156525]}
+
+        sub_list_1_size = len(unique_sources) / 2
+        sub_list_1 = unique_sources[:sub_list_1_size]
+        sub_list_2 = unique_sources[sub_list_1_size:]
+        sub_list_l = [sub_list_1, sub_list_2]
+
+        areas_j = []
+        for idx_l in range(0, 2, 1):
+            areas_p = Process(target=self.filter_b_image_thread,
+                              args=(dict_keys, sub_list_l[idx_l], full_df,
+                                    filter_params, idx_l,))
+            areas_j.append(areas_p)
+            areas_p.start()
+
+        active_areas = list([job.is_alive() for job in areas_j])
+        while True in active_areas:
+            active_areas = list([job.is_alive() for job in areas_j])
+            pass
+
+        # Merges areas
+        # Merges catalogs
+        list_1 = read_csv('{}_8_0.csv'.format(self.filter_o_n), index_col=0)
+        list_2 = read_csv('{}_8_1.csv'.format(self.filter_o_n), index_col=0)
+
+        full_df = concat([list_1, list_2])
+
+        return full_df
+
+    def filter_b_image_thread(self, dict_keys, unique_sources_thread, full_df,
+                              filter_params, idx_l):
+        """
+
+        :param dict_keys:
+        :param unique_sources_thread:
+        :param full_df:
+        :param filter_params:
+        :param idx_l:
+        :return:
+        """
+        accepted = []
+        rejected = []
+
+        # Loops over unique sources of filtered file
+        for idx, source_ in enumerate(unique_sources_thread):
+            print('filter_pm - thread {} - source {}'.format(idx_l, idx))
+
+            o_df = full_df[full_df['SOURCE_NUMBER'].isin([source_])].iloc[0]
+
+            # b test
+            mag_iso = float(o_df['MEDIAN_MAG_ISO'])
+            b_image = float(o_df['MEDIAN_B_IMAGE'])
+            upper_test = filter_params['upper_fit'][0] + \
+                         (filter_params['upper_fit'][1] * mag_iso)
+            lower_test = filter_params['lower_fit'][0] + \
+                         (filter_params['lower_fit'][1] * mag_iso)
+            b_test = float(lower_test) < b_image < float(upper_test)
 
             if b_test:
                 accepted.append(source_)
             else:
                 rejected.append(source_)
 
-        # full_db = full_db[full_db['SOURCE_NUMBER'].isin(accepted)]
+        full_df = full_df[full_df['SOURCE_NUMBER'].isin(accepted)]
 
         if self.save:
-            self.save_message('6s_{}'.format(idx_l))
-            full_db.to_csv('{}_6s_{}.csv'.format(self.filter_o_n, idx_l),
+            self.save_message('8_{}'.format(idx_l))
+            full_df.to_csv('{}_8_{}.csv'.format(self.filter_o_n, idx_l),
                            columns=dict_keys)
 
     def filter_coherence(self, full_db):
@@ -738,7 +876,7 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
         :return: full_db
         """
         self.logger.debug('Runs coherence motion filter')
-        full_db = confidence_filter(full_db, 0.90)  # was 0.97
+        full_db = confidence_filter(full_db, 0.60)  # was 0.97
 
         return full_db
 

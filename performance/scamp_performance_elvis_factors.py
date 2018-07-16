@@ -58,17 +58,6 @@ def compute_factors(factors_d, stats_df):
     :param stats_df:
     :return:
     """
-    # prfs_d = extract_settings_luca()
-    #
-    # mags = [[14, 15], [15, 16], [16, 17], [17, 18], [18, 19],
-    #         [19, 20], [20, 21], [21, 22], [22, 23], [23, 24],
-    #         [24, 25], [25, 26], [26, 27], [27, 28]]
-    # pms = ['right-0', 'false-0', 'total-0',
-    #        'right-0.1', 'false-0.1', 'total-0.1',
-    #        'right-0.3', 'false-0.3', 'total-0.3',
-    #        'right-1.0', 'false-1.0', 'total-1.0',
-    #        'right-3.0', 'false-3.0', 'total-3.0',
-    #        'right-10.0', 'false-10.0', 'total-10.0']
     pm_list = [0.1, 0.3, 1.0, 3.0, 10.0]
     idxs_pm = [[4, 5, 6], [7, 8, 9], [10, 11, 12],
                [13, 14, 15], [16, 17, 18]]
@@ -215,14 +204,17 @@ def get_norm_mag(o_mag):
     :param o_mag:
     :return: mag_bin
     """
-    mags = [[14, 15], [15, 16], [16, 17], [17, 18], [18, 19], [19, 20],
-            [20, 21], [21, 22], [22, 23], [23, 24], [24, 25], [25, 26],
-            [26, 27], [27, 28]]
+    mags = [[11, 12], [12, 13], [13, 14], [14, 15], [15, 16], [16, 17],
+            [17, 18], [18, 19], [19, 20], [20, 21], [21, 22], [22, 23],
+            [23, 24], [24, 25], [25, 26], [26, 27], [27, 28], [28, 29]]
 
     mag_bin = ''
     for mag_ in mags:
         if mag_[0] < o_mag < mag_[1]:
             mag_bin = '{}-{}'.format(mag_[0], mag_[1])
+
+    if mag_bin == '':
+        print(o_mag)
 
     return mag_bin
 
@@ -416,7 +408,7 @@ class FactorsScampPerformance:
                            3: {'RA': [], 'DEC': []}, 4: {'RA': [], 'DEC': []}}
 
         print('Creating new catalogues from filtered catalogue due type')
-        print('Total sources: {}'.format(filt_cat['SOURCE_NUMBER'].size))
+        print('Unique sources: {}'.format(len(unique_sources)))
         for idx_source_, source_ in enumerate(unique_sources):
             source_df = filt_cat[filt_cat['SOURCE_NUMBER'].isin([source_])]
             # Takes the first value of MAG Series
@@ -439,7 +431,7 @@ class FactorsScampPerformance:
                     source_d['source'].append(row.SOURCE_NUMBER)
                     pm_norm = get_norm_speed(float(test_sso['VEL'].iloc[0]))
                     source_d['pm'].append(pm_norm)  # order by input not output
-                    source_d['mag'].append(row.MEDIAN_MAG_ISO)
+                    source_d['mag'].append(test_sso['ABMAG'].iloc[0])
                 else:
                     false_positives[dither_n]['RA'].append(alpha)
                     false_positives[dither_n]['DEC'].append(delta)

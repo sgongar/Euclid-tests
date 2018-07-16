@@ -74,35 +74,66 @@ for a_image in a_image_list:
 ax.scatter(x_vals, y_vals, z_vals, c='b')
 """
 
-margin = 0.5
+# margin = 0.05
+# total_ = 0
+# in_ = 0
+# out_ = 0
+# out_x_vals = []
+# out_y_vals = []
+# out_z_vals = []
+# catalogue = read_csv('catalogue.csv', index_col=0)
+# for i, row in enumerate(catalogue.itertuples(), 1):
+#     pm = 28.8231115565 + (-4.41139416 * row.B_IMAGE) + (0.006949 * row.A_IMAGE)
+#
+#     upper_value = (28.8231115565 * (1 + margin)) + (-4.41139416 * row.B_IMAGE) + (0.006949 * row.A_IMAGE)
+#     lower_value = (28.8231115565 * (1 - margin)) + (-4.41139416 * row.B_IMAGE) + (0.006949 * row.A_IMAGE)
+#
+#     total_ += 1
+#     if lower_value < row.MAG_ISO < upper_value:
+#         # print('in {}'.format(row.PM))
+#         in_ += 1
+#     else:
+#         # print('out {}'.format(row.PM))
+#         out_ += 1
+#
+#     out_x_vals.append(row.B_IMAGE)
+#     out_y_vals.append(row.A_IMAGE)
+#     out_z_vals.append(row.MAG_ISO)
+#
+# print('total: {}'.format(total_))
+# print('in: {}'.format(in_))
+# print('out: {}'.format(out_))
+
+
+margin = 0.05
 total_ = 0
 in_ = 0
 out_ = 0
 out_x_vals = []
 out_y_vals = []
-out_z_vals = []
 catalogue = read_csv('catalogue.csv', index_col=0)
 for i, row in enumerate(catalogue.itertuples(), 1):
-    pm = 2.37524438132 + (-4.54174735 * row.B_IMAGE) + (2.83112412 * row.A_IMAGE)
+    b_image = 4.896222 + (-0.156525 * row.MAG_ISO)
 
-    upper_value = (2.37524438132 * (1 + margin)) + (-4.54174735 * row.B_IMAGE) + (2.83112412 * row.A_IMAGE)
-    lower_value = (2.37524438132 * (1 - margin)) + (-4.54174735 * row.B_IMAGE) + (2.83112412 * row.A_IMAGE)
+    upper_value = (4.896222 * (1 + margin)) + (-0.156525 * row.MAG_ISO)
+    print(4.896222 * (1 + margin))
+    lower_value = (4.896222 * (1 - margin)) + (-0.156525 * row.MAG_ISO)
+    print(4.896222 * (1 - margin))
 
     total_ += 1
-    if lower_value < row.PM < upper_value:
-        # print('in {}'.format(row.PM))
+    if lower_value < row.B_IMAGE < upper_value:
         in_ += 1
     else:
-        # print('out {}'.format(row.PM))
         out_ += 1
 
-    out_x_vals.append(row.B_IMAGE)
-    out_y_vals.append(row.A_IMAGE)
-    out_z_vals.append(row.PM)
+    out_x_vals.append(row.MAG_ISO)
+    out_y_vals.append(row.B_IMAGE)
 
 print('total: {}'.format(total_))
 print('in: {}'.format(in_))
 print('out: {}'.format(out_))
+
+
 
 """
 ax.scatter(out_x_vals, out_y_vals, out_z_vals, c='g')

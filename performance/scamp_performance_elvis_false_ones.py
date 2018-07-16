@@ -402,6 +402,7 @@ class FalsePositivesScampPerformance:
                     self.false_positives[dither_n]['PM'].append(o_pm_norm)
                     self.false_positives[dither_n]['CLASS'].append(o_class_star)
                     object_type = get_object(alpha, delta, self.input_d)
+                    print(o_pm_norm, o_class_star, object_type)
                     self.false_positives[dither_n]['OBJECT'].append(object_type)
 
         # Regions creation
