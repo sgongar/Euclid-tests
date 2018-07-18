@@ -70,6 +70,13 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
         # full_df = self.filter_coherence(full_df)
 
         full_df = self.filter_class(full_df)
+<<<<<<< HEAD
+
+        # Does not work!
+        # full_df = full_df[full_df['MEDIAN_B_IMAGE'] > 1.04]
+        # full_df = full_df[full_df['MEDIAN_B_IMAGE'] < 2]
+=======
+>>>>>>> 45b42f5dbf03ad4d6b0fe7a3c095a65db428f98a
 
         # full_df = self.filter_pm(full_df)  # 6th version
         # full_df = self.filter_mag(full_df)  # 7th version
@@ -533,15 +540,25 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
             pm = float(o_df['PM'])
             class_star = float(o_df['MEAN_CLASS_STAR'])
 
+<<<<<<< HEAD
+            if pm < 0.6 and class_star < 0.85:
+=======
             if pm < 1.0 and class_star < 0.95:
+>>>>>>> 45b42f5dbf03ad4d6b0fe7a3c095a65db428f98a
                 rejected.append(source_)
             else:
                 accepted.append(source_)
 
         full_df = full_df[full_df['SOURCE_NUMBER'].isin(accepted)]
+<<<<<<< HEAD
 
         return full_df
 
+=======
+
+        return full_df
+
+>>>>>>> 45b42f5dbf03ad4d6b0fe7a3c095a65db428f98a
     def filter_pm(self, full_db):
         """
 
@@ -705,6 +722,7 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
         while True in active_areas:
             active_areas = list([job.is_alive() for job in areas_j])
             pass
+<<<<<<< HEAD
 
         # Merges areas
         # Merges catalogs
@@ -842,6 +860,145 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
         for idx, source_ in enumerate(unique_sources_thread):
             print('filter_pm - thread {} - source {}'.format(idx_l, idx))
 
+=======
+
+        # Merges areas
+        # Merges catalogs
+        list_1 = read_csv('{}_7_0.csv'.format(self.filter_o_n), index_col=0)
+        list_2 = read_csv('{}_7_1.csv'.format(self.filter_o_n), index_col=0)
+
+        full_df = concat([list_1, list_2])
+
+        return full_df
+
+    def filter_mag_thread(self, dict_keys, unique_sources_thread, full_df,
+                          filter_params, idx_l):
+        """
+
+        :param dict_keys:
+        :param unique_sources_thread:
+        :param full_df:
+        :param filter_params:
+        :param idx_l:
+        :return:
+        """
+        accepted = []
+        rejected = []
+
+        # Loops over unique sources of filtered file
+        for idx, source_ in enumerate(unique_sources_thread):
+            print('filter_pm - thread {} - source {}'.format(idx_l, idx))
+
+            o_df = full_df[full_df['SOURCE_NUMBER'].isin([source_])].iloc[0]
+            # mag = float(o_df['MEDIAN_MAG_ISO'])
+
+            # b test
+            mag_iso = float(o_df['MEDIAN_MAG_ISO'])
+            b_image = float(o_df['MEDIAN_B_IMAGE'])
+            a_image = float(o_df['MEDIAN_A_IMAGE'])
+            upper_test = filter_params['upper_fit'][0] + \
+                         (filter_params['upper_fit'][1] * b_image) + \
+                         (filter_params['upper_fit'][2] * a_image)
+            lower_test = filter_params['lower_fit'][0] + \
+                         (filter_params['lower_fit'][1] * b_image) + \
+                         (filter_params['lower_fit'][2] * a_image)
+            mag_test = float(lower_test) < mag_iso < float(upper_test)
+
+            if mag_test:
+                accepted.append(source_)
+            else:
+                rejected.append(source_)
+
+        full_df = full_df[full_df['SOURCE_NUMBER'].isin(accepted)]
+
+        if self.save:
+            self.save_message('7_{}'.format(idx_l))
+            full_df.to_csv('{}_7_{}.csv'.format(self.filter_o_n, idx_l),
+                           columns=dict_keys)
+
+    def filter_b_image(self, full_df):
+        """
+
+        :return: full_df
+        """
+        self.logger.debug('Runs B_Image size filter')
+
+        # Gets unique sources from filtered file
+        unique_sources = list(set(full_df['SOURCE_NUMBER'].tolist()))
+        l_sourcs = len(unique_sources)  # Just to not break 79 characters
+        self.logger.debug('Unique sources to be analysed {}'.format(l_sourcs))
+
+        dict_keys = ['SOURCE_NUMBER', 'CATALOG_NUMBER', 'EXTENSION',
+                     'ASTR_INSTRUM', 'PHOT_INSTRUM', 'X_IMAGE', 'Y_IMAGE',
+                     'ISOAREA_IMAGE', 'A_IMAGE', 'MEDIAN_A_IMAGE',
+                     'MEAN_A_IMAGE', 'ERRA_IMAGE',  'MEDIAN_ERRA_IMAGE',
+                     'MEAN_ERRA_IMAGE', 'B_IMAGE', 'MEDIAN_B_IMAGE',
+                     'MEAN_B_IMAGE', 'ERRB_IMAGE', 'MEDIAN_ERRB_IMAGE',
+                     'MEAN_ERRB_IMAGE', 'THETA_IMAGE', 'ERRTHETA_IMAGE',
+                     'ALPHA_J2000', 'DELTA_J2000', 'ERRA_WORLD', 'ERRB_WORLD',
+                     'ERRTHETA_WORLD', 'EPOCH', 'FWHM_IMAGE', 'CLASS_STAR',
+                     'MEDIAN_CLASS_STAR', 'MEAN_CLASS_STAR', 'FLUX_ISO',
+                     'MEDIAN_FLUX_ISO', 'MEAN_FLUX_ISO', 'FLUXERR_ISO',
+                     'MEDIAN_FLUXERR_ISO', 'MEAN_FLUXERR_ISO', 'FLUX_RADIUS',
+                     'ELONGATION', 'ELLIPTICITY', 'MEDIAN_ELLIPTICITY',
+                     'MEAN_ELLIPTICITY', 'MAG', 'MAGERR', 'MAG_ISO',
+                     'MEDIAN_MAG_ISO', 'MEAN_MAG_ISO', 'MAGERR_ISO',
+                     'MEDIAN_MAGERR_ISO', 'MEAN_MAGERR_ISO',
+                     'FLAGS_EXTRACTION', 'FLAGS_SCAMP', 'FLAGS_IMA', 'PM',
+                     'PMERR', 'PMALPHA', 'PMDELTA', 'PMALPHAERR', 'PMDELTAERR']
+
+        # pm-a-b relation without error
+        # new sextractor configuration
+        filter_params = {'lower_fit': [4.6514109, -0.156525],
+                         'central_fit': [4.896222, -0.156525],
+                         'upper_fit': [5.1410331, -0.156525]}
+
+        sub_list_1_size = len(unique_sources) / 2
+        sub_list_1 = unique_sources[:sub_list_1_size]
+        sub_list_2 = unique_sources[sub_list_1_size:]
+        sub_list_l = [sub_list_1, sub_list_2]
+
+        areas_j = []
+        for idx_l in range(0, 2, 1):
+            areas_p = Process(target=self.filter_b_image_thread,
+                              args=(dict_keys, sub_list_l[idx_l], full_df,
+                                    filter_params, idx_l,))
+            areas_j.append(areas_p)
+            areas_p.start()
+
+        active_areas = list([job.is_alive() for job in areas_j])
+        while True in active_areas:
+            active_areas = list([job.is_alive() for job in areas_j])
+            pass
+
+        # Merges areas
+        # Merges catalogs
+        list_1 = read_csv('{}_8_0.csv'.format(self.filter_o_n), index_col=0)
+        list_2 = read_csv('{}_8_1.csv'.format(self.filter_o_n), index_col=0)
+
+        full_df = concat([list_1, list_2])
+
+        return full_df
+
+    def filter_b_image_thread(self, dict_keys, unique_sources_thread, full_df,
+                              filter_params, idx_l):
+        """
+
+        :param dict_keys:
+        :param unique_sources_thread:
+        :param full_df:
+        :param filter_params:
+        :param idx_l:
+        :return:
+        """
+        accepted = []
+        rejected = []
+
+        # Loops over unique sources of filtered file
+        for idx, source_ in enumerate(unique_sources_thread):
+            print('filter_pm - thread {} - source {}'.format(idx_l, idx))
+
+>>>>>>> 45b42f5dbf03ad4d6b0fe7a3c095a65db428f98a
             o_df = full_df[full_df['SOURCE_NUMBER'].isin([source_])].iloc[0]
 
             # b test

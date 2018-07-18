@@ -38,6 +38,21 @@ __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
 
 
+def creates_ssos_dict():
+    """
+
+    :return:
+    """
+    d = {'20-21': {0.01: 0, 0.03: 0, 0.1: 0, 0.3: 0, 1: 0, 3: 0, 10: 0, 30: 0},
+         '21-22': {0.01: 0, 0.03: 0, 0.1: 0, 0.3: 0, 1: 0, 3: 0, 10: 0, 30: 0},
+         '22-23': {0.01: 0, 0.03: 0, 0.1: 0, 0.3: 0, 1: 0, 3: 0, 10: 0, 30: 0},
+         '23-24': {0.01: 0, 0.03: 0, 0.1: 0, 0.3: 0, 1: 0, 3: 0, 10: 0, 30: 0},
+         '24-25': {0.01: 0, 0.03: 0, 0.1: 0, 0.3: 0, 1: 0, 3: 0, 10: 0, 30: 0},
+         '25-26': {0.01: 0, 0.03: 0, 0.1: 0, 0.3: 0, 1: 0, 3: 0, 10: 0, 30: 0}}
+
+    return d
+
+
 def get_zoom_level(pm):
     """
 
@@ -140,7 +155,7 @@ def gets_filtered_catalog():
     """
     prfs_d = extract_settings_elvis()
 
-    filter_n = 'filt__3.csv'  # First one with PM
+    filter_n = 'filt__9.csv'  # First one with PM
     filter_o_n = '{}/{}'.format(prfs_d['filtered'], filter_n)
 
     print('Opens filtered catalogue {}'.format(filter_o_n))
@@ -229,17 +244,17 @@ def get_norm_mag(o_mag):
 class ScampPerformanceLostOnes:
 
     def __init__(self):
-        """ Me da los valores de salida de todos las estrellas  y galaxias
-        presentes en filt 3 obtenidos o no
+        """
 
         """
         self.filter_p_number = 9  # First one with enough data for statistics
         self.prfs_d = extract_settings_elvis()
         self.data_keys = ['IN_SOURCE', 'SOURCE_NUMBER', 'DITHER', 'IN_ALPHA',
-                          'OUT_ALPHA', 'IN_DELTA',
-                          'OUT_DELTA', 'IN_PM', 'IN_PM_NORM', 'OUT_PM',
-                          'IN_MAG', 'OUT_MAG',
+                          'OUT_ALPHA', 'IN_DELTA', 'OUT_DELTA', 'IN_PM',
+                          'IN_PM_NORM', 'OUT_PM', 'IN_MAG', 'OUT_MAG',
                           'CHI_ALPHA', 'CHI_DELTA']
+        self.lost_keys = ['DITHER', 'IN_SOURCE', 'DITHER', 'IN_ALPHA', 'IN_DELTA',
+                          'IN_PM', 'IN_MAG']
         self.save = True
 
         logger_name = 'scamp_performance'  # Set as desired
@@ -248,10 +263,20 @@ class ScampPerformanceLostOnes:
         scamp_cat = self.gets_scamp_catalog()  # Gets data from filtered
         self.filtered_cat = gets_filtered_catalog()
         input_df = self.gets_data() # Gets data from catalogs
-        data_d = self.extract_lost(input_df, scamp_cat)
+        origin = 'filtered'
+        lost_d, data_d = self.extract_lost(input_df, scamp_cat)
 
         data_df = DataFrame(data_d, columns=self.data_keys)
         data_df.to_csv('data.csv')
+
+        """
+        for dither_ in range(1, 5, 1):
+            lost_df = DataFrame(lost_d, columns=self.lost_keys)
+            print(lost_df.columns)
+            lost_df = lost_df[lost_df['DITHER'].isin([dither_])]
+            lost_df.to_csv('lost_{}.reg'.format(dither_),
+                           index=False, header=False, sep=" ")
+        """
 
     def gets_scamp_catalog(self):
         """
@@ -296,31 +321,50 @@ class ScampPerformanceLostOnes:
         :param scamp_cat:
         :return:
         """
+        # Creates a dictionary with the number of input sources
+        ssos_d = creates_ssos_dict()
+        # Creates a dictionary in order to save all de input data
         total_dict = {}
+        # A list of keys contained in the input dataframes
         dict_keys = ['ABMAG', 'DEC', 'DITHER', 'IDX',
                      'RA', 'SOURCE', 'THETA', 'VEL']
+        # Populates the input dictionary with lists.
         for key_ in dict_keys:
             total_dict[key_] = []
 
+        # Merges the dataframe of each dither into a single dictionary
         for dither_ in range(1, 5, 1):
             for column_ in input_df[dither_]['SSOs'].columns:
                 for value_ in input_df[dither_]['SSOs'][column_].tolist():
                     total_dict[column_].append(value_)
-
+        # Creates a dataframe from the previous dictionary
         total_df = DataFrame(total_dict)
+        # Gets the unique sources of the total dataframe
         unique_sources = list(set(total_df['SOURCE'].tolist()))
 
-        test_right = 0
-        test_false = 0
-
+        # Data dictionary for extracted SSOs
         data_d = {}
         for key_ in self.data_keys:
             data_d[key_] = []
 
+        # Data dictionary for lost SSOs
+        lost_d = {}
+        for key_ in self.lost_keys:
+            lost_d[key_] = []
+
+        # Test variables
+        total_unique_sources = 0
+        unique_sources_lost = 0
+        unique_sources_found = 0
+        total_1_0 = 0
+
         for idx_source_, source_ in enumerate(unique_sources):
             source_df = total_df[total_df['SOURCE'].isin([source_])]
-
+            test = 0
+            test_1_0 = 0
             for idx_column_, column_ in enumerate(source_df.itertuples(), 1):
+                test += 1
+
                 alpha = column_.RA
                 delta = column_.DEC
                 pm = column_.VEL
@@ -328,53 +372,66 @@ class ScampPerformanceLostOnes:
                 dither_n = column_.DITHER
                 source = column_.SOURCE
 
+                i_pm_test = get_norm_speed(pm)
+                i_mag_test = get_norm_mag(mag)
+
+                    # print(source, test_3_0, i_mag_test)
+
                 keys = ['ALPHA_J2000', 'DELTA_J2000']  # Catalogue version 2
                 ccd_df = check_source(scamp_cat, alpha, delta, keys)
                 cats = get_cats(dither_n)
                 test_df = ccd_df[ccd_df['CATALOG_NUMBER'].isin(cats)]
 
+                total_unique_sources += 1  # Adds one to the total number
+
+                # Populates the dictionary of lost sources
                 if test_df.empty is True:
-                    test_false += 1
+                    unique_sources_lost += 1  # Adds one to the lost sources
+                    in_source = source
+                    lost_d['IN_SOURCE'].append(in_source)
+                    dither = dither_n
+                    lost_d['DITHER'].append(dither)
+                    in_alpha = alpha
+                    lost_d['IN_ALPHA'].append(in_alpha)
+                    in_delta = delta
+                    lost_d['IN_DELTA'].append(in_delta)
+                    in_pm = pm
+                    lost_d['IN_PM'].append(in_pm)
+                    in_mag = mag
+                    lost_d['IN_MAG'].append(in_mag)
+
+                    output = 'NOT'
+
+                # Populates the dictionary of extracted sources
                 elif test_df.empty is False:
+                    unique_sources_found += 1   # Adds one to the found sources
                     in_source = source
                     data_d['IN_SOURCE'].append(in_source)
-
                     source_number = int(test_df['SOURCE_NUMBER'].iloc[0])
                     data_d['SOURCE_NUMBER'].append(source_number)
-
                     dither = dither_n
                     data_d['DITHER'].append(dither)
-
                     in_alpha = alpha
                     data_d['IN_ALPHA'].append(in_alpha)
-
                     out_alpha = float(test_df['ALPHA_J2000'].iloc[0])
                     data_d['OUT_ALPHA'].append(out_alpha)
-
                     in_delta = delta
                     data_d['IN_DELTA'].append(in_delta)
-
                     out_delta = float(test_df['DELTA_J2000'].iloc[0])
                     data_d['OUT_DELTA'].append(out_delta)
-
                     in_pm = pm
                     data_d['IN_PM'].append(in_pm)
-
                     in_pm_norm = get_norm_speed(in_pm)
                     data_d['IN_PM_NORM'].append(in_pm_norm)
-
                     catalog_number = int(test_df['CATALOG_NUMBER'].iloc[0])
                     out_pm = get_pm(self.filtered_cat, source_number,
                                     catalog_number)
                     data_d['OUT_PM'].append(out_pm)
-
                     in_mag = mag
                     data_d['IN_MAG'].append(in_mag)
-
                     out_mag = get_mag(self.filtered_cat, source_number,
                                       catalog_number)
                     data_d['OUT_MAG'].append(out_mag)
-
                     ra = ccd_df['ALPHA_J2000'].tolist()
                     error_ra = ccd_df['ERRA_WORLD'].tolist()
                     dec = ccd_df['DELTA_J2000'].tolist()
@@ -387,7 +444,6 @@ class ScampPerformanceLostOnes:
                     else:
                         chi_ra = 'null'
                     data_d['CHI_ALPHA'].append(chi_ra)
-                    # print(' ')
 
                     if chi[1] >= 0.0:
                         chi_dec = chi[1]
@@ -395,9 +451,34 @@ class ScampPerformanceLostOnes:
                         chi_dec = 'null'
                     data_d['CHI_DELTA'].append(chi_dec)
 
-                    test_right += 1
+                    output = 'OK'
 
-        return data_d
+                if i_pm_test == 1.0 and i_mag_test == '23-24':
+                    test_1_0 += 1
+
+            if test_1_0 >= 3:
+                total_1_0 += 1
+                print(total_1_0, output)
+                if test >= 3:
+                    print('confirmado')
+            if test >= 3:
+                mag_norm = get_norm_mag(mag)
+                pm_norm = get_norm_speed(pm)
+                ssos_d[mag_norm][pm_norm] += 1
+
+
+        print(total_1_0)
+
+        for mag_key in ['20-21', '21-22', '22-23', '23-24', '24-25', '25-26']:
+            for pm_key in [0.01, 0.03, 0.1, 0.3, 1, 3, 10, 30]:
+                print(mag_key, pm_key, ssos_d[mag_key][pm_key])
+
+        # Test variables
+        print('total_unique_sources {}'.format(total_unique_sources))
+        print('unique_sources_lost {}'.format(unique_sources_lost))
+        print('unique_sources_found {}'.format(unique_sources_found))
+
+        return lost_d, data_d
 
 
 class PlotScampPerformanceLostOnes:
@@ -426,24 +507,25 @@ class PlotScampPerformanceLostOnes:
         :param data_df:
         :return:
         """
-        unique_sources = list(set(data_df['IN_SOURCE']))
+        # unique_sources = list(set(data_df['IN_SOURCE']))
 
-        selected_pms_df = data_df[data_df['IN_PM_NORM'].isin([0.1, 0.3, 1.0, 3.0])]
+        selected_pms_df = data_df[data_df['IN_PM_NORM'].isin([0.1, 0.3,
+                                                              1.0, 3.0])]
         unique_sources = list(set(selected_pms_df['IN_SOURCE']))
 
         with PdfPages('data.pdf') as pdf:
             for idx_in_source_, in_source_ in enumerate(unique_sources):
                 source_df = data_df[data_df['IN_SOURCE'].isin([in_source_])]
                 # MAG_ISO Galaxies
-                for idx_dither_, dither_ in enumerate(source_df['DITHER']):
-                    dither_df = source_df[source_df['DITHER'].isin([dither_])]
-                    if idx_dither_ == 0:
+                for idx_d_, d_ in enumerate(source_df['DITHER']):
+                    dither_df = source_df[source_df['DITHER'].isin([d_])]
+                    if idx_d_ == 0:
                         p_alpha = float(dither_df['IN_ALPHA'].iloc[0])
                         p_delta = float(dither_df['IN_DELTA'].iloc[0])
 
-                    input_regions = 'regions/cat_clean_ssos_ds9_{}.reg'.format(dither_)
-                    extracted_regions = 'regions/extracted_ds9_{}.reg'.format(dither_)
-                    input_fits = 'coadd_{}.fits'.format(dither_)
+                    input_regions = 'regions/cat_clean_ssos_ds9_{}.reg'.format(d_)
+                    extracted_regions = 'regions/extracted_ds9_{}.reg'.format(d_)
+                    input_fits = 'coadd_{}.fits'.format(d_)
                     alpha = float(dither_df['IN_ALPHA'].iloc[0])
                     delta = float(dither_df['IN_DELTA'].iloc[0])
                     source = float(dither_df['IN_SOURCE'].iloc[0])
@@ -510,7 +592,7 @@ class PlotScampPerformanceLostOnes:
 
 if __name__ == "__main__":
     ScampPerformanceLostOnes()
-    PlotScampPerformanceLostOnes()
+    # PlotScampPerformanceLostOnes()
 
 # # !/usr/bin/python
 # # -*- coding: utf-8 -*-

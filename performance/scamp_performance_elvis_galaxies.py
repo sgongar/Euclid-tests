@@ -190,7 +190,11 @@ class FactorsScampPerformance:
         positions_table = concat([pm_list, a_image_list, b_image_list,
                                   class_star_list, mag_iso_list,
                                   ellipticity_list], axis=1)
+<<<<<<< HEAD
+        positions_table.to_csv('false_catalogues/galaxies_catalogue.csv')
+=======
         positions_table.to_csv('galaxies_catalogue.csv')
+>>>>>>> 45b42f5dbf03ad4d6b0fe7a3c095a65db428f98a
 
 
     # def extract_stats_filt(self, filt_cat, input_df):

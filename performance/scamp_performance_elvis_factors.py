@@ -110,7 +110,6 @@ def save_factors(factors_d):
              'n_false': [], 'n_meas': [], 'n_true': [],
              'f_pur': [], 'f_dr': [], 'f_com': []}
     pm_list = [0.1, 0.3, 1.0, 3.0, 10.0]
-    idx = 0
     mags = ['20-21', '21-22', '22-23', '23-24',
             '24-25', '25-26', '26-27']
     for mag_ in mags:
@@ -128,8 +127,15 @@ def save_factors(factors_d):
             tmp_d['f_dr'].append(pm_df['f_dr'])
             tmp_d['f_com'].append(pm_df['f_com'])
 
+    tmp_d['n_scmp'] = [24, 23, 20, 17, 11, 25, 30, 21, 18, 15, 19, 37,
+                       20, 20, 14, 17, 26, 24, 22, 12, 22, 19, 20, 16,
+                       13, 27, 23, 16, 21, 2, 0, 0, 0, 0, 0]
+
+    for key_ in tmp_d.keys():
+        print(key_, len(tmp_d[key_]))
+
     tmp_df = DataFrame(tmp_d, columns=['mag', 'pm', 'n_se',
-                                       'n_false', 'n_meas', 'n_true',
+                                       'n_false', 'n_meas', 'n_scmp', 'n_true',
                                        'f_pur', 'f_dr', 'f_com'])
     tmp_df.to_csv('stats.csv')
 
@@ -436,9 +442,11 @@ class FactorsScampPerformance:
                     false_positives[dither_n]['RA'].append(alpha)
                     false_positives[dither_n]['DEC'].append(delta)
 
-            if right_detections >= 2:
+            if right_detections >= 3:
                 i_mag_bin = get_norm_mag(source_d['mag'][0])
                 i_pm_norm = get_norm_speed(source_d['pm'][0])
+                # if i_mag_bin == '23-24' and i_pm_norm == 1.0:
+                #     print('yey')
                 self.data_d[i_mag_bin][i_pm_norm]['right'] += 1
             else:
                 self.data_d[o_mag_bin][o_pm_norm]['false'] += 1
