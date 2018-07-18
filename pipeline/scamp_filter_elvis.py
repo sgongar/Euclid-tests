@@ -71,10 +71,6 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
 
         full_df = self.filter_class(full_df)
 
-        # Does not work!
-        # full_df = full_df[full_df['MEDIAN_B_IMAGE'] > 1.04]
-        # full_df = full_df[full_df['MEDIAN_B_IMAGE'] < 2]
-
         # full_df = self.filter_pm(full_df)  # 6th version
         # full_df = self.filter_mag(full_df)  # 7th version
         full_df = self.filter_b_image(full_df)  # 8th version
