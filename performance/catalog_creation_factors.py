@@ -37,14 +37,20 @@ __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
 
 
-def main():
-    catalog_loc = '/home/sgongora/Dev/Euclid-tests/performance/stats/total.csv'
+def main_class_pm():
+    mags = ['20-21', '21-22', '22-23', '23-24', '24-25', '25-26']
+    catalog_loc = '/pcdisk/holly/sgongora/Dev/Euclid-tests/performance/stats/total.csv'
+    catalog = read_csv(catalog_loc, index_col=0)
 
     for pm_ in prfs_dict['pms']:
-        print(pm_)
+        pm_cat = catalog[catalog['pm'].isin([pm_])]
+        for mag_ in mags:
+            mag_cat = pm_cat[pm_cat['mag'].isin([mag_])]
+            if pm_cat.empty is False and mag_cat.empty is False:
+                mag_cat.to_csv('stats_{}_{}.csv'.format(mag_, pm_))
 
 
 if __name__ == "__main__":
     prfs_dict = extract_settings_elvis()
 
-    main()
+    main_class_pm()

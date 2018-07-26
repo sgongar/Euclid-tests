@@ -131,8 +131,8 @@ def save_factors(factors_d):
                        20, 20, 14, 17, 26, 24, 22, 12, 22, 19, 20, 16,
                        13, 27, 23, 16, 21, 2, 0, 0, 0, 0, 0]
 
-    for key_ in tmp_d.keys():
-        print(key_, len(tmp_d[key_]))
+    # for key_ in tmp_d.keys():
+    #     print(key_, len(tmp_d[key_]))
 
     tmp_df = DataFrame(tmp_d, columns=['mag', 'pm', 'n_se',
                                        'n_false', 'n_meas', 'n_scmp', 'n_true',
@@ -219,9 +219,6 @@ def get_norm_mag(o_mag):
         if mag_[0] < o_mag < mag_[1]:
             mag_bin = '{}-{}'.format(mag_[0], mag_[1])
 
-    if mag_bin == '':
-        print(o_mag)
-
     return mag_bin
 
 
@@ -232,63 +229,98 @@ def splits_by_mag_bin():
     """
     prfs_d = extract_settings_elvis()
     total_d = {}
-    # opens input_catalog
-    cat_ssos = read_csv('cats/cat_clean_ssos.csv', index_col=0)
+    not_rejected_by_scamp = True
+    all_of_them = False
+    if not_rejected_by_scamp:
+        total_d = {'14-15': {0: 0, 0.01: 0, 0.03: 0, 0.1: 0, 0.3: 0,
+                             1.0: 0, 3.0: 0, 10.0: 0, 30.0: 0},
+                   '15-16': {0: 0, 0.01: 0, 0.03: 0, 0.1: 0, 0.3: 0,
+                             1.0: 0, 3.0: 0, 10.0: 0, 30.0: 0},
+                   '16-17': {0: 0, 0.01: 0, 0.03: 0, 0.1: 0, 0.3: 0,
+                             1.0: 0, 3.0: 0, 10.0: 0, 30.0: 0},
+                   '17-18': {0: 0, 0.01: 0, 0.03: 0, 0.1: 0, 0.3: 0,
+                             1.0: 0, 3.0: 0, 10.0: 0, 30.0: 0},
+                   '18-19': {0: 0, 0.01: 0, 0.03: 0, 0.1: 0, 0.3: 0,
+                             1.0: 0, 3.0: 0, 10.0: 0, 30.0: 0},
+                   '19-20': {0: 0, 0.01: 0, 0.03: 0, 0.1: 0, 0.3: 0,
+                             1.0: 0, 3.0: 0, 10.0: 0, 30.0: 0},
+                   '20-21': {0: 0, 0.01: 5, 0.03: 21, 0.1: 24, 0.3: 23,
+                             1.0: 20, 3.0: 17, 10.0: 11, 30.0: 17},
+                   '21-22': {0: 0, 0.01: 3, 0.03: 22, 0.1: 25, 0.3: 30,
+                             1.0: 21, 3.0: 18, 10.0: 15, 30.0: 15},
+                   '22-23': {0: 0, 0.01: 3, 0.03: 26, 0.1: 19, 0.3: 37,
+                             1.0: 20, 3.0: 20, 10.0: 14, 30.0: 10},
+                   '23-24': {0: 0, 0.01: 7, 0.03: 29, 0.1: 17, 0.3: 26,
+                             1.0: 24, 3.0: 22, 10.0: 12, 30.0: 15},
+                   '24-25': {0: 0, 0.01: 9, 0.03: 23, 0.1: 22, 0.3: 19,
+                             1.0: 20, 3.0: 16, 10.0: 13, 30.0: 19},
+                   '25-26': {0: 0, 0.01: 10, 0.03: 21, 0.1: 27, 0.3: 23,
+                             1.0: 16, 3.0: 21, 10.0: 2, 30.0: 16},
+                   '26-27': {0: 0, 0.01: 0, 0.03: 0, 0.1: 0, 0.3: 0,
+                             1.0: 0, 3.0: 0, 10.0: 0, 30.0: 0},
+                   '27-28': {0: 0, 0.01: 0, 0.03: 0, 0.1: 0, 0.3: 0,
+                             1.0: 0, 3.0: 0, 10.0: 0, 30.0: 0}}
 
-    mags = [[20, 21], [21, 22], [22, 23], [23, 24],
-            [24, 25], [25, 26], [26, 27], [27, 28]]
-    pms = prfs_d['pms']
-    pms_range = {0.01: [0.005, 0.015], 0.03: [0.015, 0.05],
-                 0.1: [0.05, 0.15], 0.3: [0.15, 0.5],
-                 1.0: [0.5, 1.5], 3.0: [1.5, 5],
-                 10.0: [5.0, 15.0], 30.0: [15.0, 50]}
+    elif all_of_them:
+        # opens input_catalog
+        cat_ssos = read_csv('cats/cat_clean_ssos.csv', index_col=0)
 
-    total_d['14-15'] = {}
-    total_d['14-15'][0] = 0
-    for pm_ in pms:
-        total_d['14-15'][pm_] = 0
+        mags = [[20, 21], [21, 22], [22, 23], [23, 24],
+                [24, 25], [25, 26], [26, 27], [27, 28]]
+        pms = prfs_d['pms']
+        pms_range = {0.01: [0.005, 0.015], 0.03: [0.015, 0.05],
+                     0.1: [0.05, 0.15], 0.3: [0.15, 0.5],
+                     1.0: [0.5, 1.5], 3.0: [1.5, 5],
+                     10.0: [5.0, 15.0], 30.0: [15.0, 50]}
 
-    total_d['15-16'] = {}
-    total_d['15-16'][0] = 0
-    for pm_ in pms:
-        total_d['15-16'][pm_] = 0
-
-    total_d['16-17'] = {}
-    total_d['16-17'][0] = 0
-    for pm_ in pms:
-        total_d['16-17'][pm_] = 0
-
-    total_d['17-18'] = {}
-    total_d['17-18'][0] = 0
-    for pm_ in pms:
-        total_d['17-18'][pm_] = 0
-
-    total_d['18-19'] = {}
-    total_d['18-19'][0] = 0
-    for pm_ in pms:
-        total_d['18-19'][pm_] = 0
-
-    total_d['19-20'] = {}
-    total_d['19-20'][0] = 0
-    for pm_ in pms:
-        total_d['19-20'][pm_] = 0
-
-    for mag_ in mags:
-        mag_bin_cat = cat_ssos[cat_ssos['ABMAG'] < mag_[1]]
-        mag_bin_cat = mag_bin_cat[mag_bin_cat['ABMAG'] > mag_[0]]
-        total_d['{}-{}'.format(mag_[0], mag_[1])] = {}
-        total_d['{}-{}'.format(mag_[0], mag_[1])][0] = 0
+        total_d['14-15'] = {}
+        total_d['14-15'][0] = 0
         for pm_ in pms:
-            # gets proper motion bin
-            pm_bin_cat = mag_bin_cat[mag_bin_cat['VEL'] < pms_range[pm_][1]]
-            pm_bin_cat = pm_bin_cat[pm_bin_cat['VEL'] > pms_range[pm_][0]]
-            try:
-                pm_bin_cat = concat(g for _, g in pm_bin_cat.groupby('SOURCE')
-                                    if len(g) >= 3)
-                total_sources = len(list(set(pm_bin_cat['SOURCE'].tolist())))
-                total_d['{}-{}'.format(mag_[0], mag_[1])][pm_] = total_sources
-            except ValueError:
-                total_d['{}-{}'.format(mag_[0], mag_[1])][pm_] = 0
+            total_d['14-15'][pm_] = 0
+
+        total_d['15-16'] = {}
+        total_d['15-16'][0] = 0
+        for pm_ in pms:
+            total_d['15-16'][pm_] = 0
+
+        total_d['16-17'] = {}
+        total_d['16-17'][0] = 0
+        for pm_ in pms:
+            total_d['16-17'][pm_] = 0
+
+        total_d['17-18'] = {}
+        total_d['17-18'][0] = 0
+        for pm_ in pms:
+            total_d['17-18'][pm_] = 0
+
+        total_d['18-19'] = {}
+        total_d['18-19'][0] = 0
+        for pm_ in pms:
+            total_d['18-19'][pm_] = 0
+
+        total_d['19-20'] = {}
+        total_d['19-20'][0] = 0
+        for pm_ in pms:
+            total_d['19-20'][pm_] = 0
+
+        for mag_ in mags:
+            mag_bin_cat = cat_ssos[cat_ssos['ABMAG'] < mag_[1]]
+            mag_bin_cat = mag_bin_cat[mag_bin_cat['ABMAG'] > mag_[0]]
+            total_d['{}-{}'.format(mag_[0], mag_[1])] = {}
+            total_d['{}-{}'.format(mag_[0], mag_[1])][0] = 0
+            for pm_ in pms:
+                # gets proper motion bin
+                pm_bin_cat = mag_bin_cat[mag_bin_cat['VEL'] < pms_range[pm_][1]]
+                pm_bin_cat = pm_bin_cat[pm_bin_cat['VEL'] > pms_range[pm_][0]]
+                try:
+                    pm_bin_cat = concat(g for _, g in pm_bin_cat.groupby('SOURCE')
+                                        if len(g) >= 3)
+                    total_sources = len(list(set(pm_bin_cat['SOURCE'].tolist())))
+                    total_d['{}-{}'.format(mag_[0], mag_[1])][pm_] = total_sources
+                except ValueError:
+                    total_d['{}-{}'.format(mag_[0], mag_[1])][pm_] = 0
+
+        print(total_d)
 
     return total_d
 
