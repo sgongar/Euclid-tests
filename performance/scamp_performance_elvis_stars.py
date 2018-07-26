@@ -151,8 +151,8 @@ class FactorsScampPerformance:
         positions_table = concat([pm_list, a_image_list, b_image_list,
                                   class_star_list, mag_iso_list,
                                   ellipticity_list], axis=1)
-        positions_table.to_csv('false_catalogues/stars_catalogue.csv')
-        positions_table.to_csv('true_catalogues/stars_catalogue.csv')
+        # positions_table.to_csv('catalogues_not_detectd/stars_catalogue.csv')
+        positions_table.to_csv('catalogues_detected/stars_catalogue.csv')
 
     # def extract_stats_filt(self, filt_cat, input_df):
     #     """

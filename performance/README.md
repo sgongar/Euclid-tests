@@ -1,5 +1,10 @@
 ## Performance module
 
+#### To-do
+- [ ] Implement not detected catalogue for SSOs. 
+- [ ] Implement not detected catalogue for stars.
+
+
 #### Files
 
 ##### catalog_creation_factors

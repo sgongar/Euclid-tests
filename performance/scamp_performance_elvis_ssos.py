@@ -169,10 +169,12 @@ class FactorsScampPerformance:
             print('idx {}'.format(idx_source_))
             source_df = input_df[input_df['SOURCE'].isin([source_])]
 
-            test_number = 0
+            test_number = 0  # Counter of right detections
+            mag_norm = 0  # Just to clear the code
+            pm_norm = 0  # Just to clear the code
             # Loops over CCD catalogues
             for i, row in enumerate(source_df.itertuples(), 1):
-                dither_df = source_df[source_df['DITHER'].isin([row.DITHER])]
+                # dither_df = source_df[source_df['DITHER'].isin([row.DITHER])]
                 i_alpha = float(row.RA)
                 i_delta = float(row.DEC)
 
@@ -233,8 +235,8 @@ class FactorsScampPerformance:
         positions_table = concat([pm_list, a_image_list, b_image_list,
                                   class_star_list, mag_iso_list,
                                   ellipticity_list], axis=1)
-        positions_table.to_csv('false_catalogues/ssos_catalogue.csv')
-        positions_table.to_csv('true_catalogues/ssos_catalogue.csv')
+        # positions_table.to_csv('catalogues_not_detected/ssos_catalogue.csv')
+        positions_table.to_csv('catalogues_detected/ssos_catalogue.csv')
 
     def extract_stats_filt(self, filt_cat, input_df):
         """
