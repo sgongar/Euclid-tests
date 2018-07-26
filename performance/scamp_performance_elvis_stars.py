@@ -16,7 +16,7 @@ from astropy.io import fits
 from astropy.table import Table
 from pandas import concat, DataFrame, read_csv, Series
 
-from misc import extract_settings_elvis, get_cats_elvis_d
+from misc import extract_settings_elvis, check_source, get_cats_elvis_d
 
 
 __author__ = "Samuel Góngora García"
@@ -26,25 +26,6 @@ __version__ = "0.1"
 __maintainer__ = "Samuel Góngora García"
 __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
-
-
-def check_source(o_df, i_alpha, i_delta, keys):
-    """
-
-    :param o_df:
-    :param i_alpha:
-    :param i_delta:
-    :param keys:
-    :return:
-    """
-    prfs_d = extract_settings_elvis()
-
-    o_df = o_df[o_df[keys[0]] + prfs_d['tolerance']*2 > i_alpha]
-    o_df = o_df[i_alpha > o_df[keys[0]] - prfs_d['tolerance']*2]
-    o_df = o_df[o_df[keys[1]] + prfs_d['tolerance']*2 > i_delta]
-    o_df = o_df[i_delta > o_df[keys[1]] - prfs_d['tolerance']*2]
-
-    return o_df
 
 
 class FactorsScampPerformance:
@@ -170,12 +151,8 @@ class FactorsScampPerformance:
         positions_table = concat([pm_list, a_image_list, b_image_list,
                                   class_star_list, mag_iso_list,
                                   ellipticity_list], axis=1)
-<<<<<<< HEAD
         positions_table.to_csv('false_catalogues/stars_catalogue.csv')
-=======
         positions_table.to_csv('stars_catalogue.csv')
->>>>>>> 45b42f5dbf03ad4d6b0fe7a3c095a65db428f98a
-
 
     # def extract_stats_filt(self, filt_cat, input_df):
     #     """

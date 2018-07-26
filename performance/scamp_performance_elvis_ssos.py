@@ -16,7 +16,7 @@ from astropy.io import fits
 from astropy.table import Table
 from pandas import concat, DataFrame, read_csv, Series
 
-from misc import extract_settings_elvis, get_cats_elvis_d
+from misc import extract_settings_elvis, check_source, get_cats_elvis_d
 
 
 __author__ = "Samuel Góngora García"
@@ -89,25 +89,6 @@ def get_norm_mag(o_mag):
             mag_bin = '{}-{}'.format(mag_[0], mag_[1])
 
     return mag_bin
-
-
-def check_source(o_df, i_alpha, i_delta, keys):
-    """
-
-    :param o_df:
-    :param i_alpha:
-    :param i_delta:
-    :param keys:
-    :return:
-    """
-    prfs_d = extract_settings_elvis()
-
-    o_df = o_df[o_df[keys[0]] + prfs_d['tolerance']*2 > i_alpha]
-    o_df = o_df[i_alpha > o_df[keys[0]] - prfs_d['tolerance']*2]
-    o_df = o_df[o_df[keys[1]] + prfs_d['tolerance']*2 > i_delta]
-    o_df = o_df[i_delta > o_df[keys[1]] - prfs_d['tolerance']*2]
-
-    return o_df
 
 
 class FactorsScampPerformance:
@@ -224,10 +205,7 @@ class FactorsScampPerformance:
                             class_star = float(pm_df['MEDIAN_CLASS_STAR'].iloc[0])
                             mag_iso = float(pm_df['MEDIAN_MAG_ISO'].iloc[0])
                             ellipticity = float(pm_df['MEDIAN_ELLIPTICITY'].iloc[0])
-<<<<<<< HEAD
                             test_number += 1  # Test number
-=======
->>>>>>> 45b42f5dbf03ad4d6b0fe7a3c095a65db428f98a
 
                 if test:
                     test_dict['PM'].append(pm)
@@ -236,7 +214,6 @@ class FactorsScampPerformance:
                     test_dict['CLASS_STAR'].append(class_star)
                     test_dict['MAG_ISO'].append(mag_iso)
                     test_dict['ELLIPTICITY'].append(ellipticity)
-<<<<<<< HEAD
 
             if test_number >= 3:
                 print(mag_norm, pm_norm)
@@ -246,8 +223,6 @@ class FactorsScampPerformance:
                         '25-26', '26-27']:
             for pm_key in [0.01, 0.03, 0.1, 0.3, 1, 3, 10, 30]:
                 print(mag_key, pm_key, ssos_d[mag_key][pm_key])
-=======
->>>>>>> 45b42f5dbf03ad4d6b0fe7a3c095a65db428f98a
 
         pm_list = Series(test_dict['PM'], name='PM')
         a_image_list = Series(test_dict['A_IMAGE'], name='A_IMAGE')
@@ -259,11 +234,8 @@ class FactorsScampPerformance:
         positions_table = concat([pm_list, a_image_list, b_image_list,
                                   class_star_list, mag_iso_list,
                                   ellipticity_list], axis=1)
-<<<<<<< HEAD
         positions_table.to_csv('false_catalogues/ssos_catalogue.csv')
-=======
         positions_table.to_csv('catalogue.csv')
->>>>>>> 45b42f5dbf03ad4d6b0fe7a3c095a65db428f98a
 
     def extract_stats_filt(self, filt_cat, input_df):
         """

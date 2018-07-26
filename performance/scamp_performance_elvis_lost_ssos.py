@@ -26,7 +26,7 @@ from pyds9 import DS9
 import statsmodels.api as sm
 
 
-from misc import extract_settings_elvis, setting_logger
+from misc import extract_settings_elvis, check_source, setting_logger
 
 
 __author__ = "Samuel Góngora García"
@@ -179,25 +179,6 @@ def get_cats(dither_n):
             cats_dict[cat_dither].append(cat_dither + cat_ccd)
 
     return cats_dict[dither_n]
-
-
-def check_source(o_df, i_alpha, i_delta, keys):
-    """
-
-    :param o_df:
-    :param i_alpha:
-    :param i_delta:
-    :param keys:
-    :return:
-    """
-    prfs_d = extract_settings_elvis()
-
-    o_df = o_df[o_df[keys[0]] + prfs_d['tolerance'] > i_alpha]
-    o_df = o_df[i_alpha > o_df[keys[0]] - prfs_d['tolerance']]
-    o_df = o_df[o_df[keys[1]] + prfs_d['tolerance'] > i_delta]
-    o_df = o_df[i_delta > o_df[keys[1]] - prfs_d['tolerance']]
-
-    return o_df
 
 
 def get_norm_speed(o_pm):

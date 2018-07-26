@@ -321,8 +321,8 @@ def get_fits_d(mag_, dither):
 
 
 def get_os():
-    """ a function that gets the current operative system
-    for now works in Debian, Fedora and Ubuntu shell (Microsoft version)
+    """ A function that gets the current operating system for now works in
+    Fedora and CentOS.
 
     @return os_system: a string which contains the operative system name
     """
@@ -430,77 +430,17 @@ def extract_settings_luca():
     return prfs_d
 
 
-def extract_settings_sc3():
-    """ creates a dictionary with all the configuration parameters
-        at this moment configuration file location is fixed at main directory
-
-    @return prfs_d: a dictionary which contains all valuable data
-    """
-    cf = ConfigParser()
-    cf.read(".settings_SC3.ini")
-
-    prfs_d = {}
-    os_version = get_os()
-
-    if os_version == 'centos':
-        prfs_d['version'] = conf_map(cf, "Version")['centos_version']
-    elif os_version == 'cab':
-        prfs_d['version'] = conf_map(cf, "Version")['cab_version']
-    else:
-        raise BadSettings('Operative system not chosen')
-
-    if os_version == 'centos':
-        prfs_d['home'] = conf_map(cf, "HomeDirs")['centos_home']
-    elif os_version == 'cab':
-        prfs_d['home'] = conf_map(cf, "HomeDirs")['cab_home']
-    else:
-        raise BadSettings('Operative system not chosen')
-
-    prfs_d['fits_dir'] = conf_map(cf, "ImagesDirs")['fits_dir']
-    prfs_d['fits_dir'] = '{}{}'.format(prfs_d['version'], prfs_d['fits_dir'])
-
-    # todo - comment!
-    prfs_d['output_cats'] = conf_map(cf, "CatsDirs")['output_cats']
-    prfs_d['output_cats'] = prfs_d['version'] + prfs_d['output_cats']
-    # todo - comment!
-    prfs_d['references'] = conf_map(cf, "CatsDirs")['references']
-    prfs_d['references'] = prfs_d['version'] + prfs_d['references']
-    # todo - comment!
-    prfs_d['filtered'] = conf_map(cf, "CatsDirs")['filtered']
-    prfs_d['filtered'] = prfs_d['version'] + prfs_d['filtered']
-
-    outputdirs_list = ['conf_scamp', 'conf_sex', 'params_sex', 'neural_sex',
-                       'params_cat', 'logger_config']
-    for conf_ in outputdirs_list:
-        prfs_d[conf_] = conf_map(cf, "ConfigDirs")[conf_]
-        prfs_d[conf_] = prfs_d['home'] + prfs_d[conf_]
-
-    prfs_d['detections'] = int(conf_map(cf, "Misc")['detections'])
-    prfs_d['pm_low'] = float(conf_map(cf, "Misc")['pm_low'])
-    prfs_d['pm_up'] = float(conf_map(cf, "Misc")['pm_up'])
-    prfs_d['r_fit'] = conf_map(cf, "Misc")['r_fit']
-    prfs_d['cores_number'] = conf_map(cf, "Misc")['cores_number']
-    if prfs_d['cores_number'] == '0':
-        prfs_d['cores_number'] = int(str(cpu_count()))
-        # TODO should leave free at least 20% of processors
-    else:
-        prfs_d['cores_number'] = int(prfs_d['cores_number'])
-    prfs_d['tolerance'] = float(conf_map(cf, "Misc")['tolerance'])
-
-    return prfs_d
-
-
 def extract_settings_elvis():
-    """ creates a dictionary with all the configuration parameters
+    """ Creates a dictionary with all the configuration parameters
         at this moment configuration file location is fixed at main directory
 
-    @return prfs_d: a dictionary which contains all valuable data
+    @return prfs_d: a dictionary which contains all valuable data.
     """
     cf = ConfigParser()
-    cf.read(".settings_ELViS.ini")
+    cf.read(".settings_ELViS.ini")  # Location of the configuration parameters
 
     prfs_d = {}
-    os_version = get_os()
+    os_version = get_os()  # Gets the current operating system.
 
     if os_version == 'centos':
         prfs_d['version'] = conf_map(cf, "Version")['centos_version']
@@ -559,3 +499,27 @@ def extract_settings_elvis():
     prfs_d['tolerance'] = float(conf_map(cf, "Misc")['tolerance'])
 
     return prfs_d
+
+
+def check_source(df, i_alpha, i_delta, keys):
+    """ Checks if there is any source with a right ascension and declination
+    coordinates in a given dataframe
+
+    :param df: The given dataframe.
+    :param i_alpha: Right ascension of the source to be located.
+    :param i_delta: Declination of the source to be located.
+    :param keys: A list with the names of the columns of right ascension and
+    declination.
+    :return: A dataframe called df populated with the found source, if there
+    is no source the dataframe will be empty.
+    """
+    prfs_d = extract_settings_elvis()
+    # How many times the cross search radius will be increased
+    tolerance_factor = 2
+
+    df = df[df[keys[0]] + prfs_d['tolerance']*tolerance_factor > i_alpha]
+    df = df[i_alpha > df[keys[0]] - prfs_d['tolerance']*tolerance_factor]
+    df = df[df[keys[1]] + prfs_d['tolerance']*tolerance_factor > i_delta]
+    df = df[i_delta > df[keys[1]] - prfs_d['tolerance']*tolerance_factor]
+
+    return df

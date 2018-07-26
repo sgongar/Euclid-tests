@@ -20,7 +20,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
 from pandas import concat, DataFrame, read_csv
 
-from misc import extract_settings_elvis, setting_logger
+from misc import extract_settings_elvis, check_source, setting_logger
 from sys import argv
 
 from matplotlib import cm
@@ -124,25 +124,6 @@ def get_dither(catalog_n):
             dither_n = dither_
 
     return dither_n
-
-
-def check_source(o_df, i_alpha, i_delta, keys):
-    """
-
-    :param o_df:
-    :param i_alpha:
-    :param i_delta:
-    :param keys:
-    :return:
-    """
-    prfs_d = extract_settings_elvis()
-
-    o_df = o_df[o_df[keys[0]] + prfs_d['tolerance']*2 > i_alpha]
-    o_df = o_df[i_alpha > o_df[keys[0]] - prfs_d['tolerance']*2]
-    o_df = o_df[o_df[keys[1]] + prfs_d['tolerance']*2 > i_delta]
-    o_df = o_df[i_delta > o_df[keys[1]] - prfs_d['tolerance']*2]
-
-    return o_df
 
 
 def get_norm_speed(o_pm):

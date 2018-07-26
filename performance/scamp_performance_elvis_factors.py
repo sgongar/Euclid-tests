@@ -14,23 +14,10 @@ Todo:
 *GNU Terry Pratchett*
 """
 
-from astropy.io import fits
-from astropy.table import Table
-from matplotlib.backends.backend_pdf import PdfPages
-import matplotlib.pyplot as plt
-from pandas import concat, DataFrame, read_csv
+from misc import extract_settings_elvis, check_source, setting_logger
 
-from misc import extract_settings_elvis, setting_logger
-from sys import argv
-
-from matplotlib import cm
-from matplotlib.backends.backend_pdf import PdfPages
-import matplotlib.pyplot as plt
-from numpy import array, isnan, nan, nanmean
+from numpy import nan
 from pandas import concat, DataFrame, read_csv, Series
-
-from misc import extract_settings_luca
-from regions import Create_regions
 
 
 __author__ = "Samuel Góngora García"
@@ -40,6 +27,27 @@ __version__ = "0.1"
 __maintainer__ = "Samuel Góngora García"
 __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
+
+
+def gets_data():
+    """ Creates an input dictionary. Each key contains SSOs' information
+    for each dither.
+
+    :return: input_dict
+    """
+    # # For now we only have data for dither 1
+    input_df = {1: {}, 2: {}, 3: {}, 4: {}}
+
+    for key_ in input_df.keys():
+        # Uses clean ones instead total ones
+        ssos_cat = 'cats/cat_clean_ssos_{}.csv'.format(key_)
+        input_df[key_]['SSOs'] = read_csv(ssos_cat, index_col=0)
+        stars_cat = 'tmp_stars/stars.csv'
+        input_df[key_]['stars'] = read_csv(stars_cat, index_col=0)
+        galaxies_cat = 'tmp_galaxies/galaxies.csv'
+        input_df[key_]['galaxies'] = read_csv(galaxies_cat, index_col=0)
+
+    return input_df
 
 
 def compute_factors(factors_d, stats_df):
@@ -131,6 +139,7 @@ def save_factors(factors_d):
                        20, 20, 14, 17, 26, 24, 22, 12, 22, 19, 20, 16,
                        13, 27, 23, 16, 21, 2, 0, 0, 0, 0, 0]
 
+    # For test reasons
     # for key_ in tmp_d.keys():
     #     print(key_, len(tmp_d[key_]))
 
@@ -143,12 +152,14 @@ def save_factors(factors_d):
 
 
 def get_dither(catalog_n):
-    """
+    """ Gets the number of the dither for a catalogue number.
 
-    :param catalog_n:
-    :return: cat_list
+    :param catalog_n: The catalogue with the unknown dither.
+    :return: dither_n, the number of the dither.
     """
+    dither_n = 0  # In order to have a clear code
     cats_dict = {}
+
     for i in range(1, 5, 1):
         cats_dict[i] = []
 
@@ -161,25 +172,6 @@ def get_dither(catalog_n):
             dither_n = dither_
 
     return dither_n
-
-
-def check_source(o_df, i_alpha, i_delta, keys):
-    """
-
-    :param o_df:
-    :param i_alpha:
-    :param i_delta:
-    :param keys:
-    :return:
-    """
-    prfs_d = extract_settings_elvis()
-
-    o_df = o_df[o_df[keys[0]] + prfs_d['tolerance']*2 > i_alpha]
-    o_df = o_df[i_alpha > o_df[keys[0]] - prfs_d['tolerance']*2]
-    o_df = o_df[o_df[keys[1]] + prfs_d['tolerance']*2 > i_delta]
-    o_df = o_df[i_delta > o_df[keys[1]] - prfs_d['tolerance']*2]
-
-    return o_df
 
 
 def get_norm_speed(o_pm):
@@ -203,6 +195,7 @@ def get_norm_speed(o_pm):
                 pm_norm = key_
 
     return pm_norm
+
 
 def get_norm_mag(o_mag):
     """
@@ -392,7 +385,7 @@ class FactorsScampPerformance:
         self.logger = setting_logger(self.prfs_d, logger_name)
 
         filt_cat = self.gets_filtered_catalog()  # Gets data from filtered
-        input_df = self.gets_data()  # Gets data from catalogs
+        input_df = gets_data()  # Gets data from catalogs
         stats_df = self.extract_stats(filt_cat, input_df)  # Splits due type
         factors_d = compute_factors(factors_d, stats_df)
         save_factors(factors_d)
@@ -409,26 +402,6 @@ class FactorsScampPerformance:
         filtered_cat = read_csv('{}'.format(filter_o_n), index_col=0)
 
         return filtered_cat
-
-    def gets_data(self):
-        """ Creates an input dictionary. Each key contains SSOs' information
-        for each dither.
-
-        :return: input_dict
-        """
-        # # For now we only have data for dither 1
-        input_df = {1: {}, 2: {}, 3: {}, 4: {}}
-
-        for key_ in input_df.keys():
-            # Uses clean ones instead total ones
-            ssos_cat = 'cats/cat_clean_ssos_{}.csv'.format(key_)
-            input_df[key_]['SSOs'] = read_csv(ssos_cat, index_col=0)
-            stars_cat = 'tmp_stars/stars.csv'
-            input_df[key_]['stars'] = read_csv(stars_cat, index_col=0)
-            galaxies_cat = 'tmp_galaxies/galaxies.csv'
-            input_df[key_]['galaxies'] = read_csv(galaxies_cat, index_col=0)
-
-        return input_df
 
     def extract_stats(self, filt_cat, input_df):
         """
@@ -497,12 +470,6 @@ class FactorsScampPerformance:
         mags = [[14, 15], [15, 16], [16, 17], [17, 18], [18, 19],
                 [19, 20], [20, 21], [21, 22], [22, 23], [23, 24],
                 [24, 25], [25, 26], [26, 27], [27, 28]]
-        """
-        for mag_ in mags:
-            mag_bin = '{}-{}'.format(mag_[0], mag_[1])
-            data_df = DataFrame(self.data_d[mag_bin])
-            data_df.to_csv('stats_{}.csv'.format(mag_bin))
-        """
 
         idxs = ['14-15', '15-16', '16-17', '17-18', '18-19',
                 '19-20', '20-21', '21-22', '22-23', '23-24',

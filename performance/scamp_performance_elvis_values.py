@@ -18,20 +18,17 @@ Versions:
 
 Todo:
     * Improve log messages
-    * Get out check_source
 
 *GNU Terry Pratchett*
 """
 from multiprocessing import Process
 from os import getcwd, remove
 
-from astropy.io import fits
-from astropy.table import Table
 from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
 from pandas import concat, DataFrame, read_csv
 
-from misc import extract_settings_elvis, setting_logger
+from misc import extract_settings_elvis, check_source, setting_logger
 
 __author__ = "Samuel Góngora García"
 __copyright__ = "Copyright 2018"
@@ -148,25 +145,6 @@ def create_output_dicts():
                 'lost': lost_d}
 
     return output_d
-
-
-def check_source(o_df, i_alpha, i_delta, keys):
-    """
-
-    :param o_df:
-    :param i_alpha:
-    :param i_delta:
-    :param keys:
-    :return:
-    """
-    prfs_d = extract_settings_elvis()
-
-    o_df = o_df[o_df[keys[0]] + prfs_d['tolerance'] > i_alpha]
-    o_df = o_df[i_alpha > o_df[keys[0]] - prfs_d['tolerance']]
-    o_df = o_df[o_df[keys[1]] + prfs_d['tolerance'] > i_delta]
-    o_df = o_df[i_delta > o_df[keys[1]] - prfs_d['tolerance']]
-
-    return o_df
 
 
 class TotalScampPerformance:
