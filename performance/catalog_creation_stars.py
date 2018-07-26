@@ -34,12 +34,11 @@ from sys import stdout
 
 from astropy.io import fits
 from astropy.table import Table
-from numpy import median
 from pandas import concat, DataFrame, read_csv
 
-from images_management_elvis import get_borders
-from misc import get_cat, get_cats, extract_settings_elvis
+from misc_cats import get_cat, get_cats
 from misc import create_scamp_dict, create_sextractor_dict
+from misc import extract_settings_elvis
 
 __author__ = "Samuel Góngora García"
 __copyright__ = "Copyright 2018"

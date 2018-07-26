@@ -59,24 +59,6 @@ def get_dither(catalog_n):
     return dither_n
 
 
-"""
-Index([u'SOURCE_NUMBER', u'CATALOG_NUMBER', u'EXTENSION', u'ASTR_INSTRUM',
-       u'PHOT_INSTRUM', u'X_IMAGE', u'Y_IMAGE', u'ISOAREA_IMAGE', u'A_IMAGE',
-       u'MEDIAN_A_IMAGE', u'MEAN_A_IMAGE', u'ERRA_IMAGE', u'MEDIAN_ERRA_IMAGE',
-       u'MEAN_ERRA_IMAGE', u'B_IMAGE', u'MEDIAN_B_IMAGE', u'MEAN_B_IMAGE',
-       u'ERRB_IMAGE', u'MEDIAN_ERRB_IMAGE', u'MEAN_ERRB_IMAGE', u'THETA_IMAGE',
-       u'ERRTHETA_IMAGE', u'ALPHA_J2000', u'DELTA_J2000', u'ERRA_WORLD',
-       u'ERRB_WORLD', u'ERRTHETA_WORLD', u'EPOCH', u'FWHM_IMAGE',
-       u'CLASS_STAR', u'MEDIAN_CLASS_STAR', u'MEAN_CLASS_STAR', u'FLUX_ISO',
-       u'MEDIAN_FLUX_ISO', u'MEAN_FLUX_ISO', u'FLUXERR_ISO',
-       u'MEDIAN_FLUXERR_ISO', u'MEAN_FLUXERR_ISO', u'FLUX_RADIUS',
-       u'ELONGATION', u'ELLIPTICITY', u'MEDIAN_ELLIPTICITY',
-       u'MEAN_ELLIPTICITY', u'MAG', u'MAGERR', u'MAG_ISO',
-       u'MEAN_MAG_ISO', u'MAGERR_ISO', u'MEDIAN_MAGERR_ISO',
-       u'MEAN_MAGERR_ISO', u'FLAGS_EXTRACTION', u'FLAGS_SCAMP', u'FLAGS_IMA'],
-"""
-
-
 def create_output_dicts():
     # prfs_d = extract_settings_elvis()
 

@@ -14,10 +14,10 @@ Todo:
 
 from astropy.io import fits
 from astropy.table import Table
-from pandas import concat, DataFrame, read_csv, Series
+from pandas import concat, read_csv, Series
 
-from misc import extract_settings_elvis, check_source, get_cats_elvis_d
-
+from misc import extract_settings_elvis, check_source
+from misc_cats import get_cats
 
 __author__ = "Samuel Góngora García"
 __copyright__ = "Copyright 2018"
@@ -126,7 +126,7 @@ class FactorsScampPerformance:
         """
         cats_d = {}
         for dither_ in range(1, 5, 1):
-            cat_list = get_cats_elvis_d(dither_)
+            cat_list = get_cats(dither_)
             cats_d[dither_] = {}
             for cat_ in cat_list:
                 cat = fits.open('{}/{}'.format(self.prfs_d['fits_dir'], cat_))
@@ -216,7 +216,6 @@ class FactorsScampPerformance:
                     test_dict['ELLIPTICITY'].append(ellipticity)
 
             if test_number >= 3:
-                print(mag_norm, pm_norm)
                 ssos_d[mag_norm][pm_norm] += 1
 
         for mag_key in ['20-21', '21-22', '22-23', '23-24', '24-25',
@@ -235,7 +234,7 @@ class FactorsScampPerformance:
                                   class_star_list, mag_iso_list,
                                   ellipticity_list], axis=1)
         positions_table.to_csv('false_catalogues/ssos_catalogue.csv')
-        positions_table.to_csv('catalogue.csv')
+        positions_table.to_csv('true_catalogues/ssos_catalogue.csv')
 
     def extract_stats_filt(self, filt_cat, input_df):
         """

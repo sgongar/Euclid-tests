@@ -4,12 +4,9 @@
 """
 
 Content:
-    * get_fits_limits
-    * get_fits_d
     * get_os
     * conf_map
     * extract_settings_luca
-    * extract_settings_sc3
 
 Todo:
     * Improve log messages
@@ -17,14 +14,8 @@ Todo:
 """
 from multiprocessing import cpu_count
 from ConfigParser import ConfigParser
-from os import listdir
 from platform import platform
 from logging import getLogger, config
-
-from astropy.io import fits
-from astropy.coordinates import SkyCoord
-from astropy.units import degree
-from astropy.wcs import WCS
 
 from errors import BadSettings
 
@@ -50,7 +41,7 @@ def create_sextractor_dict(conf_num, cat_conf):
         configurations = [2, 0.1, 5, 4, 'models/gauss_2.0_5x5.conv']
         len_conf = 1
     else:
-        mode = {'type': 'sextractor'}  # harcoded
+        mode = {'type': 'sextractor'}  # hard-coded
         configurations, len_conf = create_configurations(mode)
 
     analysis_l = []
@@ -171,153 +162,6 @@ def setting_logger(prfs_d, logger_name):
     # logger.FileHandler('spam.log')
 
     return logger
-
-
-def get_cats(dither):
-    """
-
-    :return:
-    """
-    prfs_d = extract_settings_elvis()
-    cat_list = []
-
-    files = listdir('{}/'.format(prfs_d['fits_dir']))
-    for file_ in files:
-        if file_[-4:] == '.cat':
-            cat_list.append(file_)
-
-    cats_out = []
-    for file_ in cat_list:
-        if file_[-5:-4] == str(dither):
-            cats_out.append(file_)
-
-    return cats_out
-
-
-def get_cat(ccd):
-    """ returns catalog from ccd name
-
-    :param ccd:
-    :return:
-    """
-    cats = []
-    idx = 0
-
-    for x_ in range(1, 7, 1):
-        for y_ in range(1, 7, 1):
-            for d_ in range(1, 5, 1):
-                cat_name = 'x{}_y{}'.format(x_, y_, d_)
-                cats.append([cat_name, d_, idx])
-
-                idx += 1
-
-    ccd_position = ccd[4:9]
-    dither_n = ccd[11:12]
-
-    for cat_ in cats:
-        if str(ccd_position) == cat_[0] and int(dither_n) == cat_[1]:
-            cat_n = cat_[2]
-
-    return cat_n
-
-
-def get_fits(dither):
-    """
-
-    :return:
-    """
-    prfs_d = extract_settings_elvis()
-    fits_list = []
-
-    files = listdir('{}/'.format(prfs_d['fits_dir']))
-    for file_ in files:
-        if file_[-5:] == '.fits':
-            fits_list.append(file_)
-
-    fits_out = []
-    for file_ in fits_list:
-        if file_[-6:-5] == str(dither):
-            fits_out.append(file_)
-
-    return fits_out
-
-
-def get_fits_limits(fits_image):
-    """ todo - to another new file?
-
-    @param fits_image: fits image
-
-    @return limits: a dict with ra/dec limits above_ra, below_ra,
-                    above_dec_, below_dec
-    """
-    # logger.info('getting limits of {} image'.format(fits_image))
-
-    data, header = fits.getdata(fits_image, header=True)
-    w = WCS(fits_image)
-
-    above_x, above_y = header['NAXIS1'], header['NAXIS2']
-    above_ra, above_dec = w.all_pix2world(above_x, above_y, 0)
-
-    below_ra, below_dec = w.all_pix2world(0, 0, 0)
-
-    c = SkyCoord(ra=[above_ra, below_ra] * degree,
-                 dec=[above_dec, below_dec] * degree)
-
-    ra = [above_ra, below_ra]
-    dec = [above_dec, below_dec]
-
-    limits = {'below_ra': float(min(ra)), 'above_ra': float(max(ra)),
-              'below_dec': float(min(dec)), 'above_dec': float(max(dec))}
-
-    # check position
-    # sometimes some values could be higher when are tagged as "lowest"
-    return limits
-
-
-def get_cats_elvis_d(dither):
-    """
-
-    :param mag_:
-    :param dither:
-    :return:
-    """
-    prfs_d = extract_settings_elvis()
-    fits_list = []
-
-    files = listdir('{}'.format(prfs_d['fits_dir']))
-    for file_ in files:
-        if file_[-4:] == '.cat':
-            fits_list.append(file_)
-
-    list_out = []
-    for file_ in fits_list:
-        if file_[-5:-4] == str(dither):
-            list_out.append(file_)
-
-    return list_out
-
-
-def get_fits_d(mag_, dither):
-    """
-
-    :param mag_:
-    :param dither:
-    :return:
-    """
-    prfs_d = extract_settings_luca()
-    fits_list = []
-
-    files = listdir('{}/{}/CCDs/'.format(prfs_d['fits_dir'], mag_))
-    for file_ in files:
-        if file_[:1] == 'm' and file_[-5:] == '.fits':
-            fits_list.append(file_)
-
-    list_out = []
-    for file_ in fits_list:
-        if file_[-6:-5] == str(dither):
-            list_out.append(file_)
-
-    return list_out
 
 
 def get_os():

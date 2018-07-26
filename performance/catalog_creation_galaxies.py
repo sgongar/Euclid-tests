@@ -27,7 +27,8 @@ from astropy.table import Table
 from numpy import median
 from pandas import concat, DataFrame, read_csv
 
-from misc import get_cat, get_cats, extract_settings_elvis
+from misc import extract_settings_elvis
+from misc_cats import get_cat, get_cats
 
 __author__ = "Samuel Góngora García"
 __copyright__ = "Copyright 2018"

@@ -17,16 +17,9 @@ Todo:
 *GNU Terry Pratchett*
 
 """
-from math import hypot
-from multiprocessing import Process
-from sys import stdout
+from pandas import read_csv
 
-from astropy.io import fits
-from astropy.table import Table
-from numpy import median
-from pandas import concat, DataFrame, read_csv
-
-from misc import get_cat, get_cats, extract_settings_elvis
+from misc import extract_settings_elvis
 
 __author__ = "Samuel Góngora García"
 __copyright__ = "Copyright 2018"
@@ -39,7 +32,6 @@ __status__ = "Development"
 
 # Reads first catalogue dither
 # Propagate over dither
-
 
 def create_empty_catalog_dict():
     """
@@ -101,13 +93,6 @@ def propagate_dithers():
         ssos_d['PA'].append(pa_source)
         mag_source = source_df['MAG'].iloc[0]
         ssos_d['MAG'].append(mag_source)
-
-        """
-        for dither_ in range(2, 5, 1):
-            alpha_source = alpha_source +
-        """
-
-    # print(ssos_d)
 
 
 if __name__ == "__main__":

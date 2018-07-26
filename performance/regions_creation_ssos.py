@@ -21,7 +21,9 @@ from astropy.io import fits
 from astropy.table import Table
 from pandas import concat, Series
 
-from misc import extract_settings_elvis, get_cats_elvis_d
+from misc import extract_settings_elvis
+from misc_cats import get_cats
+
 
 __author__ = "Samuel Góngora García"
 __copyright__ = "Copyright 2018"
@@ -32,13 +34,13 @@ __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
 
 
-def create_regions():
-    """
+def create_regions_by_ccd():
+    """ Creates a regions file for each CCD.
 
-    :return:
+    :return: True if everything is alright.
     """
     for dither_ in range(1, 5, 1):
-        cat_list = get_cats_elvis_d(dither_)
+        cat_list = get_cats(dither_)
         for cat_ in cat_list:
             catalog = fits.open('{}/{}'.format(prfs_d['fits_dir'], cat_))
             catalog_data = Table(catalog[2].data).to_pandas()
@@ -52,16 +54,18 @@ def create_regions():
             positions_table.to_csv('{}.reg'.format(cat_[:-4]),
                                    index=False, header=False, sep=" ")
 
+    return True
+
 
 def create_regions_by_dither():
-    """
+    """ Creates a regions file for each dither.
 
-    :return:
+    :return: True if everything is alright.
     """
     for dither_ in range(1, 5, 1):
         alpha_list = []
         delta_list = []
-        cat_list = get_cats_elvis_d(dither_)
+        cat_list = get_cats(dither_)
         for cat_ in cat_list:
             catalog = fits.open('{}/{}'.format(prfs_d['fits_dir'], cat_))
             catalog_data = Table(catalog[2].data).to_pandas()
@@ -80,8 +84,13 @@ def create_regions_by_dither():
         positions_table.to_csv('regions/extracted_{}.reg'.format(dither_),
                                index=False, header=False, sep=" ")
 
+    return True
+
 
 if __name__ == "__main__":
     prfs_d = extract_settings_elvis()
 
-    create_regions_by_dither()
+    if create_regions_by_dither():
+        pass
+    else:
+        raise Exception
