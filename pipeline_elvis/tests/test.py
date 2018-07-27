@@ -98,3 +98,6 @@ class TestCheckOptions(TestCase):
 
         """
         print(path)
+        from os import listdir
+        lista = listdir('/home/travis/build/sgongar/Euclid-tests/pipeline_elvis')
+        print(lista)
