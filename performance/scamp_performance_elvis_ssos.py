@@ -10,8 +10,8 @@ Todo:
     * Improve log messages
 
 *GNU Terry Pratchett*
-"""
 
+"""
 from astropy.io import fits
 from astropy.table import Table
 from pandas import concat, read_csv, Series

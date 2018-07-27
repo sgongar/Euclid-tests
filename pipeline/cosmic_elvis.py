@@ -10,6 +10,7 @@ Versions:
 Todo:
     * Improve log messages
 
+*GNU Terry Pratchett*
 """
 
 from os import listdir
