@@ -25,7 +25,7 @@ home = getenv("HOME")
 path.append('{}/build/sgongar/Euclid-tests/pipeline'.format(home))
 # path.append('/mnt/g/dev/Euclid-tests/pipeline')
 
-from check import Check
+from check_elvis import Check
 from errors import BadSettings
 import misc
 
@@ -44,10 +44,12 @@ def extract_settings_mock():
     """
     return True
 
+
 def setting_logger_mock():
     """
     """
     return True
+
 
 class TestCheckOptions(TestCase):
     """
@@ -55,8 +57,7 @@ class TestCheckOptions(TestCase):
     """
 
     def setup(self):
-        print blabla
-
+        print "blabla"
 
     @patch('misc.extract_settings', side_effect=extract_settings_mock)
     @patch('misc.setting_logger', side_effect=setting_logger_mock)
@@ -82,9 +83,3 @@ class TestCheckNoOptions(TestCase):
         argv[1] = '-wrong'
 
         return self.assertRaises(BadSettings, Check)
-
-
-"""
-if __name__ == '__main__':
-    main()
-"""
