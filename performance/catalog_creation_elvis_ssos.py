@@ -25,7 +25,7 @@ from numpy import pi
 from pandas import concat, DataFrame, read_csv, Series
 
 from images_management_elvis import get_borders
-from misc import extract_settings_elvis
+from misc import extract_settings_elvis, check_source
 
 __author__ = "Samuel Góngora García"
 __copyright__ = "Copyright 2018"
@@ -34,25 +34,6 @@ __version__ = "0.1"
 __maintainer__ = "Samuel Góngora García"
 __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
-
-
-def check_source(o_df, i_alpha, i_delta, keys):
-    """
-
-    :param o_df:
-    :param i_alpha:
-    :param i_delta:
-    :param keys:
-    :return:
-    """
-    prfs_d = extract_settings_elvis()
-
-    o_df = o_df[o_df[keys[0]] + prfs_d['tolerance'] > i_alpha]
-    o_df = o_df[i_alpha > o_df[keys[0]] - prfs_d['tolerance']]
-    o_df = o_df[o_df[keys[1]] + prfs_d['tolerance'] > i_delta]
-    o_df = o_df[i_delta > o_df[keys[1]] - prfs_d['tolerance']]
-
-    return o_df
 
 
 def create_empty_catalog_dict():

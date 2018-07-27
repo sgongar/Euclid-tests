@@ -3,6 +3,7 @@
 #### To-do
 - [ ] Implement not detected catalogue for SSOs. 
 - [ ] Implement not detected catalogue for stars.
+- [ ] Implement not detected catalogue for galaxies.
 
 
 #### Files
@@ -10,10 +11,14 @@
 ##### catalog_creation_factors
 
 ##### catalog_creation_galaxies
+Creates a catalog populated of galaxies from sextracted catalogs
+of single CCDs images.
 
 ##### catalog_creation_ssos
 
 ##### catalog_creation_stars
+Creates a catalog populated of stars from sextracted catalogs
+of single CCDs images.
 
 ##### errors
 

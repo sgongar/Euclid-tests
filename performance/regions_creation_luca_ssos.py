@@ -1,12 +1,13 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-"""Python script for time measurements
+"""
 
 
 Todo:
-    * Improve log messages
+    *
 
+*GNU Terry Pratchett*
 """
 
 from math import cos, sin, radians
@@ -16,7 +17,8 @@ from astropy.wcs import WCS
 from numpy import genfromtxt, float64
 from pandas import concat, Series
 
-from misc import get_fits_d, extract_settings_luca, get_fits_limits
+from misc import extract_settings_luca
+from misc_fits import get_fits_d, get_fits_limits
 
 
 __author__ = "Samuel Gongora-Garcia"

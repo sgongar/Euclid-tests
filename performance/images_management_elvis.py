@@ -22,7 +22,8 @@ from astropy.coordinates import SkyCoord
 from astropy.units import degree
 from astropy.wcs import WCS
 
-from misc import extract_settings_elvis, get_fits
+from misc import extract_settings_elvis
+from misc_fits import get_fits
 
 __author__ = "Samuel Góngora García"
 __copyright__ = "Copyright 2018"

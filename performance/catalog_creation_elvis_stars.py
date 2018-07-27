@@ -1,7 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-""" Creates a catalog from sextracted catalogs from single CCDs images.
+""" Creates a catalog populated of stars from sextracted catalogs
+of single CCDs images.
 
 Versions:
 - 0.1: Initial release. Split from check.py
@@ -22,12 +23,10 @@ Todo:
     * Improve variable nomenclature.
     * Explanations are still not so easy to understand.
     * POO implementation?
-    * Finish galaxies catalog creation.
 
 *GNU Terry Pratchett*
 
 """
-from math import hypot
 from multiprocessing import Process
 from subprocess import Popen
 from sys import stdout
@@ -38,7 +37,7 @@ from pandas import concat, DataFrame, read_csv
 
 from misc_cats import get_cat, get_cats
 from misc import create_scamp_dict, create_sextractor_dict
-from misc import extract_settings_elvis
+from misc import extract_settings_elvis, check_distance, check_source
 
 __author__ = "Samuel Góngora García"
 __copyright__ = "Copyright 2018"
@@ -63,42 +62,6 @@ def scamp_f_name(idx):
                                    scmp_d['position_maxerr'])
 
     return scmp_d, scmp_cf
-
-
-def check_distance(o_df, alpha, delta):
-    """
-
-    :param o_df:
-    :param alpha:
-    :param delta:
-    :return:
-    """
-    distance_l = []
-    for ix, row in o_df.iterrows():
-        distance = hypot(row.ALPHA_J2000 - alpha, row.DELTA_J2000 - delta)
-        distance_l.append(distance)
-
-    index = distance_l.index(min(distance_l))
-
-    return index
-
-
-def check_source(o_cat, i_alpha, i_delta):
-    """
-
-    :param o_cat:
-    :param i_alpha:
-    :param i_delta:
-    :return:
-    """
-    prfs_d = extract_settings_elvis()
-
-    o_cat = o_cat[o_cat['ALPHA_J2000'] + prfs_d['tolerance'] > i_alpha]
-    o_cat = o_cat[i_alpha > o_cat['ALPHA_J2000'] - prfs_d['tolerance']]
-    o_cat = o_cat[o_cat['DELTA_J2000'] + prfs_d['tolerance'] > i_delta]
-    o_cat = o_cat[i_delta > o_cat['DELTA_J2000'] - prfs_d['tolerance']]
-
-    return o_cat
 
 
 def extract_cats_d():
@@ -227,7 +190,6 @@ def create_catalog():
         stars_list.append(stars_)
 
     stars_df = concat(stars_list)
-    cats['stars'] = stars_df
 
     if save:
         stars_df.to_csv('tmp_stars/stars.csv')
@@ -245,13 +207,12 @@ def create_stars_catalog_thread(idx_l, sub_list, inputs_d, full_d):
     :return:
     """
     save = True
+    keys = ['ALPHA_J2000', 'DELTA_J2000']
 
     cat_d = create_empty_catalog_dict()
     total_thread = len(sub_list)
     stdout.write('total stars {} of thread {}\n'.format(total_thread, idx_l))
     for idx, star in enumerate(sub_list):
-        # stdout.write('star {} of {} \r'.format(idx, total_stars))
-        # stdout.flush()
         stars_df = inputs_d['stars']
         source_df = stars_df[stars_df['IDX'].isin([star])]
         alpha = source_df['RA2000(Gaia)'].iloc[0]
@@ -259,7 +220,7 @@ def create_stars_catalog_thread(idx_l, sub_list, inputs_d, full_d):
 
         source_d = create_empty_catalog_dict()
         for dither in range(1, 5, 1):
-            o_df = check_source(full_d[dither], alpha, delta)
+            o_df = check_source(full_d[dither], alpha, delta, keys)
 
             if o_df.empty is not True:
                 # Returns the index of the closest found source
@@ -306,9 +267,10 @@ def create_stars_catalog_thread(idx_l, sub_list, inputs_d, full_d):
         cat_df.to_csv('tmp_stars/stars_{}.csv'.format(idx_l))
 
 
-def write_stars_catalog(catalogs):
+def write_stars_catalog(stars_df):
     """
 
+    :param stars_df:
     :return:
     """
     # Stars catalogue creation
@@ -317,7 +279,6 @@ def write_stars_catalog(catalogs):
     # todo - launch sextractor
 
     analysis_d, len_dicts = create_sextractor_dict(0, False)
-    stars_df_data = catalogs['stars']
 
     try:
         test_cat_name = '{}/coadd.cat'.format(prfs_dict['references'])
@@ -333,25 +294,25 @@ def write_stars_catalog(catalogs):
     #                  array=stars_df['NUMBER'])
     # Kron-like elliptical aperture magnitude
     c1 = fits.Column(name='MAG_AUTO', format='1E', unit='mag',
-                     disp='F8.4', array=stars_df_data['MAG_AUTO'])
+                     disp='F8.4', array=stars_df['MAG_AUTO'])
     # RMS error for AUTO magnitude
     c2 = fits.Column(name='MAGERR_AUTO', format='1E', unit='mag',
-                     disp='F8.4', array=stars_df_data['MAGERR_AUTO'])
+                     disp='F8.4', array=stars_df['MAGERR_AUTO'])
     # Barycenter position along world x axis
     c3 = fits.Column(name='X_WORLD', format='1D', unit='deg', disp='E18.10',
-                     array=stars_df_data['X_WORLD'])
+                     array=stars_df['X_WORLD'])
     # Barycenter position along world y axis
     c4 = fits.Column(name='Y_WORLD', format='1D', unit='deg', disp='E18.10',
-                     array=stars_df_data['Y_WORLD'])
+                     array=stars_df['Y_WORLD'])
     # World RMS position error along major axis
     c5 = fits.Column(name='ERRA_WORLD', format='1E', unit='deg',
-                     disp='G12.7', array=stars_df_data['ERRA_WORLD'])
+                     disp='G12.7', array=stars_df['ERRA_WORLD'])
     # World RMS position error along minor axis
     c6 = fits.Column(name='ERRB_WORLD', format='1E', unit='deg',
-                     disp='G12.7', array=stars_df_data['ERRB_WORLD'])
+                     disp='G12.7', array=stars_df['ERRB_WORLD'])
     # Error ellipse pos.angle(CCW / world - x)
     c7 = fits.Column(name='ERRTHETA_WORLD', format='1E', unit='deg',
-                     disp='F6.2', array=stars_df_data['ERRTHETA_WORLD'])
+                     disp='F6.2', array=stars_df['ERRTHETA_WORLD'])
 
     col_defs = fits.ColDefs([c1, c2, c3, c4, c5, c6, c7])
 
@@ -380,6 +341,7 @@ def create_coadded_image():
 def extract_catalogue(analysis_dict):
     """
 
+    :param analysis_dict:
     :return:
     """
     coadded_fits = '{}/coadd.fits'.format(prfs_dict['fits_dir'])
@@ -404,5 +366,5 @@ def extract_catalogue(analysis_dict):
 if __name__ == "__main__":
     prfs_dict = extract_settings_elvis()
 
-    cats = create_catalog()
-    write_stars_catalog(cats)
+    catalogue = create_catalog()
+    write_stars_catalog(catalogue)

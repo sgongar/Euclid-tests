@@ -12,6 +12,8 @@ Todo:
     * Improve log messages
     * Improve usability
 """
+from math import hypot
+
 from multiprocessing import cpu_count
 from ConfigParser import ConfigParser
 from platform import platform
@@ -367,3 +369,21 @@ def check_source(df, i_alpha, i_delta, keys):
     df = df[i_delta > df[keys[1]] - prfs_d['tolerance']*tolerance_factor]
 
     return df
+
+
+def check_distance(o_df, alpha, delta):
+    """
+
+    :param o_df:
+    :param alpha:
+    :param delta:
+    :return:
+    """
+    distance_l = []
+    for ix, row in o_df.iterrows():
+        distance = hypot(row.ALPHA_J2000 - alpha, row.DELTA_J2000 - delta)
+        distance_l.append(distance)
+
+    index = distance_l.index(min(distance_l))
+
+    return index

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """ Creates a catalog populated of galaxies from sextracted catalogs
-from single CCDs images.
+of single CCDs images.
 
 Versions:
 - 0.1: Initial release. Split from stars_catalog_creation.py
@@ -18,16 +18,14 @@ Todo:
 *GNU Terry Pratchett*
 
 """
-from math import hypot
 from multiprocessing import Process
 from sys import stdout
 
 from astropy.io import fits
 from astropy.table import Table
-from numpy import median
 from pandas import concat, DataFrame, read_csv
 
-from misc import extract_settings_elvis
+from misc import check_distance, check_source, extract_settings_elvis
 from misc_cats import get_cat, get_cats
 
 __author__ = "Samuel Góngora García"
@@ -37,42 +35,6 @@ __version__ = "0.1"
 __maintainer__ = "Samuel Góngora García"
 __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
-
-
-def check_distance(o_df, alpha, delta):
-    """
-
-    :param o_df:
-    :param alpha:
-    :param delta:
-    :return:
-    """
-    distance_l = []
-    for ix, row in o_df.iterrows():
-        distance = hypot(row.ALPHA_J2000 - alpha, row.DELTA_J2000 - delta)
-        distance_l.append(distance)
-
-    index = distance_l.index(min(distance_l))
-
-    return index
-
-
-def check_source(o_cat, i_alpha, i_delta):
-    """
-
-    :param o_cat:
-    :param i_alpha:
-    :param i_delta:
-    :return:
-    """
-    prfs_d = extract_settings_elvis()
-
-    o_cat = o_cat[o_cat['ALPHA_J2000'] + prfs_d['tolerance'] > i_alpha]
-    o_cat = o_cat[i_alpha > o_cat['ALPHA_J2000'] - prfs_d['tolerance']]
-    o_cat = o_cat[o_cat['DELTA_J2000'] + prfs_d['tolerance'] > i_delta]
-    o_cat = o_cat[i_delta > o_cat['DELTA_J2000'] - prfs_d['tolerance']]
-
-    return o_cat
 
 
 def extract_cats_d():
@@ -111,7 +73,7 @@ def create_full_cats(cats_d):
         for key_ in cats_d[dither].keys():
             dither_l.append(cats_d[dither][key_])
         full_d[dither] = concat(dither_l, ignore_index=True)
-        full_idx = range(0, full_d[dither]['NUMBER'].size, 1)
+        full_idx = range(0, int(full_d[dither]['NUMBER'].size), 1)
         full_d[dither]['IDX'] = full_idx
 
     return full_d
@@ -128,7 +90,7 @@ def extract_inputs_d():
     cat_galaxies = fits.open('{}/cat_galaxies.fits'.format(cat_galaxies_loc))
     galaxies_data = Table(cat_galaxies[1].data)
     galaxies_df = galaxies_data.to_pandas()
-    galaxies_idx = range(0, 143766, 1)  # hardcoded - todo!
+    galaxies_idx = range(0, 143766, 1)
     galaxies_df['IDX'] = galaxies_idx
     inputs_d['galaxies'] = galaxies_df
 
@@ -155,7 +117,6 @@ def create_catalog():
     cats_d = extract_cats_d()  # extracts dataframes from catalogues
     full_d = create_full_cats(cats_d)  # creates dataframe from CCDs catalogues
     inputs_d = extract_inputs_d()
-    cats = {}
     save = True
 
     unique_sources = inputs_d['galaxies']['IDX']
@@ -194,12 +155,11 @@ def create_catalog():
         galaxies_list.append(galaxies_)
 
     galaxies_df = concat(galaxies_list)
-    cats['galaxies'] = galaxies_df
 
     if save:
         galaxies_df.to_csv('tmp_galaxies/galaxies.csv')
 
-    return cats
+    return galaxies_df
 
 
 def create_galaxies_catalog_thread(idx_l, sub_list, inputs_d, full_d):
@@ -212,6 +172,7 @@ def create_galaxies_catalog_thread(idx_l, sub_list, inputs_d, full_d):
     :return:
     """
     save = True
+    keys = ['ALPHA_J2000', 'DELTA_J2000']
 
     cat_d = create_empty_catalog_dict()
     total_thread = len(sub_list)
@@ -225,7 +186,7 @@ def create_galaxies_catalog_thread(idx_l, sub_list, inputs_d, full_d):
 
         source_d = create_empty_catalog_dict()
         for dither in range(1, 5, 1):
-            o_df = check_source(full_d[dither], alpha, delta)
+            o_df = check_source(full_d[dither], alpha, delta, keys)
             if o_df.empty is not True:
                 # Returns the index of the closest found source
                 index = check_distance(o_df, alpha, delta)
@@ -273,13 +234,12 @@ def create_galaxies_catalog_thread(idx_l, sub_list, inputs_d, full_d):
         cat_df.to_csv('tmp_galaxies/galaxies_{}.csv'.format(idx_l))
 
 
-def write_galaxies_catalog(catalogs):
+def write_galaxies_catalog(galaxies_df):
     """
 
-    :param catalogs:
+    :param galaxies_df:
     :return:
     """
-    galaxies_df_data = catalogs['galaxies']
     # Galaxies catalogue creation
     test_cat_name = '{}/coadd.cat'.format(prfs_dict['references'])
     test_coadd_cat = fits.open(test_cat_name)
@@ -289,25 +249,25 @@ def write_galaxies_catalog(catalogs):
     #                  array=stars_df_data['NUMBER'])
     # Kron-like elliptical aperture magnitude
     c1 = fits.Column(name='MAG_AUTO', format='1E', unit='mag',
-                     disp='F8.4', array=galaxies_df_data['MAG_AUTO'])
+                     disp='F8.4', array=galaxies_df['MAG_AUTO'])
     # RMS error for AUTO magnitude
     c2 = fits.Column(name='MAGERR_AUTO', format='1E', unit='mag',
-                     disp='F8.4', array=galaxies_df_data['MAGERR_AUTO'])
+                     disp='F8.4', array=galaxies_df['MAGERR_AUTO'])
     # Barycenter position along world x axis
     c3 = fits.Column(name='X_WORLD', format='1D', unit='deg', disp='E18.10',
-                     array=galaxies_df_data['X_WORLD'])
+                     array=galaxies_df['X_WORLD'])
     # Barycenter position along world y axis
     c4 = fits.Column(name='Y_WORLD', format='1D', unit='deg', disp='E18.10',
-                     array=galaxies_df_data['Y_WORLD'])
+                     array=galaxies_df['Y_WORLD'])
     # World RMS position error along major axis
     c5 = fits.Column(name='ERRA_WORLD', format='1E', unit='deg',
-                     disp='G12.7', array=galaxies_df_data['ERRA_WORLD'])
+                     disp='G12.7', array=galaxies_df['ERRA_WORLD'])
     # World RMS position error along minor axis
     c6 = fits.Column(name='ERRB_WORLD', format='1E', unit='deg',
-                     disp='G12.7', array=galaxies_df_data['ERRB_WORLD'])
+                     disp='G12.7', array=galaxies_df['ERRB_WORLD'])
     # Error ellipse pos.angle(CCW / world - x)
     c7 = fits.Column(name='ERRTHETA_WORLD', format='1E', unit='deg',
-                     disp='F6.2', array=galaxies_df_data['ERRTHETA_WORLD'])
+                     disp='F6.2', array=galaxies_df['ERRTHETA_WORLD'])
 
     col_defs = fits.ColDefs([c1, c2, c3, c4, c5, c6, c7])
 
@@ -323,5 +283,5 @@ def write_galaxies_catalog(catalogs):
 if __name__ == "__main__":
     prfs_dict = extract_settings_elvis()
 
-    cats = create_catalog()
-    write_galaxies_catalog(cats)
+    catalogue = create_catalog()
+    write_galaxies_catalog(catalogue)

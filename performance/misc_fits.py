@@ -100,3 +100,6 @@ def get_fits_limits(fits_image):
               'below_dec': float(min(dec)), 'above_dec': float(max(dec))}
 
     return limits
+
+
+
