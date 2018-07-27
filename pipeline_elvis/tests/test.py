@@ -41,14 +41,25 @@ __status__ = "Development"
 
 def extract_settings_mock():
     """
+
+    :return:
     """
     return True
 
 
 def setting_logger_mock():
     """
+
+    :return:
     """
     return True
+
+
+def full_pipeline_mock():
+    """
+
+    :return:
+    """
 
 
 class TestCheckOptions(TestCase):
@@ -61,7 +72,7 @@ class TestCheckOptions(TestCase):
 
     @patch('misc.extract_settings_elvis', side_effect=extract_settings_mock)
     @patch('misc.setting_logger', side_effect=setting_logger_mock)
-    @patch('check_elvis.Check', side_effect=full_pipeline)
+    @patch('check_elvis.Check', side_effect=full_pipeline_mock)
     def test_fulloptionchoosen(self, extract_settings, setting_logger,
                                full_pipeline):
         """
