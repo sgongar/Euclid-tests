@@ -25,9 +25,6 @@ home = getenv("HOME")
 path.append('{}/build/sgongar/Euclid-tests/pipeline_elvis'.format(home))
 # path.append('/mnt/g/dev/Euclid-tests/pipeline')
 
-print(path)
-
-
 # from check_elvis import Check
 # from errors import BadSettings
 # import misc
@@ -86,3 +83,12 @@ print(path)
 #         argv[1] = '-wrong'
 #
 #         return self.assertRaises(BadSettings, Check)
+
+
+class TestCheckOptions(TestCase):
+    """
+
+    """
+
+    def setup(self):
+        print(path)
