@@ -7,4 +7,4 @@ install:
   - pip install -r pipeline_elvis/requirements.txt
 script:
   - cd pipeline_elvis/tests
-  - nosetests test.py
+  - nosetests --nocapture test.py
