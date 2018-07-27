@@ -22,7 +22,7 @@ from unittest import TestCase, main
 from mock import MagicMock, patch
 
 home = getenv("HOME")
-path.append('{}/build/sgongar/Euclid-tests/pipeline'.format(home))
+path.append('{}/build/sgongar/Euclid-tests/pipeline_elvis'.format(home))
 # path.append('/mnt/g/dev/Euclid-tests/pipeline')
 
 from check_elvis import Check
