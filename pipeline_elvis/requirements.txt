@@ -1,4 +1,5 @@
 astropy==2.0.6
+astroscrappy
 fs==2.0.21
 matplotlib==2.2.2
 pandas==0.22.0
