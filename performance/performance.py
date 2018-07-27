@@ -23,9 +23,9 @@ import matplotlib.pyplot as plt
 from numpy import arange, array, median
 from pandas import concat, read_csv, DataFrame
 
-from misc import extract_settings
+from misc import extract_settings_luca, check_source
 from misc import speeds_range
-from regions import Create_regions
+from regions_creation_luca_ssos import Create_regions
 
 
 __author__ = "Samuel Góngora García"
@@ -37,13 +37,12 @@ __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
 
 
-
 class StatsPerformance:
     def __init__(self):
         """
 
         """
-        self.prfs_d = extract_settings()
+        self.prfs_d = extract_settings_luca()
 
     def error(self, logger, mag, sex_cf):
         """
@@ -60,6 +59,7 @@ class StatsPerformance:
         errors_b_galaxies = []
         errors_a_ssos = []
         errors_b_ssos = []
+        keys = ['ALPHA_J2000', 'DELTA_J2000']
 
         # Input sources
         input_ssos_d = {}
@@ -139,15 +139,15 @@ class StatsPerformance:
                 for idx, row in o_cat.iterrows():
                     i_alpha = row['ALPHA_J2000']
                     i_delta = row['DELTA_J2000']
-                    o_df = search(i_stars_d_df, i_alpha, i_delta)
+                    o_df = check_source(i_stars_d_df, i_alpha, i_delta, keys)
                     if o_df.empty is not True:
                         errors_a_stars.append(row['ERRA_IMAGE'])
                         errors_b_stars.append(row['ERRB_IMAGE'])
-                    o_df = search(i_galaxies_d_df, i_alpha, i_delta)
+                    o_df = check_source(i_galaxies_d_df, i_alpha, i_delta, keys)
                     if o_df.empty is not True:
                         errors_a_galaxies.append(row['ERRA_IMAGE'])
                         errors_b_galaxies.append(row['ERRB_IMAGE'])
-                    o_df = search(i_ssos_d_df, i_alpha, i_delta)
+                    o_df = check_source(i_ssos_d_df, i_alpha, i_delta, keys)
                     if o_df.empty is not True:
                         errors_a_ssos.append(row['ERRA_IMAGE'])
                         errors_b_ssos.append(row['ERRB_IMAGE'])
@@ -189,7 +189,7 @@ class PMPerformance:
         """
         self.bypassfilter = True
         self.plot = False
-        self.prfs_d = extract_settings()
+        self.prfs_d = extract_settings_luca()
 
         pass
 

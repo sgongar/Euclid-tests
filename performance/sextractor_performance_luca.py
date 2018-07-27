@@ -1,12 +1,10 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-"""Python script for time measurements
-
-La idea es que compare los objetos extraidos en total con los que tengo.
+"""
 
 Todo:
-    * Script not complete!!!!!
+    *
 
 *GNU Terry Pratchett*
 """
@@ -19,7 +17,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 from pandas import concat, read_csv
 
 from misc import extract_settings_luca
-from regions import Create_regions
+from regions_creation_luca_ssos import Create_regions
 
 __author__ = "Samuel Gongora-Garcia"
 __copyright__ = "Copyright 2018"
