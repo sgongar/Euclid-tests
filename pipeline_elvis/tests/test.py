@@ -27,61 +27,62 @@ path.append('{}/build/sgongar/Euclid-tests/pipeline_elvis'.format(home))
 
 print(path)
 
-from check_elvis import Check
-from errors import BadSettings
-import misc
 
-
-__author__ = "Samuel Gongora-Garcia"
-__copyright__ = "Copyright 2017"
-__credits__ = ["Samuel Gongora-Garcia"]
-__version__ = "0.1"
-__maintainer__ = "Samuel Gongora-Garcia"
-__email__ = "sgongora@cab.inta-csic.es"
-__status__ = "Development"
-
-
-def extract_settings_mock():
-    """
-    """
-    return True
-
-
-def setting_logger_mock():
-    """
-    """
-    return True
-
-
-class TestCheckOptions(TestCase):
-    """
-
-    """
-
-    def setup(self):
-        print "blabla"
-
-    @patch('misc.extract_settings', side_effect=extract_settings_mock)
-    @patch('misc.setting_logger', side_effect=setting_logger_mock)
-    @patch.object(Check, 'full_pipeline', return_value=True)
-    def test_fulloptionchoosen(self, extract_settings, setting_logger,
-                               full_pipeline):
-        """
-
-        """
-        argv[1] = '-full'
-
-        return self.assertTrue(Check)
-
-    def teardrown(self):
-        pass
-
-
-class TestCheckNoOptions(TestCase):
-
-    @patch('Check.logger', side_effect=setting_logger_mock)
-    @patch('misc.extract_settings', side_effect=extract_settings_mock)
-    def test_nooptionspassed(self, setting_logger, extract_settings):
-        argv[1] = '-wrong'
-
-        return self.assertRaises(BadSettings, Check)
+# from check_elvis import Check
+# from errors import BadSettings
+# import misc
+#
+#
+# __author__ = "Samuel Gongora-Garcia"
+# __copyright__ = "Copyright 2017"
+# __credits__ = ["Samuel Gongora-Garcia"]
+# __version__ = "0.1"
+# __maintainer__ = "Samuel Gongora-Garcia"
+# __email__ = "sgongora@cab.inta-csic.es"
+# __status__ = "Development"
+#
+#
+# def extract_settings_mock():
+#     """
+#     """
+#     return True
+#
+#
+# def setting_logger_mock():
+#     """
+#     """
+#     return True
+#
+#
+# class TestCheckOptions(TestCase):
+#     """
+#
+#     """
+#
+#     def setup(self):
+#         print "blabla"
+#
+#     @patch('misc.extract_settings', side_effect=extract_settings_mock)
+#     @patch('misc.setting_logger', side_effect=setting_logger_mock)
+#     @patch.object(Check, 'full_pipeline', return_value=True)
+#     def test_fulloptionchoosen(self, extract_settings, setting_logger,
+#                                full_pipeline):
+#         """
+#
+#         """
+#         argv[1] = '-full'
+#
+#         return self.assertTrue(Check)
+#
+#     def teardrown(self):
+#         pass
+#
+#
+# class TestCheckNoOptions(TestCase):
+#
+#     @patch('Check.logger', side_effect=setting_logger_mock)
+#     @patch('misc.extract_settings', side_effect=extract_settings_mock)
+#     def test_nooptionspassed(self, setting_logger, extract_settings):
+#         argv[1] = '-wrong'
+#
+#         return self.assertRaises(BadSettings, Check)
