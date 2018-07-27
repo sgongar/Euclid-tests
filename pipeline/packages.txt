@@ -1,4 +1,0 @@
-python-pip
-python-devel
-python-setuptools
-python-virtualenv
