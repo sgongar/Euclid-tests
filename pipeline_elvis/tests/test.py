@@ -92,3 +92,9 @@ class TestCheckOptions(TestCase):
 
     def setup(self):
         print(path)
+
+    def test_fulloptionchoosen(self):
+        """
+
+        """
+        print(path)
