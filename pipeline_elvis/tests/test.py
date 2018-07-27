@@ -61,7 +61,9 @@ class TestCheckOptions(TestCase):
 
     @patch('misc.extract_settings_elvis', side_effect=extract_settings_mock)
     @patch('misc.setting_logger', side_effect=setting_logger_mock)
-    def test_fulloptionchoosen(self, extract_settings, setting_logger):
+    @patch('check_elvis.Check', side_effect=full_pipeline)
+    def test_fulloptionchoosen(self, extract_settings, setting_logger,
+                               full_pipeline):
         """
 
         """
