@@ -1,0 +1,536 @@
+2017-11-13 15:22:21,333 - main_process - INFO - Program started
+2017-11-13 15:28:42,657 - main_process - INFO - Program started
+2017-11-13 15:28:42,659 - main_process - DEBUG - checking performance for 10_1.2_0.5_0.16 and 20_1.5_1.5_0.001_4
+2017-11-13 15:31:09,870 - main_process - INFO - Program started
+2017-11-13 15:31:09,872 - main_process - DEBUG - checking performance for 10_1.2_0.5_0.16 and 20_1.5_1.5_0.001_4
+2017-11-13 15:46:46,623 - main_process - INFO - Program started
+2017-11-13 15:46:46,626 - main_process - DEBUG - checking performance for 10_1.2_0.5_0.16 and 20_1.5_1.5_0.001_4
+2017-11-30 20:41:43,219 - main_process - INFO - Program started
+2017-11-30 20:41:43,230 - main_process - INFO - swarp process launched for mag 20-21
+2017-11-30 20:41:43,231 - main_process - INFO - files /home/sgongora/Documents/CarpetaCompartida/luca_data/v19/CCDs/m_20-21_*.fits
+2017-11-30 20:41:43,240 - main_process - INFO - Swarp process finished
+2017-11-30 20:41:43,240 - main_process - INFO - Swarped image sextraction process
+2017-11-30 20:41:43,263 - main_process - INFO - Sextractor process for catalogue finished
+2017-11-30 20:41:43,264 - main_process - INFO - Catalog /home/sgongora/Documents/CarpetaCompartida/luca_data/v19/CCDs/2_5_5_0.1_4/catalog_20-21.cat created
+2017-11-30 20:46:13,307 - main_process - INFO - Program started
+2017-11-30 20:46:13,317 - main_process - INFO - swarp process launched for mag 20-21
+2017-11-30 20:46:13,317 - main_process - INFO - files /home/sgongora/Documents/CarpetaCompartida/luca_data/v19/CCDs/m_20-21_*.fits
+2017-11-30 20:46:44,748 - main_process - INFO - Swarp process finished
+2017-11-30 20:46:44,788 - main_process - INFO - Swarped image sextraction process
+2017-11-30 20:46:55,482 - main_process - INFO - Sextractor process for catalogue finished
+2017-11-30 20:46:55,482 - main_process - INFO - Catalog /home/sgongora/Documents/CarpetaCompartida/luca_data/v19/CCDs/2_5_5_0.1_4/catalog_20-21.cat created
+2017-11-30 20:46:55,649 - main_process - DEBUG - /home/sgongora/Documents/CarpetaCompartida/luca_data/v19/CCDs/coadd_20-21.fits removed
+2017-11-30 20:46:55,794 - main_process - DEBUG - /home/sgongora/Documents/CarpetaCompartida/luca_data/v19/CCDs/coadd_20-21.weight.fits removed
+2017-12-01 01:42:50,031 - main_process - INFO - Program started
+2017-12-01 01:42:50,040 - main_process - INFO - swarp process launched for mag 20-21
+2017-12-01 01:42:50,040 - main_process - INFO - files /media/sf_CarpetaCompartida/luca_data/v19/CCDs/m_20-21_*.fits
+2017-12-01 01:42:50,053 - main_process - INFO - Swarp process finished
+2017-12-01 01:42:50,054 - main_process - DEBUG - folder /media/sf_CarpetaCompartida/luca_data/v19/CCDs/2_5_5_0.1_4 created
+2017-12-01 01:42:50,054 - main_process - INFO - Swarped image sextraction process
+2017-12-01 01:42:50,084 - main_process - INFO - Sextractor process for catalogue finished
+2017-12-01 01:42:50,084 - main_process - INFO - Catalog /media/sf_CarpetaCompartida/luca_data/v19/CCDs/2_5_5_0.1_4/catalog_20-21.cat created
+2017-12-01 01:44:07,249 - main_process - INFO - Program started
+2017-12-01 01:44:07,259 - main_process - INFO - swarp process launched for mag 20-21
+2017-12-01 01:44:07,259 - main_process - INFO - files /home/sgongora/Documents/CarpetaCompartida/luca_data/v19/CCDs/m_20-21_*.fits
+2017-12-01 01:44:44,982 - main_process - INFO - Swarp process finished
+2017-12-01 01:44:45,115 - main_process - INFO - Swarped image sextraction process
+2017-12-01 01:44:57,900 - main_process - INFO - Sextractor process for catalogue finished
+2017-12-01 01:44:57,900 - main_process - INFO - Catalog /home/sgongora/Documents/CarpetaCompartida/luca_data/v19/CCDs/2_5_5_0.1_4/catalog_20-21.cat created
+2017-12-01 01:44:57,999 - main_process - DEBUG - /home/sgongora/Documents/CarpetaCompartida/luca_data/v19/CCDs/coadd_20-21.fits removed
+2017-12-01 01:44:58,028 - main_process - DEBUG - /home/sgongora/Documents/CarpetaCompartida/luca_data/v19/CCDs/coadd_20-21.weight.fits removed
+2017-12-01 01:49:01,699 - main_process - INFO - Program started
+2017-12-01 01:49:01,703 - main_process - INFO - scamp process for magnitude 20-21
+2017-12-01 01:49:01,703 - main_process - INFO - sextractor configuration 30_3_3_0.01_4
+2017-12-01 01:49:01,703 - main_process - INFO - scamp configuration 10_1.2_0.5_0.16
+2017-12-01 01:49:01,838 - main_process - INFO - Scamp process finished. Data is ready to be analysed.
+2017-12-01 01:49:01,843 - main_process - INFO - scamp process for magnitude 20-21
+2017-12-01 01:49:01,843 - main_process - INFO - sextractor configuration 30_3_3_0.01_4
+2017-12-01 01:49:01,843 - main_process - INFO - scamp configuration 10_1.2_0.5_0.32
+2017-12-01 01:49:01,920 - main_process - INFO - Scamp process finished. Data is ready to be analysed.
+2017-12-01 01:49:01,925 - main_process - INFO - scamp process for magnitude 20-21
+2017-12-01 01:49:01,925 - main_process - INFO - sextractor configuration 30_3_3_0.01_4
+2017-12-01 01:49:01,925 - main_process - INFO - scamp configuration 10_1.2_0.5_0.64
+2017-12-01 01:49:02,066 - main_process - INFO - Scamp process finished. Data is ready to be analysed.
+2017-12-04 11:54:05,900 - main_process - INFO - Program started
+2017-12-04 11:54:05,910 - main_process - INFO - swarp process launched for mag 20-21
+2017-12-04 11:54:05,910 - main_process - INFO - files /home/sgongora/Documents/CarpetaCompartida/luca_data/v19/CCDs/mag_20-21_*.fits
+2017-12-04 11:54:05,910 - main_process - INFO - Swarp process finished
+2017-12-04 11:54:05,910 - main_process - DEBUG - Folder /home/sgongora/Documents/CarpetaCompartida/luca_data/v19/CCDs/2_5_5_0.1_4 already created
+2017-12-04 11:54:05,910 - main_process - INFO - Swarped image sextraction process
+2017-12-04 11:54:05,910 - main_process - INFO - Sextractor process for catalogue finished
+2017-12-04 11:54:05,910 - main_process - INFO - Catalog /home/sgongora/Documents/CarpetaCompartida/luca_data/v19/CCDs/2_5_5_0.1_4/catalog_20-21.cat created
+2017-12-04 11:55:47,352 - main_process - INFO - Program started
+2017-12-04 11:55:47,359 - main_process - INFO - swarp process launched for mag 20-21
+2017-12-04 11:55:47,360 - main_process - INFO - files /home/sgongora/Documents/CarpetaCompartida/luca_data/v19/CCDs/mag_20-21_*.fits
+2017-12-04 11:56:16,179 - main_process - INFO - Swarp process finished
+2017-12-04 11:56:16,180 - main_process - DEBUG - Folder /home/sgongora/Documents/CarpetaCompartida/luca_data/v19/CCDs/2_5_5_0.1_4 already created
+2017-12-04 11:56:16,180 - main_process - INFO - Swarped image sextraction process
+2017-12-04 11:56:26,005 - main_process - INFO - Sextractor process for catalogue finished
+2017-12-04 11:56:26,005 - main_process - INFO - Catalog /home/sgongora/Documents/CarpetaCompartida/luca_data/v19/CCDs/2_5_5_0.1_4/catalog_20-21.cat created
+2017-12-04 11:56:26,117 - main_process - DEBUG - /home/sgongora/Documents/CarpetaCompartida/luca_data/v19/CCDs/coadd_20-21.fits removed
+2017-12-04 11:56:26,251 - main_process - DEBUG - /home/sgongora/Documents/CarpetaCompartida/luca_data/v19/CCDs/coadd_20-21.w.fits removed
+2017-12-08 14:41:18,124 - main_process - INFO - Program started
+2017-12-08 14:41:18,140 - main_process - INFO - swarp process launched for mag 20-21
+2017-12-08 14:41:18,140 - main_process - INFO - files /home/sgongora/Documents/CarpetaCompartida/luca_data/v19/CCDs/mag_20-21_*.fits
+2017-12-08 15:39:28,143 - main_process - INFO - Program started
+2017-12-08 15:39:28,157 - main_process - INFO - swarp process launched for mag 20-21
+2017-12-08 15:39:28,158 - main_process - INFO - files /home/sgongora/Documents/CarpetaCompartida/luca_data/v19/CCDs/mag_20-21_*.fits
+2017-12-08 15:39:28,172 - main_process - INFO - Swarp process finished
+2017-12-08 15:39:28,173 - main_process - INFO - Swarped image sextraction process
+2017-12-08 15:39:28,198 - main_process - INFO - Sextractor process for catalogue finished
+2017-12-08 15:39:28,198 - main_process - INFO - Catalog /home/sgongora/Documents/CarpetaCompartida/luca_data/v19/CCDs/2_5_5_0.1_4/catalog_20-21.cat created
+2017-12-08 15:41:36,066 - main_process - INFO - Program started
+2017-12-08 15:41:36,078 - main_process - INFO - swarp process launched for mag 20-21
+2017-12-08 15:41:36,078 - main_process - INFO - files /home/sgongora/Documents/CarpetaCompartida/luca_data/v19/20-21/CCDs/mag_20-21_*.fits
+2017-12-08 15:42:15,380 - main_process - INFO - Swarp process finished
+2017-12-08 15:42:15,383 - main_process - INFO - Swarped image sextraction process
+2017-12-08 15:42:31,271 - main_process - INFO - Sextractor process for catalogue finished
+2017-12-08 15:42:31,272 - main_process - INFO - Catalog /home/sgongora/Documents/CarpetaCompartida/luca_data/v19/20-21/CCDs/2_5_5_0.1_4/catalog_20-21.cat created
+2017-12-08 15:42:31,335 - main_process - DEBUG - /home/sgongora/Documents/CarpetaCompartida/luca_data/v19/20-21/CCDs/coadd_20-21.fits removed
+2017-12-08 15:42:31,336 - main_process - DEBUG - /home/sgongora/Documents/CarpetaCompartida/luca_data/v19/20-21/CCDs/coadd_20-21.w.fits removed
+2017-12-12 14:25:01,289 - main_process - INFO - Program started
+2017-12-12 14:25:01,294 - main_process - ERROR - __init__() takes exactly 2 arguments (3 given)
+2017-12-12 14:25:01,294 - main_process - ERROR - Select a valid option
+2017-12-12 14:25:42,506 - main_process - INFO - Program started
+2017-12-12 14:25:42,520 - main_process - ERROR - [Errno 2] No such file or directory: '/home/sgongora/Documents/CarpetaCompartida/luca_data/v18/CCDs/20_1.5_1.5_0.001_4/mag_20-21_CCD_x0_y0_d1.cat'
+2017-12-12 14:25:42,520 - main_process - ERROR - Select a valid option
+2017-12-12 14:28:42,355 - main_process - INFO - Program started
+2017-12-12 14:28:42,365 - main_process - ERROR - [Errno 2] No such file or directory: '/home/sgongora/Documents/CarpetaCompartida/luca_data/v18/CCDs/20-21/CCDs/20_1.5_1.5_0.001_4/mag_20-21_CCD_x0_y0_d1.cat'
+2017-12-12 14:28:42,366 - main_process - ERROR - Select a valid option
+2017-12-12 14:30:20,142 - main_process - INFO - Program started
+2017-12-12 14:30:20,153 - main_process - ERROR - [Errno 2] No such file or directory: '/home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_1.5_1.5_0.001_4/mag_20-21_CCD_x0_y0_d1.cat'
+2017-12-12 14:30:20,153 - main_process - ERROR - Select a valid option
+2017-12-12 14:31:43,520 - main_process - INFO - Program started
+2017-12-12 14:31:43,592 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_1.5_1.5_0.01_4/mag_20-21_CCD_x0_y0_d1.cat
+2017-12-12 14:31:43,663 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_1.5_1.5_0.01_4/mag_20-21_CCD_x0_y0_d2.cat
+2017-12-12 14:31:43,729 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_1.5_1.5_0.01_4/mag_20-21_CCD_x0_y0_d3.cat
+2017-12-12 14:31:43,805 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_1.5_1.5_0.01_4/mag_20-21_CCD_x0_y0_d4.cat
+2017-12-12 14:31:43,887 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_3_3_0.01_4/mag_20-21_CCD_x0_y0_d1.cat
+2017-12-12 14:31:43,970 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_3_3_0.01_4/mag_20-21_CCD_x0_y0_d2.cat
+2017-12-12 14:31:44,053 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_3_3_0.01_4/mag_20-21_CCD_x0_y0_d3.cat
+2017-12-12 14:31:44,133 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_3_3_0.01_4/mag_20-21_CCD_x0_y0_d4.cat
+2017-12-12 14:31:44,221 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_1.5_1.5_0.01_4/mag_20-21_CCD_x0_y0_d1.cat
+2017-12-12 14:31:44,310 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_1.5_1.5_0.01_4/mag_20-21_CCD_x0_y0_d2.cat
+2017-12-12 14:31:44,400 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_1.5_1.5_0.01_4/mag_20-21_CCD_x0_y0_d3.cat
+2017-12-12 14:31:44,492 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_1.5_1.5_0.01_4/mag_20-21_CCD_x0_y0_d4.cat
+2017-12-12 14:31:44,576 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_3_3_0.01_4/mag_20-21_CCD_x0_y0_d1.cat
+2017-12-12 14:31:44,657 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_3_3_0.01_4/mag_20-21_CCD_x0_y0_d2.cat
+2017-12-12 14:31:44,742 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_3_3_0.01_4/mag_20-21_CCD_x0_y0_d3.cat
+2017-12-12 14:31:44,827 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_3_3_0.01_4/mag_20-21_CCD_x0_y0_d4.cat
+2017-12-12 14:31:44,918 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_1.5_1.5_0.01_4/mag_20-21_CCD_x0_y0_d1.cat
+2017-12-12 14:31:45,007 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_1.5_1.5_0.01_4/mag_20-21_CCD_x0_y0_d2.cat
+2017-12-12 14:31:45,092 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_1.5_1.5_0.01_4/mag_20-21_CCD_x0_y0_d3.cat
+2017-12-12 14:31:45,158 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_1.5_1.5_0.01_4/mag_20-21_CCD_x0_y0_d4.cat
+2017-12-12 14:31:45,221 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_3_3_0.01_4/mag_20-21_CCD_x0_y0_d1.cat
+2017-12-12 14:31:45,274 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_3_3_0.01_4/mag_20-21_CCD_x0_y0_d2.cat
+2017-12-12 14:31:45,338 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_3_3_0.01_4/mag_20-21_CCD_x0_y0_d3.cat
+2017-12-12 14:31:45,421 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_3_3_0.01_4/mag_20-21_CCD_x0_y0_d4.cat
+2017-12-12 14:31:45,513 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_1.5_1.5_0.01_4/mag_20-21_CCD_x0_y1_d1.cat
+2017-12-12 14:31:45,605 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_1.5_1.5_0.01_4/mag_20-21_CCD_x0_y1_d2.cat
+2017-12-12 14:31:45,694 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_1.5_1.5_0.01_4/mag_20-21_CCD_x0_y1_d3.cat
+2017-12-12 14:31:45,785 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_1.5_1.5_0.01_4/mag_20-21_CCD_x0_y1_d4.cat
+2017-12-12 14:31:45,876 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_3_3_0.01_4/mag_20-21_CCD_x0_y1_d1.cat
+2017-12-12 14:31:45,965 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_3_3_0.01_4/mag_20-21_CCD_x0_y1_d2.cat
+2017-12-12 14:31:46,041 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_3_3_0.01_4/mag_20-21_CCD_x0_y1_d3.cat
+2017-12-12 14:31:46,103 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_3_3_0.01_4/mag_20-21_CCD_x0_y1_d4.cat
+2017-12-12 14:31:46,160 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_1.5_1.5_0.01_4/mag_20-21_CCD_x0_y1_d1.cat
+2017-12-12 14:31:46,229 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_1.5_1.5_0.01_4/mag_20-21_CCD_x0_y1_d2.cat
+2017-12-12 14:31:46,291 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_1.5_1.5_0.01_4/mag_20-21_CCD_x0_y1_d3.cat
+2017-12-12 14:31:46,348 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_1.5_1.5_0.01_4/mag_20-21_CCD_x0_y1_d4.cat
+2017-12-12 14:31:46,410 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_3_3_0.01_4/mag_20-21_CCD_x0_y1_d1.cat
+2017-12-12 14:31:46,465 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_3_3_0.01_4/mag_20-21_CCD_x0_y1_d2.cat
+2017-12-12 14:31:46,525 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_3_3_0.01_4/mag_20-21_CCD_x0_y1_d3.cat
+2017-12-12 14:31:46,579 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_3_3_0.01_4/mag_20-21_CCD_x0_y1_d4.cat
+2017-12-12 14:31:46,645 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_1.5_1.5_0.01_4/mag_20-21_CCD_x0_y1_d1.cat
+2017-12-12 14:31:46,712 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_1.5_1.5_0.01_4/mag_20-21_CCD_x0_y1_d2.cat
+2017-12-12 14:31:46,790 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_1.5_1.5_0.01_4/mag_20-21_CCD_x0_y1_d3.cat
+2017-12-12 14:31:46,884 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_1.5_1.5_0.01_4/mag_20-21_CCD_x0_y1_d4.cat
+2017-12-12 14:31:46,942 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_3_3_0.01_4/mag_20-21_CCD_x0_y1_d1.cat
+2017-12-12 14:31:47,006 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_3_3_0.01_4/mag_20-21_CCD_x0_y1_d2.cat
+2017-12-12 14:31:47,071 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_3_3_0.01_4/mag_20-21_CCD_x0_y1_d3.cat
+2017-12-12 14:31:47,133 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_3_3_0.01_4/mag_20-21_CCD_x0_y1_d4.cat
+2017-12-12 14:31:47,191 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_1.5_1.5_0.01_4/mag_20-21_CCD_x0_y2_d1.cat
+2017-12-12 14:31:47,258 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_1.5_1.5_0.01_4/mag_20-21_CCD_x0_y2_d2.cat
+2017-12-12 14:31:47,323 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_1.5_1.5_0.01_4/mag_20-21_CCD_x0_y2_d3.cat
+2017-12-12 14:31:47,386 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_1.5_1.5_0.01_4/mag_20-21_CCD_x0_y2_d4.cat
+2017-12-12 14:31:47,447 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_3_3_0.01_4/mag_20-21_CCD_x0_y2_d1.cat
+2017-12-12 14:31:47,510 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_3_3_0.01_4/mag_20-21_CCD_x0_y2_d2.cat
+2017-12-12 14:31:47,564 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_3_3_0.01_4/mag_20-21_CCD_x0_y2_d3.cat
+2017-12-12 14:31:47,624 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_3_3_0.01_4/mag_20-21_CCD_x0_y2_d4.cat
+2017-12-12 14:31:47,682 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_1.5_1.5_0.01_4/mag_20-21_CCD_x0_y2_d1.cat
+2017-12-12 14:31:47,753 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_1.5_1.5_0.01_4/mag_20-21_CCD_x0_y2_d2.cat
+2017-12-12 14:31:47,822 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_1.5_1.5_0.01_4/mag_20-21_CCD_x0_y2_d3.cat
+2017-12-12 14:31:47,885 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_1.5_1.5_0.01_4/mag_20-21_CCD_x0_y2_d4.cat
+2017-12-12 14:31:47,946 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_3_3_0.01_4/mag_20-21_CCD_x0_y2_d1.cat
+2017-12-12 14:31:47,999 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_3_3_0.01_4/mag_20-21_CCD_x0_y2_d2.cat
+2017-12-12 14:31:48,073 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_3_3_0.01_4/mag_20-21_CCD_x0_y2_d3.cat
+2017-12-12 14:31:48,129 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_3_3_0.01_4/mag_20-21_CCD_x0_y2_d4.cat
+2017-12-12 14:31:48,191 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_1.5_1.5_0.01_4/mag_20-21_CCD_x0_y2_d1.cat
+2017-12-12 14:31:48,262 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_1.5_1.5_0.01_4/mag_20-21_CCD_x0_y2_d2.cat
+2017-12-12 14:31:48,327 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_1.5_1.5_0.01_4/mag_20-21_CCD_x0_y2_d3.cat
+2017-12-12 14:31:48,391 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_1.5_1.5_0.01_4/mag_20-21_CCD_x0_y2_d4.cat
+2017-12-12 14:31:48,455 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_3_3_0.01_4/mag_20-21_CCD_x0_y2_d1.cat
+2017-12-12 14:31:48,516 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_3_3_0.01_4/mag_20-21_CCD_x0_y2_d2.cat
+2017-12-12 14:31:48,568 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_3_3_0.01_4/mag_20-21_CCD_x0_y2_d3.cat
+2017-12-12 14:31:48,628 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_3_3_0.01_4/mag_20-21_CCD_x0_y2_d4.cat
+2017-12-12 14:31:48,693 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_1.5_1.5_0.01_4/mag_20-21_CCD_x1_y0_d1.cat
+2017-12-12 14:31:48,761 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_1.5_1.5_0.01_4/mag_20-21_CCD_x1_y0_d2.cat
+2017-12-12 14:31:48,850 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_1.5_1.5_0.01_4/mag_20-21_CCD_x1_y0_d3.cat
+2017-12-12 14:31:48,945 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_1.5_1.5_0.01_4/mag_20-21_CCD_x1_y0_d4.cat
+2017-12-12 14:31:49,031 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_3_3_0.01_4/mag_20-21_CCD_x1_y0_d1.cat
+2017-12-12 14:31:49,114 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_3_3_0.01_4/mag_20-21_CCD_x1_y0_d2.cat
+2017-12-12 14:31:49,195 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_3_3_0.01_4/mag_20-21_CCD_x1_y0_d3.cat
+2017-12-12 14:31:49,282 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_3_3_0.01_4/mag_20-21_CCD_x1_y0_d4.cat
+2017-12-12 14:31:49,368 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_1.5_1.5_0.01_4/mag_20-21_CCD_x1_y0_d1.cat
+2017-12-12 14:31:49,457 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_1.5_1.5_0.01_4/mag_20-21_CCD_x1_y0_d2.cat
+2017-12-12 14:31:49,548 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_1.5_1.5_0.01_4/mag_20-21_CCD_x1_y0_d3.cat
+2017-12-12 14:31:49,637 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_1.5_1.5_0.01_4/mag_20-21_CCD_x1_y0_d4.cat
+2017-12-12 14:31:49,719 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_3_3_0.01_4/mag_20-21_CCD_x1_y0_d1.cat
+2017-12-12 14:31:49,799 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_3_3_0.01_4/mag_20-21_CCD_x1_y0_d2.cat
+2017-12-12 14:31:49,882 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_3_3_0.01_4/mag_20-21_CCD_x1_y0_d3.cat
+2017-12-12 14:31:49,959 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_3_3_0.01_4/mag_20-21_CCD_x1_y0_d4.cat
+2017-12-12 14:31:50,040 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_1.5_1.5_0.01_4/mag_20-21_CCD_x1_y0_d1.cat
+2017-12-12 14:31:50,160 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_1.5_1.5_0.01_4/mag_20-21_CCD_x1_y0_d2.cat
+2017-12-12 14:31:50,252 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_1.5_1.5_0.01_4/mag_20-21_CCD_x1_y0_d3.cat
+2017-12-12 14:31:50,352 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_1.5_1.5_0.01_4/mag_20-21_CCD_x1_y0_d4.cat
+2017-12-12 14:31:50,428 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_3_3_0.01_4/mag_20-21_CCD_x1_y0_d1.cat
+2017-12-12 14:31:50,498 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_3_3_0.01_4/mag_20-21_CCD_x1_y0_d2.cat
+2017-12-12 14:31:50,594 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_3_3_0.01_4/mag_20-21_CCD_x1_y0_d3.cat
+2017-12-12 14:31:50,672 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_3_3_0.01_4/mag_20-21_CCD_x1_y0_d4.cat
+2017-12-12 14:31:50,754 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_1.5_1.5_0.01_4/mag_20-21_CCD_x1_y1_d1.cat
+2017-12-12 14:31:50,845 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_1.5_1.5_0.01_4/mag_20-21_CCD_x1_y1_d2.cat
+2017-12-12 14:31:50,930 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_1.5_1.5_0.01_4/mag_20-21_CCD_x1_y1_d3.cat
+2017-12-12 14:31:51,035 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_1.5_1.5_0.01_4/mag_20-21_CCD_x1_y1_d4.cat
+2017-12-12 14:31:51,100 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_3_3_0.01_4/mag_20-21_CCD_x1_y1_d1.cat
+2017-12-12 14:31:51,180 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_3_3_0.01_4/mag_20-21_CCD_x1_y1_d2.cat
+2017-12-12 14:31:51,258 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_3_3_0.01_4/mag_20-21_CCD_x1_y1_d3.cat
+2017-12-12 14:31:51,344 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_3_3_0.01_4/mag_20-21_CCD_x1_y1_d4.cat
+2017-12-12 14:31:51,445 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_1.5_1.5_0.01_4/mag_20-21_CCD_x1_y1_d1.cat
+2017-12-12 14:31:51,560 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_1.5_1.5_0.01_4/mag_20-21_CCD_x1_y1_d2.cat
+2017-12-12 14:31:51,650 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_1.5_1.5_0.01_4/mag_20-21_CCD_x1_y1_d3.cat
+2017-12-12 14:31:51,744 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_1.5_1.5_0.01_4/mag_20-21_CCD_x1_y1_d4.cat
+2017-12-12 14:31:51,828 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_3_3_0.01_4/mag_20-21_CCD_x1_y1_d1.cat
+2017-12-12 14:31:51,913 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_3_3_0.01_4/mag_20-21_CCD_x1_y1_d2.cat
+2017-12-12 14:31:51,995 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_3_3_0.01_4/mag_20-21_CCD_x1_y1_d3.cat
+2017-12-12 14:31:52,079 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_3_3_0.01_4/mag_20-21_CCD_x1_y1_d4.cat
+2017-12-12 14:31:52,168 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_1.5_1.5_0.01_4/mag_20-21_CCD_x1_y1_d1.cat
+2017-12-12 14:31:52,261 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_1.5_1.5_0.01_4/mag_20-21_CCD_x1_y1_d2.cat
+2017-12-12 14:31:52,350 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_1.5_1.5_0.01_4/mag_20-21_CCD_x1_y1_d3.cat
+2017-12-12 14:31:52,439 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_1.5_1.5_0.01_4/mag_20-21_CCD_x1_y1_d4.cat
+2017-12-12 14:31:52,522 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_3_3_0.01_4/mag_20-21_CCD_x1_y1_d1.cat
+2017-12-12 14:31:52,610 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_3_3_0.01_4/mag_20-21_CCD_x1_y1_d2.cat
+2017-12-12 14:31:52,687 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_3_3_0.01_4/mag_20-21_CCD_x1_y1_d3.cat
+2017-12-12 14:31:52,764 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_3_3_0.01_4/mag_20-21_CCD_x1_y1_d4.cat
+2017-12-12 14:31:52,856 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_1.5_1.5_0.01_4/mag_20-21_CCD_x1_y2_d1.cat
+2017-12-12 14:31:52,979 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_1.5_1.5_0.01_4/mag_20-21_CCD_x1_y2_d2.cat
+2017-12-12 14:31:53,087 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_1.5_1.5_0.01_4/mag_20-21_CCD_x1_y2_d3.cat
+2017-12-12 14:31:53,196 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_1.5_1.5_0.01_4/mag_20-21_CCD_x1_y2_d4.cat
+2017-12-12 14:31:53,307 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_3_3_0.01_4/mag_20-21_CCD_x1_y2_d1.cat
+2017-12-12 14:31:53,392 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_3_3_0.01_4/mag_20-21_CCD_x1_y2_d2.cat
+2017-12-12 14:31:53,480 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_3_3_0.01_4/mag_20-21_CCD_x1_y2_d3.cat
+2017-12-12 14:31:53,564 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_3_3_0.01_4/mag_20-21_CCD_x1_y2_d4.cat
+2017-12-12 14:31:53,655 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_1.5_1.5_0.01_4/mag_20-21_CCD_x1_y2_d1.cat
+2017-12-12 14:31:53,745 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_1.5_1.5_0.01_4/mag_20-21_CCD_x1_y2_d2.cat
+2017-12-12 14:31:53,822 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_1.5_1.5_0.01_4/mag_20-21_CCD_x1_y2_d3.cat
+2017-12-12 14:31:53,896 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_1.5_1.5_0.01_4/mag_20-21_CCD_x1_y2_d4.cat
+2017-12-12 14:31:53,957 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_3_3_0.01_4/mag_20-21_CCD_x1_y2_d1.cat
+2017-12-12 14:31:54,017 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_3_3_0.01_4/mag_20-21_CCD_x1_y2_d2.cat
+2017-12-12 14:31:54,078 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_3_3_0.01_4/mag_20-21_CCD_x1_y2_d3.cat
+2017-12-12 14:31:54,131 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_3_3_0.01_4/mag_20-21_CCD_x1_y2_d4.cat
+2017-12-12 14:31:54,197 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_1.5_1.5_0.01_4/mag_20-21_CCD_x1_y2_d1.cat
+2017-12-12 14:31:54,264 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_1.5_1.5_0.01_4/mag_20-21_CCD_x1_y2_d2.cat
+2017-12-12 14:31:54,329 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_1.5_1.5_0.01_4/mag_20-21_CCD_x1_y2_d3.cat
+2017-12-12 14:31:54,392 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_1.5_1.5_0.01_4/mag_20-21_CCD_x1_y2_d4.cat
+2017-12-12 14:31:54,459 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_3_3_0.01_4/mag_20-21_CCD_x1_y2_d1.cat
+2017-12-12 14:31:54,515 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_3_3_0.01_4/mag_20-21_CCD_x1_y2_d2.cat
+2017-12-12 14:31:54,578 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_3_3_0.01_4/mag_20-21_CCD_x1_y2_d3.cat
+2017-12-12 14:31:54,631 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_3_3_0.01_4/mag_20-21_CCD_x1_y2_d4.cat
+2017-12-12 14:31:54,696 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_1.5_1.5_0.01_4/mag_20-21_CCD_x2_y0_d1.cat
+2017-12-12 14:31:54,768 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_1.5_1.5_0.01_4/mag_20-21_CCD_x2_y0_d2.cat
+2017-12-12 14:31:54,862 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_1.5_1.5_0.01_4/mag_20-21_CCD_x2_y0_d3.cat
+2017-12-12 14:31:54,966 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_1.5_1.5_0.01_4/mag_20-21_CCD_x2_y0_d4.cat
+2017-12-12 14:31:55,061 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_3_3_0.01_4/mag_20-21_CCD_x2_y0_d1.cat
+2017-12-12 14:31:55,150 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_3_3_0.01_4/mag_20-21_CCD_x2_y0_d2.cat
+2017-12-12 14:31:55,233 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_3_3_0.01_4/mag_20-21_CCD_x2_y0_d3.cat
+2017-12-12 14:31:55,334 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_3_3_0.01_4/mag_20-21_CCD_x2_y0_d4.cat
+2017-12-12 14:31:55,399 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_1.5_1.5_0.01_4/mag_20-21_CCD_x2_y0_d1.cat
+2017-12-12 14:31:55,471 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_1.5_1.5_0.01_4/mag_20-21_CCD_x2_y0_d2.cat
+2017-12-12 14:31:55,560 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_1.5_1.5_0.01_4/mag_20-21_CCD_x2_y0_d3.cat
+2017-12-12 14:31:55,648 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_1.5_1.5_0.01_4/mag_20-21_CCD_x2_y0_d4.cat
+2017-12-12 14:31:55,722 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_3_3_0.01_4/mag_20-21_CCD_x2_y0_d1.cat
+2017-12-12 14:31:55,794 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_3_3_0.01_4/mag_20-21_CCD_x2_y0_d2.cat
+2017-12-12 14:31:55,893 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_3_3_0.01_4/mag_20-21_CCD_x2_y0_d3.cat
+2017-12-12 14:31:55,954 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_3_3_0.01_4/mag_20-21_CCD_x2_y0_d4.cat
+2017-12-12 14:31:56,017 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_1.5_1.5_0.01_4/mag_20-21_CCD_x2_y0_d1.cat
+2017-12-12 14:31:56,083 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_1.5_1.5_0.01_4/mag_20-21_CCD_x2_y0_d2.cat
+2017-12-12 14:31:56,150 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_1.5_1.5_0.01_4/mag_20-21_CCD_x2_y0_d3.cat
+2017-12-12 14:31:56,216 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_1.5_1.5_0.01_4/mag_20-21_CCD_x2_y0_d4.cat
+2017-12-12 14:31:56,278 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_3_3_0.01_4/mag_20-21_CCD_x2_y0_d1.cat
+2017-12-12 14:31:56,331 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_3_3_0.01_4/mag_20-21_CCD_x2_y0_d2.cat
+2017-12-12 14:31:56,392 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_3_3_0.01_4/mag_20-21_CCD_x2_y0_d3.cat
+2017-12-12 14:31:56,447 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_3_3_0.01_4/mag_20-21_CCD_x2_y0_d4.cat
+2017-12-12 14:31:56,516 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_1.5_1.5_0.01_4/mag_20-21_CCD_x2_y1_d1.cat
+2017-12-12 14:31:56,578 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_1.5_1.5_0.01_4/mag_20-21_CCD_x2_y1_d2.cat
+2017-12-12 14:31:56,636 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_1.5_1.5_0.01_4/mag_20-21_CCD_x2_y1_d3.cat
+2017-12-12 14:31:56,702 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_1.5_1.5_0.01_4/mag_20-21_CCD_x2_y1_d4.cat
+2017-12-12 14:31:56,787 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_3_3_0.01_4/mag_20-21_CCD_x2_y1_d1.cat
+2017-12-12 14:31:56,876 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_3_3_0.01_4/mag_20-21_CCD_x2_y1_d2.cat
+2017-12-12 14:31:56,982 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_3_3_0.01_4/mag_20-21_CCD_x2_y1_d3.cat
+2017-12-12 14:31:57,091 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_3_3_0.01_4/mag_20-21_CCD_x2_y1_d4.cat
+2017-12-12 14:31:57,191 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_1.5_1.5_0.01_4/mag_20-21_CCD_x2_y1_d1.cat
+2017-12-12 14:31:57,279 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_1.5_1.5_0.01_4/mag_20-21_CCD_x2_y1_d2.cat
+2017-12-12 14:31:57,367 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_1.5_1.5_0.01_4/mag_20-21_CCD_x2_y1_d3.cat
+2017-12-12 14:31:57,455 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_1.5_1.5_0.01_4/mag_20-21_CCD_x2_y1_d4.cat
+2017-12-12 14:31:57,537 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_3_3_0.01_4/mag_20-21_CCD_x2_y1_d1.cat
+2017-12-12 14:31:57,618 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_3_3_0.01_4/mag_20-21_CCD_x2_y1_d2.cat
+2017-12-12 14:31:57,698 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_3_3_0.01_4/mag_20-21_CCD_x2_y1_d3.cat
+2017-12-12 14:31:57,783 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_3_3_0.01_4/mag_20-21_CCD_x2_y1_d4.cat
+2017-12-12 14:31:57,874 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_1.5_1.5_0.01_4/mag_20-21_CCD_x2_y1_d1.cat
+2017-12-12 14:31:57,963 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_1.5_1.5_0.01_4/mag_20-21_CCD_x2_y1_d2.cat
+2017-12-12 14:31:58,051 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_1.5_1.5_0.01_4/mag_20-21_CCD_x2_y1_d3.cat
+2017-12-12 14:31:58,131 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_1.5_1.5_0.01_4/mag_20-21_CCD_x2_y1_d4.cat
+2017-12-12 14:31:58,192 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_3_3_0.01_4/mag_20-21_CCD_x2_y1_d1.cat
+2017-12-12 14:31:58,247 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_3_3_0.01_4/mag_20-21_CCD_x2_y1_d2.cat
+2017-12-12 14:31:58,309 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_3_3_0.01_4/mag_20-21_CCD_x2_y1_d3.cat
+2017-12-12 14:31:58,362 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_3_3_0.01_4/mag_20-21_CCD_x2_y1_d4.cat
+2017-12-12 14:31:58,428 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_1.5_1.5_0.01_4/mag_20-21_CCD_x2_y2_d1.cat
+2017-12-12 14:31:58,495 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_1.5_1.5_0.01_4/mag_20-21_CCD_x2_y2_d2.cat
+2017-12-12 14:31:58,560 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_1.5_1.5_0.01_4/mag_20-21_CCD_x2_y2_d3.cat
+2017-12-12 14:31:58,624 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_1.5_1.5_0.01_4/mag_20-21_CCD_x2_y2_d4.cat
+2017-12-12 14:31:58,677 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_3_3_0.01_4/mag_20-21_CCD_x2_y2_d1.cat
+2017-12-12 14:31:58,748 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_3_3_0.01_4/mag_20-21_CCD_x2_y2_d2.cat
+2017-12-12 14:31:58,837 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_3_3_0.01_4/mag_20-21_CCD_x2_y2_d3.cat
+2017-12-12 14:31:58,919 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/20_3_3_0.01_4/mag_20-21_CCD_x2_y2_d4.cat
+2017-12-12 14:31:59,029 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_1.5_1.5_0.01_4/mag_20-21_CCD_x2_y2_d1.cat
+2017-12-12 14:31:59,118 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_1.5_1.5_0.01_4/mag_20-21_CCD_x2_y2_d2.cat
+2017-12-12 14:31:59,208 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_1.5_1.5_0.01_4/mag_20-21_CCD_x2_y2_d3.cat
+2017-12-12 14:31:59,292 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_1.5_1.5_0.01_4/mag_20-21_CCD_x2_y2_d4.cat
+2017-12-12 14:31:59,374 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_3_3_0.01_4/mag_20-21_CCD_x2_y2_d1.cat
+2017-12-12 14:31:59,458 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_3_3_0.01_4/mag_20-21_CCD_x2_y2_d2.cat
+2017-12-12 14:31:59,542 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_3_3_0.01_4/mag_20-21_CCD_x2_y2_d3.cat
+2017-12-12 14:31:59,619 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/30_3_3_0.01_4/mag_20-21_CCD_x2_y2_d4.cat
+2017-12-12 14:31:59,705 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_1.5_1.5_0.01_4/mag_20-21_CCD_x2_y2_d1.cat
+2017-12-12 14:31:59,796 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_1.5_1.5_0.01_4/mag_20-21_CCD_x2_y2_d2.cat
+2017-12-12 14:31:59,879 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_1.5_1.5_0.01_4/mag_20-21_CCD_x2_y2_d3.cat
+2017-12-12 14:31:59,979 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_1.5_1.5_0.01_4/mag_20-21_CCD_x2_y2_d4.cat
+2017-12-12 14:32:00,084 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_3_3_0.01_4/mag_20-21_CCD_x2_y2_d1.cat
+2017-12-12 14:32:00,168 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_3_3_0.01_4/mag_20-21_CCD_x2_y2_d2.cat
+2017-12-12 14:32:00,247 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_3_3_0.01_4/mag_20-21_CCD_x2_y2_d3.cat
+2017-12-12 14:32:00,329 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/20-21/CCDs/40_3_3_0.01_4/mag_20-21_CCD_x2_y2_d4.cat
+2017-12-12 14:32:12,957 - main_process - INFO - Program started
+2017-12-12 14:32:13,070 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_1.5_1.5_0.01_4/mag_21-22_CCD_x0_y0_d1.cat
+2017-12-12 14:32:13,178 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_1.5_1.5_0.01_4/mag_21-22_CCD_x0_y0_d2.cat
+2017-12-12 14:32:13,271 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_1.5_1.5_0.01_4/mag_21-22_CCD_x0_y0_d3.cat
+2017-12-12 14:32:13,384 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_1.5_1.5_0.01_4/mag_21-22_CCD_x0_y0_d4.cat
+2017-12-12 14:32:13,490 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_3_3_0.01_4/mag_21-22_CCD_x0_y0_d1.cat
+2017-12-12 14:32:13,582 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_3_3_0.01_4/mag_21-22_CCD_x0_y0_d2.cat
+2017-12-12 14:32:13,673 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_3_3_0.01_4/mag_21-22_CCD_x0_y0_d3.cat
+2017-12-12 14:32:13,772 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_3_3_0.01_4/mag_21-22_CCD_x0_y0_d4.cat
+2017-12-12 14:32:13,883 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_1.5_1.5_0.01_4/mag_21-22_CCD_x0_y0_d1.cat
+2017-12-12 14:32:13,973 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_1.5_1.5_0.01_4/mag_21-22_CCD_x0_y0_d2.cat
+2017-12-12 14:32:14,072 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_1.5_1.5_0.01_4/mag_21-22_CCD_x0_y0_d3.cat
+2017-12-12 14:32:14,181 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_1.5_1.5_0.01_4/mag_21-22_CCD_x0_y0_d4.cat
+2017-12-12 14:32:14,266 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_3_3_0.01_4/mag_21-22_CCD_x0_y0_d1.cat
+2017-12-12 14:32:14,351 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_3_3_0.01_4/mag_21-22_CCD_x0_y0_d2.cat
+2017-12-12 14:32:14,443 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_3_3_0.01_4/mag_21-22_CCD_x0_y0_d3.cat
+2017-12-12 14:32:14,522 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_3_3_0.01_4/mag_21-22_CCD_x0_y0_d4.cat
+2017-12-12 14:32:14,602 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_1.5_1.5_0.01_4/mag_21-22_CCD_x0_y0_d1.cat
+2017-12-12 14:32:14,711 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_1.5_1.5_0.01_4/mag_21-22_CCD_x0_y0_d2.cat
+2017-12-12 14:32:14,824 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_1.5_1.5_0.01_4/mag_21-22_CCD_x0_y0_d3.cat
+2017-12-12 14:32:14,927 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_1.5_1.5_0.01_4/mag_21-22_CCD_x0_y0_d4.cat
+2017-12-12 14:32:15,014 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_3_3_0.01_4/mag_21-22_CCD_x0_y0_d1.cat
+2017-12-12 14:32:15,122 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_3_3_0.01_4/mag_21-22_CCD_x0_y0_d2.cat
+2017-12-12 14:32:15,194 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_3_3_0.01_4/mag_21-22_CCD_x0_y0_d3.cat
+2017-12-12 14:32:15,260 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_3_3_0.01_4/mag_21-22_CCD_x0_y0_d4.cat
+2017-12-12 14:32:15,328 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_1.5_1.5_0.01_4/mag_21-22_CCD_x0_y1_d1.cat
+2017-12-12 14:32:15,388 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_1.5_1.5_0.01_4/mag_21-22_CCD_x0_y1_d2.cat
+2017-12-12 14:32:15,455 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_1.5_1.5_0.01_4/mag_21-22_CCD_x0_y1_d3.cat
+2017-12-12 14:32:15,526 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_1.5_1.5_0.01_4/mag_21-22_CCD_x0_y1_d4.cat
+2017-12-12 14:32:15,588 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_3_3_0.01_4/mag_21-22_CCD_x0_y1_d1.cat
+2017-12-12 14:32:15,646 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_3_3_0.01_4/mag_21-22_CCD_x0_y1_d2.cat
+2017-12-12 14:32:15,719 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_3_3_0.01_4/mag_21-22_CCD_x0_y1_d3.cat
+2017-12-12 14:32:15,795 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_3_3_0.01_4/mag_21-22_CCD_x0_y1_d4.cat
+2017-12-12 14:32:15,897 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_1.5_1.5_0.01_4/mag_21-22_CCD_x0_y1_d1.cat
+2017-12-12 14:32:15,986 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_1.5_1.5_0.01_4/mag_21-22_CCD_x0_y1_d2.cat
+2017-12-12 14:32:16,102 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_1.5_1.5_0.01_4/mag_21-22_CCD_x0_y1_d3.cat
+2017-12-12 14:32:16,227 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_1.5_1.5_0.01_4/mag_21-22_CCD_x0_y1_d4.cat
+2017-12-12 14:32:16,335 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_3_3_0.01_4/mag_21-22_CCD_x0_y1_d1.cat
+2017-12-12 14:32:16,439 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_3_3_0.01_4/mag_21-22_CCD_x0_y1_d2.cat
+2017-12-12 14:32:16,519 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_3_3_0.01_4/mag_21-22_CCD_x0_y1_d3.cat
+2017-12-12 14:32:16,639 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_3_3_0.01_4/mag_21-22_CCD_x0_y1_d4.cat
+2017-12-12 14:32:16,734 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_1.5_1.5_0.01_4/mag_21-22_CCD_x0_y1_d1.cat
+2017-12-12 14:32:16,830 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_1.5_1.5_0.01_4/mag_21-22_CCD_x0_y1_d2.cat
+2017-12-12 14:32:16,950 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_1.5_1.5_0.01_4/mag_21-22_CCD_x0_y1_d3.cat
+2017-12-12 14:32:17,058 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_1.5_1.5_0.01_4/mag_21-22_CCD_x0_y1_d4.cat
+2017-12-12 14:32:17,152 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_3_3_0.01_4/mag_21-22_CCD_x0_y1_d1.cat
+2017-12-12 14:32:17,223 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_3_3_0.01_4/mag_21-22_CCD_x0_y1_d2.cat
+2017-12-12 14:32:17,302 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_3_3_0.01_4/mag_21-22_CCD_x0_y1_d3.cat
+2017-12-12 14:32:17,403 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_3_3_0.01_4/mag_21-22_CCD_x0_y1_d4.cat
+2017-12-12 14:32:17,515 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_1.5_1.5_0.01_4/mag_21-22_CCD_x0_y2_d1.cat
+2017-12-12 14:32:17,606 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_1.5_1.5_0.01_4/mag_21-22_CCD_x0_y2_d2.cat
+2017-12-12 14:32:17,729 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_1.5_1.5_0.01_4/mag_21-22_CCD_x0_y2_d3.cat
+2017-12-12 14:32:17,831 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_1.5_1.5_0.01_4/mag_21-22_CCD_x0_y2_d4.cat
+2017-12-12 14:32:17,930 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_3_3_0.01_4/mag_21-22_CCD_x0_y2_d1.cat
+2017-12-12 14:32:18,033 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_3_3_0.01_4/mag_21-22_CCD_x0_y2_d2.cat
+2017-12-12 14:32:18,117 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_3_3_0.01_4/mag_21-22_CCD_x0_y2_d3.cat
+2017-12-12 14:32:18,210 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_3_3_0.01_4/mag_21-22_CCD_x0_y2_d4.cat
+2017-12-12 14:32:18,315 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_1.5_1.5_0.01_4/mag_21-22_CCD_x0_y2_d1.cat
+2017-12-12 14:32:18,401 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_1.5_1.5_0.01_4/mag_21-22_CCD_x0_y2_d2.cat
+2017-12-12 14:32:18,489 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_1.5_1.5_0.01_4/mag_21-22_CCD_x0_y2_d3.cat
+2017-12-12 14:32:18,590 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_1.5_1.5_0.01_4/mag_21-22_CCD_x0_y2_d4.cat
+2017-12-12 14:32:18,652 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_3_3_0.01_4/mag_21-22_CCD_x0_y2_d1.cat
+2017-12-12 14:32:18,706 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_3_3_0.01_4/mag_21-22_CCD_x0_y2_d2.cat
+2017-12-12 14:32:18,778 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_3_3_0.01_4/mag_21-22_CCD_x0_y2_d3.cat
+2017-12-12 14:32:18,846 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_3_3_0.01_4/mag_21-22_CCD_x0_y2_d4.cat
+2017-12-12 14:32:18,934 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_1.5_1.5_0.01_4/mag_21-22_CCD_x0_y2_d1.cat
+2017-12-12 14:32:19,056 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_1.5_1.5_0.01_4/mag_21-22_CCD_x0_y2_d2.cat
+2017-12-12 14:32:19,157 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_1.5_1.5_0.01_4/mag_21-22_CCD_x0_y2_d3.cat
+2017-12-12 14:32:19,247 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_1.5_1.5_0.01_4/mag_21-22_CCD_x0_y2_d4.cat
+2017-12-12 14:32:19,350 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_3_3_0.01_4/mag_21-22_CCD_x0_y2_d1.cat
+2017-12-12 14:32:19,473 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_3_3_0.01_4/mag_21-22_CCD_x0_y2_d2.cat
+2017-12-12 14:32:19,572 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_3_3_0.01_4/mag_21-22_CCD_x0_y2_d3.cat
+2017-12-12 14:32:19,659 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_3_3_0.01_4/mag_21-22_CCD_x0_y2_d4.cat
+2017-12-12 14:32:19,741 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_1.5_1.5_0.01_4/mag_21-22_CCD_x1_y0_d1.cat
+2017-12-12 14:32:19,846 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_1.5_1.5_0.01_4/mag_21-22_CCD_x1_y0_d2.cat
+2017-12-12 14:32:19,943 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_1.5_1.5_0.01_4/mag_21-22_CCD_x1_y0_d3.cat
+2017-12-12 14:32:20,034 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_1.5_1.5_0.01_4/mag_21-22_CCD_x1_y0_d4.cat
+2017-12-12 14:32:20,139 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_3_3_0.01_4/mag_21-22_CCD_x1_y0_d1.cat
+2017-12-12 14:32:20,239 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_3_3_0.01_4/mag_21-22_CCD_x1_y0_d2.cat
+2017-12-12 14:32:20,327 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_3_3_0.01_4/mag_21-22_CCD_x1_y0_d3.cat
+2017-12-12 14:32:20,423 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_3_3_0.01_4/mag_21-22_CCD_x1_y0_d4.cat
+2017-12-12 14:32:20,539 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_1.5_1.5_0.01_4/mag_21-22_CCD_x1_y0_d1.cat
+2017-12-12 14:32:20,640 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_1.5_1.5_0.01_4/mag_21-22_CCD_x1_y0_d2.cat
+2017-12-12 14:32:20,758 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_1.5_1.5_0.01_4/mag_21-22_CCD_x1_y0_d3.cat
+2017-12-12 14:32:20,848 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_1.5_1.5_0.01_4/mag_21-22_CCD_x1_y0_d4.cat
+2017-12-12 14:32:20,955 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_3_3_0.01_4/mag_21-22_CCD_x1_y0_d1.cat
+2017-12-12 14:32:21,051 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_3_3_0.01_4/mag_21-22_CCD_x1_y0_d2.cat
+2017-12-12 14:32:21,149 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_3_3_0.01_4/mag_21-22_CCD_x1_y0_d3.cat
+2017-12-12 14:32:21,256 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_3_3_0.01_4/mag_21-22_CCD_x1_y0_d4.cat
+2017-12-12 14:32:21,377 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_1.5_1.5_0.01_4/mag_21-22_CCD_x1_y0_d1.cat
+2017-12-12 14:32:21,534 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_1.5_1.5_0.01_4/mag_21-22_CCD_x1_y0_d2.cat
+2017-12-12 14:32:21,621 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_1.5_1.5_0.01_4/mag_21-22_CCD_x1_y0_d3.cat
+2017-12-12 14:32:21,721 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_1.5_1.5_0.01_4/mag_21-22_CCD_x1_y0_d4.cat
+2017-12-12 14:32:21,814 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_3_3_0.01_4/mag_21-22_CCD_x1_y0_d1.cat
+2017-12-12 14:32:21,923 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_3_3_0.01_4/mag_21-22_CCD_x1_y0_d2.cat
+2017-12-12 14:32:22,041 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_3_3_0.01_4/mag_21-22_CCD_x1_y0_d3.cat
+2017-12-12 14:32:22,132 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_3_3_0.01_4/mag_21-22_CCD_x1_y0_d4.cat
+2017-12-12 14:32:22,237 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_1.5_1.5_0.01_4/mag_21-22_CCD_x1_y1_d1.cat
+2017-12-12 14:32:22,330 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_1.5_1.5_0.01_4/mag_21-22_CCD_x1_y1_d2.cat
+2017-12-12 14:32:22,466 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_1.5_1.5_0.01_4/mag_21-22_CCD_x1_y1_d3.cat
+2017-12-12 14:32:22,588 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_1.5_1.5_0.01_4/mag_21-22_CCD_x1_y1_d4.cat
+2017-12-12 14:32:22,702 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_3_3_0.01_4/mag_21-22_CCD_x1_y1_d1.cat
+2017-12-12 14:32:22,819 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_3_3_0.01_4/mag_21-22_CCD_x1_y1_d2.cat
+2017-12-12 14:32:22,915 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_3_3_0.01_4/mag_21-22_CCD_x1_y1_d3.cat
+2017-12-12 14:32:23,026 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_3_3_0.01_4/mag_21-22_CCD_x1_y1_d4.cat
+2017-12-12 14:32:23,131 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_1.5_1.5_0.01_4/mag_21-22_CCD_x1_y1_d1.cat
+2017-12-12 14:32:23,249 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_1.5_1.5_0.01_4/mag_21-22_CCD_x1_y1_d2.cat
+2017-12-12 14:32:23,374 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_1.5_1.5_0.01_4/mag_21-22_CCD_x1_y1_d3.cat
+2017-12-12 14:32:23,495 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_1.5_1.5_0.01_4/mag_21-22_CCD_x1_y1_d4.cat
+2017-12-12 14:32:23,595 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_3_3_0.01_4/mag_21-22_CCD_x1_y1_d1.cat
+2017-12-12 14:32:23,666 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_3_3_0.01_4/mag_21-22_CCD_x1_y1_d2.cat
+2017-12-12 14:32:23,742 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_3_3_0.01_4/mag_21-22_CCD_x1_y1_d3.cat
+2017-12-12 14:32:23,821 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_3_3_0.01_4/mag_21-22_CCD_x1_y1_d4.cat
+2017-12-12 14:32:23,914 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_1.5_1.5_0.01_4/mag_21-22_CCD_x1_y1_d1.cat
+2017-12-12 14:32:24,017 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_1.5_1.5_0.01_4/mag_21-22_CCD_x1_y1_d2.cat
+2017-12-12 14:32:24,113 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_1.5_1.5_0.01_4/mag_21-22_CCD_x1_y1_d3.cat
+2017-12-12 14:32:24,233 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_1.5_1.5_0.01_4/mag_21-22_CCD_x1_y1_d4.cat
+2017-12-12 14:32:24,313 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_3_3_0.01_4/mag_21-22_CCD_x1_y1_d1.cat
+2017-12-12 14:32:24,471 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_3_3_0.01_4/mag_21-22_CCD_x1_y1_d2.cat
+2017-12-12 14:32:24,584 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_3_3_0.01_4/mag_21-22_CCD_x1_y1_d3.cat
+2017-12-12 14:32:24,682 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_3_3_0.01_4/mag_21-22_CCD_x1_y1_d4.cat
+2017-12-12 14:32:24,800 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_1.5_1.5_0.01_4/mag_21-22_CCD_x1_y2_d1.cat
+2017-12-12 14:32:24,902 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_1.5_1.5_0.01_4/mag_21-22_CCD_x1_y2_d2.cat
+2017-12-12 14:32:24,999 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_1.5_1.5_0.01_4/mag_21-22_CCD_x1_y2_d3.cat
+2017-12-12 14:32:25,117 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_1.5_1.5_0.01_4/mag_21-22_CCD_x1_y2_d4.cat
+2017-12-12 14:32:25,215 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_3_3_0.01_4/mag_21-22_CCD_x1_y2_d1.cat
+2017-12-12 14:32:25,311 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_3_3_0.01_4/mag_21-22_CCD_x1_y2_d2.cat
+2017-12-12 14:32:25,432 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_3_3_0.01_4/mag_21-22_CCD_x1_y2_d3.cat
+2017-12-12 14:32:25,510 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_3_3_0.01_4/mag_21-22_CCD_x1_y2_d4.cat
+2017-12-12 14:32:25,611 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_1.5_1.5_0.01_4/mag_21-22_CCD_x1_y2_d1.cat
+2017-12-12 14:32:25,715 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_1.5_1.5_0.01_4/mag_21-22_CCD_x1_y2_d2.cat
+2017-12-12 14:32:25,828 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_1.5_1.5_0.01_4/mag_21-22_CCD_x1_y2_d3.cat
+2017-12-12 14:32:25,933 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_1.5_1.5_0.01_4/mag_21-22_CCD_x1_y2_d4.cat
+2017-12-12 14:32:26,033 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_3_3_0.01_4/mag_21-22_CCD_x1_y2_d1.cat
+2017-12-12 14:32:26,132 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_3_3_0.01_4/mag_21-22_CCD_x1_y2_d2.cat
+2017-12-12 14:32:26,229 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_3_3_0.01_4/mag_21-22_CCD_x1_y2_d3.cat
+2017-12-12 14:32:26,322 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_3_3_0.01_4/mag_21-22_CCD_x1_y2_d4.cat
+2017-12-12 14:32:26,403 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_1.5_1.5_0.01_4/mag_21-22_CCD_x1_y2_d1.cat
+2017-12-12 14:32:26,500 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_1.5_1.5_0.01_4/mag_21-22_CCD_x1_y2_d2.cat
+2017-12-12 14:32:26,606 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_1.5_1.5_0.01_4/mag_21-22_CCD_x1_y2_d3.cat
+2017-12-12 14:32:26,703 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_1.5_1.5_0.01_4/mag_21-22_CCD_x1_y2_d4.cat
+2017-12-12 14:32:26,792 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_3_3_0.01_4/mag_21-22_CCD_x1_y2_d1.cat
+2017-12-12 14:32:26,876 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_3_3_0.01_4/mag_21-22_CCD_x1_y2_d2.cat
+2017-12-12 14:32:26,982 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_3_3_0.01_4/mag_21-22_CCD_x1_y2_d3.cat
+2017-12-12 14:32:27,055 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_3_3_0.01_4/mag_21-22_CCD_x1_y2_d4.cat
+2017-12-12 14:32:27,192 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_1.5_1.5_0.01_4/mag_21-22_CCD_x2_y0_d1.cat
+2017-12-12 14:32:27,317 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_1.5_1.5_0.01_4/mag_21-22_CCD_x2_y0_d2.cat
+2017-12-12 14:32:27,441 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_1.5_1.5_0.01_4/mag_21-22_CCD_x2_y0_d3.cat
+2017-12-12 14:32:27,543 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_1.5_1.5_0.01_4/mag_21-22_CCD_x2_y0_d4.cat
+2017-12-12 14:32:27,634 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_3_3_0.01_4/mag_21-22_CCD_x2_y0_d1.cat
+2017-12-12 14:32:27,716 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_3_3_0.01_4/mag_21-22_CCD_x2_y0_d2.cat
+2017-12-12 14:32:27,827 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_3_3_0.01_4/mag_21-22_CCD_x2_y0_d3.cat
+2017-12-12 14:32:27,909 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_3_3_0.01_4/mag_21-22_CCD_x2_y0_d4.cat
+2017-12-12 14:32:28,024 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_1.5_1.5_0.01_4/mag_21-22_CCD_x2_y0_d1.cat
+2017-12-12 14:32:28,124 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_1.5_1.5_0.01_4/mag_21-22_CCD_x2_y0_d2.cat
+2017-12-12 14:32:28,255 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_1.5_1.5_0.01_4/mag_21-22_CCD_x2_y0_d3.cat
+2017-12-12 14:32:28,362 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_1.5_1.5_0.01_4/mag_21-22_CCD_x2_y0_d4.cat
+2017-12-12 14:32:28,450 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_3_3_0.01_4/mag_21-22_CCD_x2_y0_d1.cat
+2017-12-12 14:32:28,558 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_3_3_0.01_4/mag_21-22_CCD_x2_y0_d2.cat
+2017-12-12 14:32:28,720 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_3_3_0.01_4/mag_21-22_CCD_x2_y0_d3.cat
+2017-12-12 14:32:28,825 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_3_3_0.01_4/mag_21-22_CCD_x2_y0_d4.cat
+2017-12-12 14:32:28,956 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_1.5_1.5_0.01_4/mag_21-22_CCD_x2_y0_d1.cat
+2017-12-12 14:32:29,072 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_1.5_1.5_0.01_4/mag_21-22_CCD_x2_y0_d2.cat
+2017-12-12 14:32:29,182 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_1.5_1.5_0.01_4/mag_21-22_CCD_x2_y0_d3.cat
+2017-12-12 14:32:29,282 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_1.5_1.5_0.01_4/mag_21-22_CCD_x2_y0_d4.cat
+2017-12-12 14:32:29,394 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_3_3_0.01_4/mag_21-22_CCD_x2_y0_d1.cat
+2017-12-12 14:32:29,496 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_3_3_0.01_4/mag_21-22_CCD_x2_y0_d2.cat
+2017-12-12 14:32:29,580 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_3_3_0.01_4/mag_21-22_CCD_x2_y0_d3.cat
+2017-12-12 14:32:29,664 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_3_3_0.01_4/mag_21-22_CCD_x2_y0_d4.cat
+2017-12-12 14:32:29,761 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_1.5_1.5_0.01_4/mag_21-22_CCD_x2_y1_d1.cat
+2017-12-12 14:32:29,859 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_1.5_1.5_0.01_4/mag_21-22_CCD_x2_y1_d2.cat
+2017-12-12 14:32:29,975 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_1.5_1.5_0.01_4/mag_21-22_CCD_x2_y1_d3.cat
+2017-12-12 14:32:30,111 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_1.5_1.5_0.01_4/mag_21-22_CCD_x2_y1_d4.cat
+2017-12-12 14:32:30,202 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_3_3_0.01_4/mag_21-22_CCD_x2_y1_d1.cat
+2017-12-12 14:32:30,310 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_3_3_0.01_4/mag_21-22_CCD_x2_y1_d2.cat
+2017-12-12 14:32:30,401 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_3_3_0.01_4/mag_21-22_CCD_x2_y1_d3.cat
+2017-12-12 14:32:30,506 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_3_3_0.01_4/mag_21-22_CCD_x2_y1_d4.cat
+2017-12-12 14:32:30,594 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_1.5_1.5_0.01_4/mag_21-22_CCD_x2_y1_d1.cat
+2017-12-12 14:32:30,698 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_1.5_1.5_0.01_4/mag_21-22_CCD_x2_y1_d2.cat
+2017-12-12 14:32:30,828 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_1.5_1.5_0.01_4/mag_21-22_CCD_x2_y1_d3.cat
+2017-12-12 14:32:30,933 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_1.5_1.5_0.01_4/mag_21-22_CCD_x2_y1_d4.cat
+2017-12-12 14:32:31,017 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_3_3_0.01_4/mag_21-22_CCD_x2_y1_d1.cat
+2017-12-12 14:32:31,134 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_3_3_0.01_4/mag_21-22_CCD_x2_y1_d2.cat
+2017-12-12 14:32:31,227 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_3_3_0.01_4/mag_21-22_CCD_x2_y1_d3.cat
+2017-12-12 14:32:31,321 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_3_3_0.01_4/mag_21-22_CCD_x2_y1_d4.cat
+2017-12-12 14:32:31,428 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_1.5_1.5_0.01_4/mag_21-22_CCD_x2_y1_d1.cat
+2017-12-12 14:32:31,547 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_1.5_1.5_0.01_4/mag_21-22_CCD_x2_y1_d2.cat
+2017-12-12 14:32:31,655 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_1.5_1.5_0.01_4/mag_21-22_CCD_x2_y1_d3.cat
+2017-12-12 14:32:31,783 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_1.5_1.5_0.01_4/mag_21-22_CCD_x2_y1_d4.cat
+2017-12-12 14:32:31,880 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_3_3_0.01_4/mag_21-22_CCD_x2_y1_d1.cat
+2017-12-12 14:32:31,978 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_3_3_0.01_4/mag_21-22_CCD_x2_y1_d2.cat
+2017-12-12 14:32:32,091 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_3_3_0.01_4/mag_21-22_CCD_x2_y1_d3.cat
+2017-12-12 14:32:32,192 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_3_3_0.01_4/mag_21-22_CCD_x2_y1_d4.cat
+2017-12-12 14:32:32,279 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_1.5_1.5_0.01_4/mag_21-22_CCD_x2_y2_d1.cat
+2017-12-12 14:32:32,374 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_1.5_1.5_0.01_4/mag_21-22_CCD_x2_y2_d2.cat
+2017-12-12 14:32:32,458 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_1.5_1.5_0.01_4/mag_21-22_CCD_x2_y2_d3.cat
+2017-12-12 14:32:32,546 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_1.5_1.5_0.01_4/mag_21-22_CCD_x2_y2_d4.cat
+2017-12-12 14:32:32,638 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_3_3_0.01_4/mag_21-22_CCD_x2_y2_d1.cat
+2017-12-12 14:32:32,731 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_3_3_0.01_4/mag_21-22_CCD_x2_y2_d2.cat
+2017-12-12 14:32:32,816 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_3_3_0.01_4/mag_21-22_CCD_x2_y2_d3.cat
+2017-12-12 14:32:32,894 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/20_3_3_0.01_4/mag_21-22_CCD_x2_y2_d4.cat
+2017-12-12 14:32:32,986 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_1.5_1.5_0.01_4/mag_21-22_CCD_x2_y2_d1.cat
+2017-12-12 14:32:33,093 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_1.5_1.5_0.01_4/mag_21-22_CCD_x2_y2_d2.cat
+2017-12-12 14:32:33,188 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_1.5_1.5_0.01_4/mag_21-22_CCD_x2_y2_d3.cat
+2017-12-12 14:32:33,274 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_1.5_1.5_0.01_4/mag_21-22_CCD_x2_y2_d4.cat
+2017-12-12 14:32:33,343 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_3_3_0.01_4/mag_21-22_CCD_x2_y2_d1.cat
+2017-12-12 14:32:33,423 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_3_3_0.01_4/mag_21-22_CCD_x2_y2_d2.cat
+2017-12-12 14:32:33,504 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_3_3_0.01_4/mag_21-22_CCD_x2_y2_d3.cat
+2017-12-12 14:32:33,583 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/30_3_3_0.01_4/mag_21-22_CCD_x2_y2_d4.cat
+2017-12-12 14:32:33,672 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_1.5_1.5_0.01_4/mag_21-22_CCD_x2_y2_d1.cat
+2017-12-12 14:32:33,764 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_1.5_1.5_0.01_4/mag_21-22_CCD_x2_y2_d2.cat
+2017-12-12 14:32:33,876 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_1.5_1.5_0.01_4/mag_21-22_CCD_x2_y2_d3.cat
+2017-12-12 14:32:33,969 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_1.5_1.5_0.01_4/mag_21-22_CCD_x2_y2_d4.cat
+2017-12-12 14:32:34,066 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_3_3_0.01_4/mag_21-22_CCD_x2_y2_d1.cat
+2017-12-12 14:32:34,162 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_3_3_0.01_4/mag_21-22_CCD_x2_y2_d2.cat
+2017-12-12 14:32:34,257 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_3_3_0.01_4/mag_21-22_CCD_x2_y2_d3.cat
+2017-12-12 14:32:34,337 - main_process - DEBUG - opening catalog file /home/sgongora/Documents/CarpetaCompartida/luca_data/v18/21-22/CCDs/40_3_3_0.01_4/mag_21-22_CCD_x2_y2_d4.cat
