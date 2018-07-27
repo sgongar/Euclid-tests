@@ -61,9 +61,7 @@ class TestCheckOptions(TestCase):
 
     @patch('misc.extract_settings_elvis', side_effect=extract_settings_mock)
     @patch('misc.setting_logger', side_effect=setting_logger_mock)
-    @patch.object(Check, 'full_pipeline', return_value=True)
-    def test_fulloptionchoosen(self, extract_settings, setting_logger,
-                               full_pipeline):
+    def test_fulloptionchoosen(self, extract_settings, setting_logger):
         """
 
         """
@@ -73,13 +71,3 @@ class TestCheckOptions(TestCase):
 
     def teardrown(self):
         pass
-
-
-class TestCheckNoOptions(TestCase):
-
-    @patch('Check.logger', side_effect=setting_logger_mock)
-    @patch('misc.extract_settings_elvis', side_effect=extract_settings_mock)
-    def test_nooptionspassed(self, setting_logger, extract_settings):
-        argv[1] = '-wrong'
-
-        return self.assertRaises(BadSettings, Check)
