@@ -25,6 +25,8 @@ home = getenv("HOME")
 path.append('{}/build/sgongar/Euclid-tests/pipeline_elvis'.format(home))
 # path.append('/mnt/g/dev/Euclid-tests/pipeline')
 
+print(path)
+
 from check_elvis import Check
 from errors import BadSettings
 import misc
