@@ -10,7 +10,7 @@ Problems:
 
 Todo:
     * Improve log messages
-    * 
+    *
 
 """
 
@@ -26,7 +26,8 @@ path.append('{}/build/sgongar/Euclid-tests/pipeline_elvis'.format(home))
 path.append('{}/Dev/Euclid-tests/pipeline_elvis'.format(home))
 
 from check_elvis import Check
-from errors import BadSettings
+from errors import FullPipelineFailed, CleanFailed, SplitFailed
+from errors import SextractorFailed, ScampFailed, FiltFailed, RestartFailed
 from misc import extract_settings_elvis
 
 
@@ -52,7 +53,7 @@ def full_pipeline_mock():
 
     :return:
     """
-    return True
+    return False
 
 
 def clean_mock():
@@ -60,7 +61,7 @@ def clean_mock():
 
     :return:
     """
-    return True
+    return False
 
 
 def split_mock():
@@ -68,7 +69,7 @@ def split_mock():
 
     :return:
     """
-    return True
+    return False
 
 
 def sextractor_mock():
@@ -76,7 +77,7 @@ def sextractor_mock():
 
     :return:
     """
-    return True
+    return False
 
 
 def scamp_mock():
@@ -84,7 +85,7 @@ def scamp_mock():
 
     :return:
     """
-    return True
+    return False
 
 
 def filt_mock():
@@ -92,7 +93,7 @@ def filt_mock():
 
     :return:
     """
-    return True
+    return False
 
 
 def restart_mock():
@@ -100,14 +101,13 @@ def restart_mock():
 
     :return:
     """
-    return True
+    return False
 
 
-class TestCheckSuccessfulOptions(TestCase):
+class TestCheckUnsuccessfulOptions(TestCase):
     """
 
     """
-
 
     def setup(self):
         pass
@@ -122,9 +122,8 @@ class TestCheckSuccessfulOptions(TestCase):
         :return:
         """
         argv[1] = '-full'
-        test_check = Check()
 
-        return self.assertTrue(test_check)
+        return self.assertRaises(FullPipelineFailed, Check)
 
     @patch('check_elvis.Check.parameters', side_effect=parameters_mock)
     @patch('check_elvis.Check.clean', side_effect=clean_mock)
@@ -136,9 +135,8 @@ class TestCheckSuccessfulOptions(TestCase):
         :return:
         """
         argv[1] = '-clean'
-        test_check = Check()
 
-        return self.assertTrue(test_check)
+        return self.assertRaises(CleanFailed, Check)
 
     @patch('check_elvis.Check.parameters', side_effect=parameters_mock)
     @patch('check_elvis.Check.split', side_effect=split_mock)
@@ -150,9 +148,8 @@ class TestCheckSuccessfulOptions(TestCase):
         :return:
         """
         argv[1] = '-split'
-        test_check = Check()
 
-        return self.assertTrue(test_check)
+        return self.assertRaises(SplitFailed, Check)
 
     @patch('check_elvis.Check.parameters', side_effect=parameters_mock)
     @patch('check_elvis.Check.sextractor', side_effect=sextractor_mock)
@@ -164,9 +161,8 @@ class TestCheckSuccessfulOptions(TestCase):
         :return:
         """
         argv[1] = '-sextractor'
-        test_check = Check()
 
-        return self.assertTrue(test_check)
+        return self.assertRaises(SextractorFailed, Check)
 
     @patch('check_elvis.Check.parameters', side_effect=parameters_mock)
     @patch('check_elvis.Check.scamp', side_effect=scamp_mock)
@@ -178,9 +174,8 @@ class TestCheckSuccessfulOptions(TestCase):
         :return:
         """
         argv[1] = '-scamp'
-        test_check = Check()
 
-        return self.assertTrue(test_check)
+        return self.assertRaises(ScampFailed, Check)
 
     @patch('check_elvis.Check.parameters', side_effect=parameters_mock)
     @patch('check_elvis.Check.filt', side_effect=filt_mock)
@@ -192,9 +187,8 @@ class TestCheckSuccessfulOptions(TestCase):
         :return:
         """
         argv[1] = '-filter'
-        test_check = Check()
 
-        return self.assertTrue(test_check)
+        return self.assertRaises(FiltFailed, Check)
 
     @patch('check_elvis.Check.parameters', side_effect=parameters_mock)
     @patch('check_elvis.Check.restart', side_effect=restart_mock)
@@ -206,9 +200,8 @@ class TestCheckSuccessfulOptions(TestCase):
         :return:
         """
         argv[1] = '-restart'
-        test_check = Check()
 
-        return self.assertTrue(test_check)
+        return self.assertRaises(RestartFailed, Check)
 
     def teardrown(self):
         pass

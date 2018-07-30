@@ -21,7 +21,8 @@ from os import listdir, remove
 from sys import argv
 from time import time
 
-from errors import FullPipelineFailed
+from errors import FullPipelineFailed, CleanFailed, SplitFailed
+from errors import SextractorFailed, ScampFailed, FiltFailed, RestartFailed
 from images_management_elvis import create_ccds
 from misc import setting_logger, extract_settings_elvis
 from misc import create_configurations, get_fpa_elvis
@@ -84,22 +85,22 @@ class Check:
                 raise FullPipelineFailed
         elif argv[1] == '-clean':
             if not self.clean():
-                raise Exception
+                raise CleanFailed
         elif argv[1] == '-split':
             if not self.split():
-                raise Exception
+                raise SplitFailed
         elif argv[1] == '-sextractor':
             if not self.sextractor():
-                raise Exception
+                raise SextractorFailed
         elif argv[1] == '-scamp':
             if not self.scamp():
-                raise Exception
+                raise ScampFailed
         elif argv[1] == '-filter':
             if not self.filt():
-                raise Exception
+                raise FiltFailed
         elif argv[1] == '-restart':
             if not self.restart():
-                raise Exception
+                raise RestartFailed
 
     def full_pipeline(self):
         """

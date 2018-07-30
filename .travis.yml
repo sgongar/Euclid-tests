@@ -15,10 +15,10 @@ install:
 script:
   - cd tests
   - trial test_checkOptions.py
-#   - nosetests --nocapture --with-coverage TestFailedOptions.py
+  # - trial test_failedOptions.py
   - coverage run test_checkOptions.py
 
 after_success:
   - coverage combine
-  - coverage report
+  - coverage report --omit '/home/travis/virtualenv/*'
   - coveralls

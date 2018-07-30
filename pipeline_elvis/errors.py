@@ -51,5 +51,41 @@ class FolderNotCreated(Exception):
 class FullPipelineFailed(Exception):
     """
     One of the following situations may raise this error:
-        1. Folder couldn't be created
+        1.
+    """
+
+class CleanFailed(Exception):
+    """
+    One of the following situations may raise this error:
+        1.
+    """
+
+class SplitFailed(Exception):
+    """
+    One of the following situations may raise this error:
+        1.
+    """
+
+class SextractorFailed(Exception):
+    """
+    One of the following situations may raise this error:
+        1.
+    """
+
+class ScampFailed(Exception):
+    """
+    One of the following situations may raise this error:
+        1.
+    """
+
+class FiltFailed(Exception):
+    """
+    One of the following situations may raise this error:
+        1.
+    """
+
+class RestartFailed(Exception):
+    """
+    One of the following situations may raise this error:
+        1.
     """
