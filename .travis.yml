@@ -17,3 +17,8 @@ script:
   - trial test_checkOptions.py
 #   - nosetests --nocapture --with-coverage TestFailedOptions.py
   - coverage run test_checkOptions.py
+
+after_success:
+  - coverage combine
+  - coverage report
+  - coveralls
