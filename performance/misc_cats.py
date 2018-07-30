@@ -55,7 +55,7 @@ def get_cat(ccd):
     for x_ in range(1, 7, 1):
         for y_ in range(1, 7, 1):
             for d_ in range(1, 5, 1):
-                cat_name = 'x{}_y{}'.format(x_, y_, d_)
+                cat_name = 'x{}_y{}'.format(x_, y_)
                 cats.append([cat_name, d_, idx])
 
                 idx += 1

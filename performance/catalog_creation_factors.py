@@ -13,17 +13,7 @@ Todo:
 *GNU Terry Pratchett*
 """
 
-from astropy.io import fits
-from astropy.table import Table
-from matplotlib import cm
-from matplotlib.backends.backend_pdf import PdfPages
-import matplotlib.image as mpimg
-import matplotlib.pyplot as plt
-from numpy import array, float64
 from pandas import concat, DataFrame, read_csv, Series
-from pyds9 import DS9
-import statsmodels.api as sm
-
 
 from misc import extract_settings_elvis, setting_logger
 

@@ -5,9 +5,6 @@ branches:
   only:
     - elvis_development
 install:
-  - pwd
-  # - sudo apt-get install -y python-numpy python-scipy python-matplotlib ipython ipython-notebook python-pandas python-sympy python-nose
-  # - sudo apt-get install python2-twisted
   - pip install coveralls
   - pip install coverage
   - pip install nose
@@ -15,8 +12,8 @@ install:
 script:
   - cd tests
   - trial test_checkOptions.py
-  # - trial test_failedOptions.py
-  - coverage run test_checkOptions.py
+  - trial test_failedOptions.py
+  - coverage run test_*.py
 
 after_success:
   - coverage combine

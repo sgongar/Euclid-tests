@@ -108,19 +108,19 @@ class Check:
         :return:
         """
         if not self.restart():
-            raise Exception
+            raise RestartFailed
         if not self.split():
-            raise Exception
+            raise SplitFailed
         if not change_times():
             raise Exception
         # if not self.clean():
         #     raise Exception
         if not self.sextractor():
-            raise Exception
+            raise SextractorFailed
         if not self.scamp():
-            raise Exception
+            raise ScampFailed
         if not self.filt():
-            raise Exception
+            raise FiltFailed
 
         return True
 
