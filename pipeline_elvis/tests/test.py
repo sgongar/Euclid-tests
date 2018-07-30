@@ -23,11 +23,12 @@ from mock import MagicMock, patch
 
 home = getenv("HOME")
 path.append('{}/build/sgongar/Euclid-tests/pipeline_elvis'.format(home))
-# path.append('/mnt/g/dev/Euclid-tests/pipeline')
+
+path.append('{}/Dev/Euclid-tests/pipeline_elvis'.format(home))
 
 from check_elvis import Check
 from errors import BadSettings
-import misc
+from misc import extract_settings_elvis
 
 
 __author__ = "Samuel Gongora-Garcia"
@@ -39,7 +40,7 @@ __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
 
 
-def extract_settings_mock():
+def extract_settings_elvis_mock():
     """
 
     :return:
@@ -55,11 +56,20 @@ def setting_logger_mock():
     return True
 
 
+def get_os_mock():
+    """
+
+    :return:
+    """
+    return True
+
+
 def full_pipeline_mock():
     """
 
     :return:
     """
+    return True
 
 
 class TestCheckOptions(TestCase):
@@ -68,19 +78,39 @@ class TestCheckOptions(TestCase):
     """
 
     def setup(self):
-        print "blabla"
+        pass
 
-    @patch('misc.extract_settings_elvis', side_effect=extract_settings_mock)
-    @patch('misc.setting_logger', side_effect=setting_logger_mock)
-    @patch('check_elvis.Check', side_effect=full_pipeline_mock)
-    def test_fulloptionchoosen(self, extract_settings, setting_logger,
-                               full_pipeline):
+    @patch('check_elvis.Check.parameters')
+    @patch('check_elvis.Check.full_pipeline')
+    def test_fulloptionchoosen(self, parameters, full_pipeline):
         """
 
+        :param parameters:
+        :param full_pipeline:
+        :return:
         """
+        parameters.return_value = True
+        full_pipeline.return_value = True
         argv[1] = '-full'
+        test_check = Check()
 
-        return self.assertTrue(Check)
+        return self.assertTrue(test_check)
+
+    @patch('check_elvis.Check.parameters')
+    @patch('check_elvis.Check.split')
+    def test_fulloptionchoosen(self, parameters, split):
+        """
+
+        :param parameters:
+        :param split:
+        :return:
+        """
+        parameters.return_value = True
+        split.return_value = True
+        argv[1] = '-split'
+        test_check = Check()
+
+        return self.assertTrue(test_check)
 
     def teardrown(self):
         pass

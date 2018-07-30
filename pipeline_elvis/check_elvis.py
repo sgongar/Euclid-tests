@@ -62,15 +62,21 @@ class Check:
         """
 
         """
-        self.prfs_d = extract_settings_elvis()
-        self.logger = setting_logger(self.prfs_d)
+        self.parameters()
+        self.options()
 
-        # Scamp configurations.
-        mode = {'type': 'scamp'}
-        self.scamp_confs, self.scamp_confs_n = create_configurations(mode)
-        # Sextractor configurations.
-        mode = {'type': 'sextractor'}
-        self.sex_confs, sex_confs_n = create_configurations(mode)
+    def parameters(self):
+        self.prfs_d = extract_settings_elvis()
+        # self.logger = setting_logger(self.prfs_d)
+        #
+        # # Scamp configurations.
+        # mode = {'type': 'scamp'}
+        # self.scamp_confs, self.scamp_confs_n = create_configurations(mode)
+        # # Sextractor configurations.
+        # mode = {'type': 'sextractor'}
+        # self.sex_confs, sex_confs_n = create_configurations(mode)
+
+    def options(self):
 
         if argv[1] == '-full':
             if not self.full_pipeline():
