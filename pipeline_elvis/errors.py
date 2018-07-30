@@ -89,3 +89,9 @@ class RestartFailed(Exception):
     One of the following situations may raise this error:
         1.
     """
+
+class ChangeTimeFailed(Exception):
+    """
+    One of the following situations may raise this error:
+        1.
+    """

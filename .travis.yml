@@ -13,6 +13,7 @@ script:
   - cd tests
   - trial test_checkOptions.py
   - trial test_failedOptions.py
+  - trial test_failedFullPipelineSteps.py
   - coverage run test_*.py
 
 after_success:

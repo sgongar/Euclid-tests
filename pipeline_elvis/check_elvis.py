@@ -23,6 +23,7 @@ from time import time
 
 from errors import FullPipelineFailed, CleanFailed, SplitFailed
 from errors import SextractorFailed, ScampFailed, FiltFailed, RestartFailed
+from errors import ChangeTimeFailed
 from images_management_elvis import create_ccds
 from misc import setting_logger, extract_settings_elvis
 from misc import create_configurations, get_fpa_elvis
@@ -30,7 +31,7 @@ from misc import create_sextractor_dict, create_scamp_dict
 from sextractor_aux_elvis import SextractorELViS
 from scamp_aux_elvis import ScampELViS
 from scamp_filter_elvis import ScampFilterELViS
-from times_elvis import change_times
+import times_elvis
 from cosmic_elvis import CosmicELViS
 
 __author__ = "Samuel Góngora García"
@@ -111,8 +112,8 @@ class Check:
             raise RestartFailed
         if not self.split():
             raise SplitFailed
-        if not change_times():
-            raise Exception
+        if not times_elvis.change_times():
+            raise ChangeTimeFailed
         # if not self.clean():
         #     raise Exception
         if not self.sextractor():

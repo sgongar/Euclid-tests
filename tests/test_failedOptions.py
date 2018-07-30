@@ -114,7 +114,7 @@ class TestCheckUnsuccessfulOptions(TestCase):
 
     @patch('check_elvis.Check.parameters', side_effect=parameters_mock)
     @patch('check_elvis.Check.full_pipeline', side_effect=full_pipeline_mock)
-    def test_full_option_chosen(self, parameters, full_pipeline):
+    def test_full_option_chosen(self, full_pipeline, parameters):
         """
 
         :param parameters:
@@ -127,7 +127,7 @@ class TestCheckUnsuccessfulOptions(TestCase):
 
     @patch('check_elvis.Check.parameters', side_effect=parameters_mock)
     @patch('check_elvis.Check.clean', side_effect=clean_mock)
-    def test_clean_option_chosen(self, parameters, clean):
+    def test_clean_option_chosen(self, clean, parameters):
         """
 
         :param parameters:
@@ -140,7 +140,7 @@ class TestCheckUnsuccessfulOptions(TestCase):
 
     @patch('check_elvis.Check.parameters', side_effect=parameters_mock)
     @patch('check_elvis.Check.split', side_effect=split_mock)
-    def test_split_option_chosen(self, parameters, split):
+    def test_split_option_chosen(self, split, parameters):
         """
 
         :param parameters:
@@ -153,7 +153,7 @@ class TestCheckUnsuccessfulOptions(TestCase):
 
     @patch('check_elvis.Check.parameters', side_effect=parameters_mock)
     @patch('check_elvis.Check.sextractor', side_effect=sextractor_mock)
-    def test_sextractor_option_chosen(self, parameters, sextractor):
+    def test_sextractor_option_chosen(self, sextractor, parameters):
         """
 
         :param parameters:
@@ -166,7 +166,7 @@ class TestCheckUnsuccessfulOptions(TestCase):
 
     @patch('check_elvis.Check.parameters', side_effect=parameters_mock)
     @patch('check_elvis.Check.scamp', side_effect=scamp_mock)
-    def test_scamp_option_chosen(self, parameters, scamp):
+    def test_scamp_option_chosen(self, scamp, parameters):
         """
 
         :param parameters:
@@ -179,7 +179,7 @@ class TestCheckUnsuccessfulOptions(TestCase):
 
     @patch('check_elvis.Check.parameters', side_effect=parameters_mock)
     @patch('check_elvis.Check.filt', side_effect=filt_mock)
-    def test_filter_option_chosen(self, parameters, filt):
+    def test_filter_option_chosen(self, filt, parameters):
         """
 
         :param parameters:
@@ -192,7 +192,7 @@ class TestCheckUnsuccessfulOptions(TestCase):
 
     @patch('check_elvis.Check.parameters', side_effect=parameters_mock)
     @patch('check_elvis.Check.restart', side_effect=restart_mock)
-    def test_scamp_option_chosen(self, parameters, restart):
+    def test_scamp_option_chosen(self, restart, parameters):
         """
 
         :param parameters:
