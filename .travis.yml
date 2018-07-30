@@ -9,5 +9,6 @@ install:
   # - sudo apt-get install -y python-numpy python-scipy python-matplotlib ipython ipython-notebook python-pandas python-sympy python-nose
   - pip install -r pipeline_elvis/requirements.txt
 script:
-  - cd pipeline_elvis/tests
-  - nosetests --nocapture test.py
+  - cd tests
+  - nosetests --nocapture --with-coverage TestCheckOptions.py
+#   - nosetests --nocapture --with-coverage TestFailedOptions.py

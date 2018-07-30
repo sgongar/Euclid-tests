@@ -39,16 +39,41 @@ __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
 
 
+def parameters_mock():
+    """
+
+    :return:
+    """
+    return True
+
+
+def full_pipeline_mock():
+    """
+
+    :return:
+    """
+    return True
+
+
+def clean_mock():
+    """
+
+    :return:
+    """
+    return True
+
+
 class TestCheckSuccessfulOptions(TestCase):
     """
 
     """
 
+
     def setup(self):
         pass
 
-    @patch('check_elvis.Check.parameters')
-    @patch('check_elvis.Check.full_pipeline')
+    @patch('check_elvis.Check.parameters', side_effect=parameters_mock)
+    @patch('check_elvis.Check.full_pipeline', side_effect=full_pipeline_mock)
     def test_full_option_chosen(self, parameters, full_pipeline):
         """
 
@@ -56,15 +81,15 @@ class TestCheckSuccessfulOptions(TestCase):
         :param full_pipeline:
         :return:
         """
-        parameters.return_value = True
-        full_pipeline.return_value = True
+        # parameters.return_value = True
+        # full_pipeline.return_value = False
         argv[1] = '-full'
         test_check = Check()
 
         return self.assertTrue(test_check)
 
-    @patch('check_elvis.Check.parameters')
-    @patch('check_elvis.Check.clean')
+    @patch('check_elvis.Check.parameters', side_effect=parameters_mock)
+    @patch('check_elvis.Check.clean', side_effect=clean_mock)
     def test_clean_option_chosen(self, parameters, clean):
         """
 
@@ -72,8 +97,8 @@ class TestCheckSuccessfulOptions(TestCase):
         :param clean:
         :return:
         """
-        parameters.return_value = True
-        clean.return_value = True
+        # parameters.return_value = True
+        # clean.return_value = True
         argv[1] = '-clean'
         test_check = Check()
 
@@ -161,48 +186,3 @@ class TestCheckSuccessfulOptions(TestCase):
 
     def teardrown(self):
         pass
-
-
-
-# class TestCheckUnsuccessfulOptions(TestCase):
-#     """
-#
-#     """
-#
-#     def setup(self):
-#         pass
-#
-#     @patch('check_elvis.Check.parameters')
-#     @patch('check_elvis.Check.full_pipeline')
-#     def test_fulloptionchoosen(self, parameters, full_pipeline):
-#         """
-#
-#         :param parameters:
-#         :param full_pipeline:
-#         :return:
-#         """
-#         parameters.return_value = True
-#         full_pipeline.return_value = False
-#         argv[1] = '-full'
-#         test_check = Check()
-#
-#         return self.ra(test_check)
-#
-#     @patch('check_elvis.Check.parameters')
-#     @patch('check_elvis.Check.split')
-#     def test_splitoptionchoosen(self, parameters, split):
-#         """
-#
-#         :param parameters:
-#         :param split:
-#         :return:
-#         """
-#         parameters.return_value = True
-#         split.return_value = True
-#         argv[1] = '-split'
-#         test_check = Check()
-#
-#         return self.assertTrue(test_check)
-#
-#     def teardrown(self):
-#         pass

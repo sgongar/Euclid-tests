@@ -21,6 +21,7 @@ from os import listdir, remove
 from sys import argv
 from time import time
 
+from errors import FullPipelineFailed
 from images_management_elvis import create_ccds
 from misc import setting_logger, extract_settings_elvis
 from misc import create_configurations, get_fpa_elvis
@@ -80,7 +81,7 @@ class Check:
 
         if argv[1] == '-full':
             if not self.full_pipeline():
-                raise Exception
+                raise FullPipelineFailed
         elif argv[1] == '-clean':
             if not self.clean():
                 raise Exception

@@ -43,7 +43,12 @@ class FilesNotPresent(Exception):
 
 
 class FolderNotCreated(Exception):
+    """
+    One of the following situations may raise this error:
+        1. Folder couldn't be created
+    """
 
+class FullPipelineFailed(Exception):
     """
     One of the following situations may raise this error:
         1. Folder couldn't be created
