@@ -26,7 +26,7 @@ from time import time
 
 from multiprocessing import Process
 
-from misc import extract_settings_elvis
+import misc
 
 
 __author__ = "Samuel Gongora-Garcia"
@@ -48,7 +48,7 @@ class SextractorELViS:
         """
         self.logger = logger
         self.analysis_d = analysis_d
-        self.prfs_d = extract_settings_elvis()
+        self.prfs_d = misc.extract_settings_elvis()
         self.sextractor_process()
 
     def sextractor_process(self):

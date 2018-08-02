@@ -17,7 +17,12 @@ script:
   - trial test_splitMethodCheckElvis.py
   - trial test_cleanMethodCheckElvis.py
   - trial test_sextractorMethodCheckElvis.py
-  - coverage run test_*.py
+  - coverage run test_checkOptions.py
+  - coverage run test_failedOptions.py
+  - coverage run test_failedFullPipelineSteps.py
+  - coverage run test_splitMethodCheckElvis.py
+  - coverage run test_cleanMethodCheckElvis.py
+  - coverage run test_sextractorMethodCheckElvis.py
 
 after_success:
   - coverage combine

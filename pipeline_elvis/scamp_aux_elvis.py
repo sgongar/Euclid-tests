@@ -13,7 +13,7 @@ Todo:
 """
 from subprocess import Popen
 
-from misc import extract_settings_elvis
+import misc
 
 __author__ = "Samuel Góngora García"
 __copyright__ = "Copyright 2018"
@@ -32,7 +32,7 @@ class ScampELViS:
         :param logger:
         :param scmp_d:
         """
-        self.prfs_d = extract_settings_elvis()
+        self.prfs_d = misc.extract_settings_elvis()
 
         self.logger = logger
         self.scmp_d = scmp_d

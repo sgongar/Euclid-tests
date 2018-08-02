@@ -29,7 +29,7 @@ import misc
 from misc import create_configurations
 from misc import create_sextractor_dict, create_scamp_dict
 import sextractor_aux_elvis
-from scamp_aux_elvis import ScampELViS
+import scamp_aux_elvis
 from scamp_filter_elvis import ScampFilterELViS
 import times_elvis
 import cosmic_elvis
@@ -208,8 +208,8 @@ class Check:
 
             scmp_d, scmp_cf = scamp_f_name(idx_scmp)
             for idx_sex, conf_sex in enumerate(confs_sex):
-                if not ScampELViS(self.logger, scmp_d):
-                    raise Exception  # todo improve Exception
+                if not scamp_aux_elvis.ScampELViS(self.logger, scmp_d):
+                    raise ScampFailed
 
             end_scamp_process = time()
 
