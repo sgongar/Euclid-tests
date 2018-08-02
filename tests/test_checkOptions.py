@@ -19,7 +19,7 @@ from sys import argv, modules, path
 from types import ModuleType
 
 from unittest import TestCase, main
-from mock import MagicMock, patch
+from mock import patch
 
 home = getenv("HOME")
 path.append('{}/build/sgongar/Euclid-tests/pipeline_elvis'.format(home))
@@ -27,7 +27,6 @@ path.append('{}/Dev/Euclid-tests/pipeline_elvis'.format(home))
 
 from check_elvis import Check
 from errors import BadSettings
-from misc import extract_settings_elvis
 
 
 __author__ = "Samuel Gongora-Garcia"
@@ -39,68 +38,21 @@ __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
 
 
-def parameters_mock():
-    """
+class MockedLogger:
+    def __init__(self, text):
+        """
 
-    :return:
-    """
-    return True
+        :param text:
+        """
+        pass
 
+    def info(self, text):
+        """
 
-def full_pipeline_mock():
-    """
-
-    :return:
-    """
-    return True
-
-
-def clean_mock():
-    """
-
-    :return:
-    """
-    return True
-
-
-def split_mock():
-    """
-
-    :return:
-    """
-    return True
-
-
-def sextractor_mock():
-    """
-
-    :return:
-    """
-    return True
-
-
-def scamp_mock():
-    """
-
-    :return:
-    """
-    return True
-
-
-def filt_mock():
-    """
-
-    :return:
-    """
-    return True
-
-
-def restart_mock():
-    """
-
-    :return:
-    """
-    return True
+        :param text:
+        :return:
+        """
+        pass
 
 
 class TestCheckSuccessfulOptions(TestCase):
@@ -108,107 +60,155 @@ class TestCheckSuccessfulOptions(TestCase):
 
     """
 
-
     def setup(self):
+        """
+
+        :return:
+        """
         pass
 
-    @patch('check_elvis.Check.parameters', side_effect=parameters_mock)
-    @patch('check_elvis.Check.full_pipeline', side_effect=full_pipeline_mock)
-    def test_full_option_chosen(self, full_pipeline, parameters):
+    @patch('misc.extract_settings_elvis')
+    @patch('misc.setting_logger')
+    @patch('check_elvis.Check.full_pipeline')
+    def test_full_option_chosen(self, full_pipeline, setting_logger,
+                                extract_settings_elvis):
         """
 
-        :param parameters:
         :param full_pipeline:
+        :param extract_settings_elvis:
         :return:
         """
+        full_pipeline.return_value = True
+        setting_logger.side_effect = MockedLogger
+        extract_settings_elvis.return_value = True
+
         argv[1] = '-full'
-        test_check = Check()
 
-        return self.assertTrue(test_check)
+        return self.assertTrue(Check())
 
-    @patch('check_elvis.Check.parameters', side_effect=parameters_mock)
-    @patch('check_elvis.Check.clean', side_effect=clean_mock)
-    def test_clean_option_chosen(self, clean, parameters):
+    @patch('misc.extract_settings_elvis')
+    @patch('misc.setting_logger')
+    @patch('check_elvis.Check.clean')
+    def test_clean_option_chosen(self, clean, setting_logger,
+                                 extract_settings_elvis):
         """
 
-        :param parameters:
         :param clean:
+        :param setting_logger:
+        :param extract_settings_elvis:
         :return:
         """
+        clean.return_value = True
+        setting_logger.side_effect = MockedLogger
+        extract_settings_elvis.return_value = True
+
         argv[1] = '-clean'
-        test_check = Check()
 
-        return self.assertTrue(test_check)
+        return self.assertTrue(Check())
 
-    @patch('check_elvis.Check.parameters', side_effect=parameters_mock)
-    @patch('check_elvis.Check.split', side_effect=split_mock)
-    def test_split_option_chosen(self, split, parameters):
+    @patch('misc.extract_settings_elvis')
+    @patch('misc.setting_logger')
+    @patch('check_elvis.Check.split')
+    def test_split_option_chosen(self, split, setting_logger,
+                                 extract_settings_elvis):
         """
 
-        :param parameters:
         :param split:
+        :param setting_logger:
+        :param extract_settings_elvis:
         :return:
         """
+        split.return_value = True
+        setting_logger.side_effect = MockedLogger
+        extract_settings_elvis.return_value = True
+
         argv[1] = '-split'
-        test_check = Check()
 
-        return self.assertTrue(test_check)
+        return self.assertTrue(Check())
 
-    @patch('check_elvis.Check.parameters', side_effect=parameters_mock)
-    @patch('check_elvis.Check.sextractor', side_effect=sextractor_mock)
-    def test_sextractor_option_chosen(self, sextractor, parameters):
+    @patch('misc.extract_settings_elvis')
+    @patch('misc.setting_logger')
+    @patch('check_elvis.Check.sextractor')
+    def test_sextractor_option_chosen(self, sextractor, setting_logger,
+                                      extract_settings_elvis):
         """
 
-        :param parameters:
         :param sextractor:
+        :param setting_logger:
+        :param extract_settings_elvis:
         :return:
         """
+        sextractor.return_value = True
+        setting_logger.side_effect = MockedLogger
+        extract_settings_elvis.return_value = True
+
         argv[1] = '-sextractor'
-        test_check = Check()
 
-        return self.assertTrue(test_check)
+        return self.assertTrue(Check())
 
-    @patch('check_elvis.Check.parameters', side_effect=parameters_mock)
-    @patch('check_elvis.Check.scamp', side_effect=scamp_mock)
-    def test_scamp_option_chosen(self, scamp, parameters):
+    @patch('misc.extract_settings_elvis')
+    @patch('misc.setting_logger')
+    @patch('check_elvis.Check.scamp')
+    def test_scamp_option_chosen(self, scamp, setting_logger,
+                                 extract_settings_elvis):
         """
 
-        :param parameters:
         :param scamp:
+        :param setting_logger:
+        :param extract_settings_elvis:
         :return:
         """
+        scamp.return_value = True
+        setting_logger.side_effect = MockedLogger
+        extract_settings_elvis.return_value = True
+
         argv[1] = '-scamp'
-        test_check = Check()
 
-        return self.assertTrue(test_check)
+        return self.assertTrue(Check())
 
-    @patch('check_elvis.Check.parameters', side_effect=parameters_mock)
-    @patch('check_elvis.Check.filt', side_effect=filt_mock)
-    def test_filter_option_chosen(self, filt, parameters):
+    @patch('misc.extract_settings_elvis')
+    @patch('misc.setting_logger')
+    @patch('check_elvis.Check.filt')
+    def test_filter_option_chosen(self, filt, setting_logger,
+                                  extract_settings_elvis):
         """
 
-        :param parameters:
         :param filt:
+        :param setting_logger:
+        :param extract_settings_elvis:
         :return:
         """
+        filt.return_value = True
+        setting_logger.side_effect = MockedLogger
+        extract_settings_elvis.return_value = True
+
         argv[1] = '-filter'
-        test_check = Check()
 
-        return self.assertTrue(test_check)
+        return self.assertTrue(Check())
 
-    @patch('check_elvis.Check.parameters', side_effect=parameters_mock)
-    @patch('check_elvis.Check.restart', side_effect=restart_mock)
-    def test_scamp_option_chosen(self, restart, parameters):
+    @patch('misc.extract_settings_elvis')
+    @patch('misc.setting_logger')
+    @patch('check_elvis.Check.restart')
+    def test_scamp_option_chosen(self, restart, setting_logger,
+                                 extract_settings_elvis):
         """
 
-        :param parameters:
         :param restart:
+        :param setting_logger:
+        :param extract_settings_elvis:
         :return:
         """
-        argv[1] = '-restart'
-        test_check = Check()
+        restart.return_value = True
+        setting_logger.side_effect = MockedLogger
+        extract_settings_elvis.return_value = True
 
-        return self.assertTrue(test_check)
+        argv[1] = '-restart'
+
+        return self.assertTrue(Check())
 
     def teardrown(self):
+        """
+
+        :return:
+        """
         pass

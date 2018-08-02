@@ -25,7 +25,7 @@ from errors import FullPipelineFailed, CleanFailed, SplitFailed
 from errors import SextractorFailed, ScampFailed, FiltFailed, RestartFailed
 from errors import ChangeTimeFailed
 from images_management_elvis import create_ccds
-from misc import setting_logger, extract_settings_elvis
+import misc
 from misc import create_configurations, get_fpa_elvis
 from misc import create_sextractor_dict, create_scamp_dict
 from sextractor_aux_elvis import SextractorELViS
@@ -65,21 +65,15 @@ class Check:
         """
 
         """
-        self.parameters()
-        self.options()
+        self.prfs_d = misc.extract_settings_elvis()
+        self.logger = misc.setting_logger(self.prfs_d)
 
-    def parameters(self):
-        self.prfs_d = extract_settings_elvis()
-        # self.logger = setting_logger(self.prfs_d)
-        #
-        # # Scamp configurations.
-        # mode = {'type': 'scamp'}
-        # self.scamp_confs, self.scamp_confs_n = create_configurations(mode)
-        # # Sextractor configurations.
-        # mode = {'type': 'sextractor'}
-        # self.sex_confs, sex_confs_n = create_configurations(mode)
-
-    def options(self):
+        # Scamp configurations.
+        mode = {'type': 'scamp'}
+        self.scamp_confs, self.scamp_confs_n = create_configurations(mode)
+        # Sextractor configurations.
+        mode = {'type': 'sextractor'}
+        self.sex_confs, sex_confs_n = create_configurations(mode)
 
         if argv[1] == '-full':
             if not self.full_pipeline():

@@ -29,7 +29,6 @@ from check_elvis import Check
 from errors import FullPipelineFailed, CleanFailed, SplitFailed
 from errors import SextractorFailed, ScampFailed, FiltFailed, RestartFailed
 from errors import ChangeTimeFailed
-from misc import extract_settings_elvis
 import times_elvis
 
 __author__ = "Samuel Gongora-Garcia"
@@ -41,84 +40,21 @@ __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
 
 
-def change_times_mock_false():
-    """
+class MockedLogger:
+    def __init__(self, text):
+        """
 
-    :return:
-    """
-    return False
+        :param text:
+        """
+        pass
 
+    def info(self, text):
+        """
 
-def parameters_mock():
-    """
-
-    :return:
-    """
-    return True
-
-
-def clean_mock():
-    """
-
-    :return:
-    """
-    return False
-
-
-def split_mock_true():
-    """
-
-    :return:
-    """
-    return True
-
-
-def split_mock_false():
-    """
-
-    :return:
-    """
-    return False
-
-
-def sextractor_mock():
-    """
-
-    :return:
-    """
-    return False
-
-
-def scamp_mock():
-    """
-
-    :return:
-    """
-    return False
-
-
-def filt_mock():
-    """
-
-    :return:
-    """
-    return False
-
-
-def restart_mock_true():
-    """
-
-    :return:
-    """
-    return True
-
-
-def restart_mock_false():
-    """
-
-    :return:
-    """
-    return False
+        :param text:
+        :return:
+        """
+        pass
 
 
 class TestFullPipelineUnsuccessfulSteps(TestCase):
@@ -129,125 +65,170 @@ class TestFullPipelineUnsuccessfulSteps(TestCase):
     def setup(self):
         pass
 
-    @patch('check_elvis.Check.parameters', side_effect=parameters_mock)
-    @patch('check_elvis.Check.restart', side_effect=restart_mock_false)
-    def test_restart_fails(self, restart, parameters):
+    @patch('misc.extract_settings_elvis')
+    @patch('misc.setting_logger')
+    @patch('check_elvis.Check.restart')
+    def test_restart_fails(self, restart, setting_logger,
+                           extract_settings_elvis):
         """
 
-        :param parameters:
         :param restart:
+        :param setting_logger:
+        :param extract_settings_elvis:
         :return:
         """
+        restart.return_value = False
+        setting_logger.side_effect = MockedLogger
+        extract_settings_elvis.return_value = True
+
         argv[1] = '-full'
 
         return self.assertRaises(RestartFailed, Check)
 
-    @patch('check_elvis.Check.parameters', side_effect=parameters_mock)
-    @patch('check_elvis.Check.restart', side_effect=restart_mock_true)
-    @patch('check_elvis.Check.split', side_effect=split_mock_false)
-    def test_split_fails(self, split, restart, parameters):
+    @patch('misc.extract_settings_elvis')
+    @patch('misc.setting_logger')
+    @patch('check_elvis.Check.restart')
+    @patch('check_elvis.Check.split')
+    def test_split_fails(self, split, restart, setting_logger,
+                         extract_settings_elvis):
         """
 
-        :param parameters:
         :param split:
+        :param restart:
+        :param setting_logger:
+        :param extract_settings_elvis:
         :return:
         """
+        split.return_value = False
+        restart.return_value = True
+        setting_logger.side_effect = MockedLogger
+        extract_settings_elvis.return_value = True
+
         argv[1] = '-full'
 
         return self.assertRaises(SplitFailed, Check)
 
-    @patch('check_elvis.Check.parameters', side_effect=parameters_mock)
-    @patch('check_elvis.Check.restart', side_effect=restart_mock_true)
-    @patch('check_elvis.Check.split', side_effect=split_mock_true)
-    @patch('times_elvis.change_times', side_effect=change_times_mock_false)
-    def test_change_times_fails(self, change_times, split, restart, parameters):
+    @patch('misc.extract_settings_elvis')
+    @patch('misc.setting_logger')
+    @patch('check_elvis.Check.restart')
+    @patch('check_elvis.Check.split')
+    @patch('times_elvis.change_times')
+    def test_change_times_fails(self, change_times, split, restart,
+                                setting_logger, extract_settings_elvis):
         """
 
-        :param parameters:
+        :param change_times:
         :param split:
+        :param restart:
+        :param setting_logger:
+        :param extract_settings_elvis:
         :return:
         """
+        change_times.return_value = False
+        split.return_value = True
+        restart.return_value = True
+        setting_logger.side_effect = MockedLogger
+        extract_settings_elvis.return_value = True
+
         argv[1] = '-full'
 
         return self.assertRaises(ChangeTimeFailed, Check)
 
-    # @patch('check_elvis.Check.parameters', side_effect=parameters_mock)
-    # @patch('check_elvis.Check.clean', side_effect=clean_mock)
-    # def test_clean_option_chosen(self, parameters, clean):
-    #     """
-    #
-    #     :param parameters:
-    #     :param clean:
-    #     :return:
-    #     """
-    #     argv[1] = '-full'
-    #
-    #     return self.assertRaises(CleanFailed, Check)
-    #
-    # @patch('check_elvis.Check.parameters', side_effect=parameters_mock)
-    # @patch('check_elvis.Check.split', side_effect=split_mock)
-    # def test_split_option_chosen(self, parameters, split):
-    #     """
-    #
-    #     :param parameters:
-    #     :param split:
-    #     :return:
-    #     """
-    #     argv[1] = '-split'
-    #
-    #     return self.assertRaises(SplitFailed, Check)
-    #
-    # @patch('check_elvis.Check.parameters', side_effect=parameters_mock)
-    # @patch('check_elvis.Check.sextractor', side_effect=sextractor_mock)
-    # def test_sextractor_option_chosen(self, parameters, sextractor):
-    #     """
-    #
-    #     :param parameters:
-    #     :param sextractor:
-    #     :return:
-    #     """
-    #     argv[1] = '-sextractor'
-    #
-    #     return self.assertRaises(SextractorFailed, Check)
-    #
-    # @patch('check_elvis.Check.parameters', side_effect=parameters_mock)
-    # @patch('check_elvis.Check.scamp', side_effect=scamp_mock)
-    # def test_scamp_option_chosen(self, parameters, scamp):
-    #     """
-    #
-    #     :param parameters:
-    #     :param scamp:
-    #     :return:
-    #     """
-    #     argv[1] = '-scamp'
-    #
-    #     return self.assertRaises(ScampFailed, Check)
-    #
-    # @patch('check_elvis.Check.parameters', side_effect=parameters_mock)
-    # @patch('check_elvis.Check.filt', side_effect=filt_mock)
-    # def test_filter_option_chosen(self, parameters, filt):
-    #     """
-    #
-    #     :param parameters:
-    #     :param filt:
-    #     :return:
-    #     """
-    #     argv[1] = '-filter'
-    #
-    #     return self.assertRaises(FiltFailed, Check)
-    #
-    # @patch('check_elvis.Check.parameters', side_effect=parameters_mock)
-    # @patch('check_elvis.Check.restart', side_effect=restart_mock)
-    # def test_scamp_option_chosen(self, parameters, restart):
-    #     """
-    #
-    #     :param parameters:
-    #     :param restart:
-    #     :return:
-    #     """
-    #     argv[1] = '-full'
-    #
-    #     return self.assertRaises(RestartFailed, Check)
-    #
-    # def teardrown(self):
-    #     pass
+    @patch('misc.extract_settings_elvis')
+    @patch('misc.setting_logger')
+    @patch('check_elvis.Check.restart')
+    @patch('check_elvis.Check.split')
+    @patch('times_elvis.change_times')
+    @patch('check_elvis.Check.sextractor')
+    def test_sextractor_fails(self, sextractor, change_times, split, restart,
+                              setting_logger, extract_settings_elvis):
+        """
+
+        :param sextractor:
+        :param change_times:
+        :param split:
+        :param restart:
+        :param setting_logger:
+        :param extract_settings_elvis:
+        :return:
+        """
+        sextractor.return_value = False
+        change_times.return_value = True
+        split.return_value = True
+        restart.return_value = True
+        setting_logger.side_effect = MockedLogger
+        extract_settings_elvis.return_value = True
+
+        argv[1] = '-sextractor'
+
+        return self.assertRaises(SextractorFailed, Check)
+
+    @patch('misc.extract_settings_elvis')
+    @patch('misc.setting_logger')
+    @patch('check_elvis.Check.restart')
+    @patch('check_elvis.Check.split')
+    @patch('times_elvis.change_times')
+    @patch('check_elvis.Check.sextractor')
+    @patch('check_elvis.Check.scamp')
+    def test_scamp_fails(self, scamp, sextractor, change_times, split,
+                         restart, setting_logger, extract_settings_elvis):
+        """
+
+        :param scamp:
+        :param sextractor:
+        :param change_times:
+        :param split:
+        :param restart:
+        :param setting_logger:
+        :param extract_settings_elvis:
+        :return:
+        """
+        scamp.return_value = False
+        sextractor.return_value = True
+        change_times.return_value = True
+        split.return_value = True
+        restart.return_value = True
+        setting_logger.side_effect = MockedLogger
+        extract_settings_elvis.return_value = True
+
+        argv[1] = '-scamp'
+
+        return self.assertRaises(ScampFailed, Check)
+
+    @patch('misc.extract_settings_elvis')
+    @patch('misc.setting_logger')
+    @patch('check_elvis.Check.restart')
+    @patch('check_elvis.Check.split')
+    @patch('times_elvis.change_times')
+    @patch('check_elvis.Check.sextractor')
+    @patch('check_elvis.Check.scamp')
+    @patch('check_elvis.Check.filt')
+    def test_filter_fails(self, filt, scamp, sextractor, change_times, split,
+                          restart, setting_logger, extract_settings_elvis):
+        """
+
+        :param filt:
+        :param scamp:
+        :param sextractor:
+        :param change_times:
+        :param split:
+        :param restart:
+        :param setting_logger:
+        :param extract_settings_elvis:
+        :return:
+        """
+        filt.return_value = False
+        scamp.return_value = True
+        sextractor.return_value = True
+        change_times.return_value = True
+        split.return_value = True
+        restart.return_value = True
+        setting_logger.side_effect = MockedLogger
+        extract_settings_elvis.return_value = True
+
+        argv[1] = '-filter'
+
+        return self.assertRaises(FiltFailed, Check)
+
+    def teardrown(self):
+        pass
