@@ -16,7 +16,7 @@ Todo:
 
 """
 from itertools import product
-from multiprocessing import Process
+import multiprocessing
 from os import listdir, remove
 from sys import argv
 from time import time
@@ -26,7 +26,7 @@ from errors import SextractorFailed, ScampFailed, FiltFailed, RestartFailed
 from errors import ChangeTimeFailed
 from images_management_elvis import create_ccds
 import misc
-from misc import create_configurations, get_fpa_elvis
+from misc import create_configurations
 from misc import create_sextractor_dict, create_scamp_dict
 from sextractor_aux_elvis import SextractorELViS
 from scamp_aux_elvis import ScampELViS
@@ -126,21 +126,24 @@ class Check:
         """
         self.logger.info('Creates CCD images from original quadrants')
         start_split = time()
+        print(start_split)
 
-        fpa_list = get_fpa_elvis()
+        fpa_list = misc.get_fpa_elvis()
         active_quadrant = []
         quadrants_j = []
         # Launch processes
         for proc in range(0, len(fpa_list), 1):
-            quadrant_p = Process(target=create_ccds,
-                                 args=(self.logger, proc,
-                                       self.prfs_d['fits_dir'],
-                                       self.prfs_d['fpas_dir'],
-                                       fpa_list[proc],))
+            print(proc)
+            quadrant_p = multiprocessing.Process(target=create_ccds,
+                                                 args=(self.logger, proc,
+                                                       self.prfs_d['fits_dir'],
+                                                       self.prfs_d['fpas_dir'],
+                                                       fpa_list[proc],))
+            print(quadrant_p)
             quadrants_j.append(quadrant_p)
             quadrant_p.start()
 
-            active_quadrant = list([job.is_alive() for job in quadrants_j])
+        active_quadrant = list([job.is_alive() for job in quadrants_j])
         while True in active_quadrant:
             active_quadrant = list([job.is_alive() for job in quadrants_j])
             pass
@@ -238,8 +241,9 @@ class Check:
 
                 scmp_cf = '{}_{}_{}_{}'.format(conf_[1][0], conf_[1][1],
                                                conf_[1][2], conf_[1][3])
-                filt_p = Process(target=ScampFilterELViS,
-                                 args=(self.logger, scmp_cf, sex_d,))
+                filt_p = multiprocessing.Process(target=ScampFilterELViS,
+                                                 args=(self.logger, scmp_cf,
+                                                       sex_d,))
                 filt_j.append(filt_p)
                 filt_p.start()
 
