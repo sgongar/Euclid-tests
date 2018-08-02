@@ -16,9 +16,9 @@ script:
   - trial test_splitMethodCheckElvis.py
   - trial test_cleanMethodCheckElvis.py
   - trial test_sextractorMethodCheckElvis.py
-  - ls
+  - ls -a
   - coverage run test_*.py
-  - ls
+  - ls -a
 
 after_success:
   - coverage combine
