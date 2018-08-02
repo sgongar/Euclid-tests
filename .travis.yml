@@ -10,7 +10,7 @@ install:
   - pip install -r pipeline_elvis/requirements.txt
 script:
   - cd tests
-  - trial test_checkOptions.py
+#   - trial test_checkOptions.py
   - trial test_failedOptions.py
   - trial test_failedFullPipelineSteps.py
   - trial test_splitMethodCheckElvis.py
@@ -24,6 +24,5 @@ script:
   - coverage run -a test_sextractorMethodCheckElvis.py
 
 after_success:
-#  - coverage combine
   - coverage report -i --omit '/home/travis/virtualenv/*'
   - coveralls --rcfile='/home/travis/build/sgongar/Euclid-tests/.coveragerc'
