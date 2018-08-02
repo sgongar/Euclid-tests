@@ -10,15 +10,17 @@ install:
   - pip install -r pipeline_elvis/requirements.txt
 script:
   - cd tests
-  - trial test_checkOptions.py
-  - trial test_failedOptions.py
-  - trial test_failedFullPipelineSteps.py
-  - trial test_splitMethodCheckElvis.py
-  - trial test_cleanMethodCheckElvis.py
-  - trial test_sextractorMethodCheckElvis.py
-  - ls -a
-  - coverage run -p test_*.py
-  - ls -a
+#  - trial test_checkOptions.py
+#  - trial test_failedOptions.py
+#  - trial test_failedFullPipelineSteps.py
+#  - trial test_splitMethodCheckElvis.py
+#  - trial test_cleanMethodCheckElvis.py
+#  - trial test_sextractorMethodCheckElvis.py
+#  - ls -a
+#  - coverage run -p test_*.py
+#  - ls -a
+
+  - coverage run test_failedOptions.py
 
 after_success:
   - coverage combine
