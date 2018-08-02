@@ -17,7 +17,7 @@ script:
   - trial test_cleanMethodCheckElvis.py
   - trial test_sextractorMethodCheckElvis.py
   - ls -a
-  - coverage run test_*.py
+  - coverage run -p test_*.py
   - ls -a
 
 after_success:
