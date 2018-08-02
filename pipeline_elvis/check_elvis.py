@@ -32,7 +32,7 @@ from sextractor_aux_elvis import SextractorELViS
 from scamp_aux_elvis import ScampELViS
 from scamp_filter_elvis import ScampFilterELViS
 import times_elvis
-from cosmic_elvis import CosmicELViS
+import cosmic_elvis
 
 __author__ = "Samuel Góngora García"
 __copyright__ = "Copyright 2018"
@@ -126,20 +126,16 @@ class Check:
         """
         self.logger.info('Creates CCD images from original quadrants')
         start_split = time()
-        print(start_split)
 
         fpa_list = misc.get_fpa_elvis()
-        active_quadrant = []
         quadrants_j = []
         # Launch processes
         for proc in range(0, len(fpa_list), 1):
-            print(proc)
             quadrant_p = multiprocessing.Process(target=create_ccds,
                                                  args=(self.logger, proc,
                                                        self.prfs_d['fits_dir'],
                                                        self.prfs_d['fpas_dir'],
                                                        fpa_list[proc],))
-            print(quadrant_p)
             quadrants_j.append(quadrant_p)
             quadrant_p.start()
 
@@ -162,7 +158,8 @@ class Check:
         self.logger.info('Cleans CCDs images from cosmic rays')
         start_clean = time()
 
-        CosmicELViS(self.logger)
+        if not cosmic_elvis.CosmicELViS(self.logger):
+            raise CleanFailed
 
         end_clean = time()
 
