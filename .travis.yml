@@ -25,5 +25,5 @@ script:
 
 after_success:
 #  - coverage combine
-#  - coverage report --omit '/home/travis/virtualenv/*'
+  - coverage report -i --omit '/home/travis/virtualenv/*'
   - coveralls --rcfile='/home/travis/build/sgongar/Euclid-tests/.coveragerc'
