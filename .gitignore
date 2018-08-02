@@ -27,6 +27,9 @@ pipeline/*.pdf
 pipeline/report*.pdf
 pipeline/reports/*
 
+### Trial tests ###
+tests/_trial_temp/*
+
 ### Catalogs ###
 pipeline/*.csv
 

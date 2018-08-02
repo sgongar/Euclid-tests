@@ -28,7 +28,7 @@ from images_management_elvis import create_ccds
 import misc
 from misc import create_configurations
 from misc import create_sextractor_dict, create_scamp_dict
-from sextractor_aux_elvis import SextractorELViS
+import sextractor_aux_elvis
 from scamp_aux_elvis import ScampELViS
 from scamp_filter_elvis import ScampFilterELViS
 import times_elvis
@@ -182,7 +182,9 @@ class Check:
             if len_dicts != total_confs:
                 raise Exception
             # todo - implement a return!
-            SextractorELViS(self.logger, analysis_d)
+            if not sextractor_aux_elvis.SextractorELViS(self.logger,
+                                                        analysis_d):
+                raise SextractorFailed
 
             self.logger.debug('Performs an analysis over a bunch of files')
 

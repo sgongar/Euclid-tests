@@ -16,6 +16,7 @@ script:
   - trial test_failedFullPipelineSteps.py
   - trial test_splitMethodCheckElvis.py
   - trial test_cleanMethodCheckElvis.py
+  - trial test_sextractorMethodCheckElvis.py
   - coverage run test_*.py
 
 after_success:
