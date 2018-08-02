@@ -16,9 +16,11 @@ script:
   - trial test_splitMethodCheckElvis.py
   - trial test_cleanMethodCheckElvis.py
   - trial test_sextractorMethodCheckElvis.py
+  - ls
   - coverage run test_*.py
+  - ls
 
 after_success:
   - coverage combine
   - coverage report --omit '/home/travis/virtualenv/*'
-  - coveralls --rcfile='/home/travis/build/sgongar/Euclid-tests/pipeline_elvis/.coveragerc'
+  - coveralls --rcfile='/home/travis/build/sgongar/Euclid-tests/.coveragerc'
