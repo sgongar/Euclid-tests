@@ -109,9 +109,9 @@ class TestSplitMethodFromCheckElvis(TestCase):
         extract_settings_elvis.return_value = {'fits_dir': 'fits_dir_mock',
                                                'fpas_dir': 'fpas_dir_mock'}
 
-        argv[1] = '-split'
+        # argv[1] = '-split'
 
-        self.assertTrue(Check)
+        self.assertTrue(Check().split())
 
     def teardrown(self):
         """
