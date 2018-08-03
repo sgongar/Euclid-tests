@@ -19,7 +19,7 @@ from sys import argv, modules, path
 from types import ModuleType
 
 from unittest import TestCase, main
-from mock import patch
+from mock import MagicMock, Mock, patch
 
 home = getenv("HOME")
 path.append('{}/build/sgongar/Euclid-tests/pipeline_elvis'.format(home))
@@ -65,19 +65,17 @@ class TestInitMethodFromCheckElvis(TestCase):
 
         :return:
         """
-        pass
+        misc = Mock()
+        misc.extract_settings_elvis = MagicMock(return_value=True)
 
-    @patch('misc.extract_settings_elvis')
     @patch('misc.setting_logger')
-    def test_create_configurations_return(self, setting_logger,
-                                          extract_settings_elvis):
+    def test_create_configurations_return(self, setting_logger):
         """
 
         :param extract_settings_elvis:
         :return:
         """
         setting_logger.side_effect = MockedLogger
-        extract_settings_elvis.return_value = True
 
         print(len(Check().scamp_confs))
 

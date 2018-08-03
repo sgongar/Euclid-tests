@@ -1139,3 +1139,6 @@ def check_source_elvis(o_df, o_alpha, o_delta):
     o_df = o_df[o_delta > o_df['DELTA_J2000'] - prfs_d['tolerance']]
 
     return o_df
+
+def fun(x):
+    return x + 1
