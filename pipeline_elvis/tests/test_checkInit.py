@@ -14,16 +14,15 @@ Todo:
 
 """
 
-from os import getenv
-from sys import argv, modules, path
+from os import getenv, path
+import sys
+from sys import argv, modules
 from types import ModuleType
 
 from unittest import TestCase, main
 from mock import MagicMock, Mock, patch
 
-home = getenv("HOME")
-path.append('{}/build/sgongar/Euclid-tests/pipeline_elvis'.format(home))
-path.append('{}/Dev/Euclid-tests/pipeline_elvis'.format(home))
+sys.path.append(path.abspath(path.join(path.dirname(__file__), "..")))
 
 from check_elvis import Check
 from errors import BadSettings
@@ -61,7 +60,7 @@ class TestInitMethodFromCheckElvis(TestCase):
 
     """
 
-    def setup(self):
+    def setUp(self):
         """
 
         :return:
@@ -201,9 +200,12 @@ class TestInitMethodFromCheckElvis(TestCase):
     #
     #     return self.assertTrue(Check())
 
-    def teardrown(self):
+    def tearDown(self):
         """
 
         :return:
         """
         pass
+
+if __name__ == '__main__':
+    main()

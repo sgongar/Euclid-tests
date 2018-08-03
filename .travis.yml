@@ -9,7 +9,7 @@ install:
   - pip install coverage
   - pip install -r pipeline_elvis/requirements.txt
 script:
-  - cd tests
+  - cd pipeline_elvis/tests
 #  - trial test_checkOptions.py
  - trial test_checkInit.py
 #  - trial test_failedOptions.py
