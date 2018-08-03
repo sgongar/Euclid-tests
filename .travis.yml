@@ -10,7 +10,7 @@ install:
   - pip install -r pipeline_elvis/requirements.txt
 script:
   - cd pipeline_elvis/tests
-  - nosetests test_checkOptions.py
+#  - nosetests test_checkOptions.py
   - nosetests test_checkInit.py
 #  - nosetests test_failedOptions.py
 #  - nosetests test_failedFullPipelineSteps.py

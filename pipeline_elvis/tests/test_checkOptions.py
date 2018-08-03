@@ -79,10 +79,9 @@ class TestCheckSuccessfulOptions(TestCase):
         setting_logger.side_effect = MockedLogger
         extract_settings_elvis.return_value = True
 
-        argv[1] = '-full'
+        sys.argv[1] = '-full'
 
         test_check = Check()
-        print(test_check.scamp_confs)
 
         return self.assertTrue(Check())
 
@@ -102,7 +101,7 @@ class TestCheckSuccessfulOptions(TestCase):
         setting_logger.side_effect = MockedLogger
         extract_settings_elvis.return_value = True
 
-        argv[1] = '-clean'
+        sys.argv[1] = '-clean'
 
         return self.assertTrue(Check())
 
@@ -122,7 +121,7 @@ class TestCheckSuccessfulOptions(TestCase):
         setting_logger.side_effect = MockedLogger
         extract_settings_elvis.return_value = True
 
-        argv[1] = '-split'
+        sys.argv[1] = '-split'
 
         return self.assertTrue(Check())
 
@@ -142,7 +141,7 @@ class TestCheckSuccessfulOptions(TestCase):
         setting_logger.side_effect = MockedLogger
         extract_settings_elvis.return_value = True
 
-        argv[1] = '-sextractor'
+        sys.argv[1] = '-sextractor'
 
         return self.assertTrue(Check())
 
@@ -162,7 +161,7 @@ class TestCheckSuccessfulOptions(TestCase):
         setting_logger.side_effect = MockedLogger
         extract_settings_elvis.return_value = True
 
-        argv[1] = '-scamp'
+        sys.argv[1] = '-scamp'
 
         return self.assertTrue(Check())
 
@@ -182,7 +181,7 @@ class TestCheckSuccessfulOptions(TestCase):
         setting_logger.side_effect = MockedLogger
         extract_settings_elvis.return_value = True
 
-        argv[1] = '-filter'
+        sys.argv[1] = '-filter'
 
         return self.assertTrue(Check())
 
@@ -202,7 +201,7 @@ class TestCheckSuccessfulOptions(TestCase):
         setting_logger.side_effect = MockedLogger
         extract_settings_elvis.return_value = True
 
-        argv[1] = '-restart'
+        sys.argv[1] = '-restart'
 
         return self.assertTrue(Check())
 
@@ -212,6 +211,7 @@ class TestCheckSuccessfulOptions(TestCase):
         :return:
         """
         pass
+
 
 if __name__ == '__main__':
     main()

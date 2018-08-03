@@ -65,7 +65,7 @@ class TestInitMethodFromCheckElvis(TestCase):
         """
         pass
 
-    def test_create_configurations_return(self):
+    def test_create_configurations_scamp_return(self):
         """
 
         :param extract_settings_elvis:
@@ -77,6 +77,17 @@ class TestInitMethodFromCheckElvis(TestCase):
                self.assertEqual(len(misc.create_configurations(mode)[0]), 1) and \
                self.assertEqual(len(misc.create_configurations(mode)[0]), 4)
 
+    def test_create_configurations_sextractor_return(self):
+        """
+
+        :param extract_settings_elvis:
+        :return:
+        """
+        mode = {'type': 'sextractor'}
+
+        return self.assertIsInstance(misc.create_configurations(mode)[0], list) and \
+               self.assertEqual(len(misc.create_configurations(mode)[0]), 1) and \
+               self.assertEqual(len(misc.create_configurations(mode)[0]), 5)
 
     # @patch('misc.extract_settings_elvis')
     # @patch('misc.setting_logger')
