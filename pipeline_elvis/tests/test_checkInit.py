@@ -14,15 +14,13 @@ Todo:
 
 """
 
-from os import getenv, path
+import os
 import sys
-from sys import argv, modules
-from types import ModuleType
 
 from unittest import TestCase, main
 from mock import MagicMock, Mock, patch
 
-sys.path.append(path.abspath(path.join(path.dirname(__file__), "..")))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from check_elvis import Check
 from errors import BadSettings

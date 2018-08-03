@@ -14,16 +14,13 @@ Todo:
 
 """
 
-from os import getenv
-from sys import argv, modules, path
-from types import ModuleType
+import os
+import sys
 
 from unittest import TestCase, main
 from mock import patch
 
-home = getenv("HOME")
-path.append('{}/build/sgongar/Euclid-tests/pipeline_elvis'.format(home))
-path.append('{}/Dev/Euclid-tests/pipeline_elvis'.format(home))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from check_elvis import Check
 from errors import BadSettings
@@ -60,7 +57,7 @@ class TestCheckSuccessfulOptions(TestCase):
 
     """
 
-    def setup(self):
+    def setUp(self):
         """
 
         :return:
@@ -209,9 +206,12 @@ class TestCheckSuccessfulOptions(TestCase):
 
         return self.assertTrue(Check())
 
-    def teardrown(self):
+    def tearDown(self):
         """
 
         :return:
         """
         pass
+
+if __name__ == '__main__':
+    main()
