@@ -25,7 +25,7 @@ script:
 #  - coverage run -a test_splitMethodCheckElvis.py
 #  - coverage run -a test_cleanMethodCheckElvis.py
 #  - coverage run -a test_sextractorMethodCheckElvis.py
-  - coverage run -a test_simple.py
+  - coverage run test_simple.py
 after_success:
   - coverage report -m -i --omit '/home/travis/virtualenv/*'
   - coveralls --rcfile='/home/travis/build/sgongar/Euclid-tests/.coveragerc'
