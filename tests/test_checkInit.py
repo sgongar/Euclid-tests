@@ -27,6 +27,7 @@ path.append('{}/Dev/Euclid-tests/pipeline_elvis'.format(home))
 
 from check_elvis import Check
 from errors import BadSettings
+import misc
 
 
 __author__ = "Samuel Gongora-Garcia"
@@ -65,23 +66,19 @@ class TestInitMethodFromCheckElvis(TestCase):
 
         :return:
         """
-        misc = Mock()
-        misc.extract_settings_elvis = MagicMock(return_value=True)
+        pass
 
-    @patch('misc.setting_logger')
-    def test_create_configurations_return(self, setting_logger):
+    def test_create_configurations_return(self):
         """
 
         :param extract_settings_elvis:
         :return:
         """
-        setting_logger.side_effect = MockedLogger
+        mode = {'type': 'scamp'}
 
-        print(len(Check().scamp_confs))
-
-        return self.assertIsInstance(Check().scamp_confs, list) and \
-               self.assertEqual(len(Check().scamp_confs_n), 1) and \
-               self.assertEqual(len(Check().scamp_confs_n[0]), 4)
+        return self.assertIsInstance(misc.create_configurations(mode)[0], list) and \
+               self.assertEqual(len(misc.create_configurations(mode)[0]), 1) and \
+               self.assertEqual(len(misc.create_configurations(mode)[0]), 4)
 
 
     # @patch('misc.extract_settings_elvis')
