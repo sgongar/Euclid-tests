@@ -84,6 +84,9 @@ class TestCheckSuccessfulOptions(TestCase):
 
         argv[1] = '-full'
 
+        test_check = Check()
+        print(test_check.scamp_confs)
+
         return self.assertTrue(Check())
 
     @patch('misc.extract_settings_elvis')
