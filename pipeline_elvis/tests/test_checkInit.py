@@ -68,7 +68,6 @@ class TestInitMethodFromCheckElvis(TestCase):
     def test_create_configurations_scamp_return(self):
         """
 
-        :param extract_settings_elvis:
         :return:
         """
         mode = {'type': 'scamp'}
@@ -80,7 +79,6 @@ class TestInitMethodFromCheckElvis(TestCase):
     def test_create_configurations_sextractor_return(self):
         """
 
-        :param extract_settings_elvis:
         :return:
         """
         mode = {'type': 'sextractor'}

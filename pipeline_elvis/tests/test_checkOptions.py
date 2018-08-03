@@ -81,8 +81,6 @@ class TestCheckSuccessfulOptions(TestCase):
 
         sys.argv[1] = '-full'
 
-        test_check = Check()
-
         return self.assertTrue(Check())
 
     @patch('misc.extract_settings_elvis')
