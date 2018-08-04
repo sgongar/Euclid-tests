@@ -20,7 +20,7 @@ import sys
 from unittest import TestCase, main
 from mock import MagicMock, patch
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import check_elvis
 from errors import BadSettings
@@ -76,31 +76,22 @@ class TestCheckSuccessfulOptions(TestCase):
         check_elvis.Check.full_pipeline = MagicMock(return_value=True)
         misc.setting_logger = MagicMock(side_effect=MockedLogger)
 
-        print(sys.argv)
         sys.argv.append('-full')
-        print(sys.argv)
 
         return self.assertTrue(check_elvis.Check())
 
-    # @patch('misc.extract_settings_elvis')
-    # @patch('misc.setting_logger')
-    # @patch('check_elvis.Check.clean')
-    # def test_clean_option_chosen(self, clean, setting_logger,
-    #                              extract_settings_elvis):
-    #     """
-    #
-    #     :param clean:
-    #     :param setting_logger:
-    #     :param extract_settings_elvis:
-    #     :return:
-    #     """
-    #     clean.return_value = True
-    #     setting_logger.side_effect = MockedLogger
-    #     extract_settings_elvis.return_value = True
-    #
-    #     sys.argv[1] = '-clean'
-    #
-    #     return self.assertTrue(Check())
+    def test_clean_option_chosen(self):
+        """
+
+        :return:
+        """
+        misc.extract_settings_elvis = MagicMock(return_value=True)
+        check_elvis.Check.clean = MagicMock(return_value=True)
+        misc.setting_logger = MagicMock(side_effect=MockedLogger)
+
+        sys.argv.append('-clean')
+
+        return self.assertTrue(check_elvis.Check())
     #
     # @patch('misc.extract_settings_elvis')
     # @patch('misc.setting_logger')

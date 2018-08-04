@@ -79,6 +79,7 @@ class TestSplitMethodFromCheckElvis(TestCase):
     """
 
     """
+
     def setUp(self):
         """
 
@@ -114,6 +115,7 @@ class TestSplitMethodFromCheckElvis(TestCase):
         :return:
         """
         pass
+
 
 if __name__ == '__main__':
     main()
