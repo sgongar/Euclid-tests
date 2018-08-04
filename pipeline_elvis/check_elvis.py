@@ -18,7 +18,7 @@ Todo:
 from itertools import product
 import multiprocessing
 from os import listdir, remove
-from sys import argv
+import sys
 from time import time
 
 from errors import FullPipelineFailed, CleanFailed, SplitFailed
@@ -75,25 +75,27 @@ class Check:
         mode = {'type': 'sextractor'}
         self.sex_confs, sex_confs_n = create_configurations(mode)
 
-        if argv[1] == '-full':
+        print('test {}'.format(sys.argv))
+
+        if sys.argv[1] == '-full':
             if not self.full_pipeline():
                 raise FullPipelineFailed
-        elif argv[1] == '-clean':
+        elif sys.argv[1] == '-clean':
             if not self.clean():
                 raise CleanFailed
-        elif argv[1] == '-split':
+        elif sys.argv[1] == '-split':
             if not self.split():
                 raise SplitFailed
-        elif argv[1] == '-sextractor':
+        elif sys.argv[1] == '-sextractor':
             if not self.sextractor():
                 raise SextractorFailed
-        elif argv[1] == '-scamp':
+        elif sys.argv[1] == '-scamp':
             if not self.scamp():
                 raise ScampFailed
-        elif argv[1] == '-filter':
+        elif sys.argv[1] == '-filter':
             if not self.filt():
                 raise FiltFailed
-        elif argv[1] == '-restart':
+        elif sys.argv[1] == '-restart':
             if not self.restart():
                 raise RestartFailed
 
