@@ -77,7 +77,8 @@ class TestCheckSuccessfulOptions(TestCase):
         misc.setting_logger = MagicMock(side_effect=MockedLogger)
 
         print(sys.argv)
-        sys.argv[1] = '-full'
+        sys.argv.append('-full')
+        print(sys.argv)
 
         return self.assertTrue(check_elvis.Check())
 
