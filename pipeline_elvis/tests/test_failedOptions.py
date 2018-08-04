@@ -76,9 +76,7 @@ class TestCheckUnsuccessfulOptions(TestCase):
 
         sys.argv.append('-full')
 
-        print(check_elvis.Check())
-
-        # return self.assertRaises(FullPipelineFailed, check_elvis.Check)
+        return self.assertRaises(FullPipelineFailed, check_elvis.Check())
 
     # @patch('misc.extract_settings_elvis')
     # @patch('misc.setting_logger')
