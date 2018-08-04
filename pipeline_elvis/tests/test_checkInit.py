@@ -18,11 +18,9 @@ import os
 import sys
 
 from unittest import TestCase, main
-from mock import MagicMock, Mock, patch
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from check_elvis import Check
 from errors import BadSettings
 import misc
 
@@ -213,6 +211,7 @@ class TestInitMethodFromCheckElvis(TestCase):
         :return:
         """
         pass
+
 
 if __name__ == '__main__':
     main()
