@@ -18,12 +18,11 @@ import os
 import sys
 
 from unittest import TestCase, main
-from mock import MagicMock, patch
+from mock import MagicMock
 
 # sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import check_elvis
-from errors import BadSettings
 import misc
 
 

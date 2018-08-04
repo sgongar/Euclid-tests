@@ -1,8 +1,6 @@
 language: python
 python:
   - "2.7"
-env:
-  - "PYTHONPATH=/home/travis/build/sgongar/Euclid-tests/pipeline_elvis/"
 branches:
   only:
     - elvis_development
