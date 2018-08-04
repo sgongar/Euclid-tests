@@ -57,6 +57,7 @@ class TestFullPipelineUnsuccessfulSteps(TestCase):
     """
 
     """
+
     def setUp(self):
         """
 
