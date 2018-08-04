@@ -63,7 +63,7 @@ class TestCheckUnsuccessfulOptions(TestCase):
 
         :return:
         """
-        pass
+        sys.argv = ['test_failedOptions.py', '']
 
     def test_full_option_chosen(self):
         """
@@ -74,8 +74,7 @@ class TestCheckUnsuccessfulOptions(TestCase):
         check_elvis.Check.full_pipeline = MagicMock(return_value=False)
         misc.setting_logger = MagicMock(side_effect=MockedLogger)
 
-        sys.argv.append('-full')
-        print(sys.argv)
+        sys.argv[1] = '-full'
 
         return self.assertRaises(FullPipelineFailed, check_elvis.Check)
 

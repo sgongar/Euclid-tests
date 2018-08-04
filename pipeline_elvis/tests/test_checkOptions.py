@@ -62,7 +62,7 @@ class TestCheckSuccessfulOptions(TestCase):
 
         :return:
         """
-        sys.argv.append(' ')
+        sys.argv = ['test_checkOptions.py', '']
 
     def test_full_option_chosen(self):
         """
