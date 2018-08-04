@@ -17,7 +17,7 @@ import os
 import sys
 
 from unittest import TestCase, main
-from mock import MagicMock, patch
+from mock import patch
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
@@ -63,6 +63,7 @@ class TestSextractorMethodFromCheckElvis(TestCase):
     """
 
     """
+
     def setUp(self):
         """
 
@@ -116,6 +117,7 @@ class TestSextractorMethodFromCheckElvis(TestCase):
         :return:
         """
         pass
+
 
 if __name__ == '__main__':
     main()
