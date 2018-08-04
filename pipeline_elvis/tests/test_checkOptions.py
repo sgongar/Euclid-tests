@@ -62,7 +62,7 @@ class TestCheckSuccessfulOptions(TestCase):
 
         :return:
         """
-        pass
+        sys.argv.append(' ')
 
     def test_full_option_chosen(self):
         """
@@ -75,7 +75,7 @@ class TestCheckSuccessfulOptions(TestCase):
         check_elvis.Check.full_pipeline = MagicMock(return_value=True)
         misc.setting_logger = MagicMock(side_effect=MockedLogger)
 
-        sys.argv.append('-full')
+        sys.argv[1] = '-full'
         print(sys.argv)
 
         return self.assertTrue(check_elvis.Check())
@@ -89,7 +89,7 @@ class TestCheckSuccessfulOptions(TestCase):
         check_elvis.Check.clean = MagicMock(return_value=True)
         misc.setting_logger = MagicMock(side_effect=MockedLogger)
 
-        sys.argv.append('-clean')
+        sys.argv[1] = '-clean'
         print(sys.argv)
 
         return self.assertTrue(check_elvis.Check())
@@ -103,7 +103,7 @@ class TestCheckSuccessfulOptions(TestCase):
         check_elvis.Check.split = MagicMock(return_value=True)
         misc.setting_logger = MagicMock(side_effect=MockedLogger)
 
-        sys.argv.append('-split')
+        sys.argv[1] = '-split'
         print(sys.argv)
 
         return self.assertTrue(check_elvis.Check())
@@ -117,7 +117,7 @@ class TestCheckSuccessfulOptions(TestCase):
         check_elvis.Check.sextractor = MagicMock(return_value=True)
         misc.setting_logger = MagicMock(side_effect=MockedLogger)
 
-        sys.argv.append('-sextractor')
+        sys.argv[1] = '-sextractor'
         print(sys.argv)
 
         return self.assertTrue(check_elvis.Check())
@@ -131,7 +131,7 @@ class TestCheckSuccessfulOptions(TestCase):
         check_elvis.Check.scamp = MagicMock(return_value=True)
         misc.setting_logger = MagicMock(side_effect=MockedLogger)
 
-        sys.argv.append('-scamp')
+        sys.argv[1] = '-scamp'
         print(sys.argv)
 
         return self.assertTrue(check_elvis.Check())
@@ -145,7 +145,7 @@ class TestCheckSuccessfulOptions(TestCase):
         check_elvis.Check.filt = MagicMock(return_value=True)
         misc.setting_logger = MagicMock(side_effect=MockedLogger)
 
-        sys.argv.append('-filter')
+        sys.argv[1] = '-filter'
         print(sys.argv)
 
         return self.assertTrue(check_elvis.Check())
@@ -159,7 +159,7 @@ class TestCheckSuccessfulOptions(TestCase):
         check_elvis.Check.restart = MagicMock(return_value=True)
         misc.setting_logger = MagicMock(side_effect=MockedLogger)
 
-        sys.argv.append('-restart')
+        sys.argv[1] = '-restart'
         print(sys.argv)
 
         return self.assertTrue(check_elvis.Check())

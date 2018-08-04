@@ -75,7 +75,7 @@ class TestCheckUnsuccessfulOptions(TestCase):
         misc.setting_logger = MagicMock(side_effect=MockedLogger)
 
         sys.argv.append('-full')
-        print(check_elvis.Check())
+        print(sys.argv)
 
         return self.assertRaises(FullPipelineFailed, check_elvis.Check)
 
