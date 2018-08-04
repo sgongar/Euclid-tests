@@ -13,17 +13,13 @@ Todo:
     *
 
 """
-
-from os import getenv
-from sys import argv, modules, path
-from types import ModuleType
+import os
+import sys
 
 from unittest import TestCase, main
 from mock import MagicMock, patch
 
-home = getenv("HOME")
-path.append('{}/build/sgongar/Euclid-tests/pipeline_elvis'.format(home))
-path.append('{}/Dev/Euclid-tests/pipeline_elvis'.format(home))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from check_elvis import Check
 from errors import FullPipelineFailed, CleanFailed, SplitFailed
@@ -61,9 +57,9 @@ class TestCheckUnsuccessfulOptions(TestCase):
 
     """
 
-    def setup(self):
+    def setUp(self):
         """
-        
+
         :return:
         """
         pass
@@ -84,7 +80,7 @@ class TestCheckUnsuccessfulOptions(TestCase):
         setting_logger.side_effect = MockedLogger
         extract_settings_elvis.return_value = True
 
-        argv[1] = '-full'
+        sys.argv[1] = '-full'
 
         return self.assertRaises(FullPipelineFailed, Check)
 
@@ -104,7 +100,7 @@ class TestCheckUnsuccessfulOptions(TestCase):
         setting_logger.side_effect = MockedLogger
         extract_settings_elvis.return_value = True
 
-        argv[1] = '-clean'
+        sys.argv[1] = '-clean'
 
         return self.assertRaises(CleanFailed, Check)
 
@@ -124,7 +120,7 @@ class TestCheckUnsuccessfulOptions(TestCase):
         setting_logger.side_effect = MockedLogger
         extract_settings_elvis.return_value = True
 
-        argv[1] = '-split'
+        sys.argv[1] = '-split'
 
         return self.assertRaises(SplitFailed, Check)
 
@@ -144,7 +140,7 @@ class TestCheckUnsuccessfulOptions(TestCase):
         setting_logger.side_effect = MockedLogger
         extract_settings_elvis.return_value = True
 
-        argv[1] = '-sextractor'
+        sys.argv[1] = '-sextractor'
 
         return self.assertRaises(SextractorFailed, Check)
 
@@ -164,7 +160,7 @@ class TestCheckUnsuccessfulOptions(TestCase):
         setting_logger.side_effect = MockedLogger
         extract_settings_elvis.return_value = True
 
-        argv[1] = '-scamp'
+        sys.argv[1] = '-scamp'
 
         return self.assertRaises(ScampFailed, Check)
 
@@ -184,7 +180,7 @@ class TestCheckUnsuccessfulOptions(TestCase):
         setting_logger.side_effect = MockedLogger
         extract_settings_elvis.return_value = True
 
-        argv[1] = '-filter'
+        sys.argv[1] = '-filter'
 
         return self.assertRaises(FiltFailed, Check)
 
@@ -204,13 +200,16 @@ class TestCheckUnsuccessfulOptions(TestCase):
         setting_logger.side_effect = MockedLogger
         extract_settings_elvis.return_value = True
 
-        argv[1] = '-restart'
+        sys.argv[1] = '-restart'
 
         return self.assertRaises(RestartFailed, Check)
 
-    def teardrown(self):
+    def tearDown(self):
         """
 
         :return:
         """
         pass
+
+if __name__ == '__main__':
+    main()

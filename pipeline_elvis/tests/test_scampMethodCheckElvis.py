@@ -13,17 +13,13 @@ Todo:
     *
 
 """
-
-from os import getenv
-from sys import argv, modules, path
-from types import ModuleType
+import os
+import sys
 
 from unittest import TestCase, main
 from mock import MagicMock, patch
 
-home = getenv("HOME")
-path.append('{}/build/sgongar/Euclid-tests/pipeline_elvis'.format(home))
-path.append('{}/Dev/Euclid-tests/pipeline_elvis'.format(home))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from check_elvis import Check
 from errors import ScampFailed
@@ -68,7 +64,7 @@ class TestScampMethodFromCheckElvis(TestCase):
 
     """
 
-    def setup(self):
+    def setUp(self):
         """
 
         :return:
@@ -91,7 +87,7 @@ class TestScampMethodFromCheckElvis(TestCase):
         setting_logger.side_effect = MockedLogger
         extract_settings_elvis.return_value = True
 
-        argv[1] = '-scamp'
+        sys.argv[1] = '-scamp'
 
         self.assertTrue(Check)
 
@@ -111,13 +107,16 @@ class TestScampMethodFromCheckElvis(TestCase):
         setting_logger.side_effect = MockedLogger
         extract_settings_elvis.return_value = True
 
-        argv[1] = '-scamp'
+        sys.argv[1] = '-scamp'
 
         self.assertRaises(ScampFailed, Check)
 
-    def teardrown(self):
+    def tearDown(self):
         """
 
         :return:
         """
         pass
+
+if __name__ == '__main__':
+    main()

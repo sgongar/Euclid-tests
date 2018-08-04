@@ -13,17 +13,13 @@ Todo:
     *
 
 """
-
-from os import getenv
-from sys import argv, modules, path
-from types import ModuleType
+import os
+import sys
 
 from unittest import TestCase, main
 from mock import MagicMock, patch
 
-home = getenv("HOME")
-path.append('{}/build/sgongar/Euclid-tests/pipeline_elvis'.format(home))
-path.append('{}/Dev/Euclid-tests/pipeline_elvis'.format(home))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from check_elvis import Check
 from errors import FullPipelineFailed, CleanFailed, SplitFailed
@@ -61,8 +57,11 @@ class TestFullPipelineUnsuccessfulSteps(TestCase):
     """
 
     """
+    def setUp(self):
+        """
 
-    def setup(self):
+        :return:
+        """
         pass
 
     @patch('misc.extract_settings_elvis')
@@ -81,7 +80,7 @@ class TestFullPipelineUnsuccessfulSteps(TestCase):
         setting_logger.side_effect = MockedLogger
         extract_settings_elvis.return_value = True
 
-        argv[1] = '-full'
+        sys.argv[1] = '-full'
 
         return self.assertRaises(RestartFailed, Check)
 
@@ -104,7 +103,7 @@ class TestFullPipelineUnsuccessfulSteps(TestCase):
         setting_logger.side_effect = MockedLogger
         extract_settings_elvis.return_value = True
 
-        argv[1] = '-full'
+        sys.argv[1] = '-full'
 
         return self.assertRaises(SplitFailed, Check)
 
@@ -130,7 +129,7 @@ class TestFullPipelineUnsuccessfulSteps(TestCase):
         setting_logger.side_effect = MockedLogger
         extract_settings_elvis.return_value = True
 
-        argv[1] = '-full'
+        sys.argv[1] = '-full'
 
         return self.assertRaises(ChangeTimeFailed, Check)
 
@@ -159,7 +158,7 @@ class TestFullPipelineUnsuccessfulSteps(TestCase):
         setting_logger.side_effect = MockedLogger
         extract_settings_elvis.return_value = True
 
-        argv[1] = '-sextractor'
+        sys.argv[1] = '-sextractor'
 
         return self.assertRaises(SextractorFailed, Check)
 
@@ -191,7 +190,7 @@ class TestFullPipelineUnsuccessfulSteps(TestCase):
         setting_logger.side_effect = MockedLogger
         extract_settings_elvis.return_value = True
 
-        argv[1] = '-scamp'
+        sys.argv[1] = '-scamp'
 
         return self.assertRaises(ScampFailed, Check)
 
@@ -226,9 +225,16 @@ class TestFullPipelineUnsuccessfulSteps(TestCase):
         setting_logger.side_effect = MockedLogger
         extract_settings_elvis.return_value = True
 
-        argv[1] = '-filter'
+        sys.argv[1] = '-filter'
 
         return self.assertRaises(FiltFailed, Check)
 
-    def teardrown(self):
+    def tearDown(self):
+        """
+
+        :return:
+        """
         pass
+
+if __name__ == '__main__':
+    main()
