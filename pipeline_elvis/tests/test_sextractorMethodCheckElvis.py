@@ -17,12 +17,14 @@ import os
 import sys
 
 from unittest import TestCase, main
-from mock import patch
+from mock import MagicMock
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from check_elvis import Check
+import check_elvis
 from errors import SextractorFailed
+import misc
+import sextractor_aux_elvis
 
 
 __author__ = "Samuel Gongora-Garcia"
@@ -69,47 +71,35 @@ class TestSextractorMethodFromCheckElvis(TestCase):
 
         :return:
         """
-        pass
+        sys.argv = ['test_sextractorMethodCheckElvis.py', '']
 
-    @patch('misc.extract_settings_elvis')
-    @patch('misc.setting_logger')
-    @patch('sextractor_aux_elvis.SextractorELViS')
-    def test_sextractor_works(self, SextractorELViS, setting_logger,
-                              extract_settings_elvis):
+    def test_sextractor_works(self):
         """
 
-        :param setting_logger:
-        :param extract_settings_elvis:
         :return:
         """
-        SextractorELViS.return_value = True
-        setting_logger.side_effect = MockedLogger
-        extract_settings_elvis.return_value = {'fits_dir': 'fits_dir_mock',
-                                               'fpas_dir': 'fpas_dir_mock'}
+        settings_d = {'fits_dir': 'fits_dir_mock', 'fpas_dir': 'fpas_dir_mock'}
+        misc.extract_settings_elvis = MagicMock(return_value=settings_d)
+        misc.setting_logger = MagicMock(side_effect=MockedLogger)
+        sextractor_aux_elvis.SextractorELViS = MagicMock(return_value=True)
 
         sys.argv[1] = '-sextractor'
 
-        self.assertTrue(Check)
+        self.assertTrue(check_elvis.Check)
 
-    @patch('misc.extract_settings_elvis')
-    @patch('misc.setting_logger')
-    @patch('sextractor_aux_elvis.SextractorELViS')
-    def test_sextractor_fails(self, SextractorELViS, setting_logger,
-                              extract_settings_elvis):
+    def test_sextractor_fails(self):
         """
 
-        :param setting_logger:
-        :param extract_settings_elvis:
         :return:
         """
-        SextractorELViS.return_value = False
-        setting_logger.side_effect = MockedLogger
-        extract_settings_elvis.return_value = {'fits_dir': 'fits_dir_mock',
-                                               'fpas_dir': 'fpas_dir_mock'}
+        settings_d = {'fits_dir': 'fits_dir_mock', 'fpas_dir': 'fpas_dir_mock'}
+        misc.extract_settings_elvis = MagicMock(return_value=settings_d)
+        misc.setting_logger = MagicMock(side_effect=MockedLogger)
+        sextractor_aux_elvis.SextractorELViS = MagicMock(return_value=False)
 
         sys.argv[1] = '-sextractor'
 
-        self.assertRaises(SextractorFailed, Check)
+        self.assertRaises(SextractorFailed, check_elvis.Check)
 
     def tearDown(self):
         """
