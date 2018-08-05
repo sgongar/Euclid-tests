@@ -67,8 +67,6 @@ class TestCheckSuccessfulOptions(TestCase):
     def test_full_option_chosen(self):
         """
 
-        :param full_pipeline:
-        :param extract_settings_elvis:
         :return:
         """
         misc.extract_settings_elvis = MagicMock(return_value=True)
