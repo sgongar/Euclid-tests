@@ -120,7 +120,7 @@ class TestFullPipelineUnsuccessfulSteps(TestCase):
         times_elvis.change_times = MagicMock(return_value=True)
         check_elvis.Check.sextractor = MagicMock(return_value=False)
 
-        sys.argv[1] = '-sextractor'
+        sys.argv[1] = '-full'
 
         return self.assertRaises(SextractorFailed, check_elvis.Check)
 
@@ -137,7 +137,7 @@ class TestFullPipelineUnsuccessfulSteps(TestCase):
         check_elvis.Check.sextractor = MagicMock(return_value=True)
         check_elvis.Check.scamp = MagicMock(return_value=False)
 
-        sys.argv[1] = '-scamp'
+        sys.argv[1] = '-full'
 
         return self.assertRaises(ScampFailed, check_elvis.Check)
 
@@ -155,7 +155,7 @@ class TestFullPipelineUnsuccessfulSteps(TestCase):
         check_elvis.Check.scamp = MagicMock(return_value=True)
         check_elvis.Check.filt = MagicMock(return_value=False)
 
-        sys.argv[1] = '-filter'
+        sys.argv[1] = '-full'
 
         return self.assertRaises(FiltFailed, check_elvis.Check)
 

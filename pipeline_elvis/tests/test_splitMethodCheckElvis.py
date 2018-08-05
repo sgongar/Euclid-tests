@@ -95,7 +95,6 @@ class TestSplitMethodFromCheckElvis(TestCase):
 
         :return:
         """
-        print('test {}'.format(sys.argv))
         settings_d = {'fits_dir': 'fits_dir_mock', 'fpas_dir': 'fpas_dir_mock'}
         misc.extract_settings_elvis = MagicMock(return_value=settings_d)
         misc.setting_logger = MagicMock(side_effect=MockedLogger)
