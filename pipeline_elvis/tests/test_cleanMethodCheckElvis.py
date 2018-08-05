@@ -13,12 +13,11 @@ Todo:
     *
 
 """
-
 import os
 import sys
 
 from unittest import TestCase, main
-from mock import MagicMock, patch
+from mock import MagicMock
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
@@ -80,25 +79,19 @@ class TestCleanMethodFromCheckElvis(TestCase):
 
         self.assertTrue(check_elvis.Check)
 
-    # @patch('misc.extract_settings_elvis')
-    # @patch('misc.setting_logger')
-    # @patch('cosmic_elvis.CosmicELViS')
-    # def test_clean_fails(self, CosmicELViS, setting_logger,
-    #                      extract_settings_elvis):
-    #     """
-    #
-    #     :param setting_logger:
-    #     :param extract_settings_elvis:
-    #     :return:
-    #     """
-    #     CosmicELViS.return_value = False
-    #     setting_logger.side_effect = MockedLogger
-    #     extract_settings_elvis.return_value = {'fits_dir': 'fits_dir_mock',
-    #                                            'fpas_dir': 'fpas_dir_mock'}
-    #
-    #     sys.argv[1] = '-clean'
-    #
-    #     self.assertRaises(CleanFailed, Check)
+    def test_clean_fails(self):
+        """
+
+        :return:
+        """
+        settings_d = {'fits_dir': 'fits_dir_mock', 'fpas_dir': 'fpas_dir_mock'}
+        misc.extract_settings_elvis = MagicMock(return_value=settings_d)
+        misc.setting_logger = MagicMock(side_effect=MockedLogger)
+        cosmic_elvis.CosmicELViS = MagicMock(return_value=False)
+
+        sys.argv[1] = '-clean'
+
+        self.assertRaises(CleanFailed, check_elvis.Check)
 
     def tearDown(self):
         """
