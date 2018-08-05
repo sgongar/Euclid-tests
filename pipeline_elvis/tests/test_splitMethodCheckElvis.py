@@ -17,11 +17,14 @@ import os
 import sys
 
 from unittest import TestCase, main
-from mock import MagicMock, patch
+from mock import MagicMock
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from check_elvis import Check
+import check_elvis
+import misc
+import multiprocessing
+import sextractor_aux_elvis
 
 
 __author__ = "Samuel Gongora-Garcia"
@@ -85,29 +88,24 @@ class TestSplitMethodFromCheckElvis(TestCase):
 
         :return:
         """
-        pass
+        sys.argv = ['test_splitMethodCheckElvis.py', '']
 
-    @patch('misc.extract_settings_elvis')
-    @patch('misc.setting_logger')
-    @patch('misc.get_fpa_elvis')
-    @patch('multiprocessing.Process')
-    def test_processes_created(self, Process, get_fpa_elvis, setting_logger,
-                               extract_settings_elvis):
+    def test_processes_created(self):
         """
 
-        :param setting_logger:
-        :param extract_settings_elvis:
         :return:
         """
-        Process.side_effect = MockedProcess
-        get_fpa_elvis.return_value = ['fpa_1', 'fpa_2', 'fpa_3', 'fpa_4']
-        setting_logger.side_effect = MockedLogger
-        extract_settings_elvis.return_value = {'fits_dir': 'fits_dir_mock',
-                                               'fpas_dir': 'fpas_dir_mock'}
+        print('test {}'.format(sys.argv))
+        settings_d = {'fits_dir': 'fits_dir_mock', 'fpas_dir': 'fpas_dir_mock'}
+        misc.extract_settings_elvis = MagicMock(return_value=settings_d)
+        misc.setting_logger = MagicMock(side_effect=MockedLogger)
+        fpa_l = ['fpa_1', 'fpa_2', 'fpa_3', 'fpa_4']
+        misc.get_fpa_elvis = MagicMock(return_value=fpa_l)
+        multiprocessing.Process.side_effect = MagicMock(return_value=MockedProcess)
 
-        # argv[1] = '-split'
+        sys.argv[1] = '-split'
 
-        self.assertTrue(Check().split())
+        self.assertTrue(check_elvis.Check)
 
     def tearDown(self):
         """
