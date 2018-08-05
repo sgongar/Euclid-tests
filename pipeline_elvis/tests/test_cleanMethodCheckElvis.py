@@ -63,7 +63,7 @@ class TestCleanMethodFromCheckElvis(TestCase):
 
         :return:
         """
-        sys.argv = ['test_checkOptions.py', '']
+        sys.argv = ['test_cleanMethodCheckElvis.py', '']
 
     def test_clean_works(self):
         """
