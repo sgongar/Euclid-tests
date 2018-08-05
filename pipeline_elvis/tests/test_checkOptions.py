@@ -78,7 +78,7 @@ class TestCheckSuccessfulOptions(TestCase):
         sys.argv[1] = '-full'
         print(sys.argv)
 
-        return self.assertTrue(check_elvis.Check())
+        return self.assertTrue(check_elvis.Check)
 
     def test_clean_option_chosen(self):
         """
@@ -92,7 +92,7 @@ class TestCheckSuccessfulOptions(TestCase):
         sys.argv[1] = '-clean'
         print(sys.argv)
 
-        return self.assertTrue(check_elvis.Check())
+        return self.assertTrue(check_elvis.Check)
 
     def test_split_option_chosen(self):
         """
@@ -106,7 +106,7 @@ class TestCheckSuccessfulOptions(TestCase):
         sys.argv[1] = '-split'
         print(sys.argv)
 
-        return self.assertTrue(check_elvis.Check())
+        return self.assertTrue(check_elvis.Check)
 
     def test_sextractor_option_chosen(self):
         """
@@ -134,7 +134,7 @@ class TestCheckSuccessfulOptions(TestCase):
         sys.argv[1] = '-scamp'
         print(sys.argv)
 
-        return self.assertTrue(check_elvis.Check())
+        return self.assertTrue(check_elvis.Check)
 
     def test_filter_option_chosen(self):
         """
@@ -148,7 +148,7 @@ class TestCheckSuccessfulOptions(TestCase):
         sys.argv[1] = '-filter'
         print(sys.argv)
 
-        return self.assertTrue(check_elvis.Check())
+        return self.assertTrue(check_elvis.Check)
 
     def test_restart_option_chosen(self):
         """
@@ -162,7 +162,7 @@ class TestCheckSuccessfulOptions(TestCase):
         sys.argv[1] = '-restart'
         print(sys.argv)
 
-        return self.assertTrue(check_elvis.Check())
+        return self.assertTrue(check_elvis.Check)
 
     def tearDown(self):
         """

@@ -17,7 +17,7 @@ import os
 import sys
 
 from unittest import TestCase, main
-from mock import MagicMock, patch
+from mock import MagicMock
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
@@ -75,129 +75,86 @@ class TestCheckUnsuccessfulOptions(TestCase):
         misc.setting_logger = MagicMock(side_effect=MockedLogger)
 
         sys.argv[1] = '-full'
-        print(sys.argv)
 
         return self.assertRaises(FullPipelineFailed, check_elvis.Check)
 
-    # @patch('misc.extract_settings_elvis')
-    # @patch('misc.setting_logger')
-    # @patch('check_elvis.Check.clean')
-    # def test_clean_option_chosen(self, clean, setting_logger,
-    #                              extract_settings_elvis):
-    #     """
-    #
-    #     :param clean:
-    #     :param setting_logger:
-    #     :param extract_settings_elvis:
-    #     :return:
-    #     """
-    #     clean.return_value = False
-    #     setting_logger.side_effect = MockedLogger
-    #     extract_settings_elvis.return_value = True
-    #
-    #     sys.argv[1] = '-clean'
-    #
-    #     return self.assertRaises(CleanFailed, Check)
-    #
-    # @patch('misc.extract_settings_elvis')
-    # @patch('misc.setting_logger')
-    # @patch('check_elvis.Check.split')
-    # def test_split_option_chosen(self, split, setting_logger,
-    #                              extract_settings_elvis):
-    #     """
-    #
-    #     :param split:
-    #     :param setting_logger:
-    #     :param extract_settings_elvis:
-    #     :return:
-    #     """
-    #     split.return_value = False
-    #     setting_logger.side_effect = MockedLogger
-    #     extract_settings_elvis.return_value = True
-    #
-    #     sys.argv[1] = '-split'
-    #
-    #     return self.assertRaises(SplitFailed, Check)
-    #
-    # @patch('misc.extract_settings_elvis')
-    # @patch('misc.setting_logger')
-    # @patch('check_elvis.Check.sextractor')
-    # def test_sextractor_option_chosen(self, sextractor, setting_logger,
-    #                                   extract_settings_elvis):
-    #     """
-    #
-    #     :param sextractor:
-    #     :param setting_logger:
-    #     :param extract_settings_elvis:
-    #     :return:
-    #     """
-    #     sextractor.return_value = False
-    #     setting_logger.side_effect = MockedLogger
-    #     extract_settings_elvis.return_value = True
-    #
-    #     sys.argv[1] = '-sextractor'
-    #
-    #     return self.assertRaises(SextractorFailed, Check)
-    #
-    # @patch('misc.extract_settings_elvis')
-    # @patch('misc.setting_logger')
-    # @patch('check_elvis.Check.scamp')
-    # def test_scamp_option_chosen(self, scamp, setting_logger,
-    #                              extract_settings_elvis):
-    #     """
-    #
-    #     :param scamp:
-    #     :param setting_logger:
-    #     :param extract_settings_elvis:
-    #     :return:
-    #     """
-    #     scamp.return_value = False
-    #     setting_logger.side_effect = MockedLogger
-    #     extract_settings_elvis.return_value = True
-    #
-    #     sys.argv[1] = '-scamp'
-    #
-    #     return self.assertRaises(ScampFailed, Check)
-    #
-    # @patch('misc.extract_settings_elvis')
-    # @patch('misc.setting_logger')
-    # @patch('check_elvis.Check.filt')
-    # def test_filter_option_chosen(self, filt, setting_logger,
-    #                               extract_settings_elvis):
-    #     """
-    #
-    #     :param filt:
-    #     :param setting_logger:
-    #     :param extract_settings_elvis:
-    #     :return:
-    #     """
-    #     filt.return_value = False
-    #     setting_logger.side_effect = MockedLogger
-    #     extract_settings_elvis.return_value = True
-    #
-    #     sys.argv[1] = '-filter'
-    #
-    #     return self.assertRaises(FiltFailed, Check)
-    #
-    # @patch('misc.extract_settings_elvis')
-    # @patch('misc.setting_logger')
-    # @patch('check_elvis.Check.restart')
-    # def test_scamp_option_chosen(self, restart, setting_logger,
-    #                              extract_settings_elvis):
-    #     """
-    #
-    #     :param restart:
-    #     :param setting_logger:
-    #     :param extract_settings_elvis:
-    #     :return:
-    #     """
-    #     restart.return_value = False
-    #     setting_logger.side_effect = MockedLogger
-    #     extract_settings_elvis.return_value = True
-    #
-    #     sys.argv[1] = '-restart'
-    #
-    #     return self.assertRaises(RestartFailed, Check)
+    def test_clean_option_chosen(self):
+        """
+
+        :return:
+        """
+        misc.extract_settings_elvis = MagicMock(return_value=True)
+        check_elvis.Check.clean = MagicMock(return_value=False)
+        misc.setting_logger = MagicMock(side_effect=MockedLogger)
+
+        sys.argv[1] = '-clean'
+
+        return self.assertRaises(CleanFailed, check_elvis.Check)
+
+    def test_split_option_chosen(self):
+        """
+
+        :return:
+        """
+        misc.extract_settings_elvis = MagicMock(return_value=True)
+        check_elvis.Check.split = MagicMock(return_value=False)
+        misc.setting_logger = MagicMock(side_effect=MockedLogger)
+
+        sys.argv[1] = '-split'
+
+        return self.assertRaises(SplitFailed, check_elvis.Check)
+
+    def test_sextractor_option_chosen(self):
+        """
+
+        :return:
+        """
+        misc.extract_settings_elvis = MagicMock(return_value=True)
+        check_elvis.Check.sextractor = MagicMock(return_value=False)
+        misc.setting_logger = MagicMock(side_effect=MockedLogger)
+
+        sys.argv[1] = '-sextractor'
+
+        return self.assertRaises(SextractorFailed, check_elvis.Check)
+
+    def test_scamp_option_chosen(self):
+        """
+
+        :return:
+        """
+        misc.extract_settings_elvis = MagicMock(return_value=True)
+        check_elvis.Check.scamp = MagicMock(return_value=False)
+        misc.setting_logger = MagicMock(side_effect=MockedLogger)
+
+        sys.argv[1] = '-scamp'
+
+        return self.assertRaises(ScampFailed, check_elvis.Check)
+
+    def test_filter_option_chosen(self):
+        """
+
+        :return:
+        """
+        misc.extract_settings_elvis = MagicMock(return_value=True)
+        check_elvis.Check.filt = MagicMock(return_value=False)
+        misc.setting_logger = MagicMock(side_effect=MockedLogger)
+
+        sys.argv[1] = '-filter'
+
+        return self.assertRaises(FiltFailed, check_elvis.Check)
+
+    def test_restart_option_chosen(self):
+        """
+
+        :return:
+        """
+        misc.extract_settings_elvis = MagicMock(return_value=True)
+        check_elvis.Check.restart = MagicMock(return_value=False)
+        misc.setting_logger = MagicMock(side_effect=MockedLogger)
+
+        sys.argv[1] = '-restart'
+
+        return self.assertRaises(RestartFailed, check_elvis.Check)
 
     def tearDown(self):
         """
