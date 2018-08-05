@@ -75,8 +75,6 @@ class Check:
         mode = {'type': 'sextractor'}
         self.sex_confs, sex_confs_n = create_configurations(mode)
 
-        print('test {}'.format(sys.argv))
-
         if sys.argv[1] == '-full':
             if not self.full_pipeline():
                 raise FullPipelineFailed
