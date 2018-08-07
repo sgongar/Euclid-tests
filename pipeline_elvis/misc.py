@@ -13,7 +13,7 @@ from collections import Counter
 from decimal import Decimal
 from math import hypot
 from multiprocessing import cpu_count
-from os import listdir, remove, rename, makedirs, path, mkdir
+import os
 from platform import platform
 
 from ConfigParser import ConfigParser
@@ -32,94 +32,6 @@ __version__ = "0.1"
 __maintainer__ = "Samuel Góngora García"
 __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
-
-
-def get_fits(unique, mag):
-    """
-
-    :param unique:
-    :param mag:
-    :return:
-    """
-    prfs_d = extract_settings()
-    fits_list = []
-
-    fits_dir = '{}/{}/CCDs/'.format(prfs_d['fits_dir'], mag)
-
-    print('dir {}'.format(fits_dir))
-
-    files = listdir('{}'.format(fits_dir))
-    for file_ in files:
-        if file_[:1] == 'm' and file_[-5:] == '.fits':
-            fits_list.append(file_)
-
-    if unique:
-        fits_unique = []
-        for file_ in fits_list:
-            fits_unique.append(file_[:21])
-        fits_unique = list(set(fits_unique))
-
-        for file_ in fits_unique:
-            fits_unique[fits_unique.index(file_)] = file_ + '1.fits'
-
-        return fits_unique
-    else:
-        return fits_list
-
-
-def get_fits_sc3():
-    """
-
-    :return:
-    """
-    prfs_d = extract_settings_sc3()
-    fits_list = []
-
-    files = listdir('{}'.format(prfs_d['fits_dir']))
-    for file_ in files:
-        if file_[-5:] == '.fits':
-            fits_list.append('{}/{}'.format(prfs_d['fits_dir'], file_))
-
-    return fits_list
-
-
-def get_fpa_elvis():
-    """
-
-    :return:
-    """
-    prfs_d = extract_settings_elvis()
-    fits_list = []
-
-    files = listdir('{}'.format(prfs_d['fpas_dir']))
-    for file_ in files:
-        if file_[-5:] == '.fits':
-            fits_list.append(file_)
-
-    return fits_list
-
-
-def get_fits_d(mag_, dither):
-    """
-
-    :param mag_:
-    :param dither:
-    :return:
-    """
-    prfs_d = extract_settings()
-    fits_list = []
-
-    files = listdir('{}/{}/CCDs/'.format(prfs_d['fits_dir'], mag_))
-    for file_ in files:
-        if file_[:1] == 'm' and file_[-5:] == '.fits':
-            fits_list.append(file_)
-
-    list_out = []
-    for file_ in fits_list:
-        if file_[-6:-5] == str(dither):
-            list_out.append(file_)
-
-    return list_out
 
 
 def get_cats():
@@ -146,7 +58,8 @@ def get_cats():
     # FIXME Magnitude it's harcoded...change it!
     for folder_ in folders:
         cat_dict[folder_] = []
-        files = listdir('{}/20-21/CCDs/{}'.format(prfs_d['fits_dir'], folder_))
+        files = os.listdir('{}/20-21/CCDs/{}'.format(prfs_d['fits_dir'],
+                                                     folder_))
         for file_ in files:
             if file_[:1] == 'm' and file_[-4:] == '.cat':
                 cat_dict[folder_].append(file_)
@@ -346,75 +259,6 @@ def confmap(config_, section):
             print("exception on %s!" % option)
             dict1[option] = None
     return dict1
-
-
-def extract_settings_sc3():
-    """ creates a dictionary with all the configuration parameters
-        at this moment configuration file location is fixed at main directory
-
-    @return prfs_d: a dictionary which contains all valuable data
-    """
-    cf = ConfigParser()
-    cf.read(".settings_SC3.ini")
-
-    prfs_d = {}
-    os_version = get_os()
-
-    if os_version == 'centos':
-        prfs_d['version'] = confmap(cf, "Version")['centos_version']
-    elif os_version == 'cab':
-        prfs_d['version'] = confmap(cf, "Version")['cab_version']
-    else:
-        raise BadSettings('Operative system not chosen')
-
-    if os_version == 'centos':
-        prfs_d['home'] = confmap(cf, "HomeDirs")['centos_home']
-    elif os_version == 'cab':
-        prfs_d['home'] = confmap(cf, "HomeDirs")['cab_home']
-    else:
-        raise BadSettings('Operative system not chosen')
-
-    prfs_d['fits_dir'] = confmap(cf, "ImagesDirs")['fits_dir']
-    prfs_d['fits_dir'] = '{}{}'.format(prfs_d['version'], prfs_d['fits_dir'])
-
-    # todo - comment!
-    prfs_d['output_cats'] = confmap(cf, "CatsDirs")['output_cats']
-    prfs_d['output_cats'] = prfs_d['version'] + prfs_d['output_cats']
-    # todo - comment!
-    prfs_d['references'] = confmap(cf, "CatsDirs")['references']
-    prfs_d['references'] = prfs_d['version'] + prfs_d['references']
-    # todo - comment!
-    prfs_d['filtered'] = confmap(cf, "CatsDirs")['filtered']
-    prfs_d['filtered'] = prfs_d['version'] + prfs_d['filtered']
-
-    prfs_d['time_1'] = confmap(cf, "ImagesTime")['time_1']  # 1st dither time
-    prfs_d['time_2'] = confmap(cf, "ImagesTime")['time_2']  # 2nd dither time
-    prfs_d['time_3'] = confmap(cf, "ImagesTime")['time_3']  # 3nd dither time
-    prfs_d['time_4'] = confmap(cf, "ImagesTime")['time_4']  # 4th dither time
-
-    outputdirs_list = ['conf_scamp', 'conf_sex', 'params_sex', 'neural_sex',
-                       'params_cat', 'logger_config']
-    for conf_ in outputdirs_list:
-        prfs_d[conf_] = confmap(cf, "ConfigDirs")[conf_]
-        prfs_d[conf_] = prfs_d['home'] + prfs_d[conf_]
-
-    prfs_d['detections'] = int(confmap(cf, "Misc")['detections'])
-    prfs_d['pm_low'] = float(confmap(cf, "Misc")['pm_low'])
-    prfs_d['pm_up'] = float(confmap(cf, "Misc")['pm_up'])
-    prfs_d['pm_sn'] = float(confmap(cf, "Misc")['pm_sn'])
-    pms = confmap(cf, "Misc")['pms']
-    pms = pms.replace(",", " ")
-    prfs_d['pms'] = [float(x) for x in pms.split()]
-    prfs_d['r_fit'] = confmap(cf, "Misc")['r_fit']
-    prfs_d['cores_number'] = confmap(cf, "Misc")['cores_number']
-    if prfs_d['cores_number'] == '0':
-        prfs_d['cores_number'] = int(str(cpu_count()))
-        # TODO should leave free at least 20% of processors
-    else:
-        prfs_d['cores_number'] = int(prfs_d['cores_number'])
-    prfs_d['tolerance'] = float(confmap(cf, "Misc")['tolerance'])
-
-    return prfs_d
 
 
 def extract_settings_elvis():
@@ -859,26 +703,26 @@ def clear_data(logger, prfs_d, catalogues):
 
         try:
             logger.debug("removing old xml swarp's file")
-            remove(swarp_xml)
+            os.remove(swarp_xml)
         except OSError:
             pass
 
         try:
             logger.debug('removes merged fits {}'.format(merged_fits))
-            remove(merged_fits)
+            os.remove(merged_fits)
             logger.debug('removes merged weight {}'.format(merged_weight_fits))
-            remove(merged_weight_fits)
+            os.remove(merged_weight_fits)
         except OSError:
             logger.error("merged fits cannot be removed")
             pass
 
         try:
-            cats_files = listdir(prfs_d['fits_dir'])
+            cats_files = os.listdir(prfs_d['fits_dir'])
             for cat in cats_files:
                 if cat[:3] == 'mag' and cat[-4:] == '.cat':
                     cat_name = prfs_d['output_cats'] + '/' + cat
                     logger.debug('removing...{}'.format(cat_name))
-                    remove(prfs_d['output_cats'] + '/' + cat)
+                    os.remove(prfs_d['output_cats'] + '/' + cat)
         except OSError:
             logger.error("old sextracted catalogues cannot be removed")
             pass
@@ -889,7 +733,7 @@ def clear_data(logger, prfs_d, catalogues):
                 mags = prfs_d['mags']
                 mag = mags[region_idx]
                 home = prfs_d['home']
-                remove(home + '/regions_final_m{}.reg'.format(mag))
+                os.remove(home + '/regions_final_m{}.reg'.format(mag))
         except OSError:
             logger.error('final regions cannot be removed')
 
@@ -946,23 +790,6 @@ def speeds_range(prfs_d, confidence):
     return speeds_dict
 
 
-# def cats_coherence(cats):
-#     """
-#
-#     :param cats:
-#     :return:
-#     """
-#     step = -9  # For now it is harcoded
-#
-#     diff = np.diff(cats)
-#     repeat = np.repeat(step, len(cats) - 1)
-#
-#     if np.array_equal(diff, repeat) and len(diff) >= 2:
-#         return True
-#     else:
-#         return False
-
-
 def measure_distance(x2, x1, y2, y1):
     """
 
@@ -1002,8 +829,8 @@ def create_folder(logger, folder):
     """
 
     try:
-        if not path.isfile(folder):
-            makedirs(folder)
+        if not os.path.isfile(folder):
+            os.makedirs(folder)
         return True
     except OSError:
         logger.debug('Folder {} already created'.format(folder))
@@ -1039,33 +866,6 @@ def get_dither(catalog_n):
             dither = cat_[1]
 
     return ccd, int(dither)
-
-
-def get_catalog(ccd):
-    """ returns catalog from ccd name
-
-    :param ccd:
-    :return:
-    """
-    cats = [['x0_y0', 1, 1], ['x0_y0', 2, 2], ['x0_y0', 3, 3],
-            ['x0_y0', 4, 4], ['x0_y1', 1, 5], ['x0_y1', 2, 6],
-            ['x0_y1', 3, 7], ['x0_y1', 4, 8], ['x0_y2', 1, 9],
-            ['x0_y2', 2, 10], ['x0_y2', 3, 11], ['x0_y2', 4, 12],
-            ['x1_y0', 1, 13], ['x1_y0', 2, 14], ['x1_y0', 3, 15],
-            ['x1_y0', 4, 16], ['x1_y1', 1, 17], ['x1_y1', 2, 18],
-            ['x1_y1', 3, 19], ['x1_y1', 4, 20], ['x1_y2', 1, 21],
-            ['x1_y2', 2, 22], ['x1_y2', 3, 23], ['x1_y2', 4, 24],
-            ['x2_y0', 1, 25], ['x2_y0', 2, 26], ['x2_y0', 3, 27],
-            ['x2_y0', 4, 28], ['x2_y1', 1, 29], ['x2_y1', 2, 30],
-            ['x2_y1', 3, 31], ['x2_y1', 4, 32], ['x2_y2', 1, 33],
-            ['x2_y2', 2, 34], ['x2_y2', 3, 35], ['x2_y2', 4, 36]]
-
-    ccd_position = ccd[4:9]
-    dither_n = ccd[11:12]
-
-    for cat_ in cats:
-        if ccd_position == cat_[0] and dither_n == cat_[1]:
-            print(ccd)
 
 
 def get_norm_speed(o_pm):
@@ -1105,24 +905,6 @@ def check_source(o_df, o_alpha, o_delta):
     return o_df
 
 
-def check_source_sc3(o_df, o_alpha, o_delta):
-    """
-
-    :param o_df:
-    :param o_alpha:
-    :param o_delta:
-    :return:
-    """
-    prfs_d = extract_settings_sc3()
-
-    o_df = o_df[o_df['ALPHA_J2000'] + prfs_d['tolerance'] > o_alpha]
-    o_df = o_df[o_alpha > o_df['ALPHA_J2000'] - prfs_d['tolerance']]
-    o_df = o_df[o_df['DELTA_J2000'] + prfs_d['tolerance'] > o_delta]
-    o_df = o_df[o_delta > o_df['DELTA_J2000'] - prfs_d['tolerance']]
-
-    return o_df
-
-
 def check_source_elvis(o_df, o_alpha, o_delta):
     """
 
@@ -1131,7 +913,7 @@ def check_source_elvis(o_df, o_alpha, o_delta):
     :param o_delta:
     :return:
     """
-    prfs_d = extract_settings_sc3()
+    prfs_d = extract_settings_elvis()
 
     o_df = o_df[o_df['ALPHA_J2000'] + prfs_d['tolerance'] > o_alpha]
     o_df = o_df[o_alpha > o_df['ALPHA_J2000'] - prfs_d['tolerance']]
@@ -1139,6 +921,3 @@ def check_source_elvis(o_df, o_alpha, o_delta):
     o_df = o_df[o_delta > o_df['DELTA_J2000'] - prfs_d['tolerance']]
 
     return o_df
-
-def fun(x):
-    return x + 1

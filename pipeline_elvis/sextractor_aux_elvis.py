@@ -64,6 +64,7 @@ class SextractorELViS:
 
         for image_idx in range(0, len(fits_files),
                                self.prfs_d['cores_number']):
+            print(image_idx)
             try:
                 sex_j = []
                 for proc in range(0, self.prfs_d['cores_number'], 1):
