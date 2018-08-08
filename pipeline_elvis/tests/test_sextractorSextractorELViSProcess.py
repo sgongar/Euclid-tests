@@ -26,7 +26,7 @@ import misc
 
 
 __author__ = "Samuel Gongora-Garcia"
-__copyright__ = "Copyright 2017"
+__copyright__ = "Copyright 2018"
 __credits__ = ["Samuel Gongora-Garcia"]
 __version__ = "0.1"
 __maintainer__ = "Samuel Gongora-Garcia"

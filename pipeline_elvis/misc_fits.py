@@ -10,10 +10,10 @@ Todo:
 """
 import os
 
-from misc import extract_settings, extract_settings_elvis
+import misc
 
 __author__ = "Samuel Góngora García"
-__copyright__ = "Copyright 2017"
+__copyright__ = "Copyright 2018"
 __credits__ = ["Samuel Góngora García"]
 __version__ = "0.1"
 __maintainer__ = "Samuel Góngora García"
@@ -28,7 +28,7 @@ def get_fits(unique, mag):
     :param mag:
     :return:
     """
-    prfs_d = extract_settings()
+    prfs_d = misc.extract_settings()
     fits_list = []
 
     fits_dir = '{}/{}/CCDs/'.format(prfs_d['fits_dir'], mag)
@@ -57,7 +57,7 @@ def get_fpa_elvis():
 
     :return:
     """
-    prfs_d = extract_settings_elvis()
+    prfs_d = misc.extract_settings_elvis()
     fits_list = []
 
     files = os.listdir('{}'.format(prfs_d['fpas_dir']))
@@ -75,7 +75,7 @@ def get_fits_d(mag_, dither):
     :param dither:
     :return:
     """
-    prfs_d = extract_settings()
+    prfs_d = misc.extract_settings()
     fits_list = []
 
     files = os.listdir('{}/{}/CCDs/'.format(prfs_d['fits_dir'], mag_))

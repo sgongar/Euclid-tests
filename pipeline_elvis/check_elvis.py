@@ -26,6 +26,7 @@ from errors import SextractorFailed, ScampFailed, FiltFailed, RestartFailed
 from errors import ChangeTimeFailed
 from images_management_elvis import create_ccds
 import misc
+import misc_fits
 from misc import create_configurations
 from misc import create_sextractor_dict, create_scamp_dict
 import sextractor_aux_elvis
@@ -127,7 +128,7 @@ class Check:
         self.logger.info('Creates CCD images from original quadrants')
         start_split = time()
 
-        fpa_list = misc.get_fpa_elvis()
+        fpa_list = misc_fits.get_fpa_elvis()
         quadrants_j = []
         # Launch processes
         for proc in range(0, len(fpa_list), 1):
