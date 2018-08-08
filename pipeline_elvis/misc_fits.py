@@ -69,7 +69,7 @@ def get_fpa_elvis():
 
 
 def get_fits_d(mag_, dither):
-    """
+    """ Gets a list of fits files by dither.
 
     :param mag_:
     :param dither:
