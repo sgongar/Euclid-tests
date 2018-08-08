@@ -171,7 +171,7 @@ class FalsePositivesScampPerformance:
 
         for key_ in input_df.keys():
             # ssos_cat = 'cat_ssos_{}.csv'.format(key_)
-            ssos_cat = 'cats/cat_ssos_{}.csv'.format(key_)
+            ssos_cat = 'catalogues_input/cat_ssos_{}.csv'.format(key_)
             input_df[key_]['SSOs'] = read_csv(ssos_cat, index_col=0)
             stars_cat = 'tmp_stars/stars.csv'
             input_df[key_]['stars'] = read_csv(stars_cat, index_col=0)
