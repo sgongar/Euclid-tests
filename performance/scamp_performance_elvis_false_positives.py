@@ -160,7 +160,6 @@ class FalsePositivesScampPerformance:
 
         return filtered_cat
 
-
     def gets_data(self):
         """ Creates an input dictionary. Each key contains SSOs' information
         for each dither.
@@ -189,7 +188,6 @@ class FalsePositivesScampPerformance:
         :return:
         """
         # Unique sources (?)
-        prfs_d = extract_settings_elvis()
         unique_sources = list(set(filt_cat['SOURCE_NUMBER'].tolist()))
 
         print('Creating new catalogues from filtered catalogue due type')
@@ -287,7 +285,7 @@ class FalsePositivesScampPerformance:
                 output_pm = output[output['PM'].isin([pm_])]
                 cat_name = 'false_positives/false_{}.csv'.format(pm_)
                 output_pm.to_csv(cat_name)
-        
+
 
 if __name__ == "__main__":
     FalsePositivesScampPerformance()
