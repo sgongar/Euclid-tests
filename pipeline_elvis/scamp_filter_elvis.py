@@ -67,13 +67,13 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
         # Saves _3.csv
         full_df = self.get_areas(full_df)
         # full_df = full_df[full_df['MEAN_CLASS_STAR'] > self.class_star_limit]
-        # full_df = self.filter_coherence(full_df)
 
         full_df = self.filter_class(full_df)
 
         # full_df = self.filter_pm(full_df)  # 6th version
         # full_df = self.filter_mag(full_df)  # 7th version
         full_df = self.filter_b_image(full_df)  # 8th version
+        full_df = self.filter_coherence(full_df)
 
         full_df = full_df[full_df['PM'] > 0.01]
 
@@ -872,7 +872,11 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
         :return: full_db
         """
         self.logger.debug('Runs coherence motion filter')
-        full_db = confidence_filter(full_db, 0.60)  # was 0.97
+        for source_ in full_db['SOURCE_NUMBER'].tolist():
+            print(source_)
+            print(full_db[full_db['SOURCE_NUMBER'].isin([source_])])
+
+        # full_db = confidence_filter(full_db, 0.60)  # was 0.97
 
         return full_db
 
