@@ -206,12 +206,12 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
 
         stats_keys = ['MEAN_A_IMAGE', 'MEAN_B_IMAGE', 'MEAN_CLASS_STAR',
                       'MEDIAN_A_IMAGE', 'MEDIAN_B_IMAGE', 'MEDIAN_CLASS_STAR',
-                      'MEAN_ERRA_IMAGE', 'MEAN_ERRB_IMAGE', 'MEDIAN_ERRA_IMAGE',
-                      'MEDIAN_ERRB_IMAGE', 'MEDIAN_FLUX_ISO', 'MEAN_FLUX_ISO',
-                      'MEDIAN_FLUXERR_ISO', 'MEAN_FLUXERR_ISO',
-                      'MEDIAN_ELLIPTICITY', 'MEAN_ELLIPTICITY',
-                      'MEDIAN_MAG_ISO', 'MEAN_MAG_ISO', 'MEDIAN_MAGERR_ISO',
-                      'MEAN_MAGERR_ISO']
+                      'MEAN_ERRA_IMAGE', 'MEAN_ERRB_IMAGE',
+                      'MEDIAN_ERRA_IMAGE', 'MEDIAN_ERRB_IMAGE',
+                      'MEDIAN_FLUX_ISO', 'MEAN_FLUX_ISO', 'MEDIAN_FLUXERR_ISO',
+                      'MEAN_FLUXERR_ISO', 'MEDIAN_ELLIPTICITY',
+                      'MEAN_ELLIPTICITY', 'MEDIAN_MAG_ISO',
+                      'MEAN_MAG_ISO', 'MEDIAN_MAGERR_ISO', 'MEAN_MAGERR_ISO']
         extra_keys = ['A_IMAGE', 'B_IMAGE', 'THETA_IMAGE', 'ISOAREA_IMAGE',
                       'FWHM_IMAGE', 'FLUX_ISO', 'FLUXERR_ISO', 'FLUX_RADIUS',
                       'MAG_ISO', 'MAGERR_ISO', 'ELONGATION', 'ELLIPTICITY',
@@ -308,7 +308,7 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
                       'MEDIAN_MAG_ISO', 'MEDIAN_MAGERR_ISO',
                       'MEDIAN_ELLIPTICITY', 'MEAN_A_IMAGE', 'MEAN_B_IMAGE',
                       'MEAN_ERRA_IMAGE', 'MEAN_ERRB_IMAGE', 'MEAN_CLASS_STAR',
-                      'MEAN_FLUX_ISO', 'MEAN_FLUXERR_ISO','MEAN_MAG_ISO',
+                      'MEAN_FLUX_ISO', 'MEAN_FLUXERR_ISO', 'MEAN_MAG_ISO',
                       'MEAN_MAGERR_ISO', 'MEAN_ELLIPTICITY']
         tmp_d = {}
         for key_ in tmp_d_keys:
@@ -533,7 +533,7 @@ class ScampFilterELViS:  # TODO Split scamp_filter method into single methods
             pm = float(o_df['PM'])
             class_star = float(o_df['MEAN_CLASS_STAR'])
 
-            if pm < 0.2 and class_star < 0.775:
+            if pm < 0.65 and class_star < 0.7:
                 rejected.append(source_)
             else:
                 accepted.append(source_)
