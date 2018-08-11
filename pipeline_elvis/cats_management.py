@@ -25,9 +25,6 @@ from pandas import concat, DataFrame, Series, read_csv
 __author__ = "Samuel Gongora-Garcia"
 __copyright__ = "Copyright 2017"
 __credits__ = ["Samuel Gongora-Garcia"]
-"""
-__license__ = "GPL"
-"""
 __version__ = "0.1"
 __maintainer__ = "Samuel Gongora-Garcia"
 __email__ = "sgongora@cab.inta-csic.es"
@@ -1549,7 +1546,7 @@ def merge_catalog(prfs_d, folder_sex):
 
     # Using a mutable dictionary instead a fixed lists will allow us
     # to change catalog columns without a problem
-    # Needs 
+    # Needs
     cat_dict = {}
     for idx in range(0, len(fits_files), 1):
         cat_loc = '{}/{}/{}.cat'.format(prfs_d['fits_dir'], folder_sex,

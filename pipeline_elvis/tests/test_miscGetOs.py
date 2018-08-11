@@ -106,7 +106,7 @@ class TestGetOs(TestCase):
     #     """
     #     platform.platform = MagicMock(return_value='wrongOS')
     #
-    #     self.assertRaises(errors.WrongOS, misc.get_os())
+    #     self.assertRaises(errors.WrongOS, misc, get_os())
 
     def tearDown(self):
         """

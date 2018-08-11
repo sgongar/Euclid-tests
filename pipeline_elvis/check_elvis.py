@@ -103,20 +103,20 @@ class Check:
 
         :return:
         """
-        if not self.restart():
-            raise RestartFailed
-        if not self.split():
-            raise SplitFailed
+        # if not self.restart():
+        #     raise RestartFailed
+        # if not self.split():
+        #     raise SplitFailed
         if not times_elvis.change_times():
             raise ChangeTimeFailed
         # if not self.clean():
         #     raise Exception
         if not self.sextractor():
             raise SextractorFailed
-        if not self.scamp():
-            raise ScampFailed
-        if not self.filt():
-            raise FiltFailed
+        # if not self.scamp():
+        #     raise ScampFailed
+        # if not self.filt():
+        #     raise FiltFailed
 
         return True
 

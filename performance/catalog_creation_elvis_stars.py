@@ -25,7 +25,6 @@ Todo:
     * POO implementation?
 
 *GNU Terry Pratchett*
-
 """
 from multiprocessing import Process
 from subprocess import Popen
@@ -36,7 +35,7 @@ from astropy.table import Table
 from pandas import concat, DataFrame, read_csv
 
 from misc_cats import get_cat, get_cats
-from misc import create_scamp_dict, create_sextractor_dict
+from misc import create_sextractor_dict
 from misc import extract_settings_elvis, check_distance, check_source
 
 __author__ = "Samuel Góngora García"
@@ -46,22 +45,6 @@ __version__ = "0.5"
 __maintainer__ = "Samuel Góngora García"
 __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
-
-
-def scamp_f_name(idx):
-    """
-
-    :param idx:
-    :return: scmp_d, scmp_cf
-    """
-    scmp_d, len_confs = create_scamp_dict(idx)
-
-    scmp_cf = '{}_{}_{}_{}'.format(scmp_d['crossid_radius'],
-                                   scmp_d['pixscale_maxerr'],
-                                   scmp_d['posangle_maxerr'],
-                                   scmp_d['position_maxerr'])
-
-    return scmp_d, scmp_cf
 
 
 def extract_cats_d():
@@ -152,7 +135,6 @@ def create_catalog():
     cats_d = extract_cats_d()  # extracts dataframes from catalogues
     full_d = create_full_cats(cats_d)  # creates dataframe from CCDs catalogues
     inputs_d = extract_inputs_d()
-    cats = {}
     save = True
 
     unique_sources = inputs_d['stars']['IDX']
@@ -186,7 +168,8 @@ def create_catalog():
     # Merges catalogs
     stars_list = []
     for idx_csv in range(0, 18, 1):
-        stars_ = read_csv('tmp_stars/stars_{}.csv'.format(idx_csv), index_col=0)
+        stars_ = read_csv('tmp_stars/stars_{}.csv'.format(idx_csv),
+                          index_col=0)
         stars_list.append(stars_)
 
     stars_df = concat(stars_list)
@@ -261,8 +244,7 @@ def create_stars_catalog_thread(idx_l, sub_list, inputs_d, full_d):
     cat_df = DataFrame(cat_d, columns=['DITHER', 'CATALOG_NUMBER', 'X_WORLD',
                                        'Y_WORLD', 'MAG_AUTO', 'MAGERR_AUTO',
                                        'ERRA_WORLD', 'ERRB_WORLD',
-                                       'ERRTHETA_WORLD']
-)
+                                       'ERRTHETA_WORLD'])
     if save:
         cat_df.to_csv('tmp_stars/stars_{}.csv'.format(idx_l))
 

@@ -48,11 +48,13 @@ class FolderNotCreated(Exception):
         1. Folder couldn't be created
     """
 
+
 class FullPipelineFailed(Exception):
     """
     One of the following situations may raise this error:
         1.
     """
+
 
 class CleanFailed(Exception):
     """
@@ -60,11 +62,13 @@ class CleanFailed(Exception):
         1.
     """
 
+
 class SplitFailed(Exception):
     """
     One of the following situations may raise this error:
         1.
     """
+
 
 class SextractorFailed(Exception):
     """
@@ -72,11 +76,13 @@ class SextractorFailed(Exception):
         1.
     """
 
+
 class ScampFailed(Exception):
     """
     One of the following situations may raise this error:
         1.
     """
+
 
 class FiltFailed(Exception):
     """
@@ -84,13 +90,22 @@ class FiltFailed(Exception):
         1.
     """
 
+
 class RestartFailed(Exception):
     """
     One of the following situations may raise this error:
         1.
     """
 
+
 class ChangeTimeFailed(Exception):
+    """
+    One of the following situations may raise this error:
+        1.
+    """
+
+
+class WrongOS(Exception):
     """
     One of the following situations may raise this error:
         1.

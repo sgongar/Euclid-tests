@@ -14,7 +14,7 @@ from decimal import Decimal
 from math import hypot
 from multiprocessing import cpu_count
 import os
-from platform import platform
+import platform
 
 from ConfigParser import ConfigParser
 import numpy as np
@@ -22,6 +22,7 @@ from pandas import concat, Series
 import statsmodels.api as sm
 
 from errors import BadSettings
+import errors
 from logging import getLogger, config
 
 
@@ -35,7 +36,7 @@ __status__ = "Development"
 
 
 def get_cats():
-    """
+    """ Loops over the different folders.
 
     :return:
     """
@@ -74,20 +75,20 @@ def get_os():
     @return os_system: a string which contains the operative system name
     """
 
-    if 'fedora-23' in platform():
+    if 'fedora-23' in platform.platform():
         os_system = 'test'
-    elif 'Debian' in platform():
+    elif 'Debian' in platform.platform():
         os_system = 'debian'
-    elif 'Ubuntu' in platform():
+    elif 'Ubuntu' in platform.platform():
         os_system = 'ubuntu'
-    elif 'fedora-26' in platform():
+    elif 'fedora-26' in platform.platform():
         os_system = 'fedora'
-    elif 'fedora-19' in platform():
+    elif 'fedora-19' in platform.platform():
         os_system = 'cab'
-    elif 'centos' in platform():
+    elif 'centos' in platform.platform():
         os_system = 'centos'
     else:
-        raise Exception
+        raise errors.WrongOS
 
     return os_system
 
