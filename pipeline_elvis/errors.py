@@ -110,3 +110,10 @@ class WrongOS(Exception):
     One of the following situations may raise this error:
         1.
     """
+
+
+class AllSameException(Exception):
+    """
+    One of the following situations may raise this error:
+        1.
+    """

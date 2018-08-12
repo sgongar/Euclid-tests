@@ -105,17 +105,6 @@ def all_same(items):
         return True, len(items_w_o_false)
     elif length_items is 1 and 'False' in dict(Counter(items)).keys():
         return False, 0
-    elif length_items is 2 and 'False' not in dict(Counter(items)).keys():
-        if len(items) == 4:
-            value_items = list(set(items))
-            first_value_freq = dict(Counter(items))[value_items[0]]
-            second_value_freq = dict(Counter(items))[value_items[1]]
-            if first_value_freq > 2 or second_value_freq > 2:
-                return True, max([first_value_freq, second_value_freq])
-            else:
-                return False, 0
-        else:
-            return False, 0
     elif length_items is 2 and 'False' in dict(Counter(items)).keys():
         if len(items) == 4:
             if dict(Counter(items))['False'] > 1:
@@ -127,7 +116,7 @@ def all_same(items):
     elif length_items > 2:
         return False, 0
     else:
-        print('error', items)
+        raise errors.AllSameException
 
 
 def create_sextractor_dict(conf_num, cat_conf):
