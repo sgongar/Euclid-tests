@@ -21,8 +21,7 @@ import numpy as np
 from pandas import concat, Series
 import statsmodels.api as sm
 
-from errors import BadSettings
-import errors
+from errors import BadSettings, AllSameException, WrongOS
 from logging import getLogger, config
 
 
@@ -88,7 +87,7 @@ def get_os():
     elif 'centos' in platform.platform():
         os_system = 'centos'
     else:
-        raise errors.WrongOS
+        raise WrongOS
 
     return os_system
 
@@ -116,7 +115,7 @@ def all_same(items):
     elif length_items > 2:
         return False, 0
     else:
-        raise errors.AllSameException
+        raise AllSameException
 
 
 def create_sextractor_dict(conf_num, cat_conf):

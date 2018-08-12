@@ -20,7 +20,7 @@ from unittest import TestCase, main
 from mock import MagicMock
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-import errors
+from errors import WrongOS
 import misc
 import platform
 
@@ -99,14 +99,14 @@ class TestGetOs(TestCase):
 
         self.assertIs(misc.get_os(), 'centos')
 
-    # def test_exception(self):
-    #     """
-    #
-    #     :return:
-    #     """
-    #     platform.platform = MagicMock(return_value='wrongOS')
-    #
-    #     self.assertRaises(errors.WrongOS, misc, get_os())
+    def test_exception(self):
+        """
+
+        :return:
+        """
+        platform.platform = MagicMock(return_value='wrongOS')
+
+        self.assertRaises(WrongOS, misc.get_os)
 
     def tearDown(self):
         """

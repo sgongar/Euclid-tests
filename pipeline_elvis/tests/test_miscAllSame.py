@@ -113,15 +113,15 @@ class TestAllSame(TestCase):
 
         return statement_1 and statement_2 and statement_3
 
-    # def test_there_is_an_empty_list(self):
-    #     """
-    #
-    #     :return: AllSameException
-    #     """
-    #     sources_list = []
-    #
-    #     return self.assertRaises(AllSameException,
-    #                              misc.all_same(sources_list))
+    def test_there_is_an_empty_list(self):
+        """
+
+        :return: AllSameException
+        """
+        sources_list = []
+
+        return self.assertRaises(AllSameException,
+                                 misc.all_same, sources_list)
 
     def tearDown(self):
         """
