@@ -26,6 +26,7 @@ script:
   - nosetests test_miscGetOs.py
   - nosetests test_miscAllSame.py
   - nosetests test_miscCreateSextractorDict.py
+  - nosetests test_miscCreateScampDict.py
   - coverage run -a test_checkOptions.py
   - coverage run -a test_checkInit.py
   - coverage run -a test_failedOptions.py
@@ -42,6 +43,7 @@ script:
   - coverage run -a test_miscGetOs.py
   - coverage run -a test_miscAllSame.py
   - coverage run -a test_miscCreateSextractorDict.py
+  - coverage run -a test_miscCreateScampDict.py
 after_success:
   - coverage combine
   - coverage report -m -i --omit '/home/travis/virtualenv/*'
