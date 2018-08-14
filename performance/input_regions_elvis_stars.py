@@ -18,6 +18,7 @@ Todo:
 """
 from astropy.io import fits
 from astropy.table import Table
+from pandas import concat
 
 from misc import extract_settings_elvis
 
@@ -50,11 +51,14 @@ def create_catalog():
 
     :return:
     """
+    save = True
     stars_df = extract_stars_df()
-    print(stars_df['RA2000(Gaia)'])
-    print(stars_df['DEC2000(Gaia)'])
 
-    stars_df.to_csv('catalogues_input/stars.csv')
+    positions_table = concat([stars_df['RA2000(Gaia)'],
+                              stars_df['DEC2000(Gaia)']], axis=1)
+    if save:
+        positions_table.to_csv('regions_input/stars.reg', index=False,
+                               header=False, sep=" ")
 
 
 if __name__ == "__main__":
