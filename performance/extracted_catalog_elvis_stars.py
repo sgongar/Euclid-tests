@@ -124,6 +124,8 @@ def create_catalog():
     stars_df = extract_stars_df
     save = True
 
+    print(stars_df['stars']['IDX'])  # todo check!
+
     unique_sources = stars_df['stars']['IDX']
     total_stars = stars_df['stars']['IDX'].size
 
