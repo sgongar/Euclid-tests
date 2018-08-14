@@ -1,21 +1,17 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-"""
+""" Creates a bunch of region files from sextractor catalogues.
+Output can be save as CCD regions file or dither regions file.
 
 Versions:
 - 0.1: Initial release. Split from ssos_catalog_creation.py
-
-Information:
-- cat: -> hdu_list catalogue
-- data: -> Table formatted data
-- df: -> dataframe formatted data
+- 0.2: Rename. Description improved
 
 Todo:
-    *
+    * Unit testing.
 
 *GNU Terry Pratchett*
-
 """
 from astropy.io import fits
 from astropy.table import Table
@@ -28,7 +24,7 @@ from misc_cats import get_cats
 __author__ = "Samuel Góngora García"
 __copyright__ = "Copyright 2018"
 __credits__ = ["Samuel Góngora García"]
-__version__ = "0.1"
+__version__ = "0.2"
 __maintainer__ = "Samuel Góngora García"
 __email__ = "sgongora@cab.inta-csic.es"
 __status__ = "Development"
