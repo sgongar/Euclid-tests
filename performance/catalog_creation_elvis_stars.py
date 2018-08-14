@@ -176,6 +176,7 @@ def create_catalog():
 
     if save:
         stars_df.to_csv('tmp_stars/stars.csv')
+        print(stars_df.columns)
 
     return stars_df
 
