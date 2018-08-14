@@ -49,7 +49,7 @@ def create_regions_by_ccd():
                                 name='ALPHA_J2000')
             delta_list = Series(catalog_data['DELTA_J2000'].tolist(),
                                 name='DELTA_J2000')
-    
+
             positions_table = concat([alpha_list, delta_list], axis=1)
             positions_table.to_csv('{}.reg'.format(cat_[:-4]),
                                    index=False, header=False, sep=" ")
