@@ -112,7 +112,7 @@ def create_catalog():
     """
     cats_d = extract_cats_d()  # extracts dataframes from catalogues
     full_d = create_full_cats(cats_d)  # creates dataframe from CCDs catalogues
-    galaxies_df = extract_galaxies_df
+    galaxies_df = extract_galaxies_df()
     save = True
 
     unique_sources = galaxies_df['IDX']
