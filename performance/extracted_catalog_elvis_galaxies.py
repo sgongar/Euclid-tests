@@ -13,7 +13,7 @@ Information:
 - df: -> dataframe formatted data
 
 Todo:
-    *
+    * Unit testing.
 
 *GNU Terry Pratchett*
 """
@@ -78,22 +78,19 @@ def create_full_cats(cats_d):
     return full_d
 
 
-def extract_inputs_d():
+def extract_galaxies_df():
     """
 
     :return:
     """
-    inputs_d = {}
-
     cat_galaxies_loc = prfs_dict['references']
     cat_galaxies = fits.open('{}/cat_galaxies.fits'.format(cat_galaxies_loc))
     galaxies_data = Table(cat_galaxies[1].data)
     galaxies_df = galaxies_data.to_pandas()
     galaxies_idx = range(0, 143766, 1)
     galaxies_df['IDX'] = galaxies_idx
-    inputs_d['galaxies'] = galaxies_df
 
-    return inputs_d
+    return galaxies_df
 
 
 def create_empty_catalog_dict():
@@ -115,11 +112,11 @@ def create_catalog():
     """
     cats_d = extract_cats_d()  # extracts dataframes from catalogues
     full_d = create_full_cats(cats_d)  # creates dataframe from CCDs catalogues
-    inputs_d = extract_inputs_d()
+    galaxies_df = extract_galaxies_df
     save = True
 
-    unique_sources = inputs_d['galaxies']['IDX']
-    total_galaxies = inputs_d['galaxies']['IDX'].size
+    unique_sources = galaxies_df['IDX']
+    total_galaxies = galaxies_df['IDX'].size
 
     sub_list_size = total_galaxies / 18
 
@@ -136,7 +133,7 @@ def create_catalog():
     areas_j = []
     for idx_l in range(0, 18, 1):
         areas_p = Process(target=create_galaxies_catalog_thread,
-                          args=(idx_l, sub_list_l[idx_l], inputs_d, full_d))
+                          args=(idx_l, sub_list_l[idx_l], galaxies_df, full_d))
         areas_j.append(areas_p)
         areas_p.start()
 
@@ -161,12 +158,12 @@ def create_catalog():
     return galaxies_df
 
 
-def create_galaxies_catalog_thread(idx_l, sub_list, inputs_d, full_d):
+def create_galaxies_catalog_thread(idx_l, sub_list, galaxies_df, full_d):
     """
 
     :param idx_l:
     :param sub_list:
-    :param inputs_d:
+    :param galaxies_df:
     :param full_d:
     :return:
     """
@@ -178,7 +175,6 @@ def create_galaxies_catalog_thread(idx_l, sub_list, inputs_d, full_d):
     stdout.write('total galaxies {} of thread {}\n'.format(total_thread,
                                                            idx_l))
     for idx, galaxy in enumerate(sub_list):
-        galaxies_df = inputs_d['galaxies']
         source_df = galaxies_df[galaxies_df['IDX'].isin([galaxy])]
         alpha = source_df['ra'].iloc[0]
         delta = source_df['dec'].iloc[0]
