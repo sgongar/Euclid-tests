@@ -173,8 +173,8 @@ def create_catalog():
         stars_list.append(stars_)
 
     stars_df = concat(stars_list)
-    positions_table = concat([stars_df['ALPHA_J2000'],
-                              stars_df['DELTA_J2000']], axis=1)
+    positions_table = concat([stars_df['X_WORLD'],
+                              stars_df['Y_WORLD']], axis=1)
     if save:
         positions_table.to_csv('tmp_stars/stars.reg')
 
