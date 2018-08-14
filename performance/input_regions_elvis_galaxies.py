@@ -55,8 +55,7 @@ def create_catalog():
     save = True
     galaxies_df = extract_galaxies_df()
 
-    positions_table = concat([galaxies_df['RA2000(Gaia)'],
-                              galaxies_df['DEC2000(Gaia)']], axis=1)
+    positions_table = concat([galaxies_df['ra'], galaxies_df['dec']], axis=1)
     if save:
         positions_table.to_csv('regions_input/galaxies.reg', index=False,
                                header=False, sep=" ")
