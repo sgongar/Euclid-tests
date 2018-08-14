@@ -121,7 +121,7 @@ def create_catalog():
     """
     cats_d = extract_cats_d()  # extracts dataframes from catalogues
     full_d = create_full_cats(cats_d)  # creates dataframe from CCDs catalogues
-    stars_df = extract_stars_df
+    stars_df = extract_stars_df()
     save = True
 
     print(stars_df['stars']['IDX'])  # todo check!
