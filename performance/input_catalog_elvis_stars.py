@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-""" Creates regions populated of stars from sextracted catalogs
+""" Creates a catalog populated of stars from sextracted catalogs
 of single CCDs images.
 
 Versions:
@@ -121,7 +121,10 @@ def create_catalog():
     """
     cats_d = extract_cats_d()  # extracts dataframes from catalogues
     full_d = create_full_cats(cats_d)  # creates dataframe from CCDs catalogues
-    stars_df = extract_stars_df()
+    stars_df = extract_stars_df
+    print(stars_df.columns)
+
+    raise Exception
     save = True
 
     unique_sources = stars_df['stars']['IDX']
@@ -160,11 +163,9 @@ def create_catalog():
         stars_list.append(stars_)
 
     stars_df = concat(stars_list)
-    positions_table = concat([stars_df['X_WORLD'],
-                              stars_df['Y_WORLD']], axis=1)
+
     if save:
-        positions_table.to_csv('regions_detected/stars.reg', index=False,
-                               header=False, sep=" ")
+        stars_df.to_csv('catalogues_detected/stars.csv')
 
     return stars_df
 

@@ -15,7 +15,6 @@ Todo:
     *
 
 *GNU Terry Pratchett*
-
 """
 from math import cos, sin
 
@@ -25,7 +24,7 @@ from numpy import pi
 from pandas import concat, DataFrame, read_csv, Series
 
 from images_management_elvis import get_borders
-from misc import extract_settings_elvis, check_source
+from misc import extract_settings_elvis
 
 __author__ = "Samuel Góngora García"
 __copyright__ = "Copyright 2018"
@@ -179,44 +178,18 @@ def filter_by_position(sso_df):
                     right_sources.append(row.IDX)
 
     if save:
-        sso_df.to_csv('cats/cat_ssos.csv')
+        sso_df.to_csv('catalogues_detected/cat_ssos.csv')
     for dither_ in range(1, 5, 1):
         catalog = sso_df[sso_df['DITHER'].isin([dither_])]
-        catalog.to_csv('cats/cat_ssos_{}.csv'.format(dither_))
+        catalog.to_csv('catalogues_detected/cat_ssos_{}.csv'.format(dither_))
 
     # Removes non visible sources
     sso_clean_df = sso_df[sso_df['IDX'].isin(right_sources)]
     if save:
-        sso_clean_df.to_csv('cats/cat_clean_ssos.csv')
+        sso_clean_df.to_csv('catalogues_detected/cat_clean_ssos.csv')
     for dither_ in range(1, 5, 1):
         clean_catalog = sso_clean_df[sso_clean_df['DITHER'].isin([dither_])]
-        clean_catalog.to_csv('cats/cat_clean_ssos_{}.csv'.format(dither_))
-
-
-def create_regions():
-    """
-
-    :return:
-    """
-    for dither_ in range(1, 5, 1):
-        catalog = read_csv('cats/cat_ssos.csv', index_col=0)
-        catalog = catalog[catalog['DITHER'].isin([dither_])]
-        alpha_list = Series(catalog['RA'].tolist(), name='RA')
-        delta_list = Series(catalog['DEC'].tolist(), name='DEC')
-
-        positions_table = concat([alpha_list, delta_list], axis=1)
-        positions_table.to_csv('regions/cat_ssos_{}.reg'.format(dither_),
-                               index=False, header=False, sep=" ")
-
-    for dither_ in range(1, 5, 1):
-        clean_catalog = read_csv('cats/cat_clean_ssos.csv', index_col=0)
-        clean_catalog = clean_catalog[clean_catalog['DITHER'].isin([dither_])]
-        alpha_list = Series(clean_catalog['RA'].tolist(), name='RA')
-        delta_list = Series(clean_catalog['DEC'].tolist(), name='DEC')
-
-        positions_table = concat([alpha_list, delta_list], axis=1)
-        positions_table.to_csv('regions/cat_clean_ssos_{}.reg'.format(dither_),
-                               index=False, header=False, sep=" ")
+        clean_catalog.to_csv('catalogues_detected/cat_clean_ssos_{}.csv'.format(dither_))
 
 
 if __name__ == "__main__":
@@ -224,5 +197,3 @@ if __name__ == "__main__":
 
     sso_df = propagate_dithers()
     filter_by_position(sso_df)  # Rejects source if is out of the bounds
-
-    # create_regions()
