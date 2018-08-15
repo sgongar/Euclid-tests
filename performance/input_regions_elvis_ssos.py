@@ -174,7 +174,7 @@ def filter_by_position(sso_df):
         delta_list = Series(catalog['DEC'].tolist(), name='DEC')
 
         positions_table = concat([alpha_list, delta_list], axis=1)
-        positions_table.to_csv('regions_detected/cat_ssos_{}.reg'.format(dither_),
+        positions_table.to_csv('regions_input/cat_ssos_{}.reg'.format(dither_),
                                index=False, header=False, sep=" ")
 
     # Removes non visible sources
@@ -186,7 +186,7 @@ def filter_by_position(sso_df):
         delta_list = Series(clean_catalog['DEC'].tolist(), name='DEC')
 
         positions_table = concat([alpha_list, delta_list], axis=1)
-        positions_table.to_csv('regions_detected/cat_clean_ssos_{}.reg'.format(dither_),
+        positions_table.to_csv('regions_input/cat_clean_ssos_{}.reg'.format(dither_),
                                index=False, header=False, sep=" ")
 
 

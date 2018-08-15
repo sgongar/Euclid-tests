@@ -60,7 +60,6 @@ def extract_ssos_df():
 
     cat_ssos = read_csv('{}/ssos_cat.txt'.format(prfs_dict['references']),
                         delim_whitespace=True)
-    print(cat_ssos.columns)
     ssos_source = range(0, cat_ssos['RA'].size, 1)
     cat_ssos['SOURCE'] = ssos_source
     ssos_df = cat_ssos
@@ -178,18 +177,18 @@ def filter_by_position(sso_df):
                     right_sources.append(row.IDX)
 
     if save:
-        sso_df.to_csv('catalogues_detected/cat_ssos.csv')
+        sso_df.to_csv('catalogues_input/cat_ssos.csv')
     for dither_ in range(1, 5, 1):
         catalog = sso_df[sso_df['DITHER'].isin([dither_])]
-        catalog.to_csv('catalogues_detected/cat_ssos_{}.csv'.format(dither_))
+        catalog.to_csv('catalogues_input/cat_ssos_{}.csv'.format(dither_))
 
     # Removes non visible sources
     sso_clean_df = sso_df[sso_df['IDX'].isin(right_sources)]
     if save:
-        sso_clean_df.to_csv('catalogues_detected/cat_clean_ssos.csv')
+        sso_clean_df.to_csv('catalogues_input/cat_clean_ssos.csv')
     for dither_ in range(1, 5, 1):
         clean_catalog = sso_clean_df[sso_clean_df['DITHER'].isin([dither_])]
-        clean_catalog.to_csv('catalogues_detected/cat_clean_ssos_{}.csv'.format(dither_))
+        clean_catalog.to_csv('catalogues_input/cat_clean_ssos_{}.csv'.format(dither_))
 
 
 if __name__ == "__main__":
