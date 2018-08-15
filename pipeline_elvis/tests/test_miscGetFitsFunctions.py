@@ -19,7 +19,7 @@ import sys
 from unittest import TestCase, main
 from mock import MagicMock
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 import misc
 import misc_fits
 
