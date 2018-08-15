@@ -24,7 +24,7 @@ from numpy import pi
 from pandas import concat, DataFrame, read_csv, Series
 
 from images_management_elvis import get_borders
-from misc import extract_settings_elvis, check_source
+from misc import extract_settings_elvis
 
 __author__ = "Samuel Góngora García"
 __copyright__ = "Copyright 2018"

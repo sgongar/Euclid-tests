@@ -4,6 +4,8 @@ python:
 branches:
   only:
     - master
+env:
+  - PYTHONPATH=$PYTHONPATH:$TRAVIS_BUILD_DIR/pipeline_elvis:$TRAVIS_BUILD_DIR/performance
 install:
   - pip install coveralls
   - pip install coverage
